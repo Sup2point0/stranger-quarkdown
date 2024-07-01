@@ -2,7 +2,7 @@ require "json"
 
 
 def find_repo_config()
-  config = load_default_repo_config
+  config = load_default_repo_config()
 
   begin
     route = REPO / ".squarkdown" / "repo-config.json"

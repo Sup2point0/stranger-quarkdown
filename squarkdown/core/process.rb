@@ -4,14 +4,19 @@ require_relative "fields"
 # Max lines parsed
 ProcessedLines = 20
 
+# Default file data
+DefaultData = Fields.filter do |field, props|
+  props["required"]
+end
+
 
 def extract_data(lines, repo_config:)
-  data = {"live": true}
+  data = {"live": false}
 
   lines[0, ProcessedLines].each do |line|
-    if !data["live"]
+    if !data[:live]
       if line.include?("#SQUARK live!")
-        data["live"] = true
+        data[:live] = true
       else
         next
       end
