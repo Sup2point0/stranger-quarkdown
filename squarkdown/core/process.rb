@@ -2,27 +2,42 @@
 ProcessedLines = 20
 
 Fields = {
-  "title": nil,
-  "dest": nil,
-  "style": -> [
-    lambda do |val|
+  "title": {
+    "required": true
+  },
+  "dest": {
+    "required": true
+  },
+  "style": {
+    "required": false,
+    "default": "essence",
+    "handle-val": -> { |val|
       val.downcase!
-      val.sub!(Defaults["pattern"], Defaults["repl"]["style"])
+      val.sub!(Inject["pattern"], Fields["style"]["default"])
       return val.split(" / ")
-    end
-  ],
-  "duality": -> { |val| val.downcase },
-  "index": -> { |val| val.downcase.split(" / ") },
-
-  "shard": [
-    lambda do |val, data, repo_config|
+    }
+  },
+  "duality": {
+    "required": false,
+    "default": "light",
+    "handle-val": -> { |val| val.downcase }
+  },
+  "index": {
+    "required": false,
+    "default": "",
+    "handle-val": -> { |val| val.downcase.split(" / ") }
+  }
+  "shard": {
+    "required": false,
+    "default": "",
+    "handle-all": -> { |val, data, repo_config|
       val.sub!("#index", data["index"].join(" / ")
       return val.downcase.split
-    end
+    }
   ],
 }
 
-Defaults = {
+Inject = {
   "pattern": /#(auto|default)/,
   "repl": {
     "style": "essence"
@@ -30,7 +45,7 @@ Defaults = {
 }
 
 
-def extract_data(lines)
+def extract_data(lines, data:, repo_config:)
   data = {"live": true}
 
   lines[:ProcessedLines].each do |line|
@@ -42,17 +57,21 @@ def extract_data(lines)
       end
     end
 
-    Fields.each do |field, handler|
+    Fields.each do |field, props|
       if line.include?(field)
         _, _, value = line.partition("=")
         value.strip!
 
-        if handler.is_a?(Array)
-          handler.each do |handle|
-            data[field] = handle(value, data:, repo_config:)
-          end
+        handler = props["handle-all"]
+        if handler
+          data[field] = handler(value, data:, repo_config:)
+        end
+        
+        handler = props["handle-val"]
+        if handler
+          data[field] = handler(value)
         else
-          data[field] = handler ? handler(value) : value
+          data[field] = value
         end
 
       end
