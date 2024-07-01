@@ -18,7 +18,7 @@ def extract_data(lines, repo_config:)
     end
 
     Fields.each do |field, props|
-      if line.include?(field)
+      if line.include?(String(field))
         _, _, value = line.partition("=")
         value.strip!
 

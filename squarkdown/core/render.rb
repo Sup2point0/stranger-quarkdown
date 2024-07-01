@@ -1,18 +1,18 @@
 Replace = {
-  /<!-- #SQUARK leave\?.*?#SQUARK leave\. -->/m
-   => "",
+  /<!-- #SQUARK leave\?.*?#SQUARK leave\. -->/m =>
+    "",
 
   # Constants
-  /#SQUARK font-(.*?) /
-   => styleMixins['\1'].join(", "),
+  # /#SQUARK font-(.*?) / =>
+  #   styleMixins['\1'].join(", "),
 
   # Cleanup
-  /<!-- #SQUARK only\?/
-   => "",
-  /#SQUARK only\. -->/
-   => "",
-  /<!-- #SQUARK.*?-->/m
-   => "",
+  /<!-- #SQUARK only\?/ =>
+    "",
+  /#SQUARK only\. -->/ =>
+    "",
+  /<!-- #SQUARK.*?-->/m =>
+    "",
 }
 
 
@@ -37,11 +37,11 @@ end
 
 
 def inject_style!(content, data:)
-  styles = data.style.each map |style|
-    File.read "./src/styles/sheets/{style}.scss"
+  styles = data.style.map do |style|
+    File.read "./src/styles/sheets/#{style}.scss"
   end
 
-  text = """<style lang="scss">
+  text = """<style lang=\"scss\">
 
 #{styles.join("\n\n")}
 
