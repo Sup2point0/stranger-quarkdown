@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 4 * * 2,6'
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'site/'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Git / checkout'
+        uses: actions/checkout@v4
+      
+      - name: 'Git / Ruby / setup'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          
+      - name: 'Ruby / bundle / install'
+        run: |
+          bundle config set frozen false
+          bundle install
+          
+      - name: 'Ruby / rake / run'
+        run: rake test
