@@ -24,7 +24,9 @@ jobs:
           bundler-cache: true
           
       - name: 'Ruby / bundle / install'
-        run: bundle install
+        run: |
+          bundle config set frozen false
+          bundle install
           
       - name: 'Ruby / rake / run'
         run: rake test
