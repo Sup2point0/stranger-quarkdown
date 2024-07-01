@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Squarkup Repo Config Schema",
+  "description": "Squarkup configurations for a repository.",
+  "properties":
+  {
+    "repo": {
+      "title": "Squarkup Repo",
+      "description": "Displayed name of the repository, shown in the page `title`.",
+      "type": "string",
+      "default": null
+    },
+    "dest": {
+      "title": "Destination Directory",
+      "description": "Root directory where files are exported relative to.",
+      "type": "string",
+      "default": "site/src/routes"
+    },
+    "filename": {
+      "title": "Export File Name",
+      "description": "Name of exported `.svx` files.",
+      "type": "string",
+      "default": "content"
+    },
+    "exclude": {
+      "title": "Excluded Files",
+      "description": "RegEx determining which files to skip squarkup for.",
+      "type": "string",
+      "default": null
+    }
+  }
+}
