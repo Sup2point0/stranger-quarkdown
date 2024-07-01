@@ -11,7 +11,7 @@ class SquarkupProcess < Minitest::Test
     content = """# Testing
 <!-- #SQUARK live! -->"""
 
-    data = extract_data(content.split("\n"), repo_config: RepoConfig)
+    data = extract_data(content.split("\n"), repo_config: RepoConfig, fill_defaults: false)
     assert data[:live] == true
   end
 
@@ -19,7 +19,7 @@ class SquarkupProcess < Minitest::Test
     content = """# Testing
 <!-- #SQUARK dead! -->"""
 
-    data = extract_data(content.split("\n"), repo_config: RepoConfig)
+    data = extract_data(content.split("\n"), repo_config: RepoConfig, fill_defaults: false)
     assert data[:live] == false
   end
 

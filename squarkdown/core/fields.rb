@@ -27,7 +27,7 @@ Fields = {
   },
   shard: {
     "required" => false,
-    "default" => "",
+    "default" => "#index",
     "handle-all" => ->(val, data:, repo_config:) {
       val.sub(
         "#index",
