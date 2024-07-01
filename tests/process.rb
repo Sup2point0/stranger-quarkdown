@@ -3,13 +3,15 @@ require "minitest/autorun"
 require_relative "../squarkdown/core/process"
 
 
-class Process < Minitest::Test
+class SqarkupProcess < Minitest::Test
+
+  RepoConfig = {}
 
   def test_live
     content = """# Testing
 <!-- #SQUARK live! -->"""
 
-    data = extract_data(content.split)
+    data = extract_data(content.split, repo_config: RepoConfig)
     assert data["live"] == true
   end
 
@@ -17,7 +19,7 @@ class Process < Minitest::Test
     content = """# Testing
 <!-- #SQUARK dead! -->"""
 
-    data = extract_data(content.split "\n")
+    data = extract_data(content.split("\n"), repo_config: RepoConfig)
     assert data["live"] == false
   end
 
@@ -33,7 +35,7 @@ class Process < Minitest::Test
 | shard = #index / testing
 -->"""
 
-    data = extract_data(content.split "\n")
+    data = extract_data(content.split("\n"), repo_config: RepoConfig)
     assert data["title"] == "Squarkdown is awesome"
     assert data["dest"] == "testing/fields"
     assert data["style"] == ["essence", "test"]
@@ -49,7 +51,7 @@ class Process < Minitest::Test
 | dest = testing/defaults
 -->"""
 
-    data = extract_data(content.split "\n")
+    data = extract_data(content.split("\n"), repo_config: RepoConfig)
     assert data["title"] == "Squarkdown is cool"
     assert data["dest"] == "testing/defaults"
     assert data["style"] == ["essence"]

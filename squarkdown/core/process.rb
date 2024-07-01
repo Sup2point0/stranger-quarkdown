@@ -5,10 +5,10 @@ require_relative "fields"
 ProcessedLines = 20
 
 
-def extract_data(lines, data:, repo_config:)
+def extract_data(lines, repo_config:)
   data = {"live": true}
 
-  lines[:ProcessedLines].each do |line|
+  lines[0, ProcessedLines].each do |line|
     if !data["live"]
       if line.include?("#SQUARK live!")
         data["live"] = true
