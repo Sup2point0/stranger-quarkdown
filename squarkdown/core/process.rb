@@ -21,7 +21,6 @@ def extract_data(lines, repo_config:, fill_defaults: true)
       if line.include?(String(field) + " = ")
         _, _, value = line.partition("=")
         value.strip!
-        puts "value = #{value}"
 
         data[field] = handle(value, props:, data:, repo_config:)
       end
