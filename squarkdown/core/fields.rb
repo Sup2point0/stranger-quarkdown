@@ -29,10 +29,10 @@ Fields = {
     "required" => false,
     "default" => "#index",
     "handle-all" => ->(val, data:, repo_config:) {
-      val.sub(
+      val.downcase.sub(
         "#index",
         data[:index].join(" / ")
-      ).downcase.split(" / ")
+      ).split(" / ")
     }
   }
 }

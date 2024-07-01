@@ -18,9 +18,10 @@ def extract_data(lines, repo_config:, fill_defaults: true)
     end
 
     Fields.each do |field, props|
-      if line.include?(String(field))
+      if line.include?(String(field) + " = ")
         _, _, value = line.partition("=")
         value.strip!
+        puts "value = #{value}"
 
         data[field] = handle(value, props:, data:, repo_config:)
       end
@@ -35,7 +36,7 @@ def extract_data(lines, repo_config:, fill_defaults: true)
           raise "Required field not set"
         end
 
-        value = field["default"]
+        value = props["default"]
         data[field] = handle(value, props:, data:, repo_config:)
       end
     end
