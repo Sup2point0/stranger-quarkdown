@@ -1,15 +1,18 @@
 require "json"
 
+require_relative "../config"
 
-def find_repo_config()
+
+def find_repo_config(from: REPO, _testing: false)
   config = load_default_repo_config()
 
   begin
-    route = REPO / ".squarkdown" / "repo-config.json"
+    route = from / ".squarkdown/squarkup.json"
     content = File.read(route)
     data = JSON.parse(content)
     config.merge!(data)
   rescue
+    if _testing then raise end
   end
 
   return config
@@ -17,20 +20,26 @@ end
 
 
 def load_default_repo_config()
-  content = File.read(ROOT / "resources" / "repo-config-schema.json")
+  content = File.read(ROOT / "squarkdown/resources/repo-config-schema.json")
   schema = JSON.parse(content)
-  data = schema["defaultSnippets"]
+  data = schema["defaultSnippets"]["default"]
   return data
 end
 
 
-def find_files(repo_config:)
-  paths = REPO["**/*.md"]
+def find_files(from: REPO, repo_config:)
+  paths = from.glob "**/*.md"
   exclude = repo_config["exclude"]
 
   if exclude
     paths.filter! do |path|
-      (exclude.each { |pattern| path.match(pattern) }).any?
+      (
+        exclude.each do |pattern|
+          path.realpath.to_s.match(pattern)
+        end
+      ).any?
     end
   end
+
+  return paths
 end

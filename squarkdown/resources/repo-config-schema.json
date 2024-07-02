@@ -28,5 +28,13 @@
       "type": "string",
       "default": null
     }
+  },
+  "defaultSnippets": {
+    "default": {
+      "repo": "~",
+      "dest": "site/src/routes",
+      "filename": "content",
+      "exclude": null
+    }
   }
 }
