@@ -10,9 +10,15 @@
       "type": "string",
       "default": null
     },
+    "source": {
+      "title": "Source Directory",
+      "description": "Directory (relative to root) where squarkdown starts searching for files to squarkup.",
+      "type": "string",
+      "default": ""
+    },
     "dest": {
       "title": "Destination Directory",
-      "description": "Root directory where files are exported relative to.",
+      "description": "Base directory where files are exported relative to.",
       "type": "string",
       "default": "site/src/routes"
     },
@@ -24,8 +30,11 @@
     },
     "exclude": {
       "title": "Excluded Files",
-      "description": "RegEx determining which files to skip squarkup for.",
-      "type": "string",
+      "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
       "default": null
     }
   },

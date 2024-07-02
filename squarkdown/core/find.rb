@@ -27,7 +27,15 @@ def load_default_repo_config()
 end
 
 
-def find_files(from: REPO, repo_config:)
+def find_files(from: nil, repo_config:)
+  if from.nil?
+    if repo_config["source"]
+      from = REPO / repo_config["source"]
+    else
+      from = REPO
+    end
+  end
+
   paths = from.glob "**/*.md"
   exclude = repo_config["exclude"]
 

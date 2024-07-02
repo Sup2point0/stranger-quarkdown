@@ -14,7 +14,6 @@ files = find_files(repo_config:)
 total = files.length
 i = 1
 
-
 files.each do |file|
   log "#{i} of #{total} – #{file.basename}"
 
@@ -26,6 +25,5 @@ files.each do |file|
 
   export_file(render, data:, repo_config:)
 end
-
 
 log done: true
