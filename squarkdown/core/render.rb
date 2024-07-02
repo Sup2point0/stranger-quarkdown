@@ -1,19 +1,4 @@
-Replace = {
-  /<!-- ?#SQUARK leave\?.*?#SQUARK ?leave\. -->/m =>
-    "",
-
-  # Constants
-  # /#SQUARK font-(.*?) / =>
-  #   styleMixins['\1'].join(", "),
-
-  # Cleanup
-  /<!-- ?#SQUARK only\?/ =>
-    "",
-  /#SQUARK only\. ?-->/ =>
-    "",
-  /<!-- ?#SQUARK.*?-->/m =>
-    "",
-}
+require_relative "squarks"
 
 
 def render_file(content, data:, repo_config:)
@@ -24,16 +9,7 @@ def render_file(content, data:, repo_config:)
 end
 
 
-def inject_repl(content)
-  Replace.each do |pattern, repl|
-    content.sub!(pattern, repl)
-  end
-
-  return content
-end
-
-
-def inject_head(content, pattern:, data:, repo_config:)
+def inject_head(content, data:, repo_config:)
   text = """<svelte:head>
   <title> #{data[:title]} · #{repo_config["repo"]} </title>
 </svelte:head>
@@ -63,5 +39,14 @@ def inject_style(content, data:, repo_config:)
 """
 
   content += text
+  return content
+end
+
+
+def inject_repl(content)
+  Replace.each do |pattern, repl|
+    content.sub!(pattern, repl)
+  end
+
   return content
 end
