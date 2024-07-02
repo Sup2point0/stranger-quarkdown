@@ -18,7 +18,7 @@ Replace = {
 
 def render_file(content, data:, repo_config:)
   content = inject_head(content, data:, repo_config:)
-  content = inject_style(content, data:)
+  content = inject_style(content, data:, repo_config:)
   content = inject_repl(content)
   return content
 end
@@ -33,7 +33,7 @@ def inject_repl(content)
 end
 
 
-def inject_head!(content, pattern:, data:, repo_config:)
+def inject_head(content, pattern:, data:, repo_config:)
   text = """<svelte:head>
   <title> #{data[:title]} · #{repo_config["repo"]} </title>
 </svelte:head>
