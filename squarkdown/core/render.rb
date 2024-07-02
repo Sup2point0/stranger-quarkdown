@@ -19,7 +19,11 @@ Replace = {
 def render_file(content, data:, repo_config:)
   inject_head!(content, data:, repo_config:)
   inject_style!(content, data:)
+  inject_repl!(content)
+end
 
+
+def inject_repl!(content)
   Replace.each do |pattern, repl|
     content.sub!(pattern, repl)
   end
