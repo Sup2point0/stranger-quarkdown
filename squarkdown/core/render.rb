@@ -1,5 +1,5 @@
 Replace = {
-  /<!-- #SQUARK leave\?.*?#SQUARK leave\. -->/m =>
+  /<!-- ?#SQUARK leave\?.*?#SQUARK ?leave\. -->/m =>
     "",
 
   # Constants
@@ -7,11 +7,11 @@ Replace = {
   #   styleMixins['\1'].join(", "),
 
   # Cleanup
-  /<!-- #SQUARK only\?/ =>
+  /<!-- ?#SQUARK only\?/ =>
     "",
-  /#SQUARK only\. -->/ =>
+  /#SQUARK only\. ?-->/ =>
     "",
-  /<!-- #SQUARK.*?-->/m =>
+  /<!-- ?#SQUARK.*?-->/m =>
     "",
 }
 
