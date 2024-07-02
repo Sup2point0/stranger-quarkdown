@@ -1,4 +1,5 @@
-require_relative "squarks"
+require_relative "../config"
+require_relative "../maps/squarks"
 
 
 def render_file(content, data:, repo_config:)

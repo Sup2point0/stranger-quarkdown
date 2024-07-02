@@ -1,4 +1,4 @@
-require_relative "fields"
+require_relative "../maps/fields"
 
 
 # Max lines parsed

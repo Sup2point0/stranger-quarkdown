@@ -34,12 +34,12 @@ Fields = {
         data[:index].join(" / ")
       ).split(" / ")
     }
-  }
+  },
 }
 
 Inject = {
   pattern: /#(auto|default)/,
   repl: {
     "style" => "essence"
-  }
+  },
 }
