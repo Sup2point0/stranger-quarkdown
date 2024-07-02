@@ -8,7 +8,7 @@ require_relative "utils/log"
 
 log "squarking up..."
 
-repo_config = find_repo_config(in: REPO)
+repo_config = find_repo_config(from: REPO)
 
 files = find_files(repo_config:)
 total = files.length
@@ -21,8 +21,8 @@ files.each do |file|
   lines = file.readlines
   content = lines.join("")
 
-  data = extract_data(lines:)
-  render = render_file(content:)
+  data = extract_data(lines, repo_config:)
+  render = render_file(content, data:, repo_config:)
 
   export_file(render, data:, repo_config:)
 end

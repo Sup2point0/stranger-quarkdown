@@ -1,4 +1,15 @@
+require_relative "../utils/log"
+
+
 def export_file(content, data:, repo_config:)
-  dest = repo_config["dest"] / data["dest"] / repo_config["filename"]
-  File.write(dest, content)
+  begin
+    dest = repo_config["dest"] / data["dest"] / repo_config["filename"]
+    File.write(dest, content)
+  rescue => e
+    log "export failed!"
+    log error: "#{e.class}: #{e.message}"
+    return false
+  else
+    return true
+  end
 end
