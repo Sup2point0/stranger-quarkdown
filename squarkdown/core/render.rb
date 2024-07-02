@@ -17,16 +17,19 @@ Replace = {
 
 
 def render_file(content, data:, repo_config:)
-  inject_head!(content, data:, repo_config:)
-  inject_style!(content, data:)
-  inject_repl!(content)
+  content = inject_head(content, data:, repo_config:)
+  content = inject_style(content, data:)
+  content = inject_repl(content)
+  return content
 end
 
 
-def inject_repl!(content)
+def inject_repl(content)
   Replace.each do |pattern, repl|
     content.sub!(pattern, repl)
   end
+
+  return content
 end
 
 
@@ -36,11 +39,12 @@ def inject_head!(content, pattern:, data:, repo_config:)
 </svelte:head>
 """
 
-  content.sub!(pattern, text)
+  content = text + content
+  return content
 end
 
 
-def inject_style!(content, data:, repo_config:)
+def inject_style(content, data:, repo_config:)
   if path = repo_config["style-path"]
     route = REPO / path
   else
@@ -58,7 +62,6 @@ def inject_style!(content, data:, repo_config:)
 </style>
 """
 
-  pattern = /<!-- #SQUARK style! -->/
-
-  content.sub!(pattern, text)
+  content += text
+  return content
 end
