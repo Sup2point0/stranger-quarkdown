@@ -32,10 +32,10 @@ def inject_style(content, data:, repo_config:)
     File.read(route / "#{style}.scss")
   end
 
-  text = """<style lang=\"scss\">
+  text = """
+<style lang=\"scss\">
 
 #{styles.join("\n\n")}
-
 </style>
 """
 

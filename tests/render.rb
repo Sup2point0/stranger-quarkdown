@@ -7,10 +7,12 @@ class SquarkupRender < Minitest::Test
 
   Data = {
     title: "Squarkdown is epic",
+    style: ["essence", "testing"],
   }
 
   RepoConfig = {
-    "repo" => "Squarkdown Tests"
+    "repo" => "Squarkdown Tests",
+    "style-path" => "stranger-quarkdown/tests/resources",
   }
 
   
@@ -24,21 +26,32 @@ class SquarkupRender < Minitest::Test
   end
 
 
+  def test_style
+    content = """# Testing
+    """
+
+    out = inject_style(content, data: Data, repo_config: RepoConfig)
+
+    assert out.include?("p {\n  font-size: 100%;\n}")
+    assert out.include?(".testing {\n  color: red;\n}")
+  end
+
+
   def test_repl
     content = """# Testing
 
-    <!-- #SQUARK leave? -->
-    unprocessed content
-    <!-- #SQUARK leave. -->
+<!-- #SQUARK leave? -->
+unprocessed content
+<!-- #SQUARK leave. -->
 
-    <!-- #SQUARK only?
-    processed content
-         #SQUARK only. -->
+<!-- #SQUARK only?
+processed content
+      #SQUARK only. -->
 
-    <!-- #SQUARK testing! -->
+<!-- #SQUARK testing! -->
     """
 
-    out = inject_repl(content, data: Data, repo_config: RepoConfig)
+    out = inject_repl(content)
 
     assert !out.include?("unprocessed content")
     assert out.include?("processed content")
