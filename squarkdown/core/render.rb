@@ -36,9 +36,15 @@ def inject_head!(content, pattern:, data:, repo_config:)
 end
 
 
-def inject_style!(content, data:)
-  styles = data.style.map do |style|
-    File.read "./src/styles/sheets/#{style}.scss"
+def inject_style!(content, data:, repo_config:)
+  if path = repo_config["style-path"]
+    route = REPO / path
+  else
+    route = REPO / "site/src/styles/sheets"
+  end
+  
+  styles = data[:style].map do |style|
+    File.read(route / "#{style}.scss")
   end
 
   text = """<style lang=\"scss\">
