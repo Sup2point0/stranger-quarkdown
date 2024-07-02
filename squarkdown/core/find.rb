@@ -31,15 +31,19 @@ def find_files(from: REPO, repo_config:)
   paths = from.glob "**/*.md"
   exclude = repo_config["exclude"]
 
+  puts "found paths: #{paths}"
+
   if exclude
     paths.filter! do |path|
-      (
-        exclude.each do |pattern|
-          path.realpath.to_s.match(pattern)
-        end
-      ).any?
+      (exclude.map { |pattern|
+        puts "pattern: #{pattern}"
+        puts "path: #{path.realpath.to_s}"
+        path.realpath.to_s.match(pattern)
+      }).none?
     end
   end
+
+  puts "filtered paths: #{paths}"
 
   return paths
 end
