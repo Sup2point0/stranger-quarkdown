@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "1.3",
+  "version": "1.4",
   "title": "Squarkup Repo Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":

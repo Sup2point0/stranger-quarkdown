@@ -1,6 +1,7 @@
 require "json"
 
 require_relative "../config"
+require_relative "../utils/log"
 
 
 def find_repo_config(from: Routes.repo, _testing: false)
@@ -35,15 +36,17 @@ end
 
 def find_files(from: nil, repo_config:)
   if from.nil?
-    if source = repo_config["source"]
-      if source.is_a?(Array)
-        paths = (Routes.repo / source).map { |path| path.glob "**/*.md" }.flatten
-      else
-        paths = (Routes.repo / source).glob "**/*.md"
-      end
+    from = Routes.repo
+  end
+
+  if source = repo_config["source"]
+    if source.is_a?(Array)
+      paths = (from / source).map { |path| path.glob "**/*.md" }.flatten
     else
-      paths = Routes.repo.glob "**/*.md"
+      paths = (from / source).glob "**/*.md"
     end
+  else
+    paths = from.glob "**/*.md"
   end
 
   exclude = repo_config["exclude"]

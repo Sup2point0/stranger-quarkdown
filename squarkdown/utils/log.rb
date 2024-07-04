@@ -9,13 +9,17 @@ Cols = {
 }
 
 
-def log(action = nil, error: nil, details: nil, done: false)
+def log(action = nil, error: nil, details: nil, done: false, **kwargs)
   if done
     puts "#{Cols[:grey]}>>> #{Cols[:pink]}Ruby #{Cols[:grey]}/ #{Cols[:lilac]}done!#{Cols[:white]}"
   elsif error
     puts "#{Cols[:grey]}-------- / #{Cols[:pink]}#{error}#{Cols[:white]}"
   elsif details
     puts "#{Cols[:grey]}---------- / #{Cols[:pink]}#{error}#{Cols[:white]}"
+  elsif kwargs
+    kwargs.each do |var, val|
+      puts "#{Cols[:grey]}-------- / #{Cols[:lilac]}#{var} #{Cols[:grey]}= #{Cols[:white]}#{val}"
+    end
   elsif !$started
     puts "#{Cols[:grey]}>>> #{Cols[:pink]}Ruby #{Cols[:grey]}/ #{Cols[:lilac]}#{action}#{Cols[:white]}"
   else

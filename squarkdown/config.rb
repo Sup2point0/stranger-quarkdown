@@ -7,6 +7,7 @@ class RoutesConfig
   def initialize()
     @set = false
 
+    # root directory of Squarkdown
     @root = Pathname(__dir__).parent
 
     # assuming stranger-quarkdown is a submodule of the given repo

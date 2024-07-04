@@ -1,6 +1,7 @@
 require "minitest/autorun"
 
 require_relative "../squarkdown/core/render"
+require_relative "../squarkdown/core/find"
 
 
 class SquarkupRender < Minitest::Test
@@ -10,10 +11,11 @@ class SquarkupRender < Minitest::Test
     style: ["essence", "testing"],
   }
 
-  RepoConfig = {
+  RepoConfig = load_default_repo_config().merge({
     "repo" => "Squarkdown Tests",
-    "style-path" => "stranger-quarkdown/tests/resources",
-  }
+    "site" => "stranger-quarkdown/tests",
+    "styles" => "resources",
+  })
 
   
   def test_head
@@ -27,6 +29,8 @@ class SquarkupRender < Minitest::Test
 
 
   def test_style
+    Routes.set_site(Routes.root / "tests")
+
     content = """# Testing
     """
 
