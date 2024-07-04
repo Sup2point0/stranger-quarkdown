@@ -1,6 +1,6 @@
 <div align="center">
 
-![Stranger Quarkdown: A Successor to Quarkdown](assets/squark-cover.png)
+![Stranger Quarkdown: A Successor to Quarkdown](.assets/squark-cover.png)
 
 [![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
 
@@ -10,10 +10,7 @@
 
 **Stranger Quarkdown** (*StrangerQuarkdown*, *Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit](https://kit.svelte.dev) and [MDSveX<sup>↗</sup>](https://mdsvex.pngwn.io).
 
-If you want to write content for a Svelte site in Markdown, but need finer flexibility in preprocessing and configuration, Squarkdown handles all that for you. It exports `.md` files to `.svx` files, while using [Quarkdown-Flavoured Markdown](https://github.com/Sup2point0/Quarkdown/blob/main/docs/quarks.md) for providing additional data and instructions.
-
-> [!Note]
-> Since this is a child project, there is both overlap and extension. Squarkdown-specific documentation can be found in [this repo’s docs](docs/). For the basics of Quarkdown, refer to the [Quarkdown repo](https://github.com/Sup2point0/Quarkdown).
+Write content for a site with [Quarkdown-Flavoured Markdown](https://github.com/Sup2point0/Quarkdown/blob/main/docs/quarks.md) in any directory, then use Squarkdown to export them to `.svx` files in your SvelteKit project directory.
 
 
 <br>
@@ -23,13 +20,13 @@ If you want to write content for a Svelte site in Markdown, but need finer flexi
 
 ### Core
 - Automates several parts of the build process for SvelteKit projects
-- Many flexible configuration 
-- Multiple Rake tasks for flexibility
+- Multiple configuration options and Rake tasks for flexibility
 - Intelligently handles directories for more versatile navigation
 
 ### Extra
-- Moves assets from a different folder to the SvelteKit `static/` directory.
-- Identifies and collects fonts, building the [Google Fonts<sup>↗</sup>](https://fonts.google.com) `<link>` tag for you.
+- Moves assets from a different folder to the SvelteKit `static/` directory
+- Collects fonts to build the [Google Fonts<sup>↗</sup>](https://fonts.google.com) `<link>` tag for you
+- Collects global `.scss` files to build an `scss-config.js` file
 
 ### Future
 - Correct internal relative links to correct absolute links in production
