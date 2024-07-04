@@ -22,7 +22,12 @@ end
 def load_default_repo_config()
   content = File.read(ROOT / "squarkdown/resources/repo-config-schema.json")
   schema = JSON.parse(content)
-  data = schema["defaultSnippets"]["default"]
+  
+  data = schema["properties"].map do |prop, data|
+    [prop, data["default"]]
+  end.
+  data = data.to_h
+  
   return data
 end
 
