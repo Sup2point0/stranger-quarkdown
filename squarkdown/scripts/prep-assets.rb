@@ -1,0 +1,39 @@
+require "fileutils"
+
+require_relative "../config"
+require_relative "../utils/log"
+
+
+Globs = [
+  "**/*.png",
+  "**/*.jpg",
+  "**/*.jpeg",
+  "**/*.svg",
+]
+
+
+def prep_assets(repo_config:)
+  log "preprocessing assets..."
+
+  begin
+    try_prep_assets(repo_config:)
+  rescue => e
+    log error: e.to_s
+  end
+end
+
+
+def try_prep_assets(repo_config:)
+  route = REPO / repo_config["paths"]["assets"]  
+  raise "asset path not found" unless route
+
+  files = []
+  Globs.each do |glob|
+    files += route.glob(glob)
+  end
+
+  files.each do |file|
+    dest = file.relative_path_from(route)
+    FileUtils.cp(file, dest)
+  end
+end
