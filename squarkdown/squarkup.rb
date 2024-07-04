@@ -5,7 +5,6 @@ require_relative "core/render"
 require_relative "core/export"
 require_relative "utils/log"
 
-require_relative "scripts/prep-fonts" if ARGV.include? "fonts"
 require_relative "scripts/prep-assets" if ARGV.include? "assets"
 require_relative "scripts/prep-scss" if ARGV.include? "scss"
 
@@ -14,9 +13,17 @@ log "squarking up..."
 
 repo_config = find_repo_config(from: REPO)
 
+
+if ARGV.include? "fonts"
+  require_relative "scripts/prep-fonts"
+  prep_fonts(repo_config:)
+end
+
+
 files = find_files(repo_config:)
 total = files.length
 i = 1
+
 
 files.each do |file|
   log "#{i} of #{total} – #{file.basename}"
@@ -29,5 +36,6 @@ files.each do |file|
 
   export_file(render, data:, repo_config:)
 end
+
 
 log(done: true)

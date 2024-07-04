@@ -1,5 +1,6 @@
 task default: :run
 
+
 ## Tasks
 task :test do
   Dir.glob("./tests/**/*.rb").each { |file| require file }
@@ -12,6 +13,5 @@ task :run do
 end
 
 task :squarkup do
-  ruby "squarkdown/squarkup.rb"
-  ruby "sq/scripts/prep-fonts.rb"
+  ruby "squarkdown/squarkup.rb", "fonts"
 end

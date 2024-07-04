@@ -1,7 +1,10 @@
-require_relative "config"
+require_relative "../config"
+require_relative "../utils/log"
 
 
 def prep_fonts(repo_config:)
+  log "preprocessing fonts..."
+
   fonts = repo_config["fonts"]
   return unless fonts
 
