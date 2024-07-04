@@ -37,11 +37,7 @@ end
 
 
 def inject_style(content, data:, repo_config:)
-  if path = repo_config["style-path"]
-    route = REPO / path
-  else
-    route = REPO / "site/src/styles/sheets"
-  end
+  route = SITE / repo_config["paths"]["styles"]
   
   styles = data[:style].map do |style|
     File.read(route / "#{style}.scss")
