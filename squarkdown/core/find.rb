@@ -33,14 +33,17 @@ end
 
 def find_files(from: nil, repo_config:)
   if from.nil?
-    if repo_config["source"]
-      from = REPO / repo_config["source"]
+    if source = repo_config["source"]
+      if source.is_a?(Array)
+        paths = (REPO / source).map { |path| path.glob "**/*.md" }.flatten
+      else
+        paths = (REPO / source).glob "**/*.md"
+      end
     else
-      from = REPO
+      paths = REPO.glob "**/*.md"
     end
   end
 
-  paths = from.glob "**/*.md"
   exclude = repo_config["exclude"]
 
   if exclude
