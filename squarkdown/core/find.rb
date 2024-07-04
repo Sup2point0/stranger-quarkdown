@@ -26,9 +26,9 @@ def load_default_repo_config()
   data = schema["properties"].map do |prop, data|
     [prop, data["default"]]
   end.
-  data = data.to_h
+  defaults = data.to_h
   
-  return data
+  return defaults
 end
 
 
