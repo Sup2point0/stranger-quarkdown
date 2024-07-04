@@ -43,8 +43,6 @@ class SquarkupFind < Minitest::Test
   def test_ignore_files
     files = find_files(from: Current / "ignore", repo_config: @@repo_config)
 
-    puts files
-
     assert files.length == 0
   end
 
