@@ -13,7 +13,7 @@ def prep_fonts(repo_config:)
 end
 
 
-def prep_fonts(repo_config:)
+def try_prep_fonts(repo_config:)
   fonts = repo_config["fonts"]
   raise "no fonts configured" unless fonts
 

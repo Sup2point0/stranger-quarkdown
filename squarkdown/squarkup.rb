@@ -6,7 +6,6 @@ require_relative "core/export"
 require_relative "utils/log"
 
 require_relative "scripts/prep-assets" if ARGV.include? "assets"
-require_relative "scripts/prep-scss" if ARGV.include? "scss"
 
 
 log "squarking up..."
@@ -24,9 +23,21 @@ end
 
 if ARGV.include? "fonts"
   require_relative "scripts/prep-fonts"
-  fine = prep_fonts(repo_config:)
+  prep_fonts(repo_config:)
 end
 
+if ARGV.include? "assets"
+  require_relative "scripts/prep-assets"
+  prep_assets(repo_config:)
+end
+
+if ARGV.include? "scss"
+  require_relative "scripts/prep-scss"
+  prep_scss(repo_config:)
+end
+
+
+log "locating files..."
 
 files = find_files(repo_config:)
 total = files.length

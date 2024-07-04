@@ -24,7 +24,7 @@ end
 
 
 def try_prep_assets(repo_config:)
-  route = Routes.repo / repo_config["assets"]  
+  route = Routes.repo / repo_config["assets"]
   raise "asset path not found" unless route
 
   files = []
@@ -32,8 +32,16 @@ def try_prep_assets(repo_config:)
     files += route.glob(glob)
   end
 
+  log "located #{files.length} assets"
+
   files.each do |file|
-    dest = file.relative_path_from(route)
+    rel = file.relative_path_from(route)
+    dest = Routes.site / "static" / rel
+
+    if !dest.exist?
+      dest.dirname.mkpath
+    end
+
     FileUtils.cp(file, dest)
   end
 end
