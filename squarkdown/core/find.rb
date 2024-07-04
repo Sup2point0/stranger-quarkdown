@@ -3,21 +3,21 @@ require "json"
 require_relative "../config"
 
 
-def find_repo_config(from: REPO, _testing: false)
-  config = load_default_repo_config()
+def find_repo_config(from: Routes.repo, _testing: false)
+  repo_config = load_default_repo_config()
 
   begin
     route = from / ".squarkdown/squarkup.json"
     content = File.read(route)
     data = JSON.parse(content)
-    config.merge!(data)
+    repo_config.merge!(data)
   rescue
     raise if _testing
   end
 
-  SITE = REPO / config["paths"]["site"]
+  Routes.set_site(Routes.repo / repo_config["site"])
 
-  return config
+  return repo_config
 end
 
 
@@ -35,18 +35,18 @@ end
 
 def find_files(from: nil, repo_config:)
   if from.nil?
-    if source = repo_config["paths"]["source"]
+    if source = repo_config["source"]
       if source.is_a?(Array)
-        paths = (REPO / source).map { |path| path.glob "**/*.md" }.flatten
+        paths = (Routes.repo / source).map { |path| path.glob "**/*.md" }.flatten
       else
-        paths = (REPO / source).glob "**/*.md"
+        paths = (Routes.repo / source).glob "**/*.md"
       end
     else
-      paths = REPO.glob "**/*.md"
+      paths = Routes.repo.glob "**/*.md"
     end
   end
 
-  exclude = repo_config["paths"]["exclude"]
+  exclude = repo_config["exclude"]
 
   if exclude
     paths.filter! do |path|

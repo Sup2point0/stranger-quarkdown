@@ -14,8 +14,8 @@ end
 
 
 def try_prep_scss(repo_config:)
-  partial = repo_config["paths"]["styles"]
-  route = SITE / partial
+  partial = repo_config["styles"]
+  route = Routes.site / partial
   raise "styles path not found" unless route
 
   files = route.glob("**/~*.scss")
@@ -35,5 +35,5 @@ const scssConfig = `
 export default scssConfig;
 """
 
-  File.write(SITE / "scss-config.js", text)
+  File.write(Routes.site / "scss-config.js", text)
 end

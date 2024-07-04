@@ -12,7 +12,7 @@ require_relative "scripts/prep-scss" if ARGV.include? "scss"
 log "squarking up..."
 
 
-repo_config = find_repo_config(from: REPO)
+repo_config = find_repo_config(from: Routes.repo)
 
 if repo_config
   log "found squarkup config!"

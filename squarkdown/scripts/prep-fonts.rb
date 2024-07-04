@@ -21,7 +21,7 @@ def prep_fonts(repo_config:)
   text = data.join("&")
   repl = "css2?" + text + "&display=swap"
 
-  path = REPO / repo_config["site"] / "src/app.html"
+  path = Routes.repo / repo_config["site"] / "src/app.html"
   pattern = /css2.*display=swap/
   
   existing = File.read(path)

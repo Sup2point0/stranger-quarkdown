@@ -10,13 +10,13 @@ class RoutesConfig
     @root = Pathname(__dir__).parent
 
     # assuming stranger-quarkdown is a submodule of the given repo
-    @repo = Routes.root.parent
+    @repo = @root.parent
 
     # default, but can be overridden
     @site = repo / "site"
   end
 
-  def update_site(path)
+  def set_site(path)
     raise if @set
     @site = path
   end

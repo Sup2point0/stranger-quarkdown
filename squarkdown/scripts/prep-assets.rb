@@ -24,7 +24,7 @@ end
 
 
 def try_prep_assets(repo_config:)
-  route = REPO / repo_config["paths"]["assets"]  
+  route = Routes.repo / repo_config["assets"]  
   raise "asset path not found" unless route
 
   files = []

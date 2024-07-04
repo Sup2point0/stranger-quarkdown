@@ -12,58 +12,51 @@
       "type": "string",
       "default": "~"
     },
-    "paths":
-    {
-      "title": "Path Configurations",
-      "description": "Configure where Squarkdown searches files from and exports them to.",
-      "type": "object",
-      "properties":
-      {
-        "site": {
-          "title": "Site Directory",
-          "description": "Base directory of the site. Relative to root.",
-          "type": "string",
-          "default": "site"
-        },
-        "source": {
-          "title": "Source Directory(s)",
-          "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root.",
-          "type": ["string", "array"],
-          "items": {"type": "string"},
-          "default": ""
-        },
-        "dest": {
-          "title": "Destination Directory",
-          "description": "Base directory where files are exported to. Relative to site.",
-          "type": "string",
-          "default": "src/routes"
-        },
-        "styles": {
-          "title": "Styles Directory",
-          "description": "Base directory where Squarkdown looks for stylesheets. Relative to site.",
-          "type": "string",
-          "default": "src/styles"
-        },
-        "assets": {
-          "title": "Assets Directory",
-          "description": "Base directory where Squarkdown looks for static assets. Relative to root.",
-          "type": "string",
-          "default": "assets"
-        },
-        "exclude": {
-          "title": "Excluded Files",
-          "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
-          "type": "array",
-          "items": {"type": "string"},
-          "default": []
-        }
-      }
+
+    "site": {
+      "title": "Site Directory",
+      "description": "Base directory of the site. Relative to root.",
+      "type": "string",
+      "default": "site"
+    },
+    "source": {
+      "title": "Source Directory(s)",
+      "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root.",
+      "type": ["string", "array"],
+      "items": {"type": "string"},
+      "default": ""
+    },
+    "dest": {
+      "title": "Destination Directory",
+      "description": "Base directory where files are exported to. Relative to site.",
+      "type": "string",
+      "default": "src/routes"
     },
     "file-name": {
       "title": "Export File Name",
       "description": "Name of exported `.svx` files.",
       "type": "string",
       "default": "content"
+    },
+
+    "styles": {
+      "title": "Styles Directory",
+      "description": "Base directory where Squarkdown looks for stylesheets. Relative to site.",
+      "type": "string",
+      "default": "src/styles"
+    },
+    "assets": {
+      "title": "Assets Directory",
+      "description": "Base directory where Squarkdown looks for static assets. Relative to root.",
+      "type": "string",
+      "default": "assets"
+    },
+    "exclude": {
+      "title": "Excluded Files",
+      "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
     },
     "fonts": {
       "title": "Fonts",
@@ -72,6 +65,7 @@
       "items": {"type": "string"},
       "default": []
     },
+    
     "if-no-dir": {
       "title": "Nonexistent Directory Handling",
       "description": "Action to take if an export directory does not exist.",
