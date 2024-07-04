@@ -21,6 +21,21 @@ def inject_head(content, data:, repo_config:)
 end
 
 
+def inject_data(content, data:)
+  fields = data.map do |field, value|
+    "#{field}: #{value}"
+  end
+  
+  text = """---
+#{fields.join('\n')}
+---
+"""
+  
+  content = text + content
+  return content
+end
+
+
 def inject_style(content, data:, repo_config:)
   if path = repo_config["style-path"]
     route = REPO / path

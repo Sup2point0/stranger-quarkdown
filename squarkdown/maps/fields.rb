@@ -1,9 +1,17 @@
+## File Fields
+# Defines the core flags for a file undergoing squarkup.
+
+
 Fields = {
+  dest: {
+    "required" => true
+  },
   title: {
     "required" => true
   },
-  dest: {
-    "required" => true
+  desc: {
+    "required" => false,
+    "default" => ""
   },
   style: {
     "required" => false,
