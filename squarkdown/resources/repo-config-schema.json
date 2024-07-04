@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.2",
   "title": "Squarkup Repo Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -8,12 +9,15 @@
       "title": "Squarkup Repo",
       "description": "Displayed name of the repository, shown in the page `title`.",
       "type": "string",
-      "default": null
+      "default": "~"
     },
     "source": {
-      "title": "Source Directory",
-      "description": "Directory (relative to root) where squarkdown starts searching for files to squarkup.",
-      "type": "string",
+      "title": "Source Directory(s)",
+      "description": "Directory(s) where squarkdown starts searching for files to squarkup, relative to root.",
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      },
       "default": ""
     },
     "dest": {
@@ -28,6 +32,12 @@
       "type": "string",
       "default": "content"
     },
+    "if-no-dir": {
+      "title": "Nonexistent Directory Handling",
+      "description": "Action to take if an export directory does not exist.",
+      "enum": ["ignore", "notify", "warn", "create"],
+      "default": "warn"
+    },
     "exclude": {
       "title": "Excluded Files",
       "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
@@ -35,15 +45,7 @@
       "items": {
         "type": "string"
       },
-      "default": null
-    }
-  },
-  "defaultSnippets": {
-    "default": {
-      "repo": "~",
-      "dest": "site/src/routes",
-      "filename": "content",
-      "exclude": null
+      "default": []
     }
   }
 }
