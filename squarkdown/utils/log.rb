@@ -16,7 +16,7 @@ def log(action = nil, error: nil, details: nil, done: false, **kwargs)
     puts "#{Cols[:grey]}-------- / #{Cols[:pink]}#{error}#{Cols[:white]}"
   elsif details
     puts "#{Cols[:grey]}---------- / #{Cols[:pink]}#{error}#{Cols[:white]}"
-  elsif kwargs
+  elsif kwargs.length > 0
     kwargs.each do |var, val|
       puts "#{Cols[:grey]}-------- / #{Cols[:lilac]}#{var} #{Cols[:grey]}= #{Cols[:white]}#{val}"
     end
