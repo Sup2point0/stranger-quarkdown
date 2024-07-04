@@ -13,5 +13,5 @@ task :run do
 end
 
 task :squarkup do
-  ruby "squarkdown/squarkup.rb", "fonts"
+  ruby "squarkdown/squarkup.rb", "fonts", "assets", "scss"
 end
