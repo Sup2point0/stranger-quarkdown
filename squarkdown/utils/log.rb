@@ -11,16 +11,14 @@ Cols = {
 
 def log(action = nil, error: nil, done: false)
   if done
-    puts "#{Cols[:grey]}>>> #{Cols[:pink]}Ruby #{Cols[:grey]}/ #{Cols[:lilac]}done!"
+    puts "#{Cols[:grey]}>>> #{Cols[:pink]}Ruby #{Cols[:grey]}/ #{Cols[:lilac]}done!#{Cols[:white]}"
   elsif error
-    puts "#{Cols[:grey]}-------- / #{Cols[:pink]}#{error}"
+    puts "#{Cols[:grey]}-------- / #{Cols[:pink]}#{error}#{Cols[:white]}"
   elsif !$started
-    puts "#{Cols[:grey]}>>> #{Cols[:pink]}Ruby #{Cols[:grey]}/ #{Cols[:lilac]}#{action}"
+    puts "#{Cols[:grey]}>>> #{Cols[:pink]}Ruby #{Cols[:grey]}/ #{Cols[:lilac]}#{action}#{Cols[:white]}"
   else
-    puts "        #{Cols[:grey]}/ #{Cols[:lilac]}#{action}"
+    puts "        #{Cols[:grey]}/ #{Cols[:lilac]}#{action}#{Cols[:white]}"
   end
-
-  puts Cols[:white]
 
   $started = true
 end

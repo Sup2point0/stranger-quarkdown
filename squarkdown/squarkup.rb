@@ -5,6 +5,10 @@ require_relative "core/render"
 require_relative "core/export"
 require_relative "utils/log"
 
+require_relative "scripts/prep-fonts" if ARGV.include? "fonts"
+require_relative "scripts/prep-assets" if ARGV.include? "assets"
+require_relative "scripts/prep-scss" if ARGV.include? "scss"
+
 
 log "squarking up..."
 
@@ -26,4 +30,4 @@ files.each do |file|
   export_file(render, data:, repo_config:)
 end
 
-log done: true
+log(done: true)

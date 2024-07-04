@@ -25,8 +25,7 @@ def load_default_repo_config()
   
   data = schema["properties"].map do |prop, data|
     [prop, data["default"]]
-  end
-  data = data.to_h
+  end.to_h
   
   return data
 end
@@ -44,19 +43,13 @@ def find_files(from: nil, repo_config:)
   paths = from.glob "**/*.md"
   exclude = repo_config["exclude"]
 
-  puts "found paths: #{paths}"
-
   if exclude
     paths.filter! do |path|
       (exclude.map { |pattern|
-        puts "pattern: #{pattern}"
-        puts "path: #{path.realpath.to_s}"
         path.realpath.to_s.match(pattern)
       }).none?
     end
   end
-
-  puts "filtered paths: #{paths}"
 
   return paths
 end
