@@ -1,4 +1,4 @@
-task default: :run
+task default: :squark
 
 
 ## Tasks
@@ -8,7 +8,7 @@ end
 
 
 ## Scripts
-task :run do
+task :squark do
   ruby "squarkdown/squarkup.rb"
 end
 
