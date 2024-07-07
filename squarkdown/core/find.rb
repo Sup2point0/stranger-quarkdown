@@ -12,8 +12,12 @@ def find_repo_config(from: Routes.repo, _testing: false)
     content = File.read(route)
     data = JSON.parse(content)
     repo_config.merge!(data)
-  rescue
-    raise if _testing
+  rescue => e
+    if _testing
+      raise
+    else
+      log error: e.message
+    end
   end
 
   Routes.set_site(Routes.repo / repo_config["site"])
@@ -35,13 +39,11 @@ end
 
 
 def find_files(from: nil, repo_config:)
-  if from.nil?
-    from = Routes.repo
-  end
+  from = Routes.repo unless !from.nil?
 
   if source = repo_config["source"]
     if source.is_a?(Array)
-      paths = (from / source).map { |path| path.glob "**/*.md" }.flatten
+      paths = source.map {|path| (from / path).glob "**/*.md" }.flatten
     else
       paths = (from / source).glob "**/*.md"
     end

@@ -27,6 +27,8 @@ def extract_data(lines, repo_config:, fill_defaults: true)
     end
   end
 
+  return unless data[:live]
+
   # fill in unspecified defaults
   if fill_defaults
     Fields.each do |field, props|

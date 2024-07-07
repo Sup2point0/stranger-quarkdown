@@ -11,13 +11,13 @@ require_relative "scripts/prep-assets" if ARGV.include? "assets"
 log "squarking up..."
 
 
-repo_config = find_repo_config(from: Routes.repo)
+repo_config = find_repo_config()
 
-if repo_config
-  log "found squarkup config!"
-else
+if repo_config.nil? or repo_config.length == 0
   log error: "squarkup config not found!"
   exit
+else
+  log success: "found squarkup config!"
 end
 
 
@@ -41,20 +41,36 @@ log "locating files..."
 
 files = find_files(repo_config:)
 total = files.length
+
+if total.nil? or total == 0
+  log error: "no files found!"
+else
+  log success: "found #{total} files!"
+end
+
 i = 1
 
-
 files.each do |file|
-  log "#{i} of #{total} – #{file.basename}"
+  log "#{i}#{Cols[:white]} of #{total}#{Cols[:grey]} – #{Cols[:blue]}#{file.basename}"
 
-  lines = file.readlines
-  content = lines.join("")
+  begin
+    lines = file.readlines
+    content = lines.join("")
 
-  data = extract_data(lines, repo_config:)
-  render = render_file(content, data:, repo_config:)
+    data = extract_data(lines, repo_config:)
+    if data.nil?
+      next
+    end
 
-  export_file(render, data:, repo_config:)
+    render = render_file(content, data:, repo_config:)
+    export_file(render, data:, repo_config:)
+
+  rescue
+    raise
+  ensure
+    i += 1
+  end
 end
 
 
-log(done: true)
+log done: true
