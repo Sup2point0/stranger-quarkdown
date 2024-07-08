@@ -24,8 +24,6 @@ def try_prep_scss(repo_config:)
     "@use './#{partial}/#{dest}' as *;"
   end
 
-  data = data.join("\n")
-
   text = """/// SCSS Config
 /// Last generated #{}
 

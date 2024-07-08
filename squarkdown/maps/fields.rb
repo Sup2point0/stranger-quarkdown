@@ -20,7 +20,7 @@ Fields = {
   },
   style: {
     "required" => false,
-    "default" => "essence",
+    "default" => "page",
     "handle-val" => ->(val) {
       val.downcase.sub(
         Inject[:pattern],
@@ -60,6 +60,6 @@ Fields = {
 Inject = {
   pattern: /#(auto|default)/,
   repl: {
-    "style" => "essence"
+    "style" => Fields[:style]["default"]
   },
 }

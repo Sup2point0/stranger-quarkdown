@@ -37,7 +37,7 @@ end
 
 
 def inject_style(content, data:, repo_config:)
-  route = Routes.site / repo_config["styles"]
+  route = Routes.site / repo_config["styles"] / "pages"
   
   styles = data[:style].map do |style|
     File.read(route / "#{style}.scss")
