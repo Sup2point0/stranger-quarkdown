@@ -34,6 +34,8 @@ def log(
     out += "#{Cols[:cyan]}done!"
   elsif error
     out += "#{Cols[:red]}#{error}"
+  elsif success
+    out += "#{Cols[:cyan]}#{success}"
   else
     out += "#{Cols[:yellow]}#{text}"
   end

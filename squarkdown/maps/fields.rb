@@ -1,13 +1,18 @@
 ## File Fields
 # Defines the core flags for a file undergoing squarkup.
 
+require "date"
+
 
 Fields = {
   dest: {
     "required" => true
   },
   title: {
-    "required" => true
+    "required" => false,
+  },
+  capt: {
+    "required" => false,
   },
   desc: {
     "required" => false,
@@ -41,6 +46,13 @@ Fields = {
         "#index",
         data[:index].join(" / ")
       ).split(" / ")
+    }
+  },
+  date: {
+    "required" => false,
+    "default" => nil,
+    "handle-val" => ->(val) {
+      Date.strptime(val, "%Y %B %d") if !val.nil?
     }
   },
 }

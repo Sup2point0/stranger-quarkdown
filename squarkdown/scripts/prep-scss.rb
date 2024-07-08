@@ -3,7 +3,7 @@ require_relative "../utils/log"
 
 
 def prep_scss(repo_config:)
-  log "preprocessing assets..."
+  log "preprocessing SCSS..."
 
   begin
     try_prep_scss(repo_config:)
@@ -19,7 +19,7 @@ def try_prep_scss(repo_config:)
   raise "styles path not found" unless route
 
   files = route.glob("**/~*.scss")
-  data = files.map do |sheet|
+  data = files.map do |file|
     dest = file.relative_path_from(route)
     "@use './#{partial}/#{dest}' as *;"
   end

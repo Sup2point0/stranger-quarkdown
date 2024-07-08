@@ -24,7 +24,7 @@ def try_prep_assets(repo_config:)
     File::FNM_DOTMATCH
   )
 
-  log "located #{files.length} assets"
+  log success: "found #{files.length} assets!"
 
   files.each do |file|
     rel = file.relative_path_from(route)
