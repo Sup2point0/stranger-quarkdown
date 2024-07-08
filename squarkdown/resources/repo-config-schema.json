@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "1.4",
+  "version": "1.5",
   "title": "Squarkup Repo Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -31,6 +31,12 @@
       "description": "Base directory where files are exported to. Relative to site.",
       "type": "string",
       "default": "src/routes"
+    },
+
+    "file-source": {
+      "title": "Export File Source",
+      "description": "File Squarkdown uses as the template for exported `.svx` files. Relative to site.",
+      "type": "string"
     },
     "file-name": {
       "title": "Export File Name",
