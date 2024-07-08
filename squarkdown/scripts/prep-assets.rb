@@ -4,14 +4,6 @@ require_relative "../config"
 require_relative "../utils/log"
 
 
-Globs = [
-  "**/*.png",
-  "**/*.jpg",
-  "**/*.jpeg",
-  "**/*.svg",
-]
-
-
 def prep_assets(repo_config:)
   log "preprocessing assets..."
 
@@ -27,10 +19,10 @@ def try_prep_assets(repo_config:)
   route = Routes.repo / repo_config["assets"]
   raise "asset path not found" unless route
 
-  files = []
-  Globs.each do |glob|
-    files += route.glob(glob)
-  end
+  files = route.glob(
+    "**/*.{png,jpg,jpeg,svg}",
+    File::FNM_DOTMATCH
+  )
 
   log "located #{files.length} assets"
 
@@ -39,7 +31,7 @@ def try_prep_assets(repo_config:)
     dest = Routes.site / "static" / rel
 
     if !dest.exist?
-      dest.dirname.mkpath
+      dest.dirname.mkpath()
     end
 
     FileUtils.cp(file, dest)
