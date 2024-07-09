@@ -6,13 +6,15 @@ require "date"
 
 Fields = {
   dest: {
-    "required" => true
+    "required" => true,
   },
   title: {
     "required" => false,
+    "default": nil,
   },
   capt: {
     "required" => false,
+    "default": nil,
   },
   desc: {
     "required" => false,
@@ -55,6 +57,11 @@ Fields = {
       Date.strptime(val, "%Y %B %d") if !val.nil?
     }
   },
+  clean: {
+    "required" => false,
+    "default" => "",
+    "handle-val" => ->(val) { val.downcase.split(" / ") }
+  }
 }
 
 Inject = {

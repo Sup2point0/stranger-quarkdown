@@ -9,6 +9,7 @@ class SquarkupRender < Minitest::Test
   Data = {
     title: "Squarkdown is epic",
     style: ["essence", "testing"],
+    clean: ["braces"]
   }
 
   RepoConfig = load_default_repo_config().merge({
@@ -61,6 +62,22 @@ processed content
     assert out.include?("processed content")
     assert !out.include?("#SQUARK only")
     assert !out.include?("#SQUARK testing")
+  end
+
+  def test_clean
+    content = """# Testing
+
+{surround}
+{{ignore}}
+"""
+
+    out = cleanup(content, data: Data)
+
+    puts "out = #{out}"
+
+    assert out.include?("{{surround}}")
+    assert out.include?("{{ignore}}")
+    assert !out.include?("{{{ignore}}}")
   end
 
 end

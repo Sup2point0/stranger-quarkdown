@@ -1,11 +1,13 @@
 require_relative "../config"
 require_relative "../maps/squarks"
+require_relative "../maps/cleanup"
 
 
 def render_file(content, data:, repo_config:)
   content = inject_head(content, data:, repo_config:)
   content = inject_style(content, data:, repo_config:)
   content = inject_repl(content)
+  content = cleanup(content, data:)
   return content
 end
 
@@ -59,6 +61,17 @@ end
 def inject_repl(content)
   Replace.each do |pattern, repl|
     content.sub!(pattern, repl)
+  end
+
+  return content
+end
+
+
+def cleanup(content, data:)
+  if clean = data[:clean]
+    if clean.include?("braces")
+      content = Cleanup[:braces].call(content)
+    end
   end
 
   return content
