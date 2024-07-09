@@ -37,16 +37,17 @@ end
 
 
 def inject_style(content, data:, repo_config:)
-  route = Routes.site / repo_config["styles"] / "pages"
+  path = repo_config["page-styles"]
+  route = Routes.site / path
   
   styles = data[:style].map do |style|
-    File.read(route / "#{style}.scss")
+    "@use './#{path}/#{style}' as *;"
   end
 
   text = """
 <style lang=\"scss\">
 
-#{styles.join("\n\n")}
+#{styles.join("\n")}
 </style>
 """
 
