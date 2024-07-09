@@ -2,9 +2,12 @@ require_relative "../config"
 require_relative "../utils/log"
 
 
-def export_file(content, data:, repo_config:)
+def export_file(content, data:, base:, repo_config:)
+  route = Routes.repo / repo_config["dest"] / data[:dest]
+
+  # content.svx
   begin
-    dest = Routes.repo / repo_config["dest"] / data[:dest] / (repo_config["file-name"] + ".svx")
+    dest = route / (repo_config["file-name"] + ".svx")
 
     if !dest.exist?
       case repo_config["if-no-dir"]
@@ -28,11 +31,24 @@ def export_file(content, data:, repo_config:)
     File.write(dest, content)
 
   rescue => e
-    log "export failed!"
+    log "failed to export `#{repo_config["file-name"]}.svx`!"
     log error: "#{e.class}: #{e.message}"
-    return false
+    error = true
 
-  else
-    return true
   end
+
+  # +page.svelte
+  begin
+    dest = route / "+page.svelte"
+    content = base % {file: repo_config["file-name"]}
+    File.write(dest, content)
+
+  rescue => e
+    log "failed to export `+page.svelte`!"
+    log error: "#{e.class}: #{e.message}"
+    error = true
+
+  end
+
+  return !error
 end

@@ -38,6 +38,13 @@ def load_default_repo_config()
 end
 
 
+def find_file_base(from: Routes.site, repo_config:)
+  route = from / repo_config["file-source"]
+  content = File.read(route)
+  return content
+end
+
+
 def find_files(from: nil, repo_config:)
   from = Routes.repo unless !from.nil?
 

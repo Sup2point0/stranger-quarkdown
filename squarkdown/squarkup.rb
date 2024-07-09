@@ -37,6 +37,16 @@ if ARGV.include? "scss"
 end
 
 
+log "locating file base..."
+
+base = find_file_base(repo_config:)
+if base.nil?
+  log error: "no file base found!"
+else
+  log success: "file base found!"
+end
+
+
 log "locating files..."
 
 files = find_files(repo_config:)
@@ -48,27 +58,32 @@ else
   log success: "found #{total} files!"
 end
 
+
 i = 1
 
-files.each do |file|
-  log "#{i}#{Cols[:white]} of #{total}#{Cols[:grey]} – #{Cols[:blue]}#{file.basename}"
+unless base.nil?
+  log "exporting files..."
 
-  begin
-    lines = file.readlines
-    content = lines.join("")
+  files.each do |file|
+    log "#{i}#{Cols[:grey]} of #{total} – #{Cols[:blue]}#{file.basename}"
 
-    data = extract_data(lines, repo_config:)
-    if data.nil?
-      next
+    begin
+      lines = file.readlines
+      content = lines.join("")
+
+      data = extract_data(lines, repo_config:)
+      if data.nil?
+        next
+      end
+
+      render = render_file(content, data:, repo_config:)
+      export_file(render, data:, base:, repo_config:)
+
+    rescue
+      raise
+    ensure
+      i += 1
     end
-
-    render = render_file(content, data:, repo_config:)
-    export_file(render, data:, repo_config:)
-
-  rescue
-    raise
-  ensure
-    i += 1
   end
 end
 
