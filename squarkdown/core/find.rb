@@ -41,12 +41,8 @@ end
 def find_files(from: nil, repo_config:)
   from = Routes.repo unless !from.nil?
 
-  if source = repo_config["source"]
-    if source.is_a?(Array)
-      paths = source.map {|path| (from / path).glob "**/*.md" }.flatten
-    else
-      paths = (from / source).glob "**/*.md"
-    end
+  if source = repo_config["sources"]
+    paths = source.map {|path| (from / path).glob "**/*.md" }.flatten
   else
     paths = from.glob "**/*.md"
   end
