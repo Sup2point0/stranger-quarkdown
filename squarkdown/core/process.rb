@@ -34,7 +34,7 @@ def extract_data(lines, repo_config:, fill_defaults: true)
     Fields.each do |field, props|
       if !data.include?(field)
         if props["required"]
-          raise "Required field not set"
+          raise "Required field `#{field}` not set"
         end
 
         value = props["default"]
