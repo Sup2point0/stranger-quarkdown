@@ -1,8 +1,8 @@
 require "pathname"
 
-require_relative "../scripts/prep-fonts"
-require_relative "../scripts/prep-assets"
-require_relative "../scripts/prep-scss"
+require_relative "../squarkdown/scripts/prep-fonts"
+require_relative "../squarkdown/scripts/prep-assets"
+require_relative "../squarkdown/scripts/prep-scss"
 
 
 Current = Pathname(__dir__)

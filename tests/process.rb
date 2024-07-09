@@ -30,7 +30,7 @@ class SquarkupProcess < Minitest::Test
 | dest = testing/fields
 | style = #auto / test
 | duality = dark
-| date = 1 April 1984
+| date = 1984 April 1
 | index = tests
 | shard = #index / testing
 -->"""
@@ -54,7 +54,7 @@ class SquarkupProcess < Minitest::Test
     data = extract_data(content.split("\n"), repo_config: RepoConfig)
     assert data[:title] == "Squarkdown is cool"
     assert data[:dest] == "testing/defaults"
-    assert data[:style] == ["essence"]
+    assert data[:style] == ["default"]
     assert data[:duality] == "light"
     assert data[:index] == []
     assert data[:shard] == []

@@ -1,6 +1,6 @@
 {
   "repo": "Squarkdown Tests",
   "dest": "export/routes",
-  "filename": "Content",
+  "file-name": "Content",
   "exclude": ["/_.*?\\.md", "/-.*?\\.md"]
 }
