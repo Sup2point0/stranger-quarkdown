@@ -35,7 +35,7 @@
 
     "file-source": {
       "title": "Export File Source",
-      "description": "File Squarkdown uses as the template for exported `.svx` files. Relative to site.",
+      "description": "File Squarkdown uses as the template for exported `+page.svelte` files. Relative to site.",
       "type": "string"
     },
     "file-name": {

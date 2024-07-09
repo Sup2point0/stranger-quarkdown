@@ -23,13 +23,18 @@ def try_prep_scss(repo_config:)
     dest = file.relative_path_from(route)
     "@use './#{partial}/#{dest}' as *;"
   end
+  data.sort! do |prot, deut|
+    prot.length <=> deut.length
+  end
 
   text = """/// SCSS Config
 /// Last generated #{}
 
-const scssConfig = `
-#{data.join("\n")}
-`;
+const scssConfig = {
+  prependData: `
+    #{data.join("\n    ")}
+  `
+};
 export default scssConfig;
 """
 
