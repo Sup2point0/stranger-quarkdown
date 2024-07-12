@@ -25,6 +25,7 @@ def try_prep_assets(repo_config:)
   )
 
   log success: "found #{files.length} assets!"
+  log "transferring assets..."
 
   files.each do |file|
     rel = file.relative_path_from(route)
