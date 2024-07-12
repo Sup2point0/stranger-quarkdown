@@ -48,9 +48,10 @@ def inject_style(content, data:, repo_config:)
 
   content = if content.include?("<style")
     then
-      content.sub(/<\/style>/, """
+      content.sub(/<style( lang="scss")?>/,
+        """<style lang=\"scss\">
+
 #{styles.join("\n")}
-</style>
 """)
     else content + """
 <style lang=\"scss\">

@@ -22,12 +22,13 @@ Fields = {
   },
   style: {
     "required" => false,
-    "default" => "default",
+    "default" => "article",
     "handle-val" => ->(val) {
-      val.downcase.sub(
-        Inject[:pattern],
-        Inject[:repl]["style"]
-      ).split(" / ")
+      styles = val.downcase.split(" / ")
+      if !styles.include?("article")
+        styles.unshift "article"
+      end
+      return styles
     }
   },
   duality: {
@@ -62,11 +63,4 @@ Fields = {
     "default" => "",
     "handle-val" => ->(val) { val.downcase.split(" / ") }
   }
-}
-
-Inject = {
-  pattern: /#(auto|default)/,
-  repl: {
-    "style" => Fields[:style]["default"]
-  },
 }
