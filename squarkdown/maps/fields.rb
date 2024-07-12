@@ -55,7 +55,11 @@ Fields = {
     "required" => false,
     "default" => nil,
     "handle-val" => ->(val) {
-      Date.strptime(val, "%Y %B %d") if !val.nil?
+      begin
+        return Date.strptime(val, "%Y %B %d") if !val.nil?
+      rescue Date::Error
+        return nil
+      end
     }
   },
   clean: {
