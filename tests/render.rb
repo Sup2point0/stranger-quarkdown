@@ -73,8 +73,6 @@ processed content
 
     out = cleanup(content, data: Data)
 
-    puts "out = #{out}"
-
     assert out.include?("{{surround}}")
     assert out.include?("{{ignore}}")
     assert !out.include?("{{{ignore}}}")
