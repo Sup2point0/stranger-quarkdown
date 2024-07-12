@@ -46,14 +46,20 @@ def inject_style(content, data:, repo_config:)
     "@use './#{path}/#{style}' as *;"
   end
 
-  text = """
+  content = if content.include?("<style")
+    then
+      content.sub(/<\/style>/, """
+#{styles.join("\n")}
+</style>
+""")
+    else content + """
 <style lang=\"scss\">
 
 #{styles.join("\n")}
 </style>
 """
+  end
 
-  content += text
   return content
 end
 
