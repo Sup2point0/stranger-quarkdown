@@ -1,6 +1,17 @@
 {
+  "$schema": "../../squarkdown/resources/repo-config-schema.json",
+
   "repo": "Squarkdown Tests",
+    "site": "tests",
+
   "dest": "export/routes",
-  "file-name": "Content",
-  "exclude": ["/_.*?\\.md", "/-.*?\\.md"]
+  "styles": "resources",
+  "page-styles": "resources",
+  "exclude": [
+    "/_.*?\\.md",
+    "/-.*?\\.md"
+  ],
+
+  "fonts": ["testing"],
+  "if-no-dir": "notify"
 }

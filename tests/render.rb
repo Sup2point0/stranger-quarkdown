@@ -16,6 +16,7 @@ class SquarkupRender < Minitest::Test
     "repo" => "Squarkdown Tests",
     "site" => "stranger-quarkdown/tests",
     "styles" => "resources",
+    "page-styles" => "resources",
   })
 
   
@@ -37,8 +38,8 @@ class SquarkupRender < Minitest::Test
 
     out = inject_style(content, data: Data, repo_config: RepoConfig)
 
-    assert out.include?("p {\n  font-size: 100%;\n}")
-    assert out.include?(".testing {\n  color: red;\n}")
+    assert out.include?("resources/essence")
+    assert out.include?("resources/testing")
   end
 
 
@@ -73,9 +74,9 @@ processed content
 
     out = cleanup(content, data: Data)
 
-    assert out.include?("{{surround}}")
+    assert out.include?("&amp;lbrace;surround&amp;rbrace;")
     assert out.include?("{{ignore}}")
-    assert !out.include?("{{{ignore}}}")
+    assert !out.include?("&amp;lbrace;ignore&amp;rbrace;")
   end
 
 end

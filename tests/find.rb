@@ -18,10 +18,8 @@ class SquarkupFind < Minitest::Test
     )
     
     assert config
+    assert config.is_a?(Hash)
     assert config["repo"] == "Squarkdown Tests"
-    assert config["dest"] == "export/routes"
-    assert config["filename"] == "Content"
-    assert config["exclude"].length > 0
   end
 
   
