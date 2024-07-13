@@ -10,26 +10,26 @@ end
 
 class FileData
   include Vars
-
-  attr_reader :path, :live
-
+  
   # sentinel for unset required fields
   Unset = Object.new
 
-  RequiredFields = [
-    :dest
-  ]
+  attr_reader :path, :live, :isIndex, :isFeatured, :isWoozy, :title, :head, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean,
+
+  Fields = [:dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :clean]
+
 
   def initialize(source = nil)
     @path = source and source.relative_path_from(Routes.root)
+    @head = nil
     @live = false
     @isIndex = false
     @isFeatured = false
     @isWoozy = false
 
     # For all fields, `nil` indicates default or skipped handling
+    @dest = Unset
     @title = nil
-    @head = nil
     @capt = nil
     @desc = nil  # capt
     @style = ["article"]
@@ -41,13 +41,17 @@ class FileData
     @clean = []
   end
 
+
   def update(text, repo_config:)
+    _, _, value = line.partition("=")
+    value.strip!
+
     Fields.each do |field|
-      _parse_(field, text, repo_config:)
+      _parse_(field:, value:, repo_config:)
     end
   end
   
-  def _parse_(field, value, repo_config:)
+  def _parse_(field:, value:, repo_config:)
     case field
 
     when "title"
@@ -67,6 +71,7 @@ class FileData
       raise ValidationError
     end
   end
+
 
   def to_json
     return (self
