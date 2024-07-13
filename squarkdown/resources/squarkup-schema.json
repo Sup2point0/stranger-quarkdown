@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "2.0",
-  "title": "Squarkup Repo Config Schema",
+  "version": "2.1",
+  "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
   {
@@ -26,23 +26,34 @@
       "items": {"type": "string"},
       "default": null
     },
+    "exclude": {
+      "title": "Excluded Files",
+      "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    },
     "dest": {
       "title": "Destination Directory",
       "description": "Base directory where files are exported to. Relative to site.",
       "type": "string",
       "default": "src/routes"
     },
-
-    "file-source": {
-      "title": "Export File Source",
-      "description": "File Squarkdown uses as the template for exported `+page.svelte` files. Relative to site.",
-      "type": "string"
-    },
     "file-name": {
       "title": "Export File Name",
       "description": "Name of exported `.svx` files.",
       "type": "string",
       "default": "content"
+    },
+    "base-page": {
+      "title": "Page Base",
+      "description": "File Squarkdown uses as the base for exported `+page.svelte` files. Relative to site.",
+      "type": "string"
+    },
+    "base-index": {
+      "title": "Index Page Base",
+      "description": "File Squarkdown uses as the base for exported index pages. Relative to site.",
+      "type": "string"
     },
 
     "styles": {
@@ -66,13 +77,6 @@
       "title": "Site Assets Directory",
       "description": "Directory containing site-specific assets which Squarkdown moves into the root of `static/`. Relative to root.",
       "type": "string"
-    },
-    "exclude": {
-      "title": "Excluded Files",
-      "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
-      "type": "array",
-      "items": {"type": "string"},
-      "default": []
     },
     "fonts": {
       "title": "Fonts",
