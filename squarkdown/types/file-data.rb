@@ -1,19 +1,27 @@
 require "json"
 
 require_relative "../config"
+require_relative "../utils/vars"
+
+
+class ValidationError < StandardError
+end
 
 
 class FileData
-  attr_reader
-    :path,
-    :live,
+  include Vars
+
+  attr_reader :path, :live
+
+  # sentinel for unset required fields
+  Unset = Object.new
 
   RequiredFields = [
     :dest
   ]
 
-  def initialize(source)
-    @path = source.relative_path_from(Routes.root)
+  def initialize(source = nil)
+    @path = source and source.relative_path_from(Routes.root)
     @live = false
     @isIndex = false
     @isFeatured = false
@@ -21,19 +29,25 @@ class FileData
 
     # For all fields, `nil` indicates default or skipped handling
     @title = nil
-    @head = nil # title
+    @head = nil
     @capt = nil
-    @desc = nil # capt
+    @desc = nil  # capt
     @style = ["article"]
     @duality = nil
     @index = []
-    @shard = nil # index
+    @shard = nil  # index
     @date = nil
     @date_display = nil
     @clean = []
   end
 
-  def update(field, value, repo_config:)
+  def update(text, repo_config:)
+    Fields.each do |field|
+      _parse_(field, text, repo_config:)
+    end
+  end
+  
+  def _parse_(field, value, repo_config:)
     case field
 
     when "title"
@@ -45,6 +59,12 @@ class FileData
     when "style"
       @style = value.downcase.split(" / ").unshift("article")
 
+    end
+  end
+
+  def validate
+    if self.vars_str.values.include?(Unset)
+      raise ValidationError
     end
   end
 
