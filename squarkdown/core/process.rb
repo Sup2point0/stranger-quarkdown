@@ -30,19 +30,10 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     end
 
     data.update(line, repo_config:)
-
-    Fields.each do |field, props|
-      if line.include?(String(field) + " = ")
-        _, _, value = line.partition("=")
-        value.strip!
-
-        data[field] = handle(value, props:, data:, repo_config:)
-      end
-    end
   end
 
   if data.live
-    data.validate()
+    data.fill()
     return data
   else
     return

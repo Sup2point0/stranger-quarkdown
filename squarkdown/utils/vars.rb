@@ -5,7 +5,7 @@ module Vars
     Hash[
       self.instance_variables.map { |var|
         [
-          var.to_s.delete("@").to_sym,
+          var.to_s.delete("@"),
           instance_variable_get(var)
         ]
       }
@@ -16,7 +16,7 @@ module Vars
     Hash[
       self.instance_variables.map { |var|
         [
-          var.to_s.delete("@"),
+          var.to_s.delete("@").to_sym,
           instance_variable_get(var)
         ]
       }
