@@ -3,7 +3,7 @@ require_relative "../utils/log"
 
 
 def export_file(content, data:, base:, repo_config:)
-  route = Routes.repo / repo_config["dest"] / data[:dest]
+  route = Routes.repo / repo_config["dest"] / data.dest]
 
   # content.svx
   begin

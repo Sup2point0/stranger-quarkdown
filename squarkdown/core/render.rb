@@ -14,7 +14,7 @@ end
 
 def inject_head(content, data:, repo_config:)
   text = """<svelte:head>
-  <title> #{data[:title]} · #{repo_config["repo"]} </title>
+  <title> #{data.title]} · #{repo_config["repo"]} </title>
 </svelte:head>
 """
 
@@ -42,7 +42,7 @@ def inject_style(content, data:, repo_config:)
   path = repo_config["page-styles"]
   route = Routes.site / path
   
-  styles = data[:style].map do |style|
+  styles = data.style].map do |style|
     "@use './#{path}/#{style}' as *;"
   end
 
@@ -75,7 +75,7 @@ end
 
 
 def cleanup(content, data:)
-  if clean = data[:clean]
+  if clean = data.clean]
     if clean.include?("braces")
       content = Cleanup[:braces].call(content)
     end

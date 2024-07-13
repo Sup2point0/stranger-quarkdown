@@ -1,4 +1,4 @@
-require_relative "../types/FileData"
+require_relative "../types/file-data"
 require_relative "../maps/fields"
 require_relative "../maps/flags"
 
@@ -13,21 +13,23 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   end
 
   lines[0, ProcessedLines].each do |line|
-    if data[:head].nil?
+    if data.head.nil?
       if line.start_with?("# ")
-        data[:head] = line[2..]
+        data.head = line[2..]
       end
     end
 
-    if !data[:live]
+    if !data.live
       if line.include?("#SQUARK live!")
-        data[:live] = true
+        data.live = true
       elsif line.include?("#SQUARK dead!")
         return
       else
         next
       end
     end
+
+    data.update(line, repo_config:)
 
     Fields.each do |field, props|
       if line.include?(String(field) + " = ")
@@ -39,23 +41,12 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     end
   end
 
-  return unless data[:live]
-
-  # fill in unspecified defaults
-  if fill_defaults
-    Fields.each do |field, props|
-      if !data.include?(field)
-        if props["required"]
-          raise "Required field `#{field}` not set"
-        end
-
-        value = props["default"]
-        data[field] = handle(value, props:, data:, repo_config:)
-      end
-    end
+  if data.live
+    data.validate()
+    return data
+  else
+    return
   end
-
-  return data
 end
 
 

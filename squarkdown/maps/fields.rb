@@ -47,7 +47,7 @@ Fields = {
     "handle-all" => ->(val, data:, repo_config:) {
       val.downcase.sub(
         "#index",
-        data[:index].join(" / ")
+        data.index].join(" / ")
       ).split(" / ")
     }
   },

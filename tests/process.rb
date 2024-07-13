@@ -16,7 +16,7 @@ class SquarkupProcess < Minitest::Test
       repo_config: RepoConfig,
       fill_defaults: false
     )
-    assert data[:live] == true
+    assert data.live == true
   end
 
   def test_dead
@@ -47,13 +47,13 @@ class SquarkupProcess < Minitest::Test
       lines: content.split("\n"),
       repo_config: RepoConfig
     )
-    assert data[:head] == "Testing"
-    assert data[:title] == "Squarkdown is awesome"
-    assert data[:dest] == "testing/fields"
-    assert data[:style] == ["default", "test"]
-    assert data[:duality] == "dark"
-    assert data[:index] == ["tests"]
-    assert data[:shard] == ["tests", "testing"]
+    assert data.head == "Testing"
+    assert data.title == "Squarkdown is awesome"
+    assert data.dest == "testing/fields"
+    assert data.style == ["default", "test"]
+    assert data.duality == "dark"
+    assert data.index == ["tests"]
+    assert data.shard == ["tests", "testing"]
   end
 
   def test_fields_default
@@ -67,13 +67,13 @@ class SquarkupProcess < Minitest::Test
       lines: content.split("\n"),
       repo_config: RepoConfig
     )
-    assert data[:head] == "Testing"
-    assert data[:title] == "Squarkdown is cool"
-    assert data[:dest] == "testing/defaults"
-    assert data[:style] == ["default"]
-    assert data[:duality] == "light"
-    assert data[:index] == []
-    assert data[:shard] == []
+    assert data.head == "Testing"
+    assert data.title == "Squarkdown is cool"
+    assert data.dest == "testing/defaults"
+    assert data.style == ["default"]
+    assert data.duality == "light"
+    assert data.index == []
+    assert data.shard == []
   end
 
 end

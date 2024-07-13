@@ -27,7 +27,7 @@ end
 
 
 def load_default_repo_config()
-  content = File.read(Routes.root / "squarkdown/resources/repo-config-schema.json")
+  content = File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
   schema = JSON.parse(content)
   
   data = schema["properties"].map do |prop, data|
