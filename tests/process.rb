@@ -11,7 +11,11 @@ class SquarkupProcess < Minitest::Test
     content = """# Testing
 <!-- #SQUARK live! -->"""
 
-    data = extract_data(content.split("\n"), repo_config: RepoConfig, fill_defaults: false)
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: false
+    )
     assert data[:live] == true
   end
 
@@ -19,7 +23,11 @@ class SquarkupProcess < Minitest::Test
     content = """# Testing
 <!-- #SQUARK dead! -->"""
 
-    data = extract_data(content.split("\n"), repo_config: RepoConfig, fill_defaults: false)
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: false
+    )
     assert data.nil?
   end
 
@@ -35,7 +43,10 @@ class SquarkupProcess < Minitest::Test
 | shard = #index / testing
 -->"""
 
-    data = extract_data(content.split("\n"), repo_config: RepoConfig)
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig
+    )
     assert data[:head] == "Testing"
     assert data[:title] == "Squarkdown is awesome"
     assert data[:dest] == "testing/fields"
@@ -52,7 +63,10 @@ class SquarkupProcess < Minitest::Test
 | dest = testing/defaults
 -->"""
 
-    data = extract_data(content.split("\n"), repo_config: RepoConfig)
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig
+    )
     assert data[:head] == "Testing"
     assert data[:title] == "Squarkdown is cool"
     assert data[:dest] == "testing/defaults"

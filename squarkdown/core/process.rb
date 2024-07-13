@@ -1,3 +1,4 @@
+require_relative "../types/FileData"
 require_relative "../maps/fields"
 require_relative "../maps/flags"
 
@@ -6,8 +7,10 @@ require_relative "../maps/flags"
 ProcessedLines = 20
 
 
-def extract_data(lines, repo_config:, fill_defaults: true)
-  data = Flags.clone
+def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
+  if data.nil?
+    data = FileData.new
+  end
 
   lines[0, ProcessedLines].each do |line|
     if data[:head].nil?

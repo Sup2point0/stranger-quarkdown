@@ -1,4 +1,6 @@
 require_relative "config"
+require_relative "types/site-data"
+require_relative "types/file-data"
 require_relative "core/find"
 require_relative "core/process"
 require_relative "core/render"
@@ -11,8 +13,9 @@ require_relative "scripts/prep-assets" if ARGV.include? "assets"
 log "squarking up..."
 
 
-repo_config = find_repo_config()
+site_data = SiteData.new
 
+repo_config = find_repo_config()
 if repo_config.nil? or repo_config.length == 0
   log error: "squarkup config not found!"
   exit
@@ -71,16 +74,20 @@ unless base.nil?
       lines = file.readlines
       content = lines.join("")
 
-      data = extract_data(lines, repo_config:)
-      if data.nil?
+      file_data = extract_data(lines:, repo_config:)
+      if file_data.nil?
         next
       end
+
+      site_data.add_page(file_data)
+      site_data.add_index(file_data.index)
+      site_data.add_shard(file_data.shard)
 
       render = render_file(content, data:, repo_config:)
       export_file(render, data:, base:, repo_config:)
 
-    rescue
-      raise
+    rescue => e
+      log error: "#{e.class}: #{e.message}"
     ensure
       i += 1
     end

@@ -10,6 +10,15 @@ class SiteData
     @shards = []
   end
 
+  def add_page(page)
+  end
+
+  def add_index(index)
+  end
+
+  def add_shard(shard)
+  end
+
   def save
     route = Routes.site / "src/site-data.js"
     existing = File.read(route)
