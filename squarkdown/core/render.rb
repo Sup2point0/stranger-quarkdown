@@ -24,17 +24,7 @@ end
 
 
 def inject_data(content, data:)
-  fields = data.map do |field, value|
-    "#{field}: #{value}"
-  end
-  
-  text = """---
-#{fields.join('\n')}
----
-"""
-  
-  content = text + content
-  return content
+  return data.to_yaml + content
 end
 
 

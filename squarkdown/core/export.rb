@@ -3,28 +3,25 @@ require_relative "../utils/log"
 
 
 def export_file(content, data:, base:, repo_config:)
-  route = Routes.repo / repo_config["dest"] / data.dest]
+  route = Routes.repo / repo_config["dest"] / data.dest
 
   # content.svx
   begin
     dest = route / (repo_config["file-name"] + ".svx")
+    handle = repo_config["if-no-dir"]
 
     if !dest.exist?
-      case repo_config["if-no-dir"]
-        when "ignore"
-          return false
+      if handle.include?("ignore")
+        return false
+      end
 
-        when "notify"
-          log error: "destination directory does not exist: #{Cols[:blue]}#{dest.expand_path}"
-          return false
-
-        when "warn"
-          log "creating destination directory: #{Cols[:blue]}#{dest.expand_path}"
-          dest.parent.mkpath()
-
-        when "create"
-          dest.parent.mkpath()
-
+      if handle.include?("warn")
+        log error: "destination directory does not exist: #{Cols[:blue]}#{dest.expand_path}"
+      end
+        
+      if handle.include?("create")
+        log "creating destination directory: #{Cols[:blue]}#{dest.expand_path}"
+        dest.parent.mkpath()
       end
     end
     
