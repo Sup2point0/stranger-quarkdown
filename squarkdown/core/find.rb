@@ -39,7 +39,7 @@ end
 
 
 def find_file_base(from: Routes.site, repo_config:)
-  route = from / repo_config["file-source"]
+  route = from / repo_config["base-page"]
   content = File.read(route)
   return content
 end

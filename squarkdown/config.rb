@@ -10,8 +10,18 @@ class RoutesConfig
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
 
-    # assuming stranger-quarkdown is a submodule of the given repo
-    @repo = @root.parent
+    # find directory with .squarkdown folder
+    @repo = nil
+
+    @root.ascend do |dir|
+      if (dir / ".squarkdown").exist?
+        @repo = dir
+      end
+    end
+
+    if @repo.nil?
+      raise "failed to find directory with a .squarkdown/ folder"
+    end
 
     # default, but can be overridden
     @site = repo / "site"
