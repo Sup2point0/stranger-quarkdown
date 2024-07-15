@@ -15,7 +15,7 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   lines[0, ProcessedLines].each do |line|
     if data.head.nil?
       if line.start_with?("# ")
-        data.head = line[2..]
+        data.head = line[2..-1]
       end
     end
 
@@ -32,21 +32,12 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     data.update(line, repo_config:)
   end
 
+  puts "data = #{data.vars_sym}"
+
   if data.live
-    data.fill()
+    data.fill(repo_config:)
     return data
   else
     return
-  end
-end
-
-
-def handle(value, props:, data:, repo_config:)
-  if handler = props["handle-all"]
-    return handler.call(value, data:, repo_config:)
-  elsif handler = props["handle-val"]
-    return handler.call(value)
-  else
-    return value
   end
 end

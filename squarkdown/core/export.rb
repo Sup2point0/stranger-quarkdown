@@ -10,7 +10,7 @@ def export_file(content, data:, base:, repo_config:)
     dest = route / (repo_config["file-name"] + ".svx")
     handle = repo_config["if-no-dir"]
 
-    if !dest.exist?
+    if route.exist?
       if handle.include?("ignore")
         return false
       end
@@ -20,8 +20,10 @@ def export_file(content, data:, base:, repo_config:)
       end
         
       if handle.include?("create")
-        log "creating destination directory: #{Cols[:blue]}#{dest.expand_path}"
-        dest.parent.mkpath()
+        log "creating destination directory: #{Cols[:blue]}#{route.expand_path}"
+        route.mkpath()
+      else
+        return false
       end
     end
     
