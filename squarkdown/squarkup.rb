@@ -83,11 +83,12 @@ unless base.nil?
       site_data.add_index(file_data.index)
       site_data.add_shard(file_data.shard)
 
-      render = render_file(content, data:, repo_config:)
-      export_file(render, data:, base:, repo_config:)
+      render = render_file(content, data: file_data, repo_config:)
+      export_file(render, data: file_data, base:, repo_config:)
 
     rescue => e
-      log error: "#{e.class}: #{e.message}"
+      # log error: "#{e.class}: #{e.message}"
+      raise
     ensure
       i += 1
     end

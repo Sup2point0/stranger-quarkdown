@@ -14,8 +14,8 @@ class FileData
   # sentinel for unset required fields
   Unset = Object.new
 
-
-  attr_reader :path, :live, :isIndex, :isFeatured, :isWoozy, :title, :head, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
+  attr_accessor :live, :head
+  attr_reader :path, :isIndex, :isFeatured, :isWoozy, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
 
   Fields = [:dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :clean]
 
@@ -44,14 +44,20 @@ class FileData
 
 
   def update(text, repo_config:)
-    _, _, value = line.partition("=")
+    _, _, value = text.partition("=")
     value.strip!
 
     Fields.each do |field|
-      _parse_(field:, value:, repo_config:)
+      if text.include?(field.to_s + " =")
+        _parse_(field:, value:, repo_config:)
+      end
     end
   end
   
+
+  def _split_(value)
+    value.downcase.split(" / ")
+  end
 
   def _parse_(field:, value:, repo_config:)
     case field
@@ -63,7 +69,6 @@ class FileData
 
     when :duality then @duality = value.downcase
     when :index then @index = _split_(value)
-    when :shard then @shard = _split_(value)
     when :clean then @clean = _split_(value)
 
     when :style
@@ -75,6 +80,12 @@ class FileData
 
       @style = styles
 
+    when :shard
+      shards = _split_(value)
+      if shards.delete("#index")
+        shards.unshift(*@index)
+      end
+
     when :date
       begin
         @date = Date.strptime(value, "%Y %B %d")
@@ -84,13 +95,20 @@ class FileData
     end
   end
 
-  def _split_(value)
-    value.downcase.split(" / ")
+  def _parse_default_(field:, repo_config:)
+    case field
+    
+    when :desc then @desc = @capt
+
+    end
   end
 
 
-  def fill
-    Files.each do |field|
+  def fill(repo_config:)
+    Fields.each do |field|
+      if self.vars_sym[field].nil?
+        _parse_default_(field:, repo_config:)
+      end
     end
 
     if self.vars_str.values.include?(Unset)
