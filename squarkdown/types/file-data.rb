@@ -43,6 +43,11 @@ class FileData
   end
 
 
+  def _split_(value)
+    value.downcase.split(" / ")
+  end
+
+
   def update(text, repo_config:)
     _, _, value = text.partition("=")
     value.strip!
@@ -52,11 +57,6 @@ class FileData
         _parse_(field:, value:, repo_config:)
       end
     end
-  end
-  
-
-  def _split_(value)
-    value.downcase.split(" / ")
   end
 
   def _parse_(field:, value:, repo_config:)
@@ -74,16 +74,18 @@ class FileData
     when :style
       styles = _split_(value)
 
-      if !styles.include?("article")
+      if styles.delete("#auto")
+        styles.unshift("article")
+      elsif !styles.include?("article")
         styles.unshift "article"
       end
 
       @style = styles
 
     when :shard
-      shards = _split_(value)
-      if shards.delete("#index")
-        shards.unshift(*@index)
+      @shard = _split_(value)
+      if @shard.delete("#index")
+        @shard.unshift(*@index)
       end
 
     when :date
@@ -91,14 +93,6 @@ class FileData
         @date = Date.strptime(value, "%Y %B %d")
       rescue Date::Error
       end
-
-    end
-  end
-
-  def _parse_default_(field:, repo_config:)
-    case field
-    
-    when :desc then @desc = @capt
 
     end
   end
@@ -113,6 +107,17 @@ class FileData
 
     if self.vars_str.values.include?(Unset)
       raise ValidationError
+    end
+  end
+
+  def _parse_default_(field:, repo_config:)
+    case field
+    
+    when :title then @title = @head
+    when :desc then @desc = @capt
+    when :duality then @duality = "light"
+    when :shard then @shard = @index
+
     end
   end
 

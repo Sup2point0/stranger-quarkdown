@@ -32,10 +32,10 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     data.update(line, repo_config:)
   end
 
-  puts "data = #{data.vars_sym}"
-
   if data.live
-    data.fill(repo_config:)
+    if fill_defaults
+      data.fill(repo_config:)
+    end
     return data
   else
     return

@@ -34,32 +34,37 @@ class SquarkupProcess < Minitest::Test
   def test_fields
     content = """# Testing
 <!-- #SQUARK live!
-| title = Squarkdown is awesome
 | dest = testing/fields
-| style = #auto / test
+| capt = A unit test
+| title = Squarkdown is awesome
+| desc = Making sure everything works
+| style = #AUTO / test
 | duality = dark
-| date = 1984 April 1
 | index = tests
-| shard = #index / testing
+| shard = #INDEX / testing
+| date = 1984 April 1
 -->"""
 
     data = extract_data(
       lines: content.split("\n"),
       repo_config: RepoConfig
     )
-    assert data.head == "Testing"
-    assert data.title == "Squarkdown is awesome"
+
     assert data.dest == "testing/fields"
-    assert data.style == ["default", "test"]
+    assert data.head == "Testing"
+    assert data.capt == "A unit test"
+    assert data.title == "Squarkdown is awesome"
+    assert data.desc == "Making sure everything works"
+    assert data.style == ["article", "test"]
     assert data.duality == "dark"
     assert data.index == ["tests"]
     assert data.shard == ["tests", "testing"]
+    assert data.date
   end
 
   def test_fields_default
     content = """# Testing
 <!-- #SQUARK live!
-| title = Squarkdown is cool
 | dest = testing/defaults
 -->"""
 
@@ -67,10 +72,12 @@ class SquarkupProcess < Minitest::Test
       lines: content.split("\n"),
       repo_config: RepoConfig
     )
-    assert data.head == "Testing"
-    assert data.title == "Squarkdown is cool"
+    log "data == #{data.vars_str}"
+
     assert data.dest == "testing/defaults"
-    assert data.style == ["default"]
+    assert data.head == "Testing"
+    assert data.title == "Testing"
+    assert data.style == ["article"]
     assert data.duality == "light"
     assert data.index == []
     assert data.shard == []
