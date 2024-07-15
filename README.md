@@ -35,6 +35,22 @@ Write content for a site with [Quarkdown-Flavoured Markdown](https://github.com/
 <br>
 
 
+## Directory
+
+> I mean, these should be pretty self-explanatory, but here you go anyway ;)
+
+| folder | notes |
+| :----- | :---- |
+| [`squarkdown`](squarkdown/) | source code |
+| [`tests`](tests/) | unit tests |
+| [`docs`](docs/) | documentation |
+| [`site`](site/) | project site |
+| [`.github/scripts`](.github/scripts/) | helper scripts for generating docs and site |
+
+
+<br>
+
+
 ## Usage
 
 This project is designed to be used as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
