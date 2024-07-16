@@ -42,7 +42,6 @@ class FileData
     @clean = []
   end
 
-
   def _split_(value)
     value.downcase.split(" / ")
   end
@@ -54,9 +53,13 @@ class FileData
 
     Fields.each do |field|
       if text.include?(field.to_s + " =")
-        _parse_(field:, value:, repo_config:)
+        if _parse_(field:, value:, repo_config:)
+          break
+        end
       end
     end
+
+    return self
   end
 
   def _parse_(field:, value:, repo_config:)
@@ -92,9 +95,23 @@ class FileData
       begin
         @date = Date.strptime(value, "%Y %B %d")
       rescue Date::Error
+        begin
+          @date = Date.strptime(value, "%Y %B")
+        rescue Date::Error
+          begin
+            @date = Date.strptime(value, "%Y")
+          rescue Date::Error
+            return
+          end
+        end
       end
 
+    else
+      return
+
     end
+
+    return self
   end
 
 
