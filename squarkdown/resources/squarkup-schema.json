@@ -1,6 +1,6 @@
 {
   // "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "2.3",
+  "version": "3.0",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -39,20 +39,40 @@
       "type": "string",
       "default": "src/routes"
     },
+    "if-no-dir": {
+      "title": "Nonexistent Directory Handling",
+      "description": "Action to take if an export directory does not exist.",
+      "type": "array",
+      "items": {
+        "enum": ["ignore", "warn", "create"]
+      },
+      "default": "warn"
+    },
+
     "file-name": {
       "title": "Export File Name",
       "description": "Name of exported `.svx` files.",
       "type": "string",
       "default": "content"
     },
-    "base-page": {
-      "title": "Page Base",
-      "description": "File Squarkdown uses as the base for exported `+page.svelte` files. Relative to site.",
+    "bases": {
+      "title": "File Templates Directory",
+      "description": "Base directory where Squarkdown looks for template files. Relative to site.",
       "type": "string"
     },
-    "base-index": {
+    "page.svelte": {
+      "title": "Page Base",
+      "description": "The file Squarkdown uses as a template for `+page.svelte` files. Relative to site.",
+      "type": "string"
+    },
+    "index.svelte": {
       "title": "Index Page Base",
-      "description": "File Squarkdown uses as the base for exported index pages. Relative to site.",
+      "description": "The file Squarkdown uses as a template for `+page.svelte` files of index pages. Relative to site.",
+      "type": "string"
+    },
+    "page.js": {
+      "title": "+page.js Base",
+      "description": "The file Squarkdown uses as a template for `+page.js` files. Relative to site.",
       "type": "string"
     },
 
@@ -84,16 +104,6 @@
       "type": "array",
       "items": {"type": "string"},
       "default": []
-    },
-    
-    "if-no-dir": {
-      "title": "Nonexistent Directory Handling",
-      "description": "Action to take if an export directory does not exist.",
-      "type": "array",
-      "items": {
-        "enum": ["ignore", "warn", "create"]
-      },
-      "default": "warn"
     }
   }
 }
