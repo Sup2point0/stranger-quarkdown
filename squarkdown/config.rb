@@ -1,5 +1,7 @@
 require "pathname"
 
+require_relative "utils/log"
+
 
 class RoutesConfig
   attr_reader :root, :repo, :site
@@ -9,6 +11,7 @@ class RoutesConfig
 
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
+    log "found root: #{@root}"
 
     # find directory with .squarkdown folder
     @repo = nil
@@ -21,6 +24,8 @@ class RoutesConfig
 
     if @repo.nil?
       raise "failed to find directory with a .squarkdown/ folder"
+    else
+      log "found repo: #{@root}"
     end
 
     # default, but can be overridden
