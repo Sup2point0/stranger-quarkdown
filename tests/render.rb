@@ -1,16 +1,23 @@
 require "minitest/autorun"
 
+require_relative "../squarkdown/types/file-data"
 require_relative "../squarkdown/core/render"
 require_relative "../squarkdown/core/find"
 
 
+def _get_data_
+  repo_config = nil
+  data = FileData.new
+  data.update("title = Squarkdown is epic", repo_config:)
+  data.update("style = #AUTO / testing", repo_config:)
+  data.update("clean = braces", repo_config:)
+  return data
+end
+
+
 class SquarkupRender < Minitest::Test
 
-  Data = {
-    title: "Squarkdown is epic",
-    style: ["essence", "testing"],
-    clean: ["braces"]
-  }
+  Data = _get_data_()
 
   RepoConfig = load_default_repo_config().merge({
     "repo" => "Squarkdown Tests",
@@ -38,7 +45,7 @@ class SquarkupRender < Minitest::Test
 
     out = inject_style(content, data: Data, repo_config: RepoConfig)
 
-    assert out.include?("resources/essence")
+    assert out.include?("resources/article")
     assert out.include?("resources/testing")
   end
 

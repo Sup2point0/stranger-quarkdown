@@ -72,7 +72,6 @@ class SquarkupProcess < Minitest::Test
       lines: content.split("\n"),
       repo_config: RepoConfig
     )
-    log "data == #{data.vars_str}"
 
     assert data.dest == "testing/defaults"
     assert data.head == "Testing"
