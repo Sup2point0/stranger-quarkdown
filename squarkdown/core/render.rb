@@ -7,6 +7,7 @@ def render_file(content, data:, repo_config:)
   content = inject_head(content, data:, repo_config:)
   content = inject_style(content, data:, repo_config:)
   content = inject_repl(content)
+  content = fix_links(content)
   content = cleanup(content, data:)
   return content
 end
@@ -59,6 +60,18 @@ def inject_repl(content)
   Replace.each do |pattern, repl|
     content.sub!(pattern, repl)
   end
+
+  return content
+end
+
+
+def fix_links(content)
+  content = content.gsub(
+    /(\.\.\/)*\.assets(\/\.site)?/,
+    "{base}"
+  )
+
+  content = content.gsub(/\.md\]/, "]")
 
   return content
 end
