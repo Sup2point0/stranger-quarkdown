@@ -1,25 +1,24 @@
 require "json"
+require "json-schema"
 
 require_relative "../config"
 require_relative "../utils/log"
 
 
-def find_repo_config(from: Routes.repo, _testing: false)
+Schema = JSON.parse(
+  File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
+)
+
+
+def find_repo_config(from: Routes.repo)
   repo_config = load_default_repo_config()
 
-  begin
-    route = from / ".squarkdown/squarkup.json"
-    content = File.read(route)
-    data = JSON.parse(content)
-    repo_config.merge!(data)
-  rescue => e
-    if _testing
-      raise
-    else
-      log error: e.message
-    end
-  end
+  route = from / ".squarkdown/squarkup.json"
+  content = File.read(route)
+  data = JSON.parse(content)
 
+  JSON::Validator.validate!(Schema, data)
+  repo_config.merge!(data)
   Routes.set_site(Routes.repo / repo_config["site"])
 
   return repo_config
@@ -27,10 +26,7 @@ end
 
 
 def load_default_repo_config()
-  content = File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
-  schema = JSON.parse(content)
-  
-  data = schema["properties"].map do |prop, data|
+  data = Schema["properties"].map do |prop, data|
     [prop, data["default"]]
   end.to_h
   

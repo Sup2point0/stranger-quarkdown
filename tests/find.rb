@@ -12,10 +12,7 @@ class SquarkupFind < Minitest::Test
 
 
   def test_find_repo_config
-    config = find_repo_config(
-      from: Current,
-      _testing: true
-    )
+    config = find_repo_config(from: Current)
     
     assert config
     assert config.is_a?(Hash)
