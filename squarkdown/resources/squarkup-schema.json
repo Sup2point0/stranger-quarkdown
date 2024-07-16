@@ -1,6 +1,6 @@
 {
   // "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "3.0",
+  "version": "3.1",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -67,13 +67,15 @@
     },
     "index.svelte": {
       "title": "Index Page Base",
-      "description": "The file Squarkdown uses as a template for `+page.svelte` files of index pages. Relative to site.",
-      "type": "string"
+      "description": "The file Squarkdown uses as a template for `+page.svelte` files of index pages. Relative to site.\n\nIf not supplied, Squarkdown will use the same base as that for regular pages.",
+      "type": ["string", "null"],
+      "default": null
     },
     "page.js": {
       "title": "+page.js Base",
-      "description": "The file Squarkdown uses as a template for `+page.js` files. Relative to site.",
-      "type": "string"
+      "description": "The file Squarkdown uses as a template for `+page.js` files. Relative to site.\n\nIf not supplied, Squarkdown will not create `+page.js` files.",
+      "type": ["string", "null"],
+      "default": null
     },
 
     "styles": {
