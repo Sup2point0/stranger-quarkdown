@@ -1,0 +1,17 @@
+```json
+{
+  "$schema": "https://sup2point0.github.io/stranger-quarkdown/squarkup-schema.json",
+
+  "repo": "Stranger Quarkdown",
+  "site": "site",
+  "sources": ["docs"],
+
+  "styles": "styles",
+  "assets": ".assets",
+  "fonts": [
+    "Fira+Sans"
+  ],
+
+  "if-no-dir": ["warn", "create"]
+}
+```
