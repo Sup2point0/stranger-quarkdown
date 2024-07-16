@@ -7,8 +7,8 @@ def render_file(content, data:, repo_config:)
   content = inject_head(content, data:, repo_config:)
   content = inject_style(content, data:, repo_config:)
   content = inject_repl(content)
-  content = fix_links(content)
   content = cleanup(content, data:)
+  content = fix_links(content)
   return content
 end
 
@@ -37,19 +37,20 @@ def inject_style(content, data:, repo_config:)
     "@use './#{path}/#{style}' as *;"
   end
 
-  content = if content.include?("<style")
-    then
-      content.sub(/<style( lang="scss")?>/,
-        """<style lang=\"scss\">
+  content = if content.include?("<style") then
+    content.sub(/<style( lang="scss")?>/,
+      """<style lang=\"scss\">
 
 #{styles.join("\n")}
 """)
-    else content + """
+  
+  else content + """
 <style lang=\"scss\">
 
 #{styles.join("\n")}
 </style>
 """
+
   end
 
   return content
@@ -72,6 +73,13 @@ def fix_links(content)
   )
 
   content = content.gsub(/\.md\]/, "]")
+
+  content = """<script>
+
+import { base } from \"$app/paths\";
+
+</script>
+""" + content
 
   return content
 end
