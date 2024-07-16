@@ -42,7 +42,7 @@ def export_file(content, data:, base:, repo_config:)
   # +page.svelte
   begin
     dest = route / "+page.svelte"
-    content = base % {file: repo_config["file-name"]}
+    content = base["page.svelte"] % {file: repo_config["file-name"]}
     File.write(dest, content)
 
   rescue => e
@@ -50,6 +50,21 @@ def export_file(content, data:, base:, repo_config:)
     log error: "#{e.class}: #{e.message}"
     error = true
 
+  end
+
+  # +page.js
+  if repo_config["page.js"]
+    begin
+      dest = route / "+page.js"
+      content = base["page.js"] % {file: repo_config["file-name"]}
+      File.write(dest, content)
+
+    rescue => e
+      log "failed to export `+page.js`!"
+      log error: "#{e.class}: #{e.message}"
+      error = true
+  
+    end
   end
 
   return !error

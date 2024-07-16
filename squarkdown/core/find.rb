@@ -34,8 +34,8 @@ def load_default_repo_config()
 end
 
 
-def find_file_base(from: Routes.site, repo_config:)
-  route = from / repo_config["base-page"]
+def find_file_base(file, from: Routes.site, repo_config:)
+  route = from / repo_config["bases"] / repo_config[file]
   content = File.read(route)
   return content
 end

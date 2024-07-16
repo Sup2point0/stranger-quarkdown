@@ -42,11 +42,20 @@ end
 
 log "locating file base..."
 
-base = find_file_base(repo_config:)
-if base.nil?
-  log error: "no file base found!"
+base = {}
+
+base["page.svelte"] = find_file_base("page.svelte", repo_config:)
+if base["page.svelte"].nil?
+  log error: "no base for +page.svelte found!"
 else
-  log success: "file base found!"
+  log success: "found base for +page.svelte!"
+end
+
+base["page.js"] = find_file_base("page.js", repo_config:)
+if base["page.js"].nil?
+  log error: "no base for +page.js found!"
+else
+  log success: "found base for +js.svelte!"
 end
 
 
@@ -84,7 +93,7 @@ unless base.nil?
       site_data.add_shard(file_data.shard)
 
       render = render_file(content, data: file_data, repo_config:)
-      export_file(render, data: file_data, base:, repo_config:)
+      export_file(render, data: file_data, base: base, repo_config:)
 
     rescue => e
       # log error: "#{e.class}: #{e.message}"
