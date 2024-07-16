@@ -4,28 +4,34 @@ require_relative "../maps/cleanup"
 
 
 def render_file(content, data:, repo_config:)
-  content = inject_head(content, data:, repo_config:)
-  content = inject_style(content, data:, repo_config:)
   content = inject_repl(content)
   content = cleanup(content, data:)
+  content = inject_head(content, data:, repo_config:)
+  content = inject_base(content)
+  content = inject_style(content, data:, repo_config:)
+  content = inject_data(content, data:)
   content = fix_links(content)
   return content
 end
 
 
 def inject_head(content, data:, repo_config:)
-  text = """<svelte:head>
+  return """<svelte:head>
   <title> #{data.title} · #{repo_config["repo"]} </title>
 </svelte:head>
-"""
 
-  content = text + content
-  return content
+""" + content
 end
 
 
-def inject_data(content, data:)
-  return data.to_yaml + content
+def inject_base(content)
+  return """<script>
+
+import { base } from \"$app/paths\";
+
+</script>
+
+""" + content
 end
 
 
@@ -66,21 +72,14 @@ def inject_repl(content)
 end
 
 
+def inject_data(content, data:)
+  return data.to_yaml + content
+end
+
+
 def fix_links(content)
-  content = content.gsub(
-    /(\.\.\/)*\.assets(\/\.site)?/,
-    "{base}"
-  )
-
+  content = content.gsub(/(\.\.\/)*\.assets(\/\.site)?/, "{base}")
   content = content.gsub(/\.md\]/, "]")
-
-  content = """<script>
-
-import { base } from \"$app/paths\";
-
-</script>
-""" + content
-
   return content
 end
 

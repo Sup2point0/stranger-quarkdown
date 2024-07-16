@@ -1,7 +1,4 @@
 Cleanup = {
-  links: ->(content) {
-    content = content.gsub!("")
-  },
   braces: ->(content) {
     content = content.gsub!(
       /(?<!\{)\{(?!\{)/,

@@ -144,7 +144,7 @@ class FileData
   end
 
   def export_external
-    return self.vars_sym.slice(:title, :head, :capt, :desc, :index, :shard, :date_displayed)
+    return self.vars_str.slice("title", "head", "capt", "desc", "index", "shard", "date_displayed")
   end
 
 
@@ -157,6 +157,6 @@ class FileData
   end
 
   def to_yaml
-    return self.export_external.to_yaml
+    return self.export_external.to_yaml + "---\n\n"
   end
 end
