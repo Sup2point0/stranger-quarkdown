@@ -13,5 +13,5 @@
   "page-styles": "resources",
   "fonts": ["testing"],
 
-  "if-no-dir": "notify"
+  "if-no-dir": ["warn"]
 }

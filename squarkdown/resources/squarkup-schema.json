@@ -1,6 +1,6 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "2.2",
+  // "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2.3",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -91,7 +91,7 @@
       "description": "Action to take if an export directory does not exist.",
       "type": "array",
       "items": {
-        "enum": ["ignore", "notify", "warn", "create"]
+        "enum": ["ignore", "warn", "create"]
       },
       "default": "warn"
     }
