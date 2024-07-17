@@ -23,11 +23,11 @@ def log(
   out = Cols[:grey]
 
   if !$started or done
-    out += ">>> #{Cols[:pink]}Ruby#{Cols[:grey]} / "
+    out += ">>> #{Cols[:pink]}Sq uark#{Cols[:grey]} / "
   elsif error
-    out += "-------- / "
+    out += "---------- / "
   else
-    out += "         / "
+    out += "           / "
   end
 
   if done
