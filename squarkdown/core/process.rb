@@ -36,7 +36,9 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   end
 
   # remove the line with head
-  lines.delete_at(idx)
+  if !idx.nil?
+    lines.delete_at(idx)
+  end
 
   if data.live
     if fill_defaults
