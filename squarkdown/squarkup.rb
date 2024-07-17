@@ -81,8 +81,6 @@ unless base.nil?
 
     begin
       lines = file.readlines
-      content = lines.join("")
-
       file_data = extract_data(lines:, repo_config:)
       if file_data.nil?
         next
@@ -92,6 +90,7 @@ unless base.nil?
       site_data.add_index(file_data.index)
       site_data.add_shard(file_data.shard)
 
+      content = lines.join("")
       render = render_file(content, data: file_data, repo_config:)
       export_file(render, data: file_data, base: base, repo_config:)
 

@@ -12,10 +12,13 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     data = FileData.new
   end
 
-  lines[0, ProcessedLines].each do |line|
+  idx = nil
+
+  lines[0, ProcessedLines].each_with_index do |line, i|
     if data.head.nil?
       if line.start_with?("# ")
         data.head = line[2..-1].strip
+        idx = i
       end
     end
 
@@ -31,6 +34,9 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
 
     data.update(line, repo_config:)
   end
+
+  # remove the line with head
+  lines.delete_at(idx)
 
   if data.live
     if fill_defaults

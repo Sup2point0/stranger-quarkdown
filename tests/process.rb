@@ -82,4 +82,19 @@ class SquarkupProcess < Minitest::Test
     assert data.shard == []
   end
 
+  def test_head
+    content = """
+# Testing
+<!-- #SQUARK live!
+| dest = testing/head
+-->
+"""
+    lines = content.split("\n")
+
+    data = extract_data(lines:, repo_config: RepoConfig)
+
+    assert data.head == "Testing"
+    assert !lines.include?("# Testing")
+  end
+
 end
