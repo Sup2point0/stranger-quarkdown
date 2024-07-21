@@ -12,19 +12,19 @@ def build_site_data(
 end
 
 
-def save_site_data(data)
+def save_site_data(data, repo_config:)
   repr = JSON.generate(data)
-  repr.sub!(/"(.*?)":/, /\1:/)
+  repr.gsub!(/"(.*?)":/, '\1:')
 
-  route = Routes.site / "src/site-config.js"
+  route = Routes.site / repo_config["site-data"]
   content = File.read(route)
   content.sub!(
-    /siteData = .*export/m,
-    "siteData = #{repr}export"
+    /Site = .*?export default Site;/m,
+    "Site = #{repr}export default Site;"
   )
 
-  update = Date.now.strftime("%d %B %y")
-  content.sub!(/generated: .*/, "generated: " + update)
+  # update = Date.now.strftime("%d %B %y")
+  # content.sub!(/generated: .*/, "generated: " + update)
 
   File.write(route, content)
 end

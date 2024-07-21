@@ -1,11 +1,13 @@
 require_relative "config"
 require_relative "types/site-data"
 require_relative "types/file-data"
+require_relative "utils/log"
+
 require_relative "core/find"
 require_relative "core/process"
 require_relative "core/render"
 require_relative "core/export"
-require_relative "utils/log"
+require_relative "core/construct"
 
 require_relative "scripts/prep-assets" if ARGV.include? "assets"
 
@@ -102,6 +104,9 @@ unless base.nil?
     end
   end
 end
+
+
+save_site_data(site_data, repo_config:)
 
 
 log done: true
