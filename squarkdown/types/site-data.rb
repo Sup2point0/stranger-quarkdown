@@ -5,12 +5,13 @@ class SiteData
   attr_accessor :pages, :index, :shards
 
   def initialize
-    @pages = []
+    @pages = Hash.new
     @index = []
-    @shards = []
+    @shard = []
   end
 
   def add_page(page)
+    @pages[page.path] = page
   end
 
   def add_index(index)
@@ -19,18 +20,12 @@ class SiteData
   def add_shard(shard)
   end
 
-  def save
-    route = Routes.site / "src/site-data.js"
-    existing = File.read(route)
-
-    pattern = /(?<=siteData = ){.*\n};\n/m
-    load = existing.match(pattern)
-    data = JSON.parse(load)
-
-    data["pages"] = @pages
-    # TODO ...
-
-    content = existing.sub(pattern, dump)
-    File.write(route, content)
+  def to_json
+    data = {
+      pages: @pages,
+      index: @index,
+      shard: @shard,
+    }
+    return JSON.pretty_generate(data)
   end
 end

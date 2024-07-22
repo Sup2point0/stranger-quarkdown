@@ -3,28 +3,7 @@
 require "json"
 
 
-def build_site_data(
-  pages:
-)
-  return {
-    "pages" => pages
-  }
-end
-
-
 def save_site_data(data, repo_config:)
-  repr = JSON.generate(data)
-  repr.gsub!(/"(.*?)":/, '\1:')
-
   route = Routes.site / repo_config["site-data"]
-  content = File.read(route)
-  content.sub!(
-    /Site = .*?export default Site;/m,
-    "Site = #{repr}export default Site;"
-  )
-
-  # update = Date.now.strftime("%d %B %y")
-  # content.sub!(/generated: .*/, "generated: " + update)
-
-  File.write(route, content)
+  File.write(route, data)
 end

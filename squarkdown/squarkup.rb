@@ -83,7 +83,8 @@ unless base.nil?
 
     begin
       lines = file.readlines
-      file_data = extract_data(lines:, repo_config:)
+      file_data = FileData.new(file)
+      file_data = extract_data(lines:, data: file_data, repo_config:)
       if file_data.nil?
         next
       end
@@ -96,6 +97,8 @@ unless base.nil?
       render = render_file(content, data: file_data, repo_config:)
       export_file(render, data: file_data, base: base, repo_config:)
 
+      site_data.add_page(file_data)
+
     rescue => e
       # log error: "#{e.class}: #{e.message}"
       raise
@@ -106,7 +109,8 @@ unless base.nil?
 end
 
 
-save_site_data(site_data, repo_config:)
+log "saving site data..."
+save_site_data(site_data.to_json, repo_config:)
 
 
 log done: true

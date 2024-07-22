@@ -21,7 +21,7 @@ class FileData
 
 
   def initialize(source = nil)
-    @path = source and source.relative_path_from(Routes.root)
+    @path = source && source.relative_path_from(Routes.repo).to_s
     @head = nil
     @live = false
     @isIndex = false
@@ -148,8 +148,13 @@ class FileData
   end
 
 
-  def to_json
-    return self.export_internal.to_json
+  def to_json(options)
+    data = self.export_internal
+    if options[:indent]
+      return JSON.pretty_generate(data)
+    else
+      return data.to_json
+    end
   end
 
   def to_pretty_json
