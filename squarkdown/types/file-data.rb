@@ -140,26 +140,13 @@ class FileData
 
 
   def export_internal
-    return self.vars_sym.slice(:head, :capt, :desc, :index, :shard, :date)
+    return self.vars_sym.slice(:dest, :head, :capt, :title, :desc, :index, :shard, :date)
   end
 
   def export_external
     return self.vars_str.slice("title", "head", "capt", "desc", "index", "shard", "date_displayed")
   end
 
-
-  def to_json(options)
-    data = self.export_internal
-    if options[:indent]
-      return JSON.pretty_generate(data)
-    else
-      return data.to_json
-    end
-  end
-
-  def to_pretty_json
-    return JSON.pretty_generate(self.export_internal)
-  end
 
   def to_yaml
     return self.export_external.to_yaml + "---\n\n"

@@ -79,7 +79,7 @@ unless base.nil?
   log "exporting files..."
 
   files.each do |file|
-    log "#{i}#{Cols[:grey]} of #{total} – #{Cols[:blue]}#{file.basename}"
+    log "#{i}#{Cols[:grey]} of #{total} – #{Cols[:white]}#{file.basename}"
 
     begin
       lines = file.readlines
@@ -110,7 +110,7 @@ end
 
 
 log "saving site data..."
-save_site_data(site_data.to_json, repo_config:)
+save_site_data(site_data.export_json, repo_config:)
 
 
 log done: true

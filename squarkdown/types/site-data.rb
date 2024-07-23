@@ -1,4 +1,5 @@
 require "json"
+require "date"
 
 
 class SiteData
@@ -20,11 +21,12 @@ class SiteData
   def add_shard(shard)
   end
 
-  def to_json
+  def export_json
     data = {
-      pages: @pages,
+      exported: Date.today.to_s,
       index: @index,
       shard: @shard,
+      pages: @pages.map {|page, data| [page, data.export_internal]}.to_h,
     }
     return JSON.pretty_generate(data)
   end
