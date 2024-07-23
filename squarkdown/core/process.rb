@@ -1,6 +1,4 @@
 require_relative "../types/file-data"
-require_relative "../maps/fields"
-require_relative "../maps/flags"
 
 
 # Max lines parsed

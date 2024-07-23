@@ -111,6 +111,7 @@ end
 
 log "saving site data..."
 save_site_data(site_data.export_json, repo_config:)
+log success: "saved site data to #{Cols[:yellow]}#{repo_config['site-data']}"
 
 
 log done: true
