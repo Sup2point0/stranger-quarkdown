@@ -26,6 +26,7 @@ else
 end
 
 
+## scripts
 if ARGV.include? "fonts"
   require_relative "scripts/prep-fonts"
   prep_fonts(repo_config:)
@@ -42,6 +43,7 @@ if ARGV.include? "scss"
 end
 
 
+## find
 log "locating file base..."
 
 base = {}
@@ -82,6 +84,7 @@ unless base.nil?
     log "#{i}#{Cols[:grey]} of #{total} – #{Cols[:white]}#{file.basename}"
 
     begin
+      ## process
       lines = file.readlines
       file_data = FileData.new(file)
       file_data = extract_data(lines:, data: file_data, repo_config:)
@@ -89,15 +92,21 @@ unless base.nil?
         next
       end
 
-      site_data.add_page(file_data)
-      site_data.add_index(file_data.index)
-      site_data.add_shard(file_data.shard)
-
+      ## render
       content = lines.join("")
       render = render_file(content, data: file_data, repo_config:)
+
+      ## export
       export_file(render, data: file_data, base: base, repo_config:)
 
       site_data.add_page(file_data)
+
+      file_data.index.each do |index|
+        site_data.add_index(index:, page: file_data.path)
+      end
+      file_data.shard.each do |shard|
+        site_data.add_shard(shard:, page: file_data.path)
+      end
 
     rescue => e
       # log error: "#{e.class}: #{e.message}"

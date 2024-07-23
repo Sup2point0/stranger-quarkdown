@@ -7,18 +7,28 @@ class SiteData
 
   def initialize
     @pages = Hash.new
-    @index = []
-    @shard = []
+    @index = Hash.new
+    @shard = Hash.new
   end
 
   def add_page(page)
     @pages[page.path] = page
   end
 
-  def add_index(index)
+  def add_index(index:, page:)
+    if !@index.include?(index)
+      @index[index] = [page]
+    else
+      @index[index].push(page)
+    end
   end
 
-  def add_shard(shard)
+  def add_shard(shard:, page:)
+    if !@shard.include?(shard)
+      @shard[shard] = [page]
+    else
+      @shard[shard].push(page)
+    end
   end
 
   def export_json
