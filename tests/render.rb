@@ -8,9 +8,9 @@ require_relative "../squarkdown/core/find"
 def _get_data_
   repo_config = nil
   data = FileData.new
-  data.update("title = Squarkdown is epic", repo_config:)
-  data.update("style = #AUTO / testing", repo_config:)
-  data.update("clean = braces", repo_config:)
+  data.update_fields("title = Squarkdown is epic", repo_config:)
+  data.update_fields("style = #AUTO / testing", repo_config:)
+  data.update_fields("clean = braces", repo_config:)
   return data
 end
 

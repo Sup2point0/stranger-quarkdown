@@ -10,6 +10,7 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     data = FileData.new
   end
 
+  processing = false
   idx = nil
 
   lines[0, ProcessedLines].each_with_index do |line, i|
@@ -20,17 +21,20 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
       end
     end
 
-    if !data.live
-      if line.include?("#SQUARK live!")
-        data.live = true
-      elsif line.include?("#SQUARK dead!")
-        return
+    if !processing
+      if line.upcase.include?("#SQUARK")
+        processing = true
+        begin
+          data.update_flags(line)
+        rescue FileData::Squarkless
+          return
+        end
       else
         next
       end
     end
 
-    data.update(line, repo_config:)
+    data.update_fields(line, repo_config:)
   end
 
   # remove the line with head
@@ -39,9 +43,7 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   end
 
   if data.live
-    if fill_defaults
-      data.fill(repo_config:)
-    end
+    data.fill_fields(repo_config:) if fill_defaults
     return data
   else
     return

@@ -7,6 +7,9 @@ require_relative "../utils/vars"
 
 class FileData
   include Vars
+
+  class Squarkless < StandardError
+  end
   
   class ValidationError < StandardError
   end
@@ -47,12 +50,21 @@ class FileData
   end
 
 
-  def update(text, repo_config:)
+  def update_flags(text)
+    if text.include?("dead!") then raise Squarkless end
+    if text.include?("live!") then @live = true end
+    if text.include?("index!") then @isIndex = true end
+    if text.include?("feat") then @isFeatured = true end
+    if text.include?("woozy") then @isWoozy = true end
+  end
+
+
+  def update_fields(text, repo_config:)
     _, _, value = text.partition("=")
     value.strip!
 
     Fields.each do |field|
-      if text.include?(field.to_s + " =")
+      if text.match("#{field} ?=")
         if _parse_(field:, value:, repo_config:)
           break
         end
@@ -115,7 +127,7 @@ class FileData
   end
 
 
-  def fill(repo_config:)
+  def fill_fields(repo_config:)
     Fields.each do |field|
       if self.vars_sym[field].nil?
         _parse_default_(field:, repo_config:)
