@@ -8,14 +8,11 @@ end
 
 
 ## Scripts
-task :squark do
-  ruby "squarkdown/squarkup.rb"
-end
-
-task :squarkup do
-  ruby "squarkdown/squarkup.rb", "fonts", "scss"
-end
-
-task :squarksup do
-  ruby "squarkdown/squarkup.rb", "fonts", "assets", "scss"
+task :squark, :fonts, :assets, :scss do |task, args|
+  args.with_defaults({
+    fonts: nil,
+    assets: nil,
+    scss: nil
+  })
+  ruby "squarkdown/squarkup.rb", *args
 end
