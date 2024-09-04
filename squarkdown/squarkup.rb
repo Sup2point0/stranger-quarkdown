@@ -9,8 +9,6 @@ require_relative "core/render"
 require_relative "core/export"
 require_relative "core/construct"
 
-require_relative "scripts/prep-assets" if ARGV.include? "assets"
-
 
 log "squarking up..."
 
