@@ -27,7 +27,6 @@ jobs:
         run: |
           bundle config set frozen false
           bundle install
-          gem install json-schema
           
       - name: 'Ruby / rake / run'
         run: rake test
