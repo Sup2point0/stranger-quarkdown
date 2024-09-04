@@ -17,3 +17,4 @@
   - But while I’m in the process of doing that, it’s kinda scary knowing my project is in a totally broken state.
   - If done over many days, it can become a little challenging to keep track of where I am and what’s left to do.
   - At times, I wonder if I’ve just irreparably broken it and it’ll never work again.
+- When you come back to a project after months of inactivity, you will never thank yourself enough for your own documentation.
