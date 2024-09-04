@@ -104,6 +104,8 @@ class FileData
       end
 
     when :date
+      @date_display = value
+      
       begin
         @date = Date.strptime(value, "%Y %B %d")
       rescue Date::Error
@@ -156,7 +158,7 @@ class FileData
   end
 
   def export_external
-    return self.vars_str.slice("title", "head", "capt", "desc", "index", "shard", "date_displayed")
+    return self.vars_str.slice("title", "head", "capt", "desc", "index", "shard", "date_display")
   end
 
 
