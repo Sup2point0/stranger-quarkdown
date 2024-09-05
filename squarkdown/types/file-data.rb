@@ -17,7 +17,7 @@ class FileData
   # sentinel for unset required fields
   Unset = Object.new
 
-  attr_accessor :live, :head
+  attr_accessor :live, :slocs, :head
   attr_reader :path, :isIndex, :isFeatured, :isWoozy, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
 
   Fields = [:dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :clean]
@@ -25,6 +25,7 @@ class FileData
 
   def initialize(source = nil)
     @path = source && source.relative_path_from(Routes.repo).to_s
+    @slocs = 0
     @head = nil
     @live = false
     @isIndex = false
@@ -154,11 +155,17 @@ class FileData
 
 
   def export_internal
-    return self.vars_sym.slice(:dest, :head, :capt, :title, :desc, :index, :shard, :date)
+    return self.vars_sym.slice(
+      :slocs, :isFeatured, :isWoozy,
+      :dest, :head, :capt, :title, :desc, :index, :shard, :date
+    )
   end
 
   def export_external
-    return self.vars_str.slice("title", "head", "capt", "desc", "index", "shard", "date_display")
+    return self.vars_str.slice(
+      "isFeatured",
+      "title", "head", "capt", "desc", "index", "shard", "date_display"
+    )
   end
 
 

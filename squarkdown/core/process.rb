@@ -10,6 +10,8 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     data = FileData.new
   end
 
+  data.slocs = lines.length
+
   processing = false
   idx = nil
 
