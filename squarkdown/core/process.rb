@@ -11,6 +11,7 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   end
 
   data.slocs = lines.length
+  data.chars = lines.join.length
 
   processing = false
   idx = nil

@@ -25,7 +25,7 @@ class RoutesConfig
     if @repo.nil?
       raise "failed to find directory with a .squarkdown/ folder"
     else
-      log "found repo = #{Cols[:blue]}#{@root}"
+      log "found repo = #{Cols[:blue]}#{@repo}"
     end
 
     # default, but can be overridden
