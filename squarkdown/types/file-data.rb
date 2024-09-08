@@ -164,7 +164,7 @@ class FileData
 
   def export_external
     return self.vars_str.slice(
-      "isFeatured",
+      "path", "isFeatured",
       "title", "head", "capt", "desc", "index", "shard", "date_display"
     )
   end

@@ -87,6 +87,7 @@ unless base.nil?
       file_data = FileData.new(file)
       file_data = extract_data(lines:, data: file_data, repo_config:)
       if file_data.nil?
+        log error: "processing failed!"
         next
       end
 
