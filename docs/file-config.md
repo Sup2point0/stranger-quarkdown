@@ -62,7 +62,7 @@ For fields which accept multiple values, these should be separated with ` / `.
 | `head` | `<head>` | any | Displayed `<h1>` text in the page header. | First detected `# ` text in the Markdown file. | Different to `title`. |
 | `capt` | `<caption>` | any | Short caption text displayed below the header. | | A description of what the page is (such as “Yu-Gi-Oh! Archetype”) rather than a unique concrete description – different to `desc`. |
 | `title` | `<title>` | any | Title injected into `<head>` of the exported HTML within `<title>`. | `head` if provided, else the default of `head`. | Different to `head`. |
-| `desc` | `<description>` | any | Description injected into `<head>` of the exported HTML within `<meta name="description"> | | Different to `capt`. |
+| `desc` | `<description>` | any | Description injected into `<head>` of the exported HTML within `<meta name="description">` | | Different to `capt`. |
 | `style` | `<style(s)>` | stylesheets | Stylesheets to apply. | Base stylesheet. | Should be a list of file names without file extensions. |
 | `duality` | `<duality>` | `light` `dark` <br> `light!` `dark!` | Default colour theme to use if user has no preference. | `light` | User preference can be ignored by following it with a `!`. |
 | `index` | `<index(s)>` | any | Where to index the page. | | Indexes can be preconfigured in `~site.js`. |
