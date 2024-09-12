@@ -8,7 +8,7 @@
 
 ---
 
-**Stranger Quarkdown** (*StrangerQuarkdown*, *Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit](https://kit.svelte.dev) and [MDSveX<sup>↗</sup>](https://mdsvex.pngwn.io).
+**Stranger Quarkdown** (*StrangerQuarkdown*, *Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit<sup>↗</sup>](https://kit.svelte.dev) and [MDSveX<sup>↗</sup>](https://mdsvex.pngwn.io).
 
 Write content for a site with [Quarkdown-Flavoured Markdown](https://github.com/Sup2point0/Quarkdown/blob/main/docs/quarks.md) in any directory, then use Squarkdown to export them to `.svx` files in your SvelteKit project directory.
 
