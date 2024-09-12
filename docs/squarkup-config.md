@@ -38,7 +38,7 @@ Feel free to copy this as a starting template!
 
   "fonts": [
     "Fira+Sans"
-  ]
+  ],
 
   "if-no-dir": ["warn", "create"]
 }
