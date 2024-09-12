@@ -28,7 +28,7 @@ Feel free to copy this as a starting template!
 
 ```json
 {
-  "$schema: "https://sup2point0.github.io/stranger-quarkdown/squarkup-schema.json",
+  "$schema": "https://sup2point0.github.io/stranger-quarkdown/squarkup-schema.json",
 
   "repo": "Stranger Quarkdown",
   "site": "site",
