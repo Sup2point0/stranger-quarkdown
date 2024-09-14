@@ -4,10 +4,7 @@
 | capt = A guided walkthrough on how to use Squarkdown in a SvelteKit project
 -->
 
-> [!Important]
-> Squarkdown is made specifically for SvelteKit projects which use SCSS and MDSveX.
-
-Here’s a guided walkthrough on how to use Squarkdown.
+Here’s a guided walkthrough on how to use Squarkdown in a SvelteKit project.
 
 > [!Tip]
 > It may be helpful to have the [Glossary](glossary.md) open while reading.
@@ -18,9 +15,12 @@ Here’s a guided walkthrough on how to use Squarkdown.
 
 ## Introduction
 
-Let’s say we’ve got some Markdown files in a repository we’d like to quickly and easily turn into a static website – perhaps you’re writing a blog or have documentation for software. And since you love nice things, you chose Svelte/Kit for building the website. Then you have MDSveX for 
+> [!Important]
+> Squarkdown was made for integration with SvelteKit projects, and nothing else!
 
-Awesome, but now you need to find a way to import the content
+Let’s say we’ve got some Markdown files in a repository we’d like to quickly and easily turn into a static website – perhaps you’re writing a blog or have documentation for software. And since we love nice things, you we Svelte/Kit for building the website.
+
+Awesome, but now you need to find a way to import the content from our repository to the SvelteKit project. These Markdown files could be scattered all throughout the repository, so it’s not exactly something a 1-liner could solve.
 
 
 <br>
@@ -33,7 +33,7 @@ So we’re on the same page, suppose our project repo looks like this:
 ```
 ./
    docs/
-     showerthoughts.md
+      showerthoughts.md
    README.md
 ```
 
@@ -72,7 +72,7 @@ Next, add a `.squarkdown/` folder in the root of your project. This is where con
 
 You’ll then need to add a `squarkup.json` file inside. You can either do this manually, or let Squarkdown generate a template for you:
 
-```console
+```
 cd stranger-quarkdown
 rake setup squarkup
 ```
@@ -90,37 +90,37 @@ We now have:
 
 For details of what to put in `squarkup.json`, see [Configuring Squarkup for a Repo](repo-config.md).
 
-### Setup site
+### Setup Site
 If you haven’t already, create your SvelteKit project. You can do this manually, use `npm create svelte@latest`, or let Squarkdown do it for you:
 
-```console
+```
 rake setup site
 ```
 
 This will create the site files in the project root, but you’ll probably want them in a folder instead. In that case, just pass it in as an argument:
 
-```console
-rake setup site site
+```
+rake setup site .site
 ```
 
 Let’s go with the latter. Our repo is now ready for Squarkdown:
 
 ```diff
   ./
-     .squarkdown/...
-     docs/...
-+    site/
++    .site/
 +       src/
 +          routes/
 +             ...
 +       svelte.config.js
 +       ...
+     .squarkdown/...
+     docs/...
      stranger-quarkdown/...
      README.md
 ```
 
 > [!Note]
-> Squarkdown uses [Sup2point0/svelte-core](https://github.com/Sup2point0/svelte-core) as the skeleton. This is a cleaned up version of the SvelteKit skeleton, with TypeScript, SCSS, MDSveX added, and configured for static sites.
+> Squarkdown uses [Sup2point0/svelte-core](https://github.com/Sup2point0/svelte-core) as the skeleton. This is a cleaned up version of the SvelteKit skeleton configured for static sites, with TypeScript, SCSS, MDSveX added.
 
 
 <br>
@@ -152,7 +152,7 @@ Here, `live!` is a **flag** telling Squarkdown *“Hey, this file is active!”*
 ### Configure the destination
 But, where to? We need to provide this metadata through a **field**. These go in the first squark where `live!` is, forming an expanded squark block called the **squark charm**.
 
-Let’s export our file to `./site/src/routes/showerthoughts/content.svx`. Remember we’ve in `./.squarkdown/squarkup.json` already configured our site directory (`./site/`), destination directory (`/src/routes`), and file name (`content.svx`). So, all we need is `showerthoughts`, and Squarkdown will handle the rest:
+Let’s export our file to `./site/src/routes/showerthoughts/content.svx`. Remember in `./.squarkdown/squarkup.json` we’ve already configured our site directory (`./site/`), destination directory (`/src/routes/`), and file name (`content.svx`). So, all we need is `showerthoughts`, and Squarkdown will handle the rest:
 
 ```md
 # Showerthoughts
@@ -215,7 +215,7 @@ For a release/publish date, the format is `<year> <month> <date>`:
 -->
 ```
 
-We can omit the date and month if desired, and can supply a season instead of a month:
+We can omit the date and month if desired, and can even supply a season instead of a month:
 
 ```md
 # Showerthoughts
@@ -261,3 +261,6 @@ If nothing’s gone wrong, we now have:
      stranger-quarkdown/...
      README.md
 ```
+
+
+<br>
