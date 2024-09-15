@@ -157,8 +157,8 @@ class FileData
 
   def export_internal
     return self.vars_sym.slice(
-      :slocs, :chars, :isFeatured, :isWoozy,
-      :dest, :head, :capt, :title, :desc, :index, :shard, :date, :date_display
+      :path, :slocs, :chars, :isIndex, :isFeatured, :isWoozy,
+      :dest, :title, :head, :capt, :desc, :index, :shard, :date, :date_display
     )
   end
 
