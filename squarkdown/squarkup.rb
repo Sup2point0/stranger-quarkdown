@@ -57,7 +57,7 @@ base["page.js"] = find_file_base("page.js", repo_config:)
 if base["page.js"].nil?
   log error: "no base for +page.js found!"
 else
-  log success: "found base for +js.svelte!"
+  log success: "found base for +page.js"
 end
 
 
@@ -118,7 +118,7 @@ end
 
 log "saving site data..."
 save_site_data(site_data.export_json, repo_config:)
-log success: "saved site data to #{Cols[:yellow]}#{repo_config['site-data']}"
+log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
 
 
 log done: true
