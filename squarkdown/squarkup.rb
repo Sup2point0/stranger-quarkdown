@@ -107,8 +107,10 @@ unless base.nil?
       end
 
     rescue => e
-      log error: "#{e.class}: #{e.message}"
-      # raise
+      if repo_config["on-error"] == "kill"
+        raise
+      else
+        log error: "#{e.class}: #{e.message}"
     ensure
       i += 1
     end
