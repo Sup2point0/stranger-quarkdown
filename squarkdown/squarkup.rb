@@ -111,6 +111,7 @@ unless base.nil?
         raise
       else
         log error: "#{e.class}: #{e.message}"
+      end
     ensure
       i += 1
     end
