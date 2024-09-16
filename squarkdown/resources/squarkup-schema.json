@@ -1,6 +1,6 @@
 {
   // "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "3.2",
+  "version": "3.3",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -46,6 +46,12 @@
       "items": {
         "enum": ["ignore", "warn", "create"]
       },
+      "default": "warn"
+    },
+    "on-error": {
+      "title": "Exception Handling",
+      "description": "Action to take if an error is encountered while processing a file.",
+      "enum": ["ignore", "warn", "kill"],
       "default": "warn"
     },
 
