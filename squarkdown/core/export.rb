@@ -9,6 +9,7 @@ def export_file(content, data:, base:, repo_config:)
   # content.svx
   begin
     dest = route / (repo_config["file-name"] + ".svx")
+    dest_display = dest.relative_path_from(Routes.repo)
     handle = repo_config["if-no-dir"]
 
     if !route.exist?
@@ -17,7 +18,7 @@ def export_file(content, data:, base:, repo_config:)
       end
 
       if handle.include?("warn")
-        log error: "destination directory does not exist: #{Cols[:blue]}#{dest.expand_path}"
+        log error: "destination directory does not exist: #{Cols[:blue]}#{dest_display}"
       end
         
       if handle.include?("create")
@@ -30,7 +31,7 @@ def export_file(content, data:, base:, repo_config:)
     end
     
     File.write(dest, content)
-    log "created #{Cols[:blue]}#{dest}" if created
+    log "created #{Cols[:blue]}#{dest_display}" if created
 
   rescue => e
     log "failed to export `#{repo_config["file-name"]}.svx`!"
