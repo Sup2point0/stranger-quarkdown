@@ -53,6 +53,9 @@ Write content for a site with [Quarkdown-Flavoured Markdown](https://github.com/
 
 ## Usage
 
+> [!Tip]
+> See [Using Squarkdown in a SvelteKit project](docs/walkthrough.md) for a full detailed walkthrough.
+
 This project is designed to be used as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
 Add it to a repo:
@@ -61,13 +64,7 @@ Add it to a repo:
 git submodule add https://github.com/Sup2point0/stranger-quarkdown
 ```
 
-If it hasn’t already, clone the submodule:
-
-```console
-git submodule update --init
-```
-
-Make sure you’ve got your [repo config](docs/config.md) in `./.squarkdown/squarkup.json` if needed.
+Make sure you’ve got your [repo config](docs/squarkup-config.md) in `./.squarkdown/squarkup.json` if needed.
 
 Run `rake` in the `./stranger-quarkdown/` directory to start the squarkup process. You can add this to your `npm run build` definition in `package.json`, so that it executes whenever you build the site:
 
@@ -82,9 +79,6 @@ Run `rake` in the `./stranger-quarkdown/` directory to start the squarkup proces
 Squarkdown will recursively look for all `.md` files starting from the root of the repo, and export them to `.svx` files in `src/routes`.
 
 Many additional configurations are available to customise this process, although the defaults should cover most projects.
-
-> [!Tip]
-> For more walkthroughs, see the [Quarkdown docs](https://github.com/Sup2point0/Quarkdown/tree/main/docs). For finer details, also see the [Squarkdown docs](docs/).
 
 
 <br>
