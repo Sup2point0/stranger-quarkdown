@@ -17,10 +17,10 @@ site_data = SiteData.new
 
 repo_config = find_repo_config()
 if repo_config.nil? or repo_config.length == 0
-  log error: "squarkup config not found!"
+  log error: "could not find #{Cols[:cyan]}squarkup.json#{Cols[:red]}!"
   exit
 else
-  log success: "found squarkup config!"
+  log success: "found #{Cols[:cyan]}squarkup.json#{Cols[:cyan]}!"
 end
 
 
@@ -48,9 +48,9 @@ base = {}
 
 base["page.svelte"] = find_file_base("page.svelte", repo_config:)
 if base["page.svelte"].nil?
-  log error: "no base for +page.svelte found!"
+  log error: "no base for #{Cols[:blue]}+page.svelte found#{Cols[:red]}!"
 else
-  log success: "found base for +page.svelte!"
+  log success: "found base for #{Cols[:blue]}+page.svelte#{Cols[:cyan]}!"
 end
 
 base["page.js"] = find_file_base("page.js", repo_config:)
@@ -79,7 +79,7 @@ unless base.nil?
   log "exporting files..."
 
   files.each do |file|
-    log "#{i}#{Cols[:grey]} of #{total} – #{Cols[:white]}#{file.basename}"
+    log "#{i}#{Cols[:grey]} of #{total}: #{Cols[:white]}#{file.parent.basename}#{Cols[:grey]}/#{Cols[:blue]}#{file.basename}"
 
     begin
       ## process
