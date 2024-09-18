@@ -4,7 +4,6 @@ require_relative "../utils/log"
 
 def export_file(content, data:, base:, repo_config:)
   route = Routes.site / repo_config["dest"] / data.dest
-  created = false
 
   # content.svx
   begin
@@ -24,14 +23,12 @@ def export_file(content, data:, base:, repo_config:)
       if handle.include?("create")
         log "creating destination directory..."
         route.mkpath()
-        created = true
       else
         return false
       end
     end
     
     File.write(dest, content)
-    log "created #{Cols[:blue]}#{dest_display}" if created
 
   rescue => e
     log "failed to export `#{repo_config["file-name"]}.svx`!"

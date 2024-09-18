@@ -55,9 +55,9 @@ end
 
 base["page.js"] = find_file_base("page.js", repo_config:)
 if base["page.js"].nil?
-  log error: "no base for +page.js found!"
+  log error: "no base for #{Cols[:blue]}+page.js found#{Cols[:red]}!"
 else
-  log success: "found base for +page.js"
+  log success: "found base for #{Cols[:blue]}+page.js#{Cols[:cyan]}!"
 end
 
 
