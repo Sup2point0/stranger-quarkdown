@@ -89,6 +89,10 @@ def cleanup(content, data:)
     if clean.include?("braces")
       content = Cleanup[:braces].call(content)
     end
+
+    if clean.include?("angles")
+      content = Cleanup[:angles].call(content)
+    end
   end
 
   return content
