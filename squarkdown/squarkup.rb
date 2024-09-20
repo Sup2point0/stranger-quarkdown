@@ -17,10 +17,10 @@ site_data = SiteData.new
 
 repo_config = find_repo_config()
 if repo_config.nil? or repo_config.length == 0
-  log error: "could not find #{Cols[:cyan]}squarkup.json#{Cols[:red]}!"
+  log error: "could not find #{Cols[:cyan]}squarkup.json#{Cols[:red]}"
   exit
 else
-  log success: "found #{Cols[:cyan]}squarkup.json#{Cols[:cyan]}!"
+  log success: "found #{Cols[:blue]}squarkup.json#{Cols[:cyan]}"
 end
 
 
@@ -48,16 +48,16 @@ base = {}
 
 base["page.svelte"] = find_file_base("page.svelte", repo_config:)
 if base["page.svelte"].nil?
-  log error: "no base for #{Cols[:blue]}+page.svelte found#{Cols[:red]}!"
+  log error: "no base for #{Cols[:blue]}+page.svelte found#{Cols[:red]}"
 else
-  log success: "found base for #{Cols[:blue]}+page.svelte#{Cols[:cyan]}!"
+  log success: "found base for #{Cols[:blue]}+page.svelte#{Cols[:cyan]}"
 end
 
 base["page.js"] = find_file_base("page.js", repo_config:)
 if base["page.js"].nil?
-  log error: "no base for #{Cols[:blue]}+page.js found#{Cols[:red]}!"
+  log error: "no base for #{Cols[:blue]}+page.js found#{Cols[:red]}"
 else
-  log success: "found base for #{Cols[:blue]}+page.js#{Cols[:cyan]}!"
+  log success: "found base for #{Cols[:blue]}+page.js#{Cols[:cyan]}"
 end
 
 
