@@ -3,6 +3,7 @@ require "yaml"
 
 require_relative "../config"
 require_relative "../utils/vars"
+require_relative "../maps/seasons"
 
 
 class FileData
@@ -111,19 +112,20 @@ class FileData
       
       begin
         @date = Date.strptime(value, "%Y %B %d")
+      rescue Date::Error end
+      begin
+        @date = Date.strptime(value, "%Y %B")
+      rescue Date::Error end
+      begin
+        @date = Date.strptime(value, "%Y")
+      rescue Date::Error end
+      # 20XX season
+      begin
+        year, season = value.downcase.split(" ")
+        dec = Seasons[season.downcase] +1
+        @date = Date.civil(year.to_i, dec +1, -1)
       rescue Date::Error
-        begin
-          @date = Date.strptime(value, "%Y %B")
-        rescue Date::Error
-          begin
-            @date = Date.strptime(value, "%Y")
-          rescue Date::Error
-            year, season = value.split(" ")
-            value = Date.new()
-            @date = Date.strptime()
-            return
-          end
-        end
+        return
       end
 
     else
