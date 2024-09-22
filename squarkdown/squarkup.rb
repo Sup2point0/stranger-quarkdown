@@ -74,6 +74,7 @@ end
 
 
 i = 1
+index_files = []
 
 unless base.nil?
   log "exporting files..."
@@ -84,9 +85,14 @@ unless base.nil?
     begin
       ## process
       lines = file.readlines
-      file_data = FileData.new(file)
-      file_data = extract_data(lines:, data: file_data, repo_config:)
+      file_data = extract_data(lines:, repo_config:)
+      
       if file_data.nil?
+        next
+      end
+
+      if file_data.isIndex
+        index_files.append(file_data)
         next
       end
 

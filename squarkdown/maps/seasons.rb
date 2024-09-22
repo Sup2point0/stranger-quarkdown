@@ -5,3 +5,5 @@ Seasons = {
   "autumn" => 10,
   "winter" => 12,
 }
+
+puts Seasons["spring"]

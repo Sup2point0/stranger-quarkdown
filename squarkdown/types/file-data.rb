@@ -113,25 +113,22 @@ class FileData
       begin
         @date = Date.strptime(value, "%Y %B %d")
       rescue Date::Error
-      end
-
-      begin
-        @date = Date.strptime(value, "%Y %B")
-      rescue Date::Error
-      end
-
-      begin
-        @date = Date.strptime(value, "%Y")
-      rescue Date::Error
-      end
-      
-      # 20XX season
-      begin
-        year, season = value.downcase.split(" ")
-        dec = Seasons[season.downcase] +1
-        @date = Date.civil(year.to_i, dec +1, -1)
-      rescue Date::Error
-        return
+        begin
+          @date = Date.strptime(value, "%Y %B")
+        rescue Date::Error
+          begin
+            @date = Date.strptime(value, "%Y")
+          rescue Date::Error
+            # 20XX season
+            begin
+              year, season = value.downcase.split(" ")
+              dec = Seasons[season.downcase] +1
+              @date = Date.civil(year.to_i, dec +1, -1)
+            rescue Date::Error
+              return
+            end
+          end
+        end
       end
 
     else
