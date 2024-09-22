@@ -27,7 +27,6 @@ class FileData
     @path = source && source.relative_path_from(Routes.repo).to_s
     @slocs = 0
     @chars = 0
-    @head = nil
     @live = false
     @isIndex = false
     @isFeatured = false
@@ -35,9 +34,10 @@ class FileData
 
     # For all fields, `nil` indicates default or skipped handling
     @dest = Unset
-    @title = nil
-    @capt = nil
+    @title = nil  # head
     @desc = nil  # capt
+    @head = nil
+    @capt = nil
     @style = ["article"]
     @duality = nil
     @index = []
@@ -56,8 +56,8 @@ class FileData
     if text.include?("dead!") then raise Squarkless end
     if text.include?("live!") then @live = true end
     if text.include?("index!") then @isIndex = true end
-    if text.include?("feat") then @isFeatured = true end
-    if text.include?("woozy") then @isWoozy = true end
+    if text.include?("feat!") then @isFeatured = true end
+    if text.include?("woozy!") then @isWoozy = true end
   end
 
 
@@ -81,8 +81,9 @@ class FileData
 
     when :dest then @dest = value
     when :title then @title = value
-    when :capt then @capt = value
     when :desc then @desc = value
+    when :head then @head = value
+    when :capt then @capt = value
 
     when :duality then @duality = value.downcase
     when :index then @index = _split_(value)
@@ -117,6 +118,9 @@ class FileData
           begin
             @date = Date.strptime(value, "%Y")
           rescue Date::Error
+            year, season = value.split(" ")
+            value = Date.new()
+            @date = Date.strptime()
             return
           end
         end
