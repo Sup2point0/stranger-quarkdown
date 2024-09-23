@@ -73,59 +73,73 @@ else
 end
 
 
+## export
+log "exporting files..."
+
 i = 1
 index_files = []
 
-unless base.nil?
-  log "exporting files..."
+files.each do |file|
+  log "#{i}#{Cols[:grey]} of #{total}: #{Cols[:white]}#{file.parent.basename}#{Cols[:grey]}/#{Cols[:blue]}#{file.basename}"
 
-  files.each do |file|
-    log "#{i}#{Cols[:grey]} of #{total}: #{Cols[:white]}#{file.parent.basename}#{Cols[:grey]}/#{Cols[:blue]}#{file.basename}"
-
-    begin
-      ## process
-      lines = file.readlines
-      file_data = extract_data(lines:, repo_config:)
-      
-      if file_data.nil?
-        next
-      end
-
-      if file_data.isIndex
-        index_files.append(file_data)
-        next
-      end
-
-      ## render
-      content = lines.join("")
-      render = render_file(content, data: file_data, repo_config:)
-
-      ## export
-      export_file(render, data: file_data, base: base, repo_config:)
-
-      site_data.add_page(file_data)
-
-      file_data.index.each do |index|
-        site_data.add_index(index:, page: file_data.path)
-      end
-      file_data.shard.each do |shard|
-        site_data.add_shard(shard:, page: file_data.path)
-      end
-
-    rescue => e
-      if repo_config["on-error"] == "kill"
-        raise
-      else
-        log error: "#{e.class}: #{e.message}"
-      end
-    ensure
-      i += 1
+  begin
+    ## process
+    lines = file.readlines
+    file_data = FileData.new(file)
+    file_data = extract_data(lines:, data: file_data, repo_config:)
+    
+    if file_data.nil?
+      next
     end
+
+    if file_data.isIndex
+      index_files.append([file, file_data])
+      next
+    end
+
+    ## render
+    content = lines.join("")
+    render = render_file(content, data: file_data, repo_config:)
+
+    ## export
+    export_file(render, data: file_data, base: base, repo_config:)
+
+    site_data.add_page(file_data)
+
+    file_data.index.each do |index|
+      site_data.add_index(index:, page: file_data.path)
+    end
+    file_data.shard.each do |shard|
+      site_data.add_shard(shard:, page: file_data.path)
+    end
+
+  rescue => e
+    if repo_config["on-error"] == "kill"
+      raise
+    else
+      log error: "#{e.class}: #{e.message}"
+    end
+  ensure
+    i += 1
   end
 end
 
 
+if index_files.length > 0
+  log "exporting index pages..."
+
+  i = 1
+  total = index_files.length
+
+  index_files.each do |file, file_data|
+    log "#{i}#{Cols[:grey]} of #{total}: #{Cols[:white]}#{file.parent.basename}#{Cols[:grey]}/#{Cols[:blue]}#{file.basename}"
+  end
+end
+
+
+## save
 log "saving site data..."
+
 save_site_data(site_data.export_json, repo_config:)
 log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
 
