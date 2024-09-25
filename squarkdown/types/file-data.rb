@@ -19,7 +19,7 @@ class FileData
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
-  attr_reader :path, :isIndex, :isFeatured, :isWoozy, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
+  attr_reader :path, :isIndex, :isFeatured, :isWoozy, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
 
   Fields = [:dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :clean]
 
@@ -32,6 +32,7 @@ class FileData
     @isIndex = false
     @isFeatured = false
     @isWoozy = false
+    @flags = []
 
     # For all fields, `nil` indicates default or skipped handling
     @dest = Unset
@@ -59,6 +60,10 @@ class FileData
     if text.include?("index!") then @isIndex = true end
     if text.include?("feat!") then @isFeatured = true end
     if text.include?("woozy!") then @isWoozy = true end
+
+    _, _, data = text.partition "#SQUARK"
+    flags = data.split "! "
+    @flags = flags.map { |flag| flag.strip }
   end
 
 
