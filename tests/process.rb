@@ -31,6 +31,23 @@ class SquarkupProcess < Minitest::Test
     assert data.nil?
   end
 
+  def test_flags
+    content = """# Testing
+<!-- #SQUARK live! index! feat! woozy! dev! -->"""
+
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: false
+    )
+
+    assert data.flags.include?("live")
+    assert data.flags.include?("index")
+    assert data.flags.include?("feat")
+    assert data.flags.include?("woozy")
+    assert data.flags.include?("dev")
+  end
+
   def test_fields
     content = """# Testing
 <!-- #SQUARK live!

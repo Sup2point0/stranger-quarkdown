@@ -92,11 +92,6 @@ files.each do |file|
       next
     end
 
-    if file_data.isIndex
-      index_files.append([file, file_data])
-      next
-    end
-
     ## render
     content = lines.join("")
     render = render_file(content, data: file_data, repo_config:)
@@ -105,6 +100,16 @@ files.each do |file|
     export_file(render, data: file_data, base: base, repo_config:)
 
     site_data.add_page(file_data)
+
+    if file_data.isIndex
+      index_files.append(file_data.index)
+      
+      file_data.index.each do |index|
+        site_data.new_index(index: page: file_data.path)
+      end
+
+      next
+    end
 
     file_data.index.each do |index|
       site_data.add_index(index:, page: file_data.path)

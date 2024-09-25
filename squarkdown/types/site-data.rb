@@ -15,11 +15,18 @@ class SiteData
     @pages[page.path] = page
   end
 
+  def new_index(index:, page:)
+    if !@index.include?(index)
+      @index[index] = {"route" => page, "pages" => []}
+    else
+      @index[index]["route"] = page
+    end
+
   def add_index(index:, page:)
     if !@index.include?(index)
-      @index[index] = [page]
+      @index[index] = {"route" => nil, "pages" => [page]}
     else
-      @index[index].push(page)
+      @index[index]["pages"].push(page)
     end
   end
 

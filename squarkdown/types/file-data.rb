@@ -1,3 +1,20 @@
+# FileData
+# Represents all the data of a file processed and exported by Squarkdown
+# 
+# The class exports to 2 kinds of representations: INTERNAL and EXTERNAL
+# 
+# INTERNAL
+# - for JSON
+# - stores a lot more data
+# - exports as symbols
+# 
+# EXTERNAL
+# - for YAML
+# - stored as frontmatter in .svx files
+# - mostly properties relevant to page rendering
+#   (used through $page.data in SvelteKit)
+# - exports as strings
+
 require "json"
 require "yaml"
 
