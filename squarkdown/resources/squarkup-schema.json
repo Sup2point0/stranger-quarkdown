@@ -1,6 +1,6 @@
 {
   // "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "3.4",
+  "version": "3.5",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
   "properties":
@@ -80,6 +80,12 @@
     "page.js": {
       "title": "+page.js Base",
       "description": "The file Squarkdown uses as a template for `+page.js` files. Relative to site.\n\nIf not supplied, Squarkdown will not create `+page.js` files.",
+      "type": ["string", "null"],
+      "default": null
+    },
+    "index-view": {
+      "title": "Index View Component",
+      "description": "The component imported and used to render page lists in index pages.\n\nIf not supplied, Squarkdown will not create or inject index pages.",
       "type": ["string", "null"],
       "default": null
     },

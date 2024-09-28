@@ -12,9 +12,10 @@ require_relative "core/construct"
 
 log "squarking up..."
 
-
 site_data = SiteData.new
 
+
+## find repo config
 repo_config = find_repo_config()
 if repo_config.nil? or repo_config.length == 0
   log error: "could not find #{Cols[:cyan]}squarkup.json#{Cols[:red]}"
@@ -24,7 +25,7 @@ else
 end
 
 
-## scripts
+## execute scripts
 if ARGV.include? "fonts"
   require_relative "scripts/prep-fonts"
   prep_fonts(repo_config:)
@@ -41,7 +42,7 @@ if ARGV.include? "scss"
 end
 
 
-## find
+## find file bases
 log "locating file base..."
 
 base = {}
@@ -61,6 +62,7 @@ else
 end
 
 
+## find files
 log "locating files..."
 
 files = find_files(repo_config:)
@@ -73,7 +75,7 @@ else
 end
 
 
-## export
+## export articles
 log "exporting files..."
 
 i = 1
@@ -130,6 +132,7 @@ files.each do |file|
 end
 
 
+## export index pages
 if index_files.length > 0
   log "exporting index pages..."
 
