@@ -44,9 +44,9 @@ end
 def find_files(from: nil, repo_config:)
   from = Routes.repo unless !from.nil?
 
-  source = repo_config["sources"]
-  if !source.empty?
-    paths = source.map {|path| (from / path).glob "**/*.md" }.flatten
+  sources = repo_config["sources"]
+  if sources && !sources.empty?
+    paths = sources.map {|path| (from / path).glob "**/*.md" }.flatten
   else
     paths = from.glob("**/*.md", File::FNM_DOTMATCH)
   end
