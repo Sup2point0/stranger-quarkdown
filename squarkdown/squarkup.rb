@@ -135,13 +135,6 @@ end
 ## export index pages
 if index_files.length > 0
   log "exporting index pages..."
-
-  i = 1
-  total = index_files.length
-
-  index_files.each do |file, file_data|
-    log "#{i}#{Cols[:grey]} of #{total}: #{Cols[:white]}#{file.parent.basename}#{Cols[:grey]}/#{Cols[:blue]}#{file.basename}"
-  end
 end
 
 

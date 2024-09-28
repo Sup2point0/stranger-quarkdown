@@ -73,7 +73,7 @@ end
 
 
 def _import_index_(data:, repo_config:)
-  return (if data[:flags].include?("index")
+  return (if data.flags.include?("index")
     then "import IndexView from \"#{repo_config["index-view"]}\";"
     else ""
   end)

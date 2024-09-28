@@ -21,6 +21,7 @@ class SiteData
     else
       @index[index]["route"] = page
     end
+  end
 
   def update_index(index:, page:)
     if !@index.include?(index)
