@@ -15,14 +15,14 @@ class SiteData
     @pages[page.path] = page
   end
 
-  def new_index(index:, page:)
+  def create_index(index:, page:)
     if !@index.include?(index)
       @index[index] = {"route" => page, "pages" => []}
     else
       @index[index]["route"] = page
     end
 
-  def add_index(index:, page:)
+  def update_index(index:, page:)
     if !@index.include?(index)
       @index[index] = {"route" => nil, "pages" => [page]}
     else
@@ -30,7 +30,7 @@ class SiteData
     end
   end
 
-  def add_shard(shard:, page:)
+  def update_shard(shard:, page:)
     if !@shard.include?(shard)
       @shard[shard] = [page]
     else

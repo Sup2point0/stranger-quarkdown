@@ -107,17 +107,17 @@ files.each do |file|
       index_files.append(file_data.index)
       
       file_data.index.each do |index|
-        site_data.new_index(index: page: file_data.path)
+        site_data.create_index(index:, page: file_data.path)
       end
 
       next
     end
 
     file_data.index.each do |index|
-      site_data.add_index(index:, page: file_data.path)
+      site_data.update_index(index:, page: file_data.path)
     end
     file_data.shard.each do |shard|
-      site_data.add_shard(shard:, page: file_data.path)
+      site_data.update_shard(shard:, page: file_data.path)
     end
 
   rescue => e
