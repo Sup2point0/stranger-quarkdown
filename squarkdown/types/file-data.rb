@@ -79,8 +79,8 @@ class FileData
     if text.include?("woozy!") then @isWoozy = true end
 
     _, _, data = text.partition "#SQUARK"
-    flags = data.split "! "
-    @flags = flags.map { |flag| flag.strip }
+    flags = data.split
+    @flags = flags.map { |flag| flag.gsub("!", "").strip }
   end
 
 
@@ -188,7 +188,7 @@ class FileData
 
   def export_internal
     return self.vars_sym.slice(
-      :path, :slocs, :chars, :isIndex, :isFeatured, :isWoozy,
+      :path, :slocs, :chars, :isIndex, :isFeatured, :isWoozy, :flags
       :dest, :title, :head, :capt, :desc, :index, :shard, :date, :date_display
     )
   end
