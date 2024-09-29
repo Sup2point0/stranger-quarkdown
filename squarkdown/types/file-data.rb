@@ -36,9 +36,9 @@ class FileData
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
-  attr_reader :path, :isIndex, :isFeatured, :isWoozy, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
+  attr_reader :path, :isIndex, :isFeatured, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
 
-  Fields = [:dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :clean]
+  Fields = [:dest, :title, :desc, :head, :capt, :style, :duality, :index, :shard, :date, :clean]
 
 
   def initialize(source = nil)
@@ -48,7 +48,6 @@ class FileData
     @live = false
     @isIndex = false
     @isFeatured = false
-    @isWoozy = false
     @flags = []
 
     # For all fields, `nil` indicates default or skipped handling
@@ -76,7 +75,6 @@ class FileData
     if text.include?("live!") then @live = true end
     if text.include?("index!") then @isIndex = true end
     if text.include?("feat!") then @isFeatured = true end
-    if text.include?("woozy!") then @isWoozy = true end
 
     _, _, data = text.partition "#SQUARK"
     flags = data.split
@@ -188,7 +186,7 @@ class FileData
 
   def export_internal
     return self.vars_sym.slice(
-      :path, :slocs, :chars, :isIndex, :isFeatured, :isWoozy, :flags,
+      :path, :slocs, :chars, :isIndex, :isFeatured, :flags,
       :dest, :title, :head, :capt, :desc, :index, :shard, :date, :date_display
     )
   end
