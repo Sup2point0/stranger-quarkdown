@@ -18,7 +18,12 @@ end
 def try_prep_assets(repo_config:)
   route = Routes.repo / repo_config["assets"]
   raise "asset path not found" unless route
-  site_route = Routes.repo / repo_config["site-assets"]
+
+  if repo_config["site-assets"]
+    site_route = Routes.repo / repo_config["site-assets"]
+  else
+    site_route = nil
+  end
 
   files = route.glob(
     "**/*.{png,jpg,jpeg,svg}",
@@ -30,18 +35,15 @@ def try_prep_assets(repo_config:)
 
   files.each do |file|
     rel = file.relative_path_from(route)
+
+    site_rel = nil
     if !site_route.nil?
-      site_rel = file.relative_path_from(site_route)
-    else
-      site_rel = nil
+      if file.parent.relative_path_from(site_route) == Pathname(".") 
+        site_rel = file.relative_path_from(site_route)
+      end
     end
     
-    dest = Routes.site / "static" / (
-      if site_rel == Pathname(".")
-      then site_rel
-      else rel
-      end
-    )
+    dest = Routes.site / "static" / (site_rel or rel)
 
     if !dest.exist?
       dest.dirname.mkpath()
