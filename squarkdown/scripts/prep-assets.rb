@@ -29,11 +29,17 @@ def try_prep_assets(repo_config:)
     "**/*.{png,jpg,jpeg,svg}",
     File::FNM_DOTMATCH
   )
+  i = 0
+  total = files.length
 
-  log success: "found #{files.length} assets!"
+  log success: "found #{total} assets in #{Cols[:blue]}#{route.relative_path_from(Routes.root)}"
   log "transferring assets..."
 
   files.each do |file|
+    i += 1
+    if i % 10 == 0
+      log "#{i}#{Cols[:grey]} of #{total}..."
+    end
     rel = file.relative_path_from(route)
 
     site_rel = nil
@@ -51,4 +57,6 @@ def try_prep_assets(repo_config:)
 
     FileUtils.cp(file, dest)
   end
+
+  log success: "transferred all assets!"
 end
