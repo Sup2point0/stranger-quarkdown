@@ -36,20 +36,24 @@ class FileData
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
-  attr_reader :path, :isIndex, :isFeatured, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
+  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
 
   Fields = [:dest, :title, :desc, :head, :capt, :style, :duality, :index, :shard, :date, :clean]
 
 
   def initialize(source = nil)
+    ## Meta
     @path = source && source.relative_path_from(Routes.repo).to_s
+    @last_deploy = source.mtime
     @slocs = 0
     @chars = 0
+
+    ## Flags
     @live = false
     @isIndex = false
-    @isFeatured = false
     @flags = []
 
+    ## Fields
     # For all fields, `nil` indicates default or skipped handling
     @dest = Unset
     @title = nil  # head
@@ -74,7 +78,6 @@ class FileData
     if text.include?("dead!") then raise Squarkless end
     if text.include?("live!") then @live = true end
     if text.include?("index!") then @isIndex = true end
-    if text.include?("feat!") then @isFeatured = true end
 
     _, _, data = text.partition "#SQUARK"
     flags = data.split
@@ -186,14 +189,14 @@ class FileData
 
   def export_internal
     return self.vars_sym.slice(
-      :path, :slocs, :chars, :isIndex, :isFeatured, :flags,
+      :path, :last_deploy, :slocs, :chars, :isIndex, :flags,
       :dest, :title, :head, :capt, :desc, :index, :shard, :date, :date_display
     )
   end
 
   def export_external
     return self.vars_str.slice(
-      "path", "isFeatured", "flags",
+      "path", "last_deploy", "flags",
       "title", "head", "capt", "desc", "index", "shard", "date_display"
     )
   end
