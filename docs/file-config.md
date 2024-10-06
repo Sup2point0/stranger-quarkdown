@@ -101,7 +101,7 @@ Here’s what a Markdown file with a full squark charm would look like:
 | duality = dark
 | index = songs
 | shard = #INDEX / jokes
-| date = 1984 / April / 1
+| date = 1984 April 1
 | clean = line-breaks / comments
 -->
 ```
@@ -125,7 +125,7 @@ And for reference, here’s a quick cheatsheet for all the flags and fields:
 | duality = {light(!) / dark(!)}
 | index = <index> / <index> ...
 | shard = <shard> / <shard> / ...
-| date = <year> / <month/season?> / <date?>
+| date = <year> <month/season?> <date?>
 | clean = ... / ...
 -->
 ```
