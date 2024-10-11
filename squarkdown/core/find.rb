@@ -35,6 +35,7 @@ end
 
 
 def find_file_base(file, from: Routes.site, repo_config:)
+  return nil if repo_config[file].nil?
   route = from / repo_config["bases"] / repo_config[file]
   content = File.read(route)
   return content

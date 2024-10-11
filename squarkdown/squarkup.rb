@@ -49,14 +49,14 @@ base = {}
 
 base["page.svelte"] = find_file_base("page.svelte", repo_config:)
 if base["page.svelte"].nil?
-  log error: "no base for #{Cols[:blue]}+page.svelte found#{Cols[:red]}"
+  log error: "no base for #{Cols[:blue]}+page.svelte#{Cols[:red]} found"
 else
   log success: "found base for #{Cols[:blue]}+page.svelte#{Cols[:cyan]}"
 end
 
 base["page.js"] = find_file_base("page.js", repo_config:)
 if base["page.js"].nil?
-  log error: "no base for #{Cols[:blue]}+page.js found#{Cols[:red]}"
+  log error: "no base for #{Cols[:blue]}+page.js#{Cols[:red]} found"
 else
   log success: "found base for #{Cols[:blue]}+page.js#{Cols[:cyan]}"
 end
