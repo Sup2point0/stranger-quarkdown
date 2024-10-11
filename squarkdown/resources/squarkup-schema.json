@@ -1,8 +1,11 @@
 {
-  // "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "3.5",
+  // "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "3.6",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
+
+  "required": ["bases", "page.svelte", "page-styles"],
+
   "properties":
   {
     "repo":
@@ -24,7 +27,7 @@
       "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root.",
       "type": "array",
       "items": {"type": "string"},
-      "default": null
+      "default": []
     },
     "exclude": {
       "title": "Excluded Files",
@@ -46,7 +49,7 @@
       "items": {
         "enum": ["ignore", "warn", "create"]
       },
-      "default": "warn"
+      "default": ["warn"]
     },
     "on-error": {
       "title": "Exception Handling",
@@ -116,7 +119,8 @@
     "site-assets": {
       "title": "Site Assets Directory",
       "description": "Directory containing site-specific assets which Squarkdown moves into the root of `static/`. Relative to root.",
-      "type": "string"
+      "type": ["string", "null"],
+      "default": null
     },
     "fonts": {
       "title": "Fonts",
