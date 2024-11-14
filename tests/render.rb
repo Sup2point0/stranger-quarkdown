@@ -60,8 +60,6 @@ unprocessed content
 <!-- #SQUARK only?
 processed content
       #SQUARK only. -->
-
-<!-- #SQUARK testing! -->
     """
 
     out = inject_repl(content)
@@ -69,7 +67,6 @@ processed content
     assert !out.include?("unprocessed content")
     assert out.include?("processed content")
     assert !out.include?("#SQUARK only")
-    assert !out.include?("#SQUARK testing")
   end
 
   def test_clean

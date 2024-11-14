@@ -44,7 +44,7 @@ class FileData
   def initialize(source = nil)
     ## Meta
     @path = source && source.relative_path_from(Routes.repo).to_s
-    @last_deploy = source.mtime
+    @last_deploy = source && source.mtime
     @slocs = 0
     @chars = 0
 

@@ -8,10 +8,11 @@
     "/-.*?\\.md"
   ],
   "dest": "export/routes",
+  "if-no-dir": ["warn"],
 
+  "bases": "resources",
+  "page.svelte": "test.svelte",
   "styles": "resources",
   "page-styles": "resources",
-  "fonts": ["testing"],
-
-  "if-no-dir": ["warn"]
+  "fonts": ["testing"]
 }
