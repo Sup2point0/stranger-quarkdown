@@ -3,9 +3,14 @@ require "date"
 
 
 class SiteData
-  attr_accessor :pages, :index, :shards
+  attr_accessor :meta, :pages, :index, :shards
 
   def initialize
+    @meta = {
+      exported: Date.today.to_s,
+      file_count: 0,
+      page_count: 0,
+    }
     @pages = Hash.new
     @index = Hash.new
     @shard = Hash.new
@@ -41,7 +46,7 @@ class SiteData
 
   def export_json
     data = {
-      exported: Date.today.to_s,
+      meta: @meta,
       index: @index,
       shard: @shard,
       pages: @pages.map {|page, data| [page, data.export_internal]}.to_h,

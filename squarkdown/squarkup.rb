@@ -74,6 +74,8 @@ else
   log success: "found #{total} files!"
 end
 
+site_data.meta[:file_count] = total
+
 
 ## export articles
 log "exporting files..."
@@ -141,6 +143,8 @@ end
 
 ## save
 log "saving site data..."
+
+site_data.meta[:page_count] = site_data.pages.length
 
 save_site_data(site_data.export_json, repo_config:)
 log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
