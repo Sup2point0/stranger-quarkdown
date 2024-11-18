@@ -103,16 +103,17 @@ files.each do |file|
 
     site_data.add_page(file_data)
 
-    if file_data.isIndex
+    if file_data.flags.include?("index")
       index_files.append(file_data.index)
       
       file_data.index.each do |index|
-        site_data.create_index(index:, page: file_data.path)
+        site_data.create_index(index:, page: file_data.dest)
       end
 
       next
     end
 
+    ## index + tag
     file_data.index.each do |index|
       site_data.update_index(index:, page: file_data.path)
     end
@@ -132,7 +133,7 @@ files.each do |file|
 end
 
 
-## export index pages
+## TODO export index pages
 if index_files.length > 0
   log "exporting index pages..."
 end
