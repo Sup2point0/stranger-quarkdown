@@ -74,6 +74,8 @@ else
   log success: "found #{total} files!"
 end
 
+site_data.meta[:file_count] = total
+
 
 ## export articles
 log "exporting files..."
@@ -103,16 +105,17 @@ files.each do |file|
 
     site_data.add_page(file_data)
 
-    if file_data.isIndex
+    if file_data.flags.include?("index")
       index_files.append(file_data.index)
       
       file_data.index.each do |index|
-        site_data.create_index(index:, page: file_data.path)
+        site_data.create_index(index:, page: file_data.dest)
       end
 
       next
     end
 
+    ## index + tag
     file_data.index.each do |index|
       site_data.update_index(index:, page: file_data.path)
     end
@@ -132,7 +135,7 @@ files.each do |file|
 end
 
 
-## export index pages
+## TODO export index pages
 if index_files.length > 0
   log "exporting index pages..."
 end
@@ -140,6 +143,8 @@ end
 
 ## save
 log "saving site data..."
+
+site_data.meta[:page_count] = site_data.pages.length
 
 save_site_data(site_data.export_json, repo_config:)
 log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
