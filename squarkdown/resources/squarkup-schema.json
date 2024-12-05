@@ -1,10 +1,8 @@
 {
   // "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "3.6",
+  "version": "4.0",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
-
-  "required": ["bases", "page.svelte", "page-styles"],
 
   "properties":
   {
@@ -24,10 +22,10 @@
     },
     "sources": {
       "title": "Source Directory(s)",
-      "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root.",
-      "type": "array",
+      "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root. If set to `null`, Markdown exporting is disabled.",
+      "type": ["array", "null"],
       "items": {"type": "string"},
-      "default": []
+      "default": null
     },
     "exclude": {
       "title": "Excluded Files",
