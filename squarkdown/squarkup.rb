@@ -41,6 +41,11 @@ if ARGV.include? "scss"
   prep_scss(repo_config:)
 end
 
+if repo_config[:sources].nil?
+  log done: true
+  exit(0)
+end
+
 
 ## find file bases
 log "locating file base..."
