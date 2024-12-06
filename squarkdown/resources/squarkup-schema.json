@@ -1,6 +1,6 @@
 {
   // "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "4.0",
+  "version": "4.1",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -30,9 +30,9 @@
     "exclude": {
       "title": "Excluded Files",
       "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
-      "type": "array",
+      "type": ["array", "null"],
       "items": {"type": "string"},
-      "default": []
+      "default": null
     },
     "dest": {
       "title": "Destination Directory",

@@ -41,7 +41,7 @@ if ARGV.include? "scss"
   prep_scss(repo_config:)
 end
 
-if repo_config[:sources].nil?
+if repo_config[:sources].nil? and repo_config[:exclude].nil?
   log done: true
   exit(0)
 end
