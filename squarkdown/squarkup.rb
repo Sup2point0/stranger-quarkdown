@@ -41,9 +41,13 @@ if ARGV.include? "scss"
   prep_scss(repo_config:)
 end
 
-if repo_config[:sources].nil? and repo_config[:exclude].nil?
+if repo_config["sources"].nil? and repo_config["exclude"].nil?
   log done: true
   exit(0)
+else
+  if repo_config[:bases].nil?
+    log error: "no file base set!"
+  end
 end
 
 
