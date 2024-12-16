@@ -45,7 +45,7 @@ if repo_config["sources"].nil? and repo_config["exclude"].nil?
   log done: true
   exit(0)
 else
-  if repo_config[:bases].nil?
+  if repo_config["bases"].nil?
     log error: "no file base set!"
   end
 end
