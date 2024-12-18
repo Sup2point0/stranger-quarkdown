@@ -82,7 +82,7 @@ end
 
 def inject_style(content, data:, repo_config:)
   path = repo_config["page-styles"]
-  route = Routes.site / path
+  if path.nil? then return content end
   
   styles = data.style.map do |style|
     "@use './#{path}/#{style}' as *;"
