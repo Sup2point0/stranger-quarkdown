@@ -73,10 +73,12 @@ end
 
 
 def _import_index_(data:, repo_config:)
-  return (if data.isIndex
-    then "import IndexView from \"#{repo_config["index-view"]}\";"
+  return (
+    if data.isIndex
+      then "import IndexView from \"#{repo_config["index-view"]}\";"
     else ""
-  end)
+    end
+  )
 end
 
 
