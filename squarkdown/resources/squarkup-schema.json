@@ -1,6 +1,6 @@
 {
   // "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "4.1",
+  "version": "4.2",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -33,6 +33,12 @@
       "type": ["array", "null"],
       "items": {"type": "string"},
       "default": null
+    },
+    "site-data": {
+      "title": "Site Data File",
+      "description": "File where Squarkdown exports the site data. Relative to site.",
+      "type": "string",
+      "default": "src/site.json"
     },
     "dest": {
       "title": "Destination Directory",
@@ -89,13 +95,6 @@
       "description": "The component imported and used to render page lists in index pages.\n\nIf not supplied, Squarkdown will not create or inject index pages.",
       "type": ["string", "null"],
       "default": null
-    },
-
-    "site-data": {
-      "title": "Site Data File",
-      "description": "File where Squarkdown exports the site data. Relative to site.",
-      "type": "string",
-      "default": "src/site.ts"
     },
     "styles": {
       "title": "Styles Directory",
