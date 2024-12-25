@@ -1,5 +1,5 @@
 Replace = {
-  /\n?<!-- ?#SQUARK live!.+-->\n?/m =>
+  /\n?<!-- ?#SQUARK live!.*?-->\n?/m =>
     "",
 
   /\n?<!-- ?#SQUARK leave\?.*?#SQUARK ?leave\. ?-->\n?/m =>
