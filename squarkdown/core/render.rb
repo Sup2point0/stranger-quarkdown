@@ -41,7 +41,7 @@ end
 
 
 def fix_links(content)
-  content = content.gsub(/(\.\.\/)*\.?assets(\/\.site)?/, "{base}")
+  content = content.gsub(/(\.\.\/)*\.?assets\/(\.?site\/)?/, "{base}/")
   content = content.gsub(/\.md\]/, "]")
   return content
 end

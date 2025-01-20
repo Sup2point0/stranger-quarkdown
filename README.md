@@ -25,10 +25,11 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.m
 
 ### Extra
 - Moves assets from a different folder to the SvelteKit `static/` directory
-- Collects fonts to build the [Google Fonts<sup>↗</sup>](https://fonts.google.com) `<link>` tag for you
+- Collects fonts to build the [Google Fonts<sup>↗</sup>](https://fonts.google.com) `<link>` tag
 - Collects global `.scss` files to build an `scss-config.js` file
 
 ### Future
+- Allow arbitrary JSON data in squark charm
 - Correct internal relative links to correct absolute links in production
 
 
