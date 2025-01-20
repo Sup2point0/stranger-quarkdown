@@ -19,7 +19,6 @@ def log(
   success: nil,
   error: nil,
   done: false,
-  time: nil,
   **kwargs
 )
   out = Cols[:grey]
@@ -42,8 +41,6 @@ def log(
     out += "#{Cols[:red]}#{error}"
   elsif done
     out += "#{Cols[:cyan]}done!"
-  elsif time
-    out += "#{Cols[:grey]}finished in #{Cols[:yellow]}#{time}#{Cols[:grey]} ms"
   else
     out += "#{Cols[:yellow]}#{text}"
   end

@@ -165,4 +165,4 @@ log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
 T_END = Time.now
 
 log done: true
-log time: (1000 * (T_END - T_START)).round
+log "#{Cols[:grey]}finished in #{Cols[:yellow]}#{(1000 * (T_END - T_START)).round}#{Cols[:white]} ms"
