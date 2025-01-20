@@ -11,7 +11,7 @@ class RoutesConfig
 
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
-    log success: "found root#{Cols[:grey]} = #{Cols[:blue]}#{@root}"
+    log success: "found root#{GREY} = #{BLUE}#{@root}"
 
     # find directory with .squarkdown folder
     @repo = nil
@@ -25,7 +25,7 @@ class RoutesConfig
     if @repo.nil?
       raise "failed to find directory with a .squarkdown/ folder"
     else
-      log success: "found repo#{Cols[:grey]} = #{Cols[:blue]}#{@repo}"
+      log success: "found repo#{GREY} = #{BLUE}#{@repo}"
     end
 
     # default, but can be overridden

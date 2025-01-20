@@ -1,17 +1,15 @@
 $started = false
 
 
-Cols = {
-  white: "\033[0m",
-  grey: "\033[90m",
+WHITE = "\033[0m"
+GREY = "\033[90m"
 
-  red: "\033[31m",
-  green: "\033[92m",
-  yellow: "\033[93m",
-  blue: "\033[94m",
-  pink: "\033[95m",
-  cyan: "\033[96m"
-}
+RED = "\033[31m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+PINK = "\033[95m"
+CYAN = "\033[96m"
 
 
 def log(
@@ -21,31 +19,31 @@ def log(
   done: false,
   **kwargs
 )
-  out = Cols[:grey]
+  out = GREY
 
   if !$started
-    out += ">>> #{Cols[:pink]}Squark#{Cols[:grey]} / "
+    out += ">>> #{PINK}Squark#{GREY} / "
   elsif done
-    out += ">>> #{Cols[:pink]}Squark#{Cols[:grey]} ✓ "
+    out += ">>> #{PINK}Squark#{GREY} ✓ "
   elsif success
-    out += "           #{Cols[:cyan]}✓ "
+    out += "           #{CYAN}✓ "
   elsif error
-    out += "           #{Cols[:red]}⨯ "
+    out += "           #{RED}⨯ "
   else
     out += "           / "
   end
 
   if success
-    out += "#{Cols[:cyan]}#{success}"
+    out += "#{CYAN}#{success}"
   elsif error
-    out += "#{Cols[:red]}#{error}"
+    out += "#{RED}#{error}"
   elsif done
-    out += "#{Cols[:cyan]}done!"
+    out += "#{CYAN}done!"
   else
-    out += "#{Cols[:yellow]}#{text}"
+    out += "#{YELLOW}#{text}"
   end
 
-  out += Cols[:white]
+  out += WHITE
   puts out
   $started = true
 end

@@ -17,7 +17,7 @@ def export_file(content, data:, base:, repo_config:)
       end
 
       if handle.include?("warn")
-        log error: "destination directory does not exist: #{Cols[:blue]}#{dest_display}"
+        log error: "destination directory does not exist: #{BLUE}#{dest_display}"
       end
         
       if handle.include?("create")
