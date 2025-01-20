@@ -6,6 +6,7 @@ Cols = {
   grey: "\033[90m",
 
   red: "\033[31m",
+  green: "\033[92m",
   yellow: "\033[93m",
   blue: "\033[94m",
   pink: "\033[95m",
@@ -18,24 +19,31 @@ def log(
   success: nil,
   error: nil,
   done: false,
+  time: nil,
   **kwargs
 )
   out = Cols[:grey]
 
-  if !$started or done
+  if !$started
     out += ">>> #{Cols[:pink]}Squark#{Cols[:grey]} / "
+  elsif done
+    out += ">>> #{Cols[:pink]}Squark#{Cols[:grey]} ✓ "
+  elsif success
+    out += "           #{Cols[:cyan]}✓ "
   elsif error
-    out += "---------- / "
+    out += "           #{Cols[:red]}⨯ "
   else
     out += "           / "
   end
 
-  if done
-    out += "#{Cols[:cyan]}done!"
+  if success
+    out += "#{Cols[:cyan]}#{success}"
   elsif error
     out += "#{Cols[:red]}#{error}"
-  elsif success
-    out += "#{Cols[:cyan]}#{success}"
+  elsif done
+    out += "#{Cols[:cyan]}done!"
+  elsif time
+    out += "#{Cols[:grey]}finished in #{Cols[:yellow]}#{time}#{Cols[:grey]} ms"
   else
     out += "#{Cols[:yellow]}#{text}"
   end

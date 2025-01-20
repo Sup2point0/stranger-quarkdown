@@ -1,5 +1,5 @@
 task default: :squark
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 
 require_relative "squarkdown/utils/log"
 log "running Squarkdown v#{VERSION}"

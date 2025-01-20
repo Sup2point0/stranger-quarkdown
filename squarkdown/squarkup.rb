@@ -1,3 +1,5 @@
+T_START = Time.now
+
 require_relative "config"
 require_relative "types/site-data"
 require_relative "types/file-data"
@@ -144,7 +146,7 @@ files.each do |file|
 end
 
 
-## TODO export index pages
+# TODO export index pages
 if index_files.length > 0
   log "exporting index pages..."
 end
@@ -159,4 +161,8 @@ save_site_data(site_data.export_json, repo_config:)
 log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
 
 
+## finish
+T_END = Time.now
+
 log done: true
+log time: (1000 * (T_END - T_START)).round
