@@ -29,6 +29,7 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.m
 - Collects global `.scss` files to build an `scss-config.js` file
 
 ### Future
+- Search root directory without recursively searching every directory
 - Allow arbitrary JSON data in squark charm
 - Correct internal relative links to correct absolute links in production
 
