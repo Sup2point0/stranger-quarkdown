@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: './site'
         
     steps:
       - name: 'git / checkout'
@@ -22,7 +25,7 @@ jobs:
           bundler-cache: true
 
       - name: 'ruby / install'
-        run: bundle install
+        run: cd .. && bundle install
 
       - name: 'node / setup'
         uses: actions/setup-node@v4
@@ -32,14 +35,12 @@ jobs:
           cache-dependency-path: './site/package-lock.json'
 
       - name: 'node / install'
-        run: cd site && npm install
+        run: npm install
 
       - name: 'svelte / build'
         env:
           BASE_PATH: '/${{ github.event.repository.name }}/site'
         run: |
-          bundle install
-          cd site
           npm run buildx
 
       - name: 'github / upload artifacts'
