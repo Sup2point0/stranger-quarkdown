@@ -38,6 +38,7 @@ jobs:
         env:
           BASE_PATH: '/${{ github.event.repository.name }}/site'
         run: |
+          bundle install
           cd site
           npm run buildx
 
