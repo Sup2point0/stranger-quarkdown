@@ -37,7 +37,9 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
       end
     end
 
-    data.update_fields(line, repo_config:)
+    if data.live
+      data.update_fields(line, repo_config:)
+    end
   end
 
   # remove the line with head

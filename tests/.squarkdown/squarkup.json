@@ -13,6 +13,6 @@
   "bases": "resources",
   "page.svelte": "test.svelte",
   "styles": "resources",
-  "page-styles": "resources",
+  "styles / page-styles": "resources",
   "fonts": ["testing"]
 }

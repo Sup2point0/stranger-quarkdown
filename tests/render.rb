@@ -23,7 +23,7 @@ class SquarkupRender < Minitest::Test
     "repo" => "Squarkdown Tests",
     "site" => "stranger-quarkdown/tests",
     "styles" => "resources",
-    "page-styles" => "resources",
+    "styles / page-styles" => "resources",
   })
 
   

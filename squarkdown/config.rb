@@ -9,6 +9,8 @@ class RoutesConfig
   def initialize()
     @set = false
 
+    log "locating routes..."
+
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
     log success: "found root#{GREY} = #{BLUE}#{@root}"
@@ -35,6 +37,7 @@ class RoutesConfig
   def set_site(path)
     raise if @set
     @site = path
+    @set = true
   end
 
 end

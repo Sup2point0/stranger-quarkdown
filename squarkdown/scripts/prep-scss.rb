@@ -14,7 +14,7 @@ end
 
 
 def try_prep_scss(repo_config:)
-  partial = repo_config["styles"]
+  partial = repo_config["styles / path"]
   route = Routes.site / partial
   raise "styles path not found" unless route
 

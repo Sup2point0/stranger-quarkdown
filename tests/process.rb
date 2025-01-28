@@ -58,7 +58,7 @@ class SquarkupProcess < Minitest::Test
 | style = #AUTO / test
 | duality = dark
 | index = tests
-| shard = #INDEX / testing
+| tags = #INDEX / testing
 | date = 1984 April 1
 -->"""
 
@@ -75,7 +75,7 @@ class SquarkupProcess < Minitest::Test
     assert data.style == ["article", "test"]
     assert data.duality == "dark"
     assert data.index == ["tests"]
-    assert data.shard == ["tests", "testing"]
+    assert data.tags == ["tests", "testing"]
     assert data.date
   end
 
@@ -96,7 +96,7 @@ class SquarkupProcess < Minitest::Test
     assert data.style == ["article"]
     assert data.duality == "light"
     assert data.index == []
-    assert data.shard == []
+    assert data.tags == []
   end
 
   def test_head
