@@ -41,8 +41,8 @@ end
 
 
 def fix_links(content)
-  content = content.gsub(/(\.\.\/)*\.?assets(\/\.site)?/, "{base}")
-  content = content.gsub(/\.md\]/, "]")
+  content = content.gsub(/(\.\.\/)*\.?assets\/(\.?site\/)?/, "{base}/")
+  content = content.gsub(/\.md\)/, ")")
   return content
 end
 
@@ -73,16 +73,18 @@ end
 
 
 def _import_index_(data:, repo_config:)
-  return (if data.isIndex
-    then "import IndexView from \"#{repo_config["index-view"]}\";"
+  return (
+    if data.isIndex
+      then "import IndexView from \"#{repo_config["index-view"]}\";"
     else ""
-  end)
+    end
+  )
 end
 
 
 def inject_style(content, data:, repo_config:)
   path = repo_config["page-styles"]
-  route = Routes.site / path
+  if path.nil? then return content end
   
   styles = data.style.map do |style|
     "@use './#{path}/#{style}' as *;"

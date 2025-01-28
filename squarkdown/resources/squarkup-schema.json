@@ -1,10 +1,8 @@
 {
   // "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "3.6",
+  "version": "4.2",
   "title": "Squarkup Config Schema",
   "description": "Squarkup configurations for a repository.",
-
-  "required": ["bases", "page.svelte", "page-styles"],
 
   "properties":
   {
@@ -24,17 +22,23 @@
     },
     "sources": {
       "title": "Source Directory(s)",
-      "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root.",
-      "type": "array",
+      "description": "Directory(s) where Squarkdown starts searching for files to squarkup. Relative to root. If set to `null`, Markdown exporting is disabled.",
+      "type": ["array", "null"],
       "items": {"type": "string"},
-      "default": []
+      "default": null
     },
     "exclude": {
       "title": "Excluded Files",
       "description": "RegEx patterns determining which files to skip squarkup for. These are matched against the entire absolute path of each file.",
-      "type": "array",
+      "type": ["array", "null"],
       "items": {"type": "string"},
-      "default": []
+      "default": null
+    },
+    "site-data": {
+      "title": "Site Data File",
+      "description": "File where Squarkdown exports the site data. Relative to site.",
+      "type": "string",
+      "default": "src/site.json"
     },
     "dest": {
       "title": "Destination Directory",
@@ -71,7 +75,7 @@
     },
     "page.svelte": {
       "title": "Page Base",
-      "description": "The file Squarkdown uses as a template for `+page.svelte` files. Relative to site.",
+      "description": "The file Squarkdown uses as a template for `+page.svelte` files. Relative to base directory as configured in `bases`.",
       "type": "string"
     },
     "index.svelte": {
@@ -91,13 +95,6 @@
       "description": "The component imported and used to render page lists in index pages.\n\nIf not supplied, Squarkdown will not create or inject index pages.",
       "type": ["string", "null"],
       "default": null
-    },
-
-    "site-data": {
-      "title": "Site Data File",
-      "description": "File where Squarkdown exports the site data. Relative to site.",
-      "type": "string",
-      "default": "src/site.ts"
     },
     "styles": {
       "title": "Styles Directory",

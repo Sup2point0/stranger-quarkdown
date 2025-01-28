@@ -32,13 +32,13 @@ def try_prep_assets(repo_config:)
   i = 0
   total = files.length
 
-  log success: "found #{total} assets in #{Cols[:blue]}#{route.relative_path_from(Routes.root)}"
+  log success: "found #{total} assets in #{BLUE}#{route.relative_path_from(Routes.root)}"
   log "transferring assets..."
 
   files.each do |file|
     i += 1
     if i % 10 == 0
-      log "#{i}#{Cols[:grey]} of #{total}..."
+      log "#{i}#{GREY} of #{total}..."
     end
     rel = file.relative_path_from(route)
 

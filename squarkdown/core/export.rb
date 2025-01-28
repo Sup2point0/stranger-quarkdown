@@ -17,7 +17,7 @@ def export_file(content, data:, base:, repo_config:)
       end
 
       if handle.include?("warn")
-        log error: "destination directory does not exist: #{Cols[:blue]}#{dest_display}"
+        log error: "destination directory does not exist: #{BLUE}#{dest_display}"
       end
         
       if handle.include?("create")
@@ -38,20 +38,22 @@ def export_file(content, data:, base:, repo_config:)
   end
 
   # +page.svelte
-  begin
-    dest = route / "+page.svelte"
-    content = base["page.svelte"] % {file: repo_config["file-name"]}
-    File.write(dest, content)
+  if base["page.svelte"]
+    begin
+      dest = route / "+page.svelte"
+      content = base["page.svelte"] % {file: repo_config["file-name"]}
+      File.write(dest, content)
 
-  rescue => e
-    log "failed to export `+page.svelte`!"
-    log error: "#{e.class}: #{e.message}"
-    error = true
+    rescue => e
+      log "failed to export `+page.svelte`!"
+      log error: "#{e.class}: #{e.message}"
+      error = true
 
+    end
   end
 
   # +page.js
-  if repo_config["page.js"]
+  if base["page.js"]
     begin
       dest = route / "+page.js"
       content = base["page.js"] % {file: repo_config["file-name"]}

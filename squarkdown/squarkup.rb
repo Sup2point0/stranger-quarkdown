@@ -1,3 +1,5 @@
+T_START = Time.now
+
 require_relative "config"
 require_relative "types/site-data"
 require_relative "types/file-data"
@@ -18,10 +20,10 @@ site_data = SiteData.new
 ## find repo config
 repo_config = find_repo_config()
 if repo_config.nil? or repo_config.length == 0
-  log error: "could not find #{Cols[:cyan]}squarkup.json#{Cols[:red]}"
+  log error: "could not find #{CYAN}squarkup.json#{RED}"
   exit
 else
-  log success: "found #{Cols[:blue]}squarkup.json#{Cols[:cyan]}"
+  log success: "found #{BLUE}squarkup.json#{CYAN}"
 end
 
 
@@ -41,6 +43,15 @@ if ARGV.include? "scss"
   prep_scss(repo_config:)
 end
 
+if repo_config["sources"].nil? and repo_config["exclude"].nil?
+  log done: true
+  exit(0)
+else
+  if repo_config["bases"].nil?
+    log error: "no file base set!"
+  end
+end
+
 
 ## find file bases
 log "locating file base..."
@@ -49,16 +60,16 @@ base = {}
 
 base["page.svelte"] = find_file_base("page.svelte", repo_config:)
 if base["page.svelte"].nil?
-  log error: "no base for #{Cols[:blue]}+page.svelte#{Cols[:red]} found"
+  log error: "no base for #{BLUE}+page.svelte#{RED} found"
 else
-  log success: "found base for #{Cols[:blue]}+page.svelte#{Cols[:cyan]}"
+  log success: "found base for #{BLUE}+page.svelte#{CYAN}"
 end
 
 base["page.js"] = find_file_base("page.js", repo_config:)
 if base["page.js"].nil?
-  log error: "no base for #{Cols[:blue]}+page.js#{Cols[:red]} found"
+  log error: "no base for #{BLUE}+page.js#{RED} found"
 else
-  log success: "found base for #{Cols[:blue]}+page.js#{Cols[:cyan]}"
+  log success: "found base for #{BLUE}+page.js#{CYAN}"
 end
 
 
@@ -84,7 +95,7 @@ i = 1
 index_files = []
 
 files.each do |file|
-  log "#{i}#{Cols[:grey]} of #{total}: #{Cols[:white]}#{file.parent.basename}#{Cols[:grey]}/#{Cols[:blue]}#{file.basename}"
+  log "#{i}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 
   begin
     ## process
@@ -135,7 +146,7 @@ files.each do |file|
 end
 
 
-## TODO export index pages
+# TODO export index pages
 if index_files.length > 0
   log "exporting index pages..."
 end
@@ -147,7 +158,11 @@ log "saving site data..."
 site_data.meta[:page_count] = site_data.pages.length
 
 save_site_data(site_data.export_json, repo_config:)
-log success: "saved site data to #{Cols[:blue]}#{repo_config['site-data']}"
+log success: "saved site data to #{BLUE}#{repo_config['site-data']}"
 
+
+## finish
+T_END = Time.now
 
 log done: true
+log "#{GREY}finished in #{YELLOW}#{(1000 * (T_END - T_START)).round}#{WHITE} ms"
