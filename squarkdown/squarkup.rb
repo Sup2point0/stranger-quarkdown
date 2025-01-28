@@ -91,11 +91,10 @@ site_data.meta[:file_count] = total
 ## export articles
 log "exporting files..."
 
-i = 1
 index_files = []
 
-files.each do |file|
-  log "#{i}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
+files.each_with_index do |file, i|
+  log "#{i+1}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 
   begin
     ## process
@@ -140,8 +139,7 @@ files.each do |file|
     else
       log error: "#{e.class}: #{e.message}"
     end
-  ensure
-    i += 1
+  
   end
 end
 
