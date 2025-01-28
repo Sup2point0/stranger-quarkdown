@@ -2,6 +2,8 @@ import adapter from "@sveltejs/adapter-static";
 import { sveltePreprocess } from "svelte-preprocess";
 
 import { mdsvex } from "mdsvex";
+import remarkFootnotes from "remark-footnotes";
+import remarkIndexFootnotes from "remark-numbered-footnote-labels";
 
 import scss_config from "./scss-config.js";
 
@@ -34,6 +36,10 @@ const config = {
   preprocess: [
     mdsvex({
       extensions: [".md", ".svx"],
+      remarkPlugins: [
+        remarkFootnotes,
+        remarkIndexFootnotes,
+      ],
     }),
     sveltePreprocess({
       scss: scss_config,

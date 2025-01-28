@@ -1,5 +1,8 @@
+~content.svx
+
 # output
 build/
+static/
 
 # internal
 node_modules/

@@ -1,11 +1,11 @@
 {
   "meta": {
     "exported": "2025-01-28",
-    "file_count": 10,
-    "page_count": 1
+    "file_count": 11,
+    "page_count": 3
   },
   "index": {},
-  "shard": {},
+  "tags": {},
   "pages": {
     "edu.md": {
       "path": "edu.md",
@@ -22,7 +22,45 @@
       "capt": null,
       "desc": "Lessons learnt from development",
       "index": [],
-      "shard": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/README.md": {
+      "path": "docs/README.md",
+      "last_deploy": "2025-01-28 19:25:27 +0000",
+      "slocs": 40,
+      "chars": 704,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs",
+      "title": "Squarkdown Docs",
+      "head": "Squarkdown Docs",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/further-walkthrough.md": {
+      "path": "docs/further-walkthrough.md",
+      "last_deploy": "2025-01-28 20:18:12 +0000",
+      "slocs": 145,
+      "chars": 4503,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/further-walkthrough",
+      "title": "Making Full Use of Squarkdown",
+      "head": "Making Full Use of Squarkdown",
+      "capt": "A Further Walkthrough of Additional Squarkdown Features",
+      "desc": "A further walkthrough of additional Squarkdown features",
+      "index": [],
+      "tags": [],
       "date": null,
       "date_display": null
     }
