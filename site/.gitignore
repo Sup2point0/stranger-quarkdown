@@ -1,0 +1,9 @@
+# output
+build/
+
+# internal
+node_modules/
+.svelte-kit/
+
+**.env**
+vite.config.*.timestamp-*

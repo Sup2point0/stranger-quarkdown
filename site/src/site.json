@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "exported": "2025-01-28",
+    "file_count": 10,
+    "page_count": 1
+  },
+  "index": {},
+  "shard": {},
+  "pages": {
+    "edu.md": {
+      "path": "edu.md",
+      "last_deploy": "2025-01-28 14:13:04 +0000",
+      "slocs": 23,
+      "chars": 1452,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/decoded",
+      "title": "decoded: Stranger Quarkdown",
+      "head": "*decoded*: Stranger Quarkdown",
+      "capt": null,
+      "desc": "Lessons learnt from development",
+      "index": [],
+      "shard": [],
+      "date": null,
+      "date_display": null
+    }
+  }
+}
