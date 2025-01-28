@@ -46,6 +46,9 @@ section {
   @include font-ui;
   color: light-dark(black, white);
   text-decoration: none;
+
+  @include link($col-squark);
+  color: unset;
 }
 
 </style>

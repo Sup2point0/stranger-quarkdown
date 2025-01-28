@@ -1,12 +1,14 @@
 @use 'src/styles/mixins/~colours' as *;
 
 
-@mixin nav-interact {
+@mixin nav-interact($col-hover: $col-squark) {
   &:hover, &:focus {
-    background: light-dark(rgb(black, 3%), rgb(white, 5%));
+    color: $col-hover;
+    background: light-dark(rgb(black, 3%), rgb(white, 10%));
+    cursor: pointer;
   }
   &:active {
-    background: light-dark(rgb(black, 7%), rgb(white, 8%))
+    background: light-dark(rgb(black, 7%), rgb(white, 15%));
   }
   &:focus-visible:not(:active) {
     outline: 1px solid $col-squark;

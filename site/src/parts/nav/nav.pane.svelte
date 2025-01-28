@@ -42,8 +42,8 @@ const delay = 240;
   </NavSection>
 
   <NavSection title="Reference">
-    <NavLink code="squarkup.json" />
     <NavLink text="project structure" />
+    <NavLink code="squarkup.json" />
     <NavLink text="squark charm">
       <NavLink code="live" />
       <NavLink code="flags" />
@@ -55,7 +55,7 @@ const delay = 240;
       <NavLink code="style" />
       <NavLink code="duality" />
       <NavLink code="index" />
-      <NavLink code="shard" />
+      <NavLink code="tags" />
       <NavLink code="date" />
       <NavLink code="clean" />
     </NavLink>
@@ -111,6 +111,8 @@ nav {
     max-width: 2rem;
     transition-delay: var(--delay);
     overflow: hidden;
+
+    @include nav-interact;
 
     > * {
       opacity: 0;

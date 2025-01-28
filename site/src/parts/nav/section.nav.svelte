@@ -41,9 +41,9 @@ h3 {
   font-size: 120%;
   font-weight: 450;
   border-radius: 0.4rem;
-  transition: background 0.1s ease-out;
+  transition: color 0.16s, background 0.1s ease-out;
 
-  @include nav-interact;
+  @include nav-interact($col-charm);
 }
 
 .links {

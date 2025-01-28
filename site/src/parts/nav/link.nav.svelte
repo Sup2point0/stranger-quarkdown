@@ -76,7 +76,7 @@ a {
   font-weight: 350;
   text-decoration: none;
   border-radius: 0.4rem;
-  transition: background 0.1s ease-out;
+  transition: color 0.16s, background 0.1s ease-out;
 
   @include nav-interact;
 
