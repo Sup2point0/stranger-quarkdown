@@ -3,6 +3,7 @@
 # output
 build/
 static/
+(docs)/
 
 # internal
 node_modules/

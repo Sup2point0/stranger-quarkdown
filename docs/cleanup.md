@@ -1,5 +1,5 @@
 # Cleanup
-<!-- #SQUARK live!
+<!-- #SQUARK dead!
 | dest = squarkup/cleanup
 -->
 

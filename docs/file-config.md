@@ -1,5 +1,5 @@
 # Configuring Squarkup for a File
-<!-- #SQUARK live!
+<!-- #SQUARK dead!
 | dest = squarkup/file
 | desc = Flags and fields for configuring how a Markdown file is processed by Squarkdown
 | shard = file / squark / charm

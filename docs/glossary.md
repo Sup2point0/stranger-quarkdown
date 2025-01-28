@@ -1,4 +1,8 @@
 # Squarkdown Terminology
+<!-- #SQUARK dead!
+| dest = 
+| index = 
+-->
 
 ***Squarkdown*** (short for *Stranger Quarkdown*) refers to both this project, and the Markdown syntax that enables special processing.
 

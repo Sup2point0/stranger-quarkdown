@@ -1,6 +1,6 @@
 # *decoded*: Stranger Quarkdown
 <!-- #SQUARK live!
-| dest = decoded
+| dest = info/decoded
 | title = decoded: Stranger Quarkdown
 | desc = Lessons learnt from development
 -->
