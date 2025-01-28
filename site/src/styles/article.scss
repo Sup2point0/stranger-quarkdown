@@ -1,0 +1,39 @@
+@use 'src/styles/mixins/~colours' as *;
+@use 'src/styles/mixins/~fonts' as *;
+@use 'src/styles/mixins/~links' as *;
+
+
+p {
+  margin: 1em 0;
+  @include font-ui;
+  font-weight: 350;
+  line-height: 150%;
+}
+
+h2,h3 {
+  @include font-ui;
+  color: $col-charm;
+}
+
+h2 {
+  padding: 0.5em 0 0.2em;
+  font-size: 200%;
+  font-weight: 400;
+}
+
+h3 {
+  font-size: 120%;
+  font-weight: 400;
+}
+
+a {
+  padding: 1em;
+  margin: -1em;
+
+  @include underlined-link(
+    $left: 1em,
+    $width: calc(100% - 2em),
+    $bottom: 0.9em,
+    $bottom-hover: 0.8em,
+  );
+}

@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Monaspace Neon';
   src:
-    url('./fonts/monaspace-neon.ttf') format('truetype'),
+    url('/fonts/monaspace-neon.ttf') format('truetype'),
 }
 
 @mixin font-body {
@@ -13,5 +13,5 @@
 }
 
 @mixin font-code {
-  font-family: 'Monaspace Neon', 'Consolas', monospace;
+  font-family: 'Monaspace Neon', 'Luckiest Guy', 'Consolas', monospace;
 }

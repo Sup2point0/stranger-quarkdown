@@ -1,0 +1,40 @@
+@use 'src/styles/mixins/~colours' as *;
+
+
+@mixin link($col-hover: $col-charm) {
+  color: $col-squark;
+  text-decoration: none;
+  transition: all 0.16s ease-out;
+
+  &:hover, &:focus {
+    color: $col-hover;
+  }
+}
+
+@mixin underlined-link(
+  $col-hover: $col-charm,
+  $left: 0,
+  $width: 100%,
+  $bottom: 0,
+  $bottom-hover: 0,
+) {
+  position: relative;
+  @include link($col-hover);
+
+  &::after {
+    content: '';
+    width: $width;
+    position: absolute;
+    left: $left;
+    bottom: $bottom;
+    border-bottom: 1px solid $col-squark;
+    transition: all 0.2s ease-out;
+  }
+
+  &:hover, &:focus {
+    &::after {
+      bottom: $bottom-hover;
+      border-color: $col-hover;
+    }
+  }
+}

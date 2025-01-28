@@ -1,4 +1,5 @@
 @use 'src/styles/mixins/~colours' as *;
+@use 'src/styles/mixins/~fonts' as *;
 
 
 * {
@@ -13,6 +14,23 @@
 }
 
 
-::selection {
+code {
+  @include font-code;
+
+  p & {
+    color: $col-light;
+    font-size: 100%;  
+  }
+}
+
+pre {
+  padding: 0.2em 3em;
+  font-size: 100%;
+  border-radius: 0.4rem;
+  scrollbar-width: thin;
+}
+
+
+:not(pre code, pre code *)::selection {
   background: color-mix(in oklch, $col-squark, transparent 60%) !important;
 }
