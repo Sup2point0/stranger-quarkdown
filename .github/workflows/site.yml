@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: 'git / checkout'
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: 'ruby / setup'
         uses: ruby/setup-ruby@v1
@@ -44,7 +42,7 @@ jobs:
       - name: 'github / upload artifacts'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'site/build/'
+          path: './site/build/'
 
   deploy:
     needs: build
