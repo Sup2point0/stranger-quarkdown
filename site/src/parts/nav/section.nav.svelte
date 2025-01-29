@@ -43,7 +43,7 @@ h3 {
   border-radius: 0.4rem;
   transition: color 0.16s, background 0.1s ease-out;
 
-  @include nav-interact($col-charm);
+  @include nav-interact;
 }
 
 .links {

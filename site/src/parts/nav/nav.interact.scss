@@ -1,7 +1,7 @@
 @use 'src/styles/mixins/~colours' as *;
 
 
-@mixin nav-interact($col-hover: $col-squark) {
+@mixin nav-interact($col-hover: $col-charm) {
   &:hover, &:focus {
     color: $col-hover;
     background: light-dark(rgb(black, 3%), rgb(white, 10%));

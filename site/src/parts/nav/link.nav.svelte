@@ -87,7 +87,7 @@ a {
 }
 
 .arrow {
-  padding: 0.25em 0.4em;
+  padding: 0 0.75rem;
   flex-grow: 0;
   display: flex;
   justify-content: center;

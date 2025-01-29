@@ -134,8 +134,9 @@ nav {
 }
 
 button#show-hide {
-  width: 2rem;
-  height: 2rem;
+  $size: 2.5rem;
+  width: $size;
+  height: $size;
   position: absolute;
   right: 0;
   bottom: 0;
@@ -143,7 +144,7 @@ button#show-hide {
   font-size: 150%;
   background: none;
   border: none;
-  border-radius: 1rem;
+  border-radius: $size / 2;
   @include nav-interact;
 }
 

@@ -47,7 +47,7 @@ section {
   color: light-dark(black, white);
   text-decoration: none;
 
-  @include link($col-squark);
+  @include link;
   color: unset;
 }
 
