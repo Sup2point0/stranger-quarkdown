@@ -28,48 +28,53 @@ const delay = 240;
       out:fade={{ duration: 100 }}
     >
 
-  <NavSection title="Home">
-    <NavLink text="what is squarkdown?" />
-    <NavLink text="project requirements" />
-    <NavLink text="getting started" />
-    <NavLink text="FAQ" />
+  <NavSection title="Home" link="https://sup2point0.github.io/stranger-quarkdown">
+    <NavLink text="FAQ" intern="info/faq" />
   </NavSection>
 
-  <NavSection title="Features">
-    <NavLink text="assets" />
-    <NavLink text="SCSS" />
-    <NavLink text="Google Fonts" />
+  <NavSection title="Walkthrough">
+    <NavLink text="what is squarkdown?" intern="docs/what-is-squarkdown" />
+    <NavLink text="project requirements" intern="docs/project-requirements" />
+    <NavLink text="squarkdown-flavoured markdown" intern="docs/squarkdown-flavoured-markdown" />
+    <NavLink text="project structure" intern="docs/project-structure" />
   </NavSection>
 
-  <NavSection title="Reference">
-    <NavLink text="project structure" />
-    <NavLink code="squarkup.json" />
-    <NavLink text="squark charm">
-      <NavLink code="live" />
-      <NavLink code="flags" />
-      <NavLink code="dest" />
-      <NavLink code="title" />
-      <NavLink code="desc" />
-      <NavLink code="head" />
-      <NavLink code="capt" />
-      <NavLink code="style" />
-      <NavLink code="duality" />
-      <NavLink code="index" />
-      <NavLink code="tags" />
-      <NavLink code="date" />
-      <NavLink code="clean" />
+  <NavSection title="Features" intern="features">
+    <NavLink text="page generation" intern="features/page-gen" />
+    <NavLink text="assets" intern="features/assets" />
+    <NavLink text="SCSS" intern="features/scss" />
+    <NavLink text="fonts" intern="features/fonts" />
+  </NavSection>
+
+  <NavSection title="Docs" intern="docs">
+    <NavLink code="squarkup.json" intern="docs/squarkup/repo-config" />
+    <NavLink text="squark charm" intern="docs/squarkup/file-config">
+      <NavLink code="live" intern="docs/squark-charm/live" />
+      <NavLink code="flags" intern="docs/squark-charm/flags" />
+      <NavLink code="dest" intern="docs/squark-charm/dest" />
+      <NavLink code="title" intern="docs/squark-charm/title" />
+      <NavLink code="desc" intern="docs/squark-charm/desc" />
+      <NavLink code="head" intern="docs/squark-charm/head" />
+      <NavLink code="capt" intern="docs/squark-charm/capt" />
+      <NavLink code="style" intern="docs/squark-charm/style" />
+      <NavLink code="duality" intern="docs/squark-charm/duality" />
+      <NavLink code="index" intern="docs/squark-charm/index" />
+      <NavLink code="tags" intern="docs/squark-charm/tags" />
+      <NavLink code="date" intern="docs/squark-charm/date" />
+      <NavLink code="clean" intern="docs/squark-charm/clean" />
     </NavLink>
-    <NavLink text="squarks">
-      <NavLink text="only" />
-      <NavLink text="leave" />
+    <NavLink text="squarks" intern="docs/squarks">
+      <NavLink code="only" intern="docs/squarks/only" />
+      <NavLink code="leave" intern="docs/squarks/leave" />
     </NavLink>
+    <NavLink text="site data" intern="docs/squarkup/site-data" />
   </NavSection>
 
-  <NavSection title="Info">
-    <NavLink text="synopsis" />
-    <NavLink text="decoded" />
-    <NavLink text="credits" />
-    <NavLink text="license" />
+  <NavSection title="Info" intern="info/synopsis">
+    <NavLink text="synopsis" intern="info/synopsis" />
+    <NavLink text="decoded" intern="info/decoded" />
+    <NavLink text="credits" intern="info/credits" />
+    <NavLink text="license" intern="info/license" />
   </NavSection>
 
   <div style:padding="1rem"></div>
