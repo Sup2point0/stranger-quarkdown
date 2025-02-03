@@ -20,7 +20,7 @@ def find_repo_config(from: Routes.repo)
   JSON::Validator.validate!(Schema, data)
   
   repo_config.merge!(data)
-  Routes.set_site(Routes.repo / repo_config["paths / site"])
+  Routes.site = Routes.repo / repo_config["paths / site"]
 
   return repo_config
 end

@@ -2,17 +2,19 @@
   "$schema": "../../squarkdown/resources/squarkup-schema.json",
 
   "repo": "Squarkdown Tests",
-  "site": "tests",
-  "exclude": [
+
+  "paths / site": "tests/",
+  "paths / exclude": [
     "/_.*?\\.md",
     "/-.*?\\.md"
   ],
-  "dest": "export/routes",
-  "if-no-dir": ["warn"],
+  "paths / dest": "export/routes/",
 
-  "bases": "resources",
-  "page.svelte": "test.svelte",
-  "styles": "resources",
-  "styles / page-styles": "resources",
-  "fonts": ["testing"]
+  "opts / if-no-dir": ["warn"],
+
+  "bases / path": "resources/",
+  "bases / page.svelte": "test.svelte",
+  "styles / path": "resources/",
+  "styles / page-styles": "resources/",
+  "fonts / queries": ["testing"]
 }

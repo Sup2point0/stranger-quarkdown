@@ -41,7 +41,7 @@ class FileData
   Fields = [:dest, :title, :desc, :head, :capt, :style, :duality, :index, :tags, :date, :clean]
 
 
-  def initialize(source = nil, repo_config:)
+  def initialize(source = nil, repo_config: nil)
     ## Meta
     @path = source && source.relative_path_from(Routes.repo).to_s
     @last_deploy = source && source.mtime
@@ -60,7 +60,13 @@ class FileData
     @desc = nil  # capt
     @head = nil
     @capt = nil
-    @style = [repo_config["styles / base-style"]]
+
+    if repo_config and repo_config["styles / base-style"]
+      @style = [repo_config["styles / base-style"]]
+    else
+      @style = []
+    end
+
     @duality = nil
     @index = []
     @tags = nil  # index
@@ -115,11 +121,16 @@ class FileData
 
     when :style
       styles = _split_(value)
+      base = repo_config["styles / base-style"]
 
       if styles.delete("#auto")
-        styles.unshift("article")
-      elsif !styles.include?("article")
-        styles.unshift "article"
+        if base
+          styles.unshift(base)
+        end
+      elsif base
+        if !styles.include?(base)
+          styles.unshift(base)
+        end
       end
 
       @style = styles

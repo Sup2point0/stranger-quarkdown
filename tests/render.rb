@@ -5,8 +5,7 @@ require_relative "../squarkdown/core/render"
 require_relative "../squarkdown/core/find"
 
 
-def _get_data_
-  repo_config = nil
+def _get_data_(repo_config:)
   data = FileData.new
   data.update_fields("title = Squarkdown is epic", repo_config:)
   data.update_fields("style = #AUTO / testing", repo_config:)
@@ -17,14 +16,15 @@ end
 
 class SquarkupRender < Minitest::Test
 
-  Data = _get_data_()
-
   RepoConfig = load_default_repo_config().merge({
     "repo" => "Squarkdown Tests",
-    "site" => "stranger-quarkdown/tests",
-    "styles" => "resources",
-    "styles / page-styles" => "resources",
+    "paths / site" => "stranger-quarkdown/tests/",
+    "styles / path" => "resources/",
+    "styles / page-styles" => "resources/",
+    "styles / base-style" => "basic",
   })
+
+  Data = _get_data_(repo_config: RepoConfig)
 
   
   def test_head
@@ -38,14 +38,14 @@ class SquarkupRender < Minitest::Test
 
 
   def test_style
-    Routes.set_site(Routes.root / "tests")
+    Routes.site = Routes.root / "tests"
 
     content = """# Testing
     """
 
     out = inject_style(content, data: Data, repo_config: RepoConfig)
 
-    assert out.include?("resources/article")
+    assert out.include?("resources/basic")
     assert out.include?("resources/testing")
   end
 
