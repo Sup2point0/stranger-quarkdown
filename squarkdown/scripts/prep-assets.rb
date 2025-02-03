@@ -25,10 +25,12 @@ def try_prep_assets(repo_config:)
     site_route = nil
   end
 
+  exts = repo_config["assets / extensions"]
   files = route.glob(
-    "**/*.{png,jpg,jpeg,svg}",
+    "**/*.#{exts.join(',')}",
     File::FNM_DOTMATCH
   )
+  
   i = 0
   total = files.length
 
