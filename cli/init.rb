@@ -3,9 +3,14 @@ require "pathname"
 require "tty-reader"
 
 require_relative "../squark.version"
+require_relative "looks"
 require_relative "../squarkdown/utils/ansi"
+
+require_relative "views/out"
 require_relative "views/line"
+require_relative "views/wait"
 require_relative "views/step"
+require_relative "views/select"
 
 
 $reader = TTY::Reader.new
@@ -13,15 +18,24 @@ $reader = TTY::Reader.new
 
 def script
   puts
+  print GREY, " ", PRE_START
   line
 
   ## intro
-  step "#{YELLOW}Welcome to Squarkdown! #{WHITE}You’re running version #{PINK}#{VERSION}", init: true
-  step "This script will help you get your project’s #{BLUE}squarkup.json#{WHITE} set up!"
-  step "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit #{BLUE}squarkup.json#{WHITE} afterwards."
-  step "Note no files will be created until the very end of the script."
+  out "#{CYAN}Welcome to Squarkdown! #{WHITE}You’re running version #{PINK}#{VERSION}"
+  out
 
-  puts
+  step after: "This script will help you get your project’s squarkup.json set up." do
+    out "This script will help you get your project’s #{BLUE}squarkup.json#{WHITE} set up!"
+  end
+  
+  step(
+    before: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit #{BLUE}squarkup.json#{WHITE} afterwards.",
+    after: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit squarkup.json afterwards."
+  )
+
+  step before: "Note no files will be created until the very end of the script."
+  out
 
   ## existing
   cwd = Pathname(__dir__).parent
@@ -33,8 +47,13 @@ def script
   end
 
   if existing
-    out "Woah, looks like you already have an existing #{BLUE}.squarkdown/squarkup.json#{WHITE}!", col: RED
-    step "Continue running this script?", prompt: "All changes will overwrite any existing files."
+    out error: "Woah, looks like you already have an existing #{BLUE}.squarkdown/squarkup.json#{WHITE}!"
+    wait
+    out "Continue running this script?"
+    select({
+      "Yes" => "All changes will overwrite any existing files.",
+      "No" => ""
+    })
   end
 end
 
@@ -47,8 +66,9 @@ end
 
 
 def kill(created: false)
-  puts "#{GREY}>> #{WHITE}Thanks for using Squarkdown#{if created then ', enjoy' else '' end}! 🥕"
-  line
+  print CLEAR
+  out
+  out close: "#{CYAN}Thanks for using Squarkdown#{if created then ', enjoy' else '' end}!#{WHITE} 🥕"
   puts
   exit
 end

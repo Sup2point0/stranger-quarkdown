@@ -24,7 +24,7 @@ def log(
   if !$started
     out += ">>> #{PINK}Squark#{GREY} / "
   elsif done
-    out += ">>> #{PINK}Squark#{GREY} ✓ "
+    out += ">>> #{PINK}Squark#{GREY} / "
   elsif success
     out += "           #{CYAN}✓ "
   elsif error
