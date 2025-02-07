@@ -21,7 +21,7 @@ def select(text, options, multi: false)
   out success: text
   out GREY, selected[0]
 
-  return selected
+  return selected[0]
 end
 
 

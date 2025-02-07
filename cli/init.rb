@@ -8,7 +8,6 @@ require_relative "looks"
 require_relative "../squarkdown/utils/ansi"
 
 require_relative "views/out"
-require_relative "views/line"
 require_relative "views/wait"
 require_relative "views/step"
 require_relative "views/select"
@@ -27,7 +26,7 @@ def script
   puts
 
   ## intro
-  print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!"
+  print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!  #{GREY}#{LINE * 69}"
   puts
 
   step(
@@ -63,10 +62,11 @@ def script
     wait
 
     out
-    select("Continue running this script?", {
+    choice = select("Continue running this script?", {
       "Yes" => "all changes will overwrite any existing files.",
       "No" => ""
     })
+    kill if choice == "No"
   
   else
     step(
@@ -77,6 +77,16 @@ def script
     step "If this isn’t the case, Squarkdown probably isn’t the tool you’re looking for!"
   
   end
+
+  ## configuring paths
+  out
+  out head: "Configuring Paths"
+  wait
+
+  step(
+    before: "What’s your project’s #{YELLOW}root#{WHITE} directory? #{GREY}This will be called ROOT.",
+    after: "What’s your project’s root directory?"
+  )
 end
 
 
