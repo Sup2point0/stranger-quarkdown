@@ -6,15 +6,18 @@ require_relative "wait"
 
 
 def step(
+  text = nil,
+  before: nil,
   after: nil,
   newline: true
 )
   out
-  before = yield
+  out step: before || text
   wait
 
   print PREV unless !newline
   print PREV, CLEAR
-  out GREY, after || before
+  out GREY, after || text
+
   print CLEAR
 end

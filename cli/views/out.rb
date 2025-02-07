@@ -15,9 +15,9 @@ def out(
   elsif close
     t = GREY + " " + PRE_END + SPACE + WHITE + close
   elsif success
-    t = CYAN + " ✓" + SPACE + WHITE + success
+    t = CYAN + " " + TICK + SPACE + WHITE + success
   elsif error
-    t = RED + " ⨯" + SPACE + WHITE + error
+    t = RED + " " + CROSS + SPACE + WHITE + error
   else
     t = GREY + " " + PRE_STEP + SPACE + WHITE + text.join
   end

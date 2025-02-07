@@ -15,6 +15,3 @@ CLEAR = "\r\33[2K\r"
 
 UP = "^[[A"
 DOWN = "^[[B"
-
-DOT = "○"
-FILLED_DOT = "●"

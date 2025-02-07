@@ -1,6 +1,7 @@
 require "pathname"
 
 require "tty-reader"
+require "tty-cursor"
 
 require_relative "../squark.version"
 require_relative "looks"
@@ -14,6 +15,12 @@ require_relative "views/select"
 
 
 $reader = TTY::Reader.new
+$cursor = TTY::Cursor
+
+# Index of currently selected option
+$i = 0
+# Total number of options
+$t = 0
 
 
 def script
@@ -22,23 +29,24 @@ def script
   ## intro
   print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!"
   puts
-  step after: "You’re running version #{VERSION}" do
-    out "You’re running version #{PINK}#{VERSION}"
-  end
 
-  step after: "This script will help you get your project’s squarkup.json set up.", newline: false do
-    out "This script will help you get your project’s #{BLUE}squarkup.json#{WHITE} set up!"
-  end
-  
-  step after: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit squarkup.json afterwards." do
-    out "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit #{BLUE}squarkup.json#{WHITE} afterwards."
-  end
+  step(
+    before: "You’re running version #{PINK}#{VERSION}",
+    after: "You’re running version #{VERSION}"
+  )
 
-  step after: "Note no files will be created until the very end of the script." do
-    out "Note no files will be created until the very end of the script."
-  end
+  step(
+    before: "This script will help you get your project’s #{BLUE}squarkup.json#{WHITE} set up!",
+    after: "This script will help you get your project’s squarkup.json set up.",
+    newline: false
+  )
 
-  out
+  step(
+    before: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit #{BLUE}squarkup.json#{WHITE} afterwards.",
+    after: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit squarkup.json afterwards."
+  )
+
+  step "Note no files will be created until the very end of the script."
 
   ## existing
   cwd = Pathname(__dir__).parent
@@ -50,13 +58,24 @@ def script
   end
 
   if existing
+    out
     out error: "Woah, looks like you already have an existing #{BLUE}.squarkdown/squarkup.json#{WHITE}!"
     wait
-    out "Continue running this script?"
-    select({
-      "Yes" => "All changes will overwrite any existing files.",
+
+    out
+    select("Continue running this script?", {
+      "Yes" => "all changes will overwrite any existing files.",
       "No" => ""
     })
+  
+  else
+    step(
+      before: "Just a heads up, Squarkdown is for #{BLUE}SvelteKit#{WHITE} projects that use #{BLUE}MDsveX.",
+      after: "Just a heads up, Squarkdown is for SvelteKit projects that use MDsveX.",
+      newline: false
+    ) 
+    step "If this isn’t the case, Squarkdown probably isn’t the tool you’re looking for!"
+  
   end
 end
 
@@ -64,6 +83,20 @@ end
 def setup
   $reader.on(:keyctrl_c, :keyescape) do
     kill
+  end
+
+  $reader.on(:keyup, :keyleft) do
+    $i -= 1
+    if $i < 0
+      $i = $t - 1
+    end
+  end
+
+  $reader.on(:keydown, :keyright) do
+    $i += 1
+    if $i > $t - 1
+      $i = 0
+    end
   end
 end
 
