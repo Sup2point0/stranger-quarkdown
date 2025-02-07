@@ -18,23 +18,26 @@ $reader = TTY::Reader.new
 
 def script
   puts
-  print GREY, " ", PRE_START
-  line
 
   ## intro
-  out "#{CYAN}Welcome to Squarkdown! #{WHITE}You’re running version #{PINK}#{VERSION}"
-  out
+  print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!"
+  puts
+  step after: "You’re running version #{VERSION}" do
+    out "You’re running version #{PINK}#{VERSION}"
+  end
 
-  step after: "This script will help you get your project’s squarkup.json set up." do
+  step after: "This script will help you get your project’s squarkup.json set up.", newline: false do
     out "This script will help you get your project’s #{BLUE}squarkup.json#{WHITE} set up!"
   end
   
-  step(
-    before: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit #{BLUE}squarkup.json#{WHITE} afterwards.",
-    after: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit squarkup.json afterwards."
-  )
+  step after: "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit squarkup.json afterwards." do
+    out "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit #{BLUE}squarkup.json#{WHITE} afterwards."
+  end
 
-  step before: "Note no files will be created until the very end of the script."
+  step after: "Note no files will be created until the very end of the script." do
+    out "Note no files will be created until the very end of the script."
+  end
+
   out
 
   ## existing

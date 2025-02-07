@@ -11,7 +11,6 @@ def out(
   newline: true
 )
   if step
-    puts GREY + " " + PRE_SECT + LINE * 69
     t = YELLOW + " " + PRE_ACTIVE + SPACE + WHITE + step
   elsif close
     t = GREY + " " + PRE_END + SPACE + WHITE + close
