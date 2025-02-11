@@ -1,5 +1,6 @@
 require "pathname"
 
+require_relative "utils/ansi"
 require_relative "utils/log"
 
 

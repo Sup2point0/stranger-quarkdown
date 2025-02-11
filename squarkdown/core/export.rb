@@ -1,4 +1,5 @@
 require_relative "../config"
+require_relative "../utils/ansi"
 require_relative "../utils/log"
 
 

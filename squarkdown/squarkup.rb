@@ -1,6 +1,7 @@
 T_START = Time.now
 
 require_relative "../squark.version"
+require_relative "utils/ansi"
 require_relative "utils/log"
 log "#{CYAN}running Squarkdown v#{VERSION}"
 
