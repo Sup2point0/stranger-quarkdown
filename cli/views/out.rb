@@ -14,7 +14,7 @@ def out(
   if step
     t = YELLOW + " " + PRE_STEP + SPACE + WHITE + step
   elsif head
-    t = GREY + " " + PRE_SECT + SPACE + YELLOW + head + "  " + GREY + LINE * (69 - head.length)
+    t = GREY + " " + PRE_SECT + SPACE + YELLOW + head + "  " + GREY + LINE * (42 - head.length)
   elsif close
     t = GREY + " " + PRE_END + SPACE + WHITE + close
   elsif success

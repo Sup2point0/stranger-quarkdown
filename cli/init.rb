@@ -3,14 +3,16 @@ require "pathname"
 require "tty-reader"
 require "tty-cursor"
 
-require_relative "../squark.version"
 require_relative "looks"
-require_relative "../squarkdown/utils/ansi"
-
 require_relative "views/out"
 require_relative "views/wait"
 require_relative "views/step"
 require_relative "views/select"
+require_relative "views/input"
+
+require_relative "../squark.version"
+require_relative "../squarkdown/utils/ansi"
+require_relative "../squarkdown/core/find"
 
 
 $reader = TTY::Reader.new
@@ -23,10 +25,12 @@ $t = 0
 
 
 def script
+  config = load_default_repo_config
+
   puts
 
   ## intro
-  print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!  #{GREY}#{LINE * 69}"
+  print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!  #{GREY}#{LINE * 42}"
   puts
 
   step(
@@ -83,9 +87,10 @@ def script
   out head: "Configuring Paths"
   wait
 
-  step(
-    before: "What’s your project’s #{YELLOW}root#{WHITE} directory? #{GREY}This will be called ROOT.",
-    after: "What’s your project’s root directory?"
+  out
+  config["paths / root"] = input(
+    before: "What directory should Squarkdown output to? #{GREY}This will be called SITE. It’s usually the directory where your site lives.",
+    after: "What directory should Squarkdown output to?"
   )
 end
 
