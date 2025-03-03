@@ -2,7 +2,7 @@
 
 
 @mixin nav-interact($col-hover: $col-charm) {
-  &:hover, &:focus {
+  &:hover, &:focus:not(:focus-visible) {
     color: $col-hover;
     background: light-dark(rgb(black, 3%), rgb(white, 10%));
     cursor: pointer;
@@ -10,7 +10,7 @@
   &:active {
     background: light-dark(rgb(black, 7%), rgb(white, 15%));
   }
-  &:focus-visible:not(:active) {
+  &:focus-visible {
     outline: 1px solid $col-squark;
   }
 }

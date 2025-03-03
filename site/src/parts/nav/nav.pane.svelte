@@ -32,11 +32,13 @@ const delay = 240;
     <NavLink text="FAQ" intern="info/faq" />
   </NavSection>
 
-  <NavSection title="Walkthrough">
+  <NavSection title="Walkthrough" intern="docs/walkthrough">
     <NavLink text="what is squarkdown?" intern="docs/what-is-squarkdown" />
     <NavLink text="project requirements" intern="docs/project-requirements" />
     <NavLink text="squarkdown-flavoured markdown" intern="docs/squarkdown-flavoured-markdown" />
     <NavLink text="project structure" intern="docs/project-structure" />
+    <NavLink text="configuring squarkup for a repo" intern="docs/project-structure" />
+    <NavLink text="configuring squarkup for a file" intern="docs/project-structure" />
   </NavSection>
 
   <NavSection title="Features" intern="features">
@@ -98,7 +100,7 @@ const delay = 240;
 @use 'nav.interact' as *;
 
 
-$base-width: 15rem;
+$base-width: max(15rem, 18vw);
 
 nav {
   width: 100%;
@@ -142,9 +144,10 @@ button#show-hide {
   bottom: 0;
   @include font-code;
   font-size: 150%;
-  background: none;
+  background: light-dark(white, black);
   border: none;
   border-radius: $size / 2;
+  box-shadow: 0 1px 3px $col-shadow;
   @include nav-interact;
 }
 

@@ -32,7 +32,7 @@ nav {
   display: flex;
   flex-flow: row;
   justify-content: space-between;
-  box-shadow: 0 0 4px lightgrey;
+  box-shadow: 0 0 4px $col-shadow;
 }
 
 section {
