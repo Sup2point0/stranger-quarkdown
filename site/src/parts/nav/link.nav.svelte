@@ -22,7 +22,7 @@ interface Props {
 let { text, code, link, intern, extern, children }: Props = $props();
 
 
-let open = $state(true);
+let open = $state(false);
 
 </script>
 
