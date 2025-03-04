@@ -49,6 +49,7 @@ const delay = 240;
   </NavSection>
 
   <NavSection title="Docs" intern="docs">
+    <NavLink code="glossary" intern="docs/glossary" />
     <NavLink code="squarkup.json" intern="docs/squarkup/repo-config" />
     <NavLink text="squark charm" intern="docs/squarkup/file-config">
       <NavLink code="live" intern="docs/squark-charm/live" />

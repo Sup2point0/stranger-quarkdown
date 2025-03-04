@@ -5,7 +5,8 @@ import "#styles/prism-tokyo-night.css";
 
 import NavTop from "#parts/nav/nav.bar.svelte";
 import NavLeft from "#parts/nav/nav.pane.svelte";
-import Header from "#parts/page/header.svelte";
+import PageHeader from "#parts/page/header.svelte";
+import PageFooter from "#parts/page/footer.svelte";
 
 import { page } from "$app/state";
 
@@ -22,7 +23,7 @@ let { children } = $props();
     <NavLeft />
 
     <main>
-      <Header title={page.data.head} />
+      <PageHeader title={page.data.head} />
 
       <article>
         {#if children}
@@ -31,6 +32,8 @@ let { children } = $props();
           <p> Oops, something went wrong! </p>
         {/if}
       </article>
+
+      <PageFooter />
     </main>
   </div>
 </div>

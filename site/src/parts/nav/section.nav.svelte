@@ -10,17 +10,20 @@ import { base } from "$app/paths";
 
 interface Props {
   title: string;
-  intern: string;
+  link?: string;
+    intern?: string;
   children?: any;
 }
 
-let { title, intern, children }: Props = $props();
+let { title, link, intern, children }: Props = $props();
 
 </script>
 
 
 <section>
-  <a href="{base}/{intern}">{title}</a>
+  <a href="{link || `${base}/${intern}`}">
+    {title}
+  </a>
 
   <div class="links">
     {@render children?.()}
