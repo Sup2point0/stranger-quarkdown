@@ -6,6 +6,7 @@ A link in the navigation pane.
 <script lang="ts">
 
 import { slide } from "svelte/transition";
+import { page } from "$app/state";
 import { base } from "$app/paths";
 
 
@@ -26,7 +27,9 @@ let open = $state(true);
 </script>
 
 
-<div class="nav-link">
+<div class="nav-link"
+  class:live={page.url.href.endsWith(link || extern || intern || "...")}
+>
   <a href={link || extern || `${base}/${intern}`}
     target={extern ? "_blank" : "_self"}
   >
@@ -65,6 +68,10 @@ let open = $state(true);
   flex-flow: row nowrap;
   justify-content: stretch;
   align-content: stretch;
+
+  &.live a {
+    color: $col-light;
+  }
 }
 
 a {

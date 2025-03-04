@@ -4,7 +4,7 @@
 @mixin nav-interact($col-hover: $col-charm) {
   &:hover, &:focus:not(:focus-visible) {
     color: $col-hover;
-    background: light-dark(rgb(black, 3%), rgb(white, 10%));
+    background: light-dark(rgb(black, 2.5%), rgb(white, 10%));
     cursor: pointer;
   }
   &:active {

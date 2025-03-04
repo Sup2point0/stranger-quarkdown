@@ -7,7 +7,15 @@ p {
   margin: 1em 0;
   @include font-ui;
   font-weight: 350;
-  line-height: 150%;
+  line-height: 180%;
+
+  em {
+    font-style: italic;
+  }
+
+  strong {
+    font-weight: 500;
+  }
 }
 
 h2,h3 {
@@ -16,17 +24,20 @@ h2,h3 {
 }
 
 h2 {
+  width: 40%;
   padding: 0.5em 0 0.2em;
   font-size: 200%;
   font-weight: 400;
+  border-bottom: 1px solid $col-line;
 }
 
 h3 {
+  padding: 1em 0 0;
   font-size: 120%;
   font-weight: 400;
 }
 
-a {
+:not(sup) > a {
   padding: 1em;
   margin: -1em;
 
@@ -36,4 +47,15 @@ a {
     $bottom: 0.9em,
     $bottom-hover: 0.8em,
   );
+}
+
+sup > a {
+  padding: 0.2em 0.4em;
+  margin-left: 0.2em;
+  @include link;
+  background: color-mix(in oklch, $col-squark, transparent 90%);
+
+  &:hover {
+    background: color-mix(in oklch, $col-charm, transparent 90%);
+  }
 }
