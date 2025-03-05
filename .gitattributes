@@ -1,3 +1,5 @@
+*.md linguist-detectable
+
 *.html -linguist-detectable
 *.css -linguist-detectable
 *.scss -linguist-detectable
