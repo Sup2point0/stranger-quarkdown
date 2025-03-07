@@ -3,13 +3,19 @@ require_relative "../../squarkdown/utils/ansi"
 require_relative "out"
 
 
-def select(text, options, multi: false)
+def select(
+  text = nil,
+  before: nil,
+  after: nil,
+  options:,
+  multi: false
+)
   $i = 0
   $t = options.length
 
   selected = nil
   $cursor.invisible do
-    out step: text
+    out step: before || text
     selected = wait_select(options.to_a, multi:)
   end
 
@@ -17,8 +23,8 @@ def select(text, options, multi: false)
     print PREV, CLEAR
   end
 
-  print PREV
-  out success: text
+  print PREV, CLEAR
+  out success: after || text
   out GREY, selected[0]
 
   return selected[0]

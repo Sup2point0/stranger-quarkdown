@@ -66,7 +66,7 @@ def script
     wait
 
     out
-    choice = select("Continue running this script?", {
+    choice = select("Continue running this script?", options: {
       "Yes" => "all changes will overwrite any existing files.",
       "No" => ""
     })
@@ -88,10 +88,76 @@ def script
   wait
 
   out
-  config["paths / root"] = input(
+  choice = select(
     before: "What directory should Squarkdown output to? #{GREY}This will be called SITE. It’s usually the directory where your site lives.",
-    after: "What directory should Squarkdown output to?"
+    after: "What directory should Squarkdown output to?",
+    options: {
+      "site/" => "",
+      ".site/" => "",
+      "_site/" => "",
+      "other" => "enter manually"
+    }
   )
+  out
+
+  if choice == "other"
+    config["paths / root"] = input(
+      "What directory should Squarkdown output to?"
+    )
+  else
+    config["paths / root"] = choice
+  end
+
+  out
+  choice = select(
+    before: "Where should Squarkdown look for Markdown files to export? #{GREY} You can choose directories to exclude in the next question.",
+    after: "Where should Squarkdown look for Markdown files to export?",
+    options: {
+      "project root (+all subdirectories)" => "default",
+      "project root (only)" => "",
+      "specific directories (configure manually)" => ""
+    }
+  )
+  
+  config["paths / sources"] = case choice
+    when "project root (+all subdirectories)"
+      [""]
+    when "project root (only)"
+      ["."]
+    else
+      []
+  end
+
+  out
+  choice = select(
+    before: "Which directories should Squarkdown ignore? #{GREY} The entire path of the file will be matched against this pattern(s).",
+    after: "Which directories should Squarkdown ignore?",
+    options: {
+      "none" => "",
+      "project root" => "",
+      "directories starting with ." => "",
+      "directories starting with _" => "",
+    }
+  )
+  
+  sep = "(/|\\\\)"
+  config["paths / exclude"] = case choice
+    when "project root"
+      ["."]
+    when "directories starting with ."
+      [sep + "\..*?" + sep]
+    when "directories starting with _"
+      [sep + "_.*?" + sep]
+    else
+      []
+  end
+
+  ## finalise
+  out ""
+  out "Finalising..."
+
+  print PREV, CLEAR
+  out success: "Your #{BLUE}squarkup.json#{WHITE} has been created in #{BLUE}./.squarkdown/#{WHITE}."
 end
 
 

@@ -18,12 +18,10 @@ any key to continue
 
 ------------------------------------------
 
-
 # Configuring Paths
 
 > What’s your project’s [root] directory?
 This will be called ROOT.
-
 _
 
 > What directory should Squarkdown output to?
@@ -33,120 +31,57 @@ This will be called SITE. It’s usually the directory where your site lives.
 ~ .site/
 ~ _site/
 ~ other
-enter manually
-
+  enter manually
 
 > Where should Squarkdown look for Markdown files to export?
+You can choose directories to exclude in the next question.
 
-You can choose directories to exclude in the
-n
-ext question.
-
-~
-p
-roject root
-(
-+
-a
-ll subdirectories)
-default
-
-~ project root
-(
-only
-)
-
+~ project root (+all subdirectories)
+  default
+~ project root (only)
 ~ specific directories (configure manually)
 
->
-W
-hich directories
-s
-hould Squarkdown
-i
-gnore?
-
+> Which directories should Squarkdown ignore?
 ~ none
-~
-p
-roject root
+~ project root
 ~ directories starting with .
 ~ directories starting with _
 
 
 ------------------------------------------
 
+# Exporting Files
 
-#
-E
-xporting Files
-
-
-> Where should Squarkdown export the
-J
-SON file containing all site data, and what should it call the file?
-
+> Where should Squarkdown export the JSON file containing all site data, and what should it call the file?
 ~ [/src/site.json]
-default
-
+  default
 ~ [/src/site-data.json]
 ~ [/src/data/site.json]
 
-> When Squarkdown exports
-[
-.md] files, what should it name the output [.svx] file?
+> When Squarkdown exports [.md] files, what should it name the output [.svx] file?
 
-~
-~
-content.svx
-default
-
+~ ~content.svx
+  default
 ~ _content.svx
 ~ content.svx
-
-~
-o
-ther
-enter manually
+~ other
+  enter manually
 
 
->
-S
-hould Squarkdown
-a
-lso auto-generate a [+page.svelte] or [+page.js] for each exported [.md] file?
-~
-[
-+page.svelte], [+page.js]
+> Should Squarkdown also auto-generate a [+page.svelte] or [+page.js] for each exported [.md] file?
+~ [+page.svelte], [+page.js]
 ~ [+page.svelte] only
 ~ [+page.js] only
-
 ~ vary by page
-configure manually
-
+  configure manually
 ~ no
 
 ---
->
-Squarkdown will need template
-s
-for these
-other auto-generated files. Where can it find
-t
-hem?
-Provide a path relative to
-S
-ite.
-
-~ [src/lib/
-b
-ases/
-]
-
+> Squarkdown will need templates for these other auto-generated files. Where can it find them? Provide a path relative to SITE.
+~ [src/lib/bases/]
 ~ [src/parts/bases/]
 ~ other
-enter manually
-
+  enter manually
 ~ cancel
 ---
 
