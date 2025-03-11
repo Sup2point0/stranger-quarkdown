@@ -13,6 +13,7 @@ log "documenting squarkup schema..."
 content = File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
 
 schema = JSON.parse(content)
+Version = schema["version"]
 
 ## Render
 rows = schema["properties"].map do |field, props|
@@ -37,3 +38,8 @@ File.write(route, text)
 
 
 log done: true
+
+
+def get_version
+  return Version
+end

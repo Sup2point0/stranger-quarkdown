@@ -161,9 +161,9 @@
     },
     "docs/reference/squarkup-json.md": {
       "path": "docs/reference/squarkup-json.md",
-      "last_deploy": "2025-03-11 17:52:19 +0000",
-      "slocs": 38,
-      "chars": 3613,
+      "last_deploy": "2025-03-11 18:19:12 +0000",
+      "slocs": 78,
+      "chars": 4367,
       "isIndex": false,
       "flags": [
         "live"

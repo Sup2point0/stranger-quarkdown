@@ -9,8 +9,13 @@ require_relative "helpers/render-table"
 
 log "syncing squarkup schema..."
 
+version = ARGV[0]
+
 route = Routes.root / "squarkdown/resources/squarkup-schema.json"
-dest = Routes.site / "static/squarkup-schema/latest.json"
-FileUtils.cp(route, dest)
+dest = Routes.site / "static/squarkup-schema"
+
+dest.mkpath()
+FileUtils.cp(route, dest / "latest.json")
+FileUtils.cp(route, dest / "v#{version}.json")
 
 log done: true
