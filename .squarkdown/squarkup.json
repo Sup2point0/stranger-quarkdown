@@ -6,7 +6,7 @@
   "paths / site": "site",
   "paths / sources": [
     ".",
-    "docs"
+    "docs/"
   ],
   "paths / exclude": null,
   "paths / dest": "src/routes/(docs)/",

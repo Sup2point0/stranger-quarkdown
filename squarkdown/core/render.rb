@@ -90,7 +90,7 @@ def inject_style(content, data:, repo_config:)
     "@use './#{File.join(path, style)}' as *;"
   end
 
-  content = if content.include?("<style") then
+  content = if content.include?("<style") and content.include?(("</style>")) then
     content.sub(/<style( lang="scss")?>/,
       """<style lang=\"scss\">
 

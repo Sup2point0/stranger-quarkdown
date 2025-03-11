@@ -69,7 +69,7 @@ let open = $state(false);
   justify-content: stretch;
   align-content: stretch;
 
-  &.live a {
+  &:where(.live) a {
     color: $col-light;
   }
 }

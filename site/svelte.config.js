@@ -4,6 +4,8 @@ import { sveltePreprocess } from "svelte-preprocess";
 import { mdsvex } from "mdsvex";
 import remarkFootnotes from "remark-footnotes";
 import remarkIndexFootnotes from "remark-numbered-footnote-labels";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import scss_config from "./scss-config.js";
 
@@ -40,6 +42,10 @@ const config = {
       remarkPlugins: [
         remarkFootnotes,
         remarkIndexFootnotes,
+      ],
+      rehypePlugins: [
+        rehypeSlug,
+        rehypeAutolinkHeadings,
       ],
     }),
     sveltePreprocess({

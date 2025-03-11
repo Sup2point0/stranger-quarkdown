@@ -33,13 +33,58 @@ const delay = 240;
   </NavSection>
 
   <NavSection title="Walkthrough" intern="docs/walkthrough">
-    <NavLink text="quickstart" intern="docs/quickstart" />
-    <NavLink text="what is squarkdown?" intern="docs/what-is-squarkdown" />
-    <NavLink text="project requirements" intern="docs/project-requirements" />
-    <NavLink text="squarkdown-flavoured markdown" intern="docs/squarkdown-flavoured-markdown" />
-    <NavLink text="project structure" intern="docs/project-structure" />
-    <NavLink text="configuring squarkup for a repo" intern="docs/repo-config" />
-    <NavLink text="configuring squarkup for a file" intern="docs/file-config" />
+    <NavLink text="quickstart" intern="docs/walkthrough/quickstart" />
+    <NavLink text="what is squarkdown?" intern="docs/walkthrough/what-is-squarkdown" />
+    <NavLink text="project requirements" intern="docs/walkthrough/project-requirements" />
+    <NavLink text="squarkdown-flavoured markdown" intern="docs/walkthrough/squarkdown-flavoured-markdown" />
+    <NavLink text="project structure" intern="docs/walkthrough/project-structure" />
+    <NavLink text="configuring squarkup for a repo" intern="docs/walkthrough/repo-config" />
+    <NavLink text="configuring squarkup for a file" intern="docs/walkthrough/file-config" />
+  </NavSection>
+
+  <NavSection title="Docs" intern="docs">
+    <NavLink text="glossary" intern="docs/glossary" />
+    <NavLink code="squarkup.json" intern="docs/reference/squarkup-json">
+      <NavLink code="repo" intern="docs/reference/squark-json#" />
+      <NavLink code="paths / site" intern="docs/reference/squark-json#site" />
+      <NavLink code="paths / sources" intern="docs/reference/squark-json#sources" />
+      <NavLink code="paths / exclude" intern="docs/reference/squark-json#exclude" />
+      <NavLink code="paths / dest" intern="docs/reference/squark-json#dest" />
+      <NavLink code="out / file-name" intern="docs/reference/squark-json#file-name" />
+      <NavLink code="out / site-data" intern="docs/reference/squark-json#site-data" />
+      <NavLink code="opts / if-no-dir" intern="docs/reference/squark-json#if-no-dir" />
+      <NavLink code="opts / on-error" intern="docs/reference/squark-json#on-error" />
+      <NavLink code="bases / path" intern="docs/reference/squark-json#path" />
+      <NavLink code="bases / page.svelte" intern="docs/reference/squark-json#page.svelte" />
+      <NavLink code="bases / page.js" intern="docs/reference/squark-json#page.js" />
+      <NavLink code="styles / path" intern="docs/reference/squark-json#path" />
+      <NavLink code="styles / page-styles" intern="docs/reference/squark-json#page-styles" />
+      <NavLink code="assets / path" intern="docs/reference/squark-json#path" />
+      <NavLink code="assets / site-assets" intern="docs/reference/squark-json#site-assets" />
+      <NavLink code="assets / extensions" intern="docs/reference/squark-json#extensions" />
+      <NavLink code="fonts / queries" intern="docs/reference/squark-json#queries" />
+    </NavLink>
+    <NavLink text="squark charm" intern="docs/reference/squark-charm">
+      <NavLink code="live" intern="docs/reference/squark-charm#live" />
+      <NavLink code="flags" intern="docs/reference/squark-charm#flags" />
+      <NavLink code="dest" intern="docs/reference/squark-charm#dest" />
+      <NavLink code="title" intern="docs/reference/squark-charm#title" />
+      <NavLink code="desc" intern="docs/reference/squark-charm#desc" />
+      <NavLink code="head" intern="docs/reference/squark-charm#head" />
+      <NavLink code="capt" intern="docs/reference/squark-charm#capt" />
+      <NavLink code="style" intern="docs/reference/squark-charm#style" />
+      <NavLink code="duality" intern="docs/reference/squark-charm#duality" />
+      <NavLink code="index" intern="docs/reference/squark-charm#index" />
+      <NavLink code="tags" intern="docs/reference/squark-charm#tags" />
+      <NavLink code="date" intern="docs/reference/squark-charm#date" />
+      <NavLink code="clean" intern="docs/reference/squark-charm#clean" />
+    </NavLink>
+    <NavLink text="squarks" intern="docs/reference/squarks">
+      <NavLink code="leave" intern="docs/reference/squarks/leave" />
+      <NavLink code="only" intern="docs/reference/squarks/only" />
+    </NavLink>
+    <NavLink text="site data" intern="docs/reference/site-data" />
+    <NavLink text="cleanup" intern="docs/reference/cleanup" />
   </NavSection>
 
   <NavSection title="Features" intern="features">
@@ -47,51 +92,6 @@ const delay = 240;
     <NavLink text="assets" intern="features/assets" />
     <NavLink text="SCSS" intern="features/scss" />
     <NavLink text="fonts" intern="features/fonts" />
-  </NavSection>
-
-  <NavSection title="Docs" intern="docs">
-    <NavLink code="glossary" intern="docs/glossary" />
-    <NavLink code="squarkup.json" intern="docs/squarkup-json">
-      <NavLink code="repo" intern="docs/squark-json#" />
-      <NavLink code="paths / site" intern="docs/squark-json#site" />
-      <NavLink code="paths / sources" intern="docs/squark-json#sources" />
-      <NavLink code="paths / exclude" intern="docs/squark-json#exclude" />
-      <NavLink code="paths / dest" intern="docs/squark-json#dest" />
-      <NavLink code="out / file-name" intern="docs/squark-json#file-name" />
-      <NavLink code="out / site-data" intern="docs/squark-json#site-data" />
-      <NavLink code="opts / if-no-dir" intern="docs/squark-json#if-no-dir" />
-      <NavLink code="opts / on-error" intern="docs/squark-json#on-error" />
-      <NavLink code="bases / path" intern="docs/squark-json#path" />
-      <NavLink code="bases / page.svelte" intern="docs/squark-json#page.svelte" />
-      <NavLink code="bases / page.js" intern="docs/squark-json#page.js" />
-      <NavLink code="styles / path" intern="docs/squark-json#path" />
-      <NavLink code="styles / page-styles" intern="docs/squark-json#page-styles" />
-      <NavLink code="assets / path" intern="docs/squark-json#path" />
-      <NavLink code="assets / site-assets" intern="docs/squark-json#site-assets" />
-      <NavLink code="assets / extensions" intern="docs/squark-json#extensions" />
-      <NavLink code="fonts / queries" intern="docs/squark-json#queries" />
-    </NavLink>
-    <NavLink text="squark charm" intern="docs/squark-charm">
-      <NavLink code="live" intern="docs/squark-charm#live" />
-      <NavLink code="flags" intern="docs/squark-charm#flags" />
-      <NavLink code="dest" intern="docs/squark-charm#dest" />
-      <NavLink code="title" intern="docs/squark-charm#title" />
-      <NavLink code="desc" intern="docs/squark-charm#desc" />
-      <NavLink code="head" intern="docs/squark-charm#head" />
-      <NavLink code="capt" intern="docs/squark-charm#capt" />
-      <NavLink code="style" intern="docs/squark-charm#style" />
-      <NavLink code="duality" intern="docs/squark-charm#duality" />
-      <NavLink code="index" intern="docs/squark-charm#index" />
-      <NavLink code="tags" intern="docs/squark-charm#tags" />
-      <NavLink code="date" intern="docs/squark-charm#date" />
-      <NavLink code="clean" intern="docs/squark-charm#clean" />
-    </NavLink>
-    <NavLink text="squarks" intern="docs/squarks">
-      <NavLink code="leave" intern="docs/squarks/leave" />
-      <NavLink code="only" intern="docs/squarks/only" />
-    </NavLink>
-    <NavLink text="site data" intern="docs/squarkup/site-data" />
-    <NavLink text="cleanup" intern="docs/squarkup/cleanup" />
   </NavSection>
 
   <NavSection title="Info" intern="info/synopsis">

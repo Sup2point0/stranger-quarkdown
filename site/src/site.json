@@ -1,8 +1,8 @@
 {
   "meta": {
-    "exported": "2025-02-11",
-    "file_count": 11,
-    "page_count": 3
+    "exported": "2025-03-11",
+    "file_count": 18,
+    "page_count": 12
   },
   "index": {},
   "tags": {},
@@ -26,11 +26,30 @@
       "date": null,
       "date_display": null
     },
+    "faq.md": {
+      "path": "faq.md",
+      "last_deploy": "2025-03-03 16:12:15 +0000",
+      "slocs": 27,
+      "chars": 2208,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/faq",
+      "title": "FAQ",
+      "head": "FAQ",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
     "docs/README.md": {
       "path": "docs/README.md",
-      "last_deploy": "2025-01-28 19:25:27 +0000",
-      "slocs": 40,
-      "chars": 704,
+      "last_deploy": "2025-03-04 20:42:10 +0000",
+      "slocs": 6,
+      "chars": 148,
       "isIndex": false,
       "flags": [
         "live"
@@ -59,6 +78,158 @@
       "head": "Making Full Use of Squarkdown",
       "capt": "A Further Walkthrough of Additional Squarkdown Features",
       "desc": "A further walkthrough of additional Squarkdown features",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/glossary.md": {
+      "path": "docs/glossary.md",
+      "last_deploy": "2025-03-11 11:48:40 +0000",
+      "slocs": 14,
+      "chars": 846,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/glossary",
+      "title": "Glossary",
+      "head": "Glossary of Squarkdown Terminology",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/rationale.md": {
+      "path": "docs/rationale.md",
+      "last_deploy": "2025-03-03 16:14:36 +0000",
+      "slocs": 21,
+      "chars": 1587,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/rationale",
+      "title": "Rationale",
+      "head": "Rationale",
+      "capt": "What did I create Squarkdown for?",
+      "desc": "What did I create Squarkdown for?",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/reference/cleanup.md": {
+      "path": "docs/reference/cleanup.md",
+      "last_deploy": "2025-03-11 14:50:39 +0000",
+      "slocs": 34,
+      "chars": 1269,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/reference/cleanup",
+      "title": "Cleanup",
+      "head": "Cleanup",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/reference/squark-charm.md": {
+      "path": "docs/reference/squark-charm.md",
+      "last_deploy": "2025-03-11 15:51:08 +0000",
+      "slocs": 96,
+      "chars": 3257,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/reference/squark-charm",
+      "title": "Squark Charm",
+      "head": "Squark Charm",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/reference/squarkup-json.md": {
+      "path": "docs/reference/squarkup-json.md",
+      "last_deploy": "2025-03-11 16:46:13 +0000",
+      "slocs": 38,
+      "chars": 3149,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/reference/squarkup-json",
+      "title": "squarkup.json",
+      "head": "squarkup.json",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/project-requirements.md": {
+      "path": "docs/walkthrough/project-requirements.md",
+      "last_deploy": "2025-03-11 16:00:15 +0000",
+      "slocs": 10,
+      "chars": 867,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/project-requirements",
+      "title": "Project Requirements",
+      "head": "Project Requirements",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/squarkdown-flavoured-markdown.md": {
+      "path": "docs/walkthrough/squarkdown-flavoured-markdown.md",
+      "last_deploy": "2025-03-11 16:00:18 +0000",
+      "slocs": 88,
+      "chars": 2740,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/squarkdown-flavoured-markdown",
+      "title": "Squarkdown-flavoured Markdown",
+      "head": "Squarkdown-flavoured Markdown",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/what-is-squarkdown.md": {
+      "path": "docs/walkthrough/what-is-squarkdown.md",
+      "last_deploy": "2025-03-11 16:00:21 +0000",
+      "slocs": 19,
+      "chars": 1664,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/what-is-squarkdown",
+      "title": "What is Squarkdown?",
+      "head": "What is Squarkdown?",
+      "capt": null,
+      "desc": "An introduction to Stranger Quarkdown",
       "index": [],
       "tags": [],
       "date": null,
