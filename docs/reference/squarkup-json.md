@@ -36,3 +36,43 @@ Text
 | `assets / extensions` | `string[]` | `jpg` `jpeg` `png` `svg` `ttf` `otf` `woff` | `["jpg", "jpeg", "png", "svg"]` | Only files with these extensions will be preprocessed by Squarkdown. |
 | `fonts / queries` | `string[]` |  | `[]` | Individual URL query params for requesting fonts from Google Fonts. |
 <!-- #SQUARK inject. -->
+
+
+<br>
+
+
+## Example
+
+Here’s what a Markdown file with a full squark charm would look like:
+
+```json
+{
+  "$schema": "https://sup2point0.github.io/stranger-quarkdown/squarkup-schema/latest.json",
+  
+  "repo": "Stranger Quarkdown",
+  
+  "paths / site": "site/",
+  "paths / sources": [
+    ".",
+    "docs/"
+  ],
+  "paths / exclude": [
+    "stranger-quarkdown/README.md"
+  ],
+  "out / file-name": "~content",
+  "out / site-data": "src/site.json",
+  
+  "opts / if-no-dir": ["warn", "create"],
+  "opts / on-error": "kill",
+  
+  "assets / path": ".assets",
+  "assets / site-assets": ".assets/site",
+  "assets / extensions": [
+    "jpg", "jpeg", "png", "svg", "ttf"
+  ],
+  "fonts / queries": [
+    "Fira+Mono:wght@400;500;700",
+    "Sora:wght@100..800"
+  ]
+}
+```
