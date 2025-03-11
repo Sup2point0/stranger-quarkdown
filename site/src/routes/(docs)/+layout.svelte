@@ -16,6 +16,12 @@ let { children } = $props();
 </script>
 
 
+<svelte:head>
+  <title> {page.data?.title} </title>
+  <meta name="description" content={page.data?.description} />
+</svelte:head>
+
+
 <div class="ui-root-layout">
   <NavTop />
 

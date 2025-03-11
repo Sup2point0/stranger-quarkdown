@@ -13,6 +13,10 @@
   font-size: 100%;
 }
 
+:not(pre code, pre code *)::selection {
+  background: color-mix(in oklch, $col-squark, transparent 60%) !important;
+}
+
 
 code {
   @include font-code;
@@ -31,9 +35,4 @@ pre {
   font-size: 100%;
   border-radius: 0.4rem;
   scrollbar-width: thin;
-}
-
-
-:not(pre code, pre code *)::selection {
-  background: color-mix(in oklch, $col-squark, transparent 60%) !important;
 }
