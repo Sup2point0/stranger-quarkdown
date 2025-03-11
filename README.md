@@ -3,6 +3,7 @@
 ![Stranger Quarkdown: A Successor to Quarkdown](.assets/squark-cover.png)
 
 [![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
+[![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)
 
 </div>
 
