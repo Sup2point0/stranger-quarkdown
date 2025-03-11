@@ -17,7 +17,7 @@
 
 When Squarkdown processes files, it will only export them if they indicate they are **active** and provide necessary metadata. This takes the form of an expanded squark known as the **squark charm**, which looks like this:
 
-```md
+```mdion
 <!-- #SQUARK live!
 | dest = path/to/destination
 | capt = This is a squark charm!
