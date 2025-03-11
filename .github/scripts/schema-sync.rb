@@ -16,6 +16,4 @@ dest = Routes.site / "static/squarkup-schema"
 
 dest.mkpath()
 FileUtils.cp(route, dest / "latest.json")
-FileUtils.cp(route, dest / "v#{version}.json")
-
-log done: true
+FileUtils.cp(route, dest / "v#{version}.json") if version

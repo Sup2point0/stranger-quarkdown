@@ -23,4 +23,5 @@ end
 task :schema do
   require_relative ".github/scripts/schema-doc.rb"
   ruby ".github/scripts/schema-sync.rb", get_version
+  log done: true
 end

@@ -37,9 +37,6 @@ text = existing.sub(pattern, repl)
 File.write(route, text)
 
 
-log done: true
-
-
 def get_version
   return Version
 end
