@@ -98,9 +98,9 @@ def script
       "other" => "enter manually"
     }
   )
-  out
 
   if choice == "other"
+    out
     config["paths / root"] = input(
       "What directory should Squarkdown output to?"
     )
@@ -152,12 +152,123 @@ def script
       []
   end
 
+  ## exporting files
+  out
+  out head: "Exporting Files"
+  wait
+
+  out
+  choice = select(
+    "Where should Squarkdown export the JSON file containing all site data, and what should it call the file?",
+    options: {
+      "/src/site.json" => "default",
+      "/src/site-data.json" => "",
+      "/src/data/site.json" => ""
+    }
+  )
+
+  config["out / site-data"] = choice
+
+  out
+  choice = select(
+    before: "When Squarkdown exports #{BLUE}.md#{WHITE} files, what should it name the output #{BLUE}.svx#{WHITE} file?",
+    after: "When Squarkdown exports .md files, what should it name the output .svx file?",
+    options: {
+      "~content.svx" => "default",
+      "_content.svx" => "",
+      "content.svx" => "",
+      "other" => "enter manually"
+    }
+  )
+  
+  if choice == "other"
+    config["out / file-name"] = ""  # TODO other
+  else
+    config["out / file-name"] = choice
+  end
+
+  out
+  choice = select(
+    before: "Should Squarkdown also auto-generate a #{BLUE}+page.svelte~#{WHITE} or #{BLUE}+page.js~#{WHITE} for each exported #{BLUE}.md~#{WHITE} file?",
+    after: "Should Squarkdown also auto-generate a +page.svelte~ or +page.js~ for each exported .md~ file?",
+    options: {
+      "+page.svelte, page.js" => "",
+      "+page.svelte only" => "",
+      "+page.js only" => "",
+      "vary by page" => "configure manually",
+      "no" => "",
+    }
+  )
+
+  # TODO
+
+  ## extra features
+  out
+  out head: "Extras"
+  wait
+
+  out
+  choice = select(
+    "Any other features you’d like to enable?",
+    options: {
+      "assets preprocessing" => "copy assets from project root to site/static/",
+      "SCSS preprocessing" => "collect global SCSS stylesheets into a SCSS config for SvelteKit",
+      "Google Fonts preprocessing" => "automatically build Google Fonts query",
+    },
+    multi: true,
+  )
+
+  ## final touches
+  out
+  out head: "Final Touches"
+  wait
+
+  out
+  choice = select(
+    "How should Squarkdown handle errors when processing files?",
+    options: {
+      "kill" => "stop execution",
+      "warn" => "log error and skip file",
+    }
+  )
+
+  config["opts / on-error"] = choice
+
+  out
+  choice = select(
+    "What should Squarkdown do when an output directory doesn’t exist?",
+    options: {
+      "warn + create the directory" => "notify, but create the directory",
+      "ignore + create the directory" => "silently create the directory",
+      "warn + do nothing" => "notify and skip file",
+      "ignore" => "silently skip file",
+    }
+  )
+
+  config["opts / on-missing-dir"] = case choice
+    when "warn + create the directory"
+      ["warn", "create"]
+    when "ignore + create the directory"
+      ["ignore", "create"]
+    when "warn + do nothing"
+      ["warn"]
+    else
+      ["ignore"]
+  end
+
   ## finalise
   out ""
   out "Finalising..."
 
   print PREV, CLEAR
   out success: "Your #{BLUE}squarkup.json#{WHITE} has been created in #{BLUE}./.squarkdown/#{WHITE}."
+  wait
+  
+  step "If you selected options that needed to be filled manually, you can find them indicated with placeholder comments."
+  step(
+    before: "For more help or guidance, please visit the docs on GitHub at #{CYAN}https://sup2point0.github.io/stranger-quarkdown/docs",
+    after: "For more help or guidance, please visit the docs on GitHub at https://sup2point0.github.io/stranger-quarkdown/docs"
+  )
 end
 
 

@@ -15,3 +15,6 @@ CLEAR = "\r\33[2K\r"
 
 UP = "^[[A"
 DOWN = "^[[B"
+
+ROMAN = "\033[0m"
+ITALIC = "\033[3m"

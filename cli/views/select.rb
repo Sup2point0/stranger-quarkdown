@@ -7,11 +7,15 @@ def select(
   text = nil,
   before: nil,
   after: nil,
-  options:,
+  options: nil,
   multi: false
 )
   $i = 0
   $t = options.length
+
+  if multi
+    options = options.map { |opt, desc| [opt, desc, false] }
+  end
 
   selected = nil
   $cursor.invisible do
@@ -25,14 +29,24 @@ def select(
 
   print PREV, CLEAR
   out success: after || text
-  out GREY, selected[0]
+  if multi
+    if selected.empty?
+      out GREY, "none"
+    else
+      out GREY, selected.join(", ")
+    end
+  else
+    out GREY, selected[0]
+  end
 
   return selected[0]
 end
 
 
 def wait_select(options, multi:)
-  i = $i
+  last_index = $i
+  changed_selection = false
+
   render_options(options, multi:)
 
   loop do
@@ -41,19 +55,21 @@ def wait_select(options, multi:)
     case c
       when " "
         if multi
-          options[$i][0] = !options[$i][0]
+          options[$i][2] = !options[$i][2]
+          changed_selection = true
         end
       when "\r"
         if multi
-          return options.select { |opt| opt[0] }.map { |opt| opt[1] }
+          return options.select { |opt| opt[2] }.map { |opt| opt[0] }
         else
           return options[$i]
         end
     end
 
     # only redraw if index changed
-    if $i != i
-      i = $i
+    if last_index != $i or changed_selection
+      last_index = $i
+      changed_selection = true
 
       $t.times do
         print PREV, CLEAR
@@ -66,18 +82,27 @@ end
 
 def render_options(options, multi:)
   options.each_with_index do |opt, idx|
-    label, desc = opt
+    label, desc, state = opt
 
     if multi
-      if opt[1][0]
-        out CYAN, FILLED_DOT, " ", WHITE, label, GREY, " ", desc[1]
+      if idx == $i
+        if state
+          out CYAN, FILLED_DOT, " ", WHITE, label, GREY, " ", ITALIC, desc, ROMAN
+        else
+          out GREY, DOT, " ", WHITE, label, GREY, " ", ITALIC, desc, ROMAN
+        end
+      
       else
-        out GREY, DOT, " ", label
+        if state
+          out CYAN, FILLED_DOT, " ", WHITE, label
+        else
+          out GREY, DOT, " ", label
+        end
       end
     
     else
       if idx == $i
-        out CYAN, FILLED_DOT, " ", WHITE, label, GREY, " ", desc
+        out CYAN, FILLED_DOT, " ", WHITE, label, GREY, " ", ITALIC, desc, ROMAN
       else
         out GREY, DOT, " ", label
       end
