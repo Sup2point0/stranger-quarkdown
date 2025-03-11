@@ -28,12 +28,17 @@ def try_prep_assets(repo_config:)
 
   exts = repo_config["assets / extensions"]
   files = route.glob(
-    "**/*.#{exts.join(',')}",
+    "**/*.{#{exts.join(',')}}",
     File::FNM_DOTMATCH
   )
   
   i = 0
   total = files.length
+
+  if total == 0
+    log error: "no assets found in #{BLUE}#{route.relative_path_from(Routes.root)}/"
+    return
+  end
 
   log success: "found #{total} assets in #{BLUE}#{route.relative_path_from(Routes.root)}"
   log "transferring assets..."
