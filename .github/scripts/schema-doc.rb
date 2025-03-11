@@ -23,8 +23,8 @@ content = rows.join("\n")
 ## Inject
 pattern = /<!-- #SQUARK inject\? -->.*?<!-- #SQUARK inject. -->/m
 repl = """<!-- #SQUARK inject? -->
-| Field | Type | Description |
-| :---- | :--- | :---------- |
+| Field | Type | Values | Default | Description |
+| :---- | :--- | :----- | :------ | :---------- |
 #{content}
 <!-- #SQUARK inject. -->"""
 

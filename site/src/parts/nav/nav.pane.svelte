@@ -170,6 +170,7 @@ $size: 2.5rem;
   right: 0;
   bottom: 0;
   background: white;
+  border-radius: $size / 2;
 }
 
 button#show-hide {

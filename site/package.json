@@ -6,11 +6,12 @@
 		"dev": "vite",
       "devx": "npm run prep && vite --open",
 		"prep": "npm run squark",
-      "prepx": "npm run squarkx",
+      "prepx": "npm run squarkx && npm run schema",
 		"squark": "cd .. && rake squark[fonts,scss] && cd site",
       "squarkx": "cd .. && rake squark[fonts,scss,assets] && cd site",
 		"build": "vite build",
       "buildx": "npm run prepx && vite build",
+    "schema": "cd ../.github/scripts && ruby schema-doc.rb && ruby schema-sync.rb",
 		"preview": "vite preview"
 	},
 	"devDependencies": {

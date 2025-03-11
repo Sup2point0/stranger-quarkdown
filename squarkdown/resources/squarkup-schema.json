@@ -24,7 +24,7 @@
     "paths / sources":
     {
       "title": "Source Directories",
-      "description": "[relative to root ]\nSquarkdown recursively searches these directories for `.md` files to squarkup.\nUse `\".\"` to target `.md` files in your project’s root.\nSet this field to `null` to disable Markdown exporting entirely.",
+      "description": "[ relative to root ]\nSquarkdown recursively searches these directories for `.md` files to squarkup.\nUse `\".\"` to target `.md` files in your project’s root.\nSet this field to `null` to disable Markdown exporting entirely.",
       "type": ["array", "null"],
       "items": {"type": "string"},
       "default": null
