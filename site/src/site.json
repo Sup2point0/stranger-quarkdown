@@ -1,8 +1,8 @@
 {
   "meta": {
-    "exported": "2025-03-11",
-    "file_count": 18,
-    "page_count": 12
+    "exported": "2025-03-13",
+    "file_count": 19,
+    "page_count": 15
   },
   "index": {},
   "tags": {},
@@ -28,16 +28,35 @@
     },
     "faq.md": {
       "path": "faq.md",
-      "last_deploy": "2025-03-03 16:12:15 +0000",
-      "slocs": 27,
-      "chars": 2208,
+      "last_deploy": "2025-03-12 17:40:45 +0000",
+      "slocs": 28,
+      "chars": 2244,
       "isIndex": false,
       "flags": [
         "live"
       ],
       "dest": "info/faq",
-      "title": "FAQ",
-      "head": "FAQ",
+      "title": "Frequently Asked Questions",
+      "head": "Frequently Asked Questions",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "synopsis.md": {
+      "path": "synopsis.md",
+      "last_deploy": "2025-03-12 17:40:54 +0000",
+      "slocs": 47,
+      "chars": 1810,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/synopsis",
+      "title": "Synopsis",
+      "head": "Hacking the Mainframe",
       "capt": null,
       "desc": null,
       "index": [],
@@ -47,9 +66,9 @@
     },
     "docs/README.md": {
       "path": "docs/README.md",
-      "last_deploy": "2025-03-04 20:42:10 +0000",
-      "slocs": 6,
-      "chars": 148,
+      "last_deploy": "2025-03-12 17:46:14 +0000",
+      "slocs": 8,
+      "chars": 211,
       "isIndex": false,
       "flags": [
         "live"
@@ -104,14 +123,14 @@
     },
     "docs/rationale.md": {
       "path": "docs/rationale.md",
-      "last_deploy": "2025-03-03 16:14:36 +0000",
+      "last_deploy": "2025-03-12 17:43:40 +0000",
       "slocs": 21,
       "chars": 1587,
       "isIndex": false,
       "flags": [
         "live"
       ],
-      "dest": "docs/rationale",
+      "dest": "info/rationale",
       "title": "Rationale",
       "head": "Rationale",
       "capt": "What did I create Squarkdown for?",
@@ -142,9 +161,9 @@
     },
     "docs/reference/squark-charm.md": {
       "path": "docs/reference/squark-charm.md",
-      "last_deploy": "2025-03-11 15:51:08 +0000",
-      "slocs": 96,
-      "chars": 3257,
+      "last_deploy": "2025-03-13 09:21:19 +0000",
+      "slocs": 98,
+      "chars": 3426,
       "isIndex": false,
       "flags": [
         "live"
@@ -161,9 +180,9 @@
     },
     "docs/reference/squarkup-json.md": {
       "path": "docs/reference/squarkup-json.md",
-      "last_deploy": "2025-03-11 19:39:53 +0000",
-      "slocs": 78,
-      "chars": 4367,
+      "last_deploy": "2025-03-13 09:23:12 +0000",
+      "slocs": 83,
+      "chars": 4569,
       "isIndex": false,
       "flags": [
         "live"
@@ -173,6 +192,25 @@
       "head": "squarkup.json",
       "capt": null,
       "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/README.md": {
+      "path": "docs/walkthrough/README.md",
+      "last_deploy": "2025-03-12 17:48:37 +0000",
+      "slocs": 13,
+      "chars": 592,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough",
+      "title": "Walkthrough",
+      "head": "Walkthrough",
+      "capt": null,
+      "desc": "A full walkthrough on how to use all of Squarkdown’s features.",
       "index": [],
       "tags": [],
       "date": null,
@@ -192,6 +230,25 @@
       "head": "Project Requirements",
       "capt": null,
       "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/quickstart.md": {
+      "path": "docs/walkthrough/quickstart.md",
+      "last_deploy": "2025-03-12 17:44:22 +0000",
+      "slocs": 266,
+      "chars": 6472,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/quickstart",
+      "title": "Using Squarkdown in a SvelteKit project",
+      "head": "Using Squarkdown in a SvelteKit project",
+      "capt": "A guided walkthrough on how to use Squarkdown in a SvelteKit project",
+      "desc": "A guided walkthrough on how to use Squarkdown in a SvelteKit project",
       "index": [],
       "tags": [],
       "date": null,

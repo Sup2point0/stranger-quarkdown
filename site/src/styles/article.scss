@@ -3,8 +3,7 @@
 @use 'src/styles/mixins/~links' as *;
 
 
-p, td {
-  margin: 1em 0;
+p, li, td {
   @include font-ui;
   font-weight: 350;
   line-height: 180%;
@@ -16,6 +15,10 @@ p, td {
   strong {
     font-weight: 500;
   }
+}
+
+p {
+  margin: 1em 0;
 }
 
 h2,h3 {
@@ -37,7 +40,7 @@ h3 {
   font-weight: 400;
 }
 
-:not(sup) > a {
+:not(sup, .quicklinks p) > a:not(.footnote-backref) {
   padding: 1em;
   margin: -1em;
 
@@ -47,6 +50,30 @@ h3 {
     $bottom: 0.9em,
     $bottom-hover: 0.8em,
   );
+}
+
+sup > a,
+a.footnote-backref {
+  padding: 0.2em 0.4em;
+  margin-left: 0.2em;
+  @include link;
+  background: color-mix(in oklch, $col-squark, transparent 90%);
+
+  &:hover {
+    background: color-mix(in oklch, $col-charm, transparent 90%);
+  }
+}
+
+ul {
+  li {
+    padding-left: 0.5em;
+    margin-left: 1em;
+    line-height: 200%;
+
+    &::marker {
+      color: $col-shadow;
+    }
+  }
 }
 
 table {
@@ -75,40 +102,29 @@ table {
   }
 }
 
-sup > a {
-  padding: 0.2em 0.4em;
-  margin-left: 0.2em;
-  @include link;
-  background: color-mix(in oklch, $col-squark, transparent 90%);
-
-  &:hover {
-    background: color-mix(in oklch, $col-charm, transparent 90%);
-  }
-}
-
 
 .quicklinks {
-  margin: -2em 0;
+  margin: -2em 0 0;
   padding: 0;
 
   a {
-    padding: 0.25em 0.5em;
-    background: rgb(grey, 4%);
-    background: color-mix(in oklch, $col-squark, transparent 90%);
-    border-radius: 0.5em;
-
-    &::after {
-      display: none;
-    }
-
-    &:hover, &:focus {
-      background: color-mix(in oklch, $col-charm, transparent 90%);
-    }
+    @include block-link;
   }
 
   .separator {
-    padding: 0 1.5em;
+    padding: 0 0.5em;
     font-family: 'Segoe UI', system-ui, sans-serif;
     color: $col-line;
+  }
+}
+
+.footnotes {
+  padding: 1em 0 0 1.5em;
+  margin: 3em 0 0;
+  color: $col-text-deut;
+  border-top: 1px solid $col-line;
+
+  hr {
+    display: none;
   }
 }

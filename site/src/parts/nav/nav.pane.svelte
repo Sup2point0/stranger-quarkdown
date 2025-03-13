@@ -50,17 +50,17 @@ const delay = 240;
       <NavLink code="paths / sources" intern="docs/reference/squark-json#sources" />
       <NavLink code="paths / exclude" intern="docs/reference/squark-json#exclude" />
       <NavLink code="paths / dest" intern="docs/reference/squark-json#dest" />
-      <NavLink code="out / file-name" intern="docs/reference/squark-json#file-name" />
-      <NavLink code="out / site-data" intern="docs/reference/squark-json#site-data" />
-      <NavLink code="opts / if-no-dir" intern="docs/reference/squark-json#if-no-dir" />
-      <NavLink code="opts / on-error" intern="docs/reference/squark-json#on-error" />
+      <NavLink code="out / file&#8209;name" intern="docs/reference/squark-json#file-name" />
+      <NavLink code="out / site&#8209;data" intern="docs/reference/squark-json#site-data" />
+      <NavLink code="opts / if&#8209;no&#8209;dir" intern="docs/reference/squark-json#if-no-dir" />
+      <NavLink code="opts / on&#8209;error" intern="docs/reference/squark-json#on-error" />
       <NavLink code="bases / path" intern="docs/reference/squark-json#path" />
       <NavLink code="bases / page.svelte" intern="docs/reference/squark-json#page.svelte" />
       <NavLink code="bases / page.js" intern="docs/reference/squark-json#page.js" />
       <NavLink code="styles / path" intern="docs/reference/squark-json#path" />
-      <NavLink code="styles / page-styles" intern="docs/reference/squark-json#page-styles" />
+      <NavLink code="styles / page&#8209;styles" intern="docs/reference/squark-json#page-styles" />
       <NavLink code="assets / path" intern="docs/reference/squark-json#path" />
-      <NavLink code="assets / site-assets" intern="docs/reference/squark-json#site-assets" />
+      <NavLink code="assets / site&#8209;assets" intern="docs/reference/squark-json#site-assets" />
       <NavLink code="assets / extensions" intern="docs/reference/squark-json#extensions" />
       <NavLink code="fonts / queries" intern="docs/reference/squark-json#queries" />
     </NavLink>
@@ -125,7 +125,7 @@ const delay = 240;
 @use 'nav.interact' as *;
 
 
-$base-width: max(15rem, 18vw);
+$base-width: max(15rem, 20vw);
 
 nav {
   width: 100%;

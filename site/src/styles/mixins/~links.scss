@@ -38,3 +38,21 @@
     }
   }
 }
+
+@mixin block-link {
+  padding: 0.25em 0.5em;
+  background: color-mix(in oklch, $col-squark, transparent 90%);
+  border: none;
+  border-radius: 0.5em;
+
+  @include link;
+
+  &::after {
+    display: none;
+  }
+
+  &:hover, &:focus {
+    cursor: pointer;
+    background: color-mix(in oklch, $col-charm, transparent 90%);
+  }
+}

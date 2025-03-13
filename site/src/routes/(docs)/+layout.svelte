@@ -65,7 +65,7 @@ let { children } = $props();
 
 main {
   width: 100%;
-  padding: 1rem 4rem 3rem 2rem;
+  padding: 1rem 3rem 3rem 2rem;
   overflow-y: scroll;
   background: light-dark(white, black);
 }
