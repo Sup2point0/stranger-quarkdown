@@ -1,10 +1,10 @@
 squark/cli/init.rb
 ------------------------------------------
 
-> Welcome to Squarkdown! You’re currently running version [#{}].
+<!-- > Welcome to Squarkdown! You’re currently running version [#{}].
   any key to continue
 > This script will help you get your project’s [squarkup.json] set up!
-> Don’t worry if you’re unsure what a question means, just skip it You can always manually edit [squarkup.json] afterwards. Note no files will be created until the very end of the script.
+> Don’t worry if you’re unsure what a question means, just skip it You can always manually edit [squarkup.json] afterwards. Note no files will be created until the very end of the script. -->
 
 ---
 > Woah, looks like you already have an existing [.squarkdown/] directory!
@@ -24,63 +24,63 @@ squark/cli/init.rb
   This will be called ROOT.
 _
 
-> What directory should Squarkdown output to?
+<!-- > What directory should Squarkdown output to?
   This will be called SITE. It’s usually the directory where your site lives.
 ~ site/
 ~ .site/
 ~ _site/
-~ other enter manually
+~ other enter manually -->
 
-> Where should Squarkdown look for Markdown files to export?
+<!-- > Where should Squarkdown look for Markdown files to export?
   You can choose directories to exclude in the next question.
 ~ project root (+ all subdirectories) default
 ~ project root (only)
-~ specific directories (configure manually)
+~ specific directories (configure manually) -->
 
-> Which directories should Squarkdown ignore?
+<!-- > Which directories should Squarkdown ignore?
 ~ none
 ~ project root
 ~ directories starting with .
-~ directories starting with _
+~ directories starting with _ -->
 
 
 ------------------------------------------
 
 # Exporting Files
 
-> Where should Squarkdown export the JSON file containing all site data, and what should it call the file?
+<!-- > Where should Squarkdown export the JSON file containing all site data, and what should it call the file?
 ~ [/src/site.json] default
 ~ [/src/site-data.json]
-~ [/src/data/site.json]
+~ [/src/data/site.json] -->
 
-> When Squarkdown exports [.md] files, what should it name the output [.svx] file?
+<!-- > When Squarkdown exports [.md] files, what should it name the output [.svx] file?
 ~ ~content.svx default
 ~ _content.svx
 ~ content.svx
-~ other enter manually
+~ other enter manually -->
 
-> Should Squarkdown also auto-generate a [+page.svelte] or [+page.js] for each exported [.md] file?
+<!-- > Should Squarkdown also auto-generate a [+page.svelte] or [+page.js] for each exported [.md] file?
 ~ [+page.svelte], [+page.js]
 ~ [+page.svelte] only
 ~ [+page.js] only
 ~ vary by page configure manually
-~ no
+~ no -->
 
 ---
-> Squarkdown will need templates for these other auto-generated files. Where can it find them?
+<!-- > Squarkdown will need templates for these other auto-generated files. Where can it find them?
   Provide a path relative to Site.
 ~ [src/lib/bases/]
 ~ [src/parts/bases/]
 ~ other enter manually
-~ cancel
+~ cancel -->
 ---
 
-> When Squarkdown applies page styles, where should it get the stylesheets from?
+<!-- > When Squarkdown applies page styles, where should it get the stylesheets from?
 ~ [SITE/src/styles/]
 ~ [SITE/src/styles/bases]
 ~ [SITE/src/styles/pages]
 ~ other enter manually
-~ skip
+~ skip -->
 
 
 ------------------------------------------
@@ -98,19 +98,19 @@ _
 
 # Preprocessing Assets
 
-> Where should Squarkdown look for assets?
+<!-- > Where should Squarkdown look for assets?
   Squarkdown will copy the contents of this directory to [Site/static/].
 ~ [./assets]
 ~ [./.assets]
 ~ other enter manually
-~ cancel
+~ cancel -->
 
-> Do you have a folder containing site-specific assets?
+<!-- > Do you have a folder containing site-specific assets?
   These files will be copied directly to the root of [Site/static/], instead of being kept in that folder.
 ~ [/site/]
 ~ [/.site/]
 ~ other enter manually
-~ cancel
+~ cancel -->
 
 > What types of assets should Squarkdown copy?
 |= .png

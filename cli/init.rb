@@ -89,7 +89,7 @@ def script
 
   out
   choice = select(
-    before: "What directory should Squarkdown output to? #{GREY}This will be called SITE. It’s usually the directory where your site lives.",
+    before: "What directory should Squarkdown output to? #{GREY} This will be called SITE. It’s usually the directory where your site lives.",
     after: "What directory should Squarkdown output to?",
     options: {
       "site/" => "",
@@ -200,7 +200,47 @@ def script
     }
   )
 
-  # TODO
+  ## autogeneration
+  if choice.include? "page."
+    out
+    choice = select(
+      "Squarkdown will need templates for these other auto-generated files. Where can it find them?",
+      options: {
+        "src/lib/bases/" => "",
+        "src/parts/bases/" => "",
+        "other" => "enter manually",
+        "cancel" => "",
+      }
+    )
+
+    case choice
+      when "cancel"
+      when "other"
+        # TODO enter manually
+      else
+        config["bases / path"] = choice
+    end
+
+    out
+    choice = select(
+      "When Squarkdown applies page styles, where should it get the stylesheets from?",
+      options: {
+        "src/styles/" => "",
+        "src/styles/bases" => "",
+        "src/styles/pages" => "",
+        "other" => "enter manually",
+        "skip" => "",
+      }
+    )
+
+    case choice
+      when "skip"
+      when "other"
+        # TODO
+      else
+        config["styles / path"] = choice
+    end
+  end
 
   ## extra features
   out
@@ -217,6 +257,74 @@ def script
     },
     multi: true,
   )
+
+  if choice and choice.include? "assets preprocessing"
+    out
+    choice = select(
+      before: "Where should Squarkdown look for assets? #{GREY} Squarkdown will copy the contents of this directory to #{BLUE}static/#{GREY}.",
+      after: "Where should Squarkdown look for assets?",
+      options: {
+        "./assets/" => "",
+        "./.assets/" => "",
+        "other" => "enter manually",
+        "cancel" => "",
+      }
+    )
+
+    case choice
+      when "cancel"
+      when "other"
+        # TODO
+      when "./assets/"
+        config["assets / path"] = choice
+        assets = "assets/"
+      when "./.assets/"
+        config["assets / path"] = choice
+        assets = ".assets/"
+    end
+
+    out
+    choice = select(
+      before: "Do you have a folder containing site-specific assets? #{GREY} These files will be copied directly to the root of #{BLUE}static/#{GREY}.",
+      after: "Do you have a folder containing site-specific assets?",
+      options: {
+        "#{assets || '/'}site/" => "",
+        "#{assets || '/'}.site/" => "",
+        "other" => "enter manually",
+        "cancel" => "",
+      }
+    )
+
+    case choice
+      when "cancel"
+      when "other"
+        # TODO enter manually
+      else
+        config["assets / site"] = choice
+    end
+
+    out
+    choice = select(
+      "What types of assets should Squarkdown copy?",
+      options: {
+        ".png" => true,
+        ".jpg / .jpeg" => true,
+        ".svg" => "",
+        ".webp" => "",
+        "other" => "configure manually",
+        "cancel" => "",
+      },
+      multi: true,
+    )
+
+    case choice
+      when "cancel"
+      when "other"
+        config["assets / extensions"] = []
+      else
+        config["assets / extensions"] = choice
+    end
+  end
 
   ## final touches
   out

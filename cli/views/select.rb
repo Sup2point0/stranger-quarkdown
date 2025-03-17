@@ -14,7 +14,13 @@ def select(
   $t = options.length
 
   if multi
-    options = options.map { |opt, desc| [opt, desc, false] }
+    options = options.map { |opt, desc|
+      [
+        opt,
+        if desc == true then "" else desc end,
+        if desc == true then true else false end
+      ]
+    }
   end
 
   selected = nil
