@@ -1,6 +1,6 @@
 # Rationale
 <!-- #SQUARK live!
-| dest = docs/rationale
+| dest = info/rationale
 | capt = What did I create Squarkdown for?
 -->
 

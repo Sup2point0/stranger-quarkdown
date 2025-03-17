@@ -3,8 +3,13 @@
 | dest = docs/reference/squarkup-json
 -->
 
-Text
+<div class="quicklinks" align="center">
 
+[Example](#example)
+
+</div>
+
+`squarkup.json` goes in a `.squarkdown/` directory in your project’s root directory, configuring how Squarkdown should squarkup the repo.
 
 <br>
 

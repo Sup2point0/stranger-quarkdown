@@ -1,6 +1,7 @@
 # FAQ
 <!-- #SQUARK live!
 | dest = info/faq
+| head = Frequently Asked Questions
 -->
 
 ### Why does Squarkdown only work with SvelteKit and MDsveX?

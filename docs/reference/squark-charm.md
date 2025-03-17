@@ -9,6 +9,8 @@
 
 </div>
 
+The squark charm is an extended squark which should go under the `# h1` title of a page, providing metadata and directives for how Squarkdown should squarkup the page.
+
 
 <br>
 
