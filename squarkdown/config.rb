@@ -16,9 +16,10 @@ class RoutesConfig
     # find directory with .squarkdown folder
     @repo = nil
 
-    @root.ascend do |dir|
+    @root.parent.ascend do |dir|
       if (dir / ".squarkdown").exist?
         @repo = dir
+        break
       end
     end
 
