@@ -1,11 +1,11 @@
 # Making Full Use of Squarkdown
 <!-- #SQUARK live!
-| dest = further-walkthrough
+| dest = docs/further-walkthrough
 | desc = A further walkthrough of additional Squarkdown features
 | capt = A Further Walkthrough of Additional Squarkdown Features
 -->
 
-Squarkdown has grown much beyond moving Markdown files around into a full-blown content deployment framework.[^ framework] There are many other features that can help with automating the process of building up a website, which can be enabled at an instant.
+Squarkdown has grown much beyond moving Markdown files around into a full-blown content deployment framework.[^framework] There are many other features that can help with automating the process of building up a website, which can be enabled at an instant.
 
 [^framework]: Okay, ‘framework’ is a bit of a stretch.
 
@@ -73,7 +73,7 @@ project/
    README.md
 ```
 
-Getting SvelteKit to look there for assets is gonna be more than a little fiddly (maybe ever impossible), so Squarkdown can save you the pain and just copy all asset files from `assets/` to 'site/static/`.
+Getting SvelteKit to look there for assets is gonna be more than a little fiddly (maybe ever impossible), so Squarkdown can save you the pain and just copy all asset files from `assets/` to `site/static/`.
 
 > Now of course, this essentially duplicates the files locally, which can waste a lot of storage space (and assets tend to be the largest part of a repo too) – there’s not really a permanent solution to this, but if you're not working on the site, you can clear the `static/` folder, since the files will be regenerated next time anyway.
 

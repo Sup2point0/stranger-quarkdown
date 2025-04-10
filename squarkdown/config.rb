@@ -1,13 +1,15 @@
 require "pathname"
 
+require_relative "utils/ansi"
 require_relative "utils/log"
 
 
 class RoutesConfig
-  attr_reader :root, :repo, :site
+  attr_reader :root, :repo
+  attr_accessor :site
 
   def initialize()
-    @set = false
+    log "locating routes..."
 
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
@@ -32,12 +34,6 @@ class RoutesConfig
     # default, but can be overridden
     @site = repo / "site"
   end
-
-  def set_site(path)
-    raise if @set
-    @site = path
-  end
-
 end
 
 

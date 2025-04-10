@@ -3,6 +3,7 @@
 ![Stranger Quarkdown: A Successor to Quarkdown](.assets/squark-cover.png)
 
 [![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
+[![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)
 
 </div>
 
@@ -29,6 +30,7 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.m
 - Collects global `.scss` files to build an `scss-config.js` file
 
 ### Future
+- Search root directory without recursively searching every directory
 - Allow arbitrary JSON data in squark charm
 - Correct internal relative links to correct absolute links in production
 

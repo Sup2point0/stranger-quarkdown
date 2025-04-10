@@ -1,6 +1,6 @@
 # Using Squarkdown in a SvelteKit project
 <!-- #SQUARK live!
-| dest = walkthrough
+| dest = docs/walkthrough/quickstart
 | capt = A guided walkthrough on how to use Squarkdown in a SvelteKit project
 -->
 

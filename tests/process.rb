@@ -58,13 +58,14 @@ class SquarkupProcess < Minitest::Test
 | style = #AUTO / test
 | duality = dark
 | index = tests
-| shard = #INDEX / testing
+| tags = #INDEX / testing
 | date = 1984 April 1
 -->"""
 
     data = extract_data(
       lines: content.split("\n"),
-      repo_config: RepoConfig
+      repo_config: RepoConfig,
+      fill_defaults: true
     )
 
     assert data.dest == "testing/fields"
@@ -72,10 +73,10 @@ class SquarkupProcess < Minitest::Test
     assert data.capt == "A unit test"
     assert data.title == "Squarkdown is awesome"
     assert data.desc == "Making sure everything works"
-    assert data.style == ["article", "test"]
+    assert data.style == ["test"]
     assert data.duality == "dark"
     assert data.index == ["tests"]
-    assert data.shard == ["tests", "testing"]
+    assert data.tags == ["tests", "testing"]
     assert data.date
   end
 
@@ -87,16 +88,17 @@ class SquarkupProcess < Minitest::Test
 
     data = extract_data(
       lines: content.split("\n"),
-      repo_config: RepoConfig
+      repo_config: RepoConfig,
+      fill_defaults: true
     )
 
     assert data.dest == "testing/defaults"
     assert data.head == "Testing"
     assert data.title == "Testing"
-    assert data.style == ["article"]
+    assert data.style == []
     assert data.duality == "light"
     assert data.index == []
-    assert data.shard == []
+    assert data.tags == []
   end
 
   def test_head

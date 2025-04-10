@@ -1,15 +1,7 @@
+require_relative "ansi"
+
+
 $started = false
-
-
-WHITE = "\033[0m"
-GREY = "\033[90m"
-
-RED = "\033[31m"
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-BLUE = "\033[94m"
-PINK = "\033[95m"
-CYAN = "\033[96m"
 
 
 def log(
@@ -24,7 +16,7 @@ def log(
   if !$started
     out += ">>> #{PINK}Squark#{GREY} / "
   elsif done
-    out += ">>> #{PINK}Squark#{GREY} ✓ "
+    out += ">>> #{PINK}Squark#{GREY} / "
   elsif success
     out += "           #{CYAN}✓ "
   elsif error

@@ -1,6 +1,7 @@
 require "fileutils"
 
 require_relative "../config"
+require_relative "../utils/ansi"
 require_relative "../utils/log"
 
 
@@ -16,21 +17,28 @@ end
 
 
 def try_prep_assets(repo_config:)
-  route = Routes.repo / repo_config["assets"]
+  route = Routes.repo / repo_config["assets / path"]
   raise "asset path not found" unless route
 
-  if repo_config["site-assets"]
-    site_route = Routes.repo / repo_config["site-assets"]
+  if repo_config["assets / site-assets"]
+    site_route = Routes.repo / repo_config["assets / site-assets"]
   else
     site_route = nil
   end
 
+  exts = repo_config["assets / extensions"]
   files = route.glob(
-    "**/*.{png,jpg,jpeg,svg}",
+    "**/*.{#{exts.join(',')}}",
     File::FNM_DOTMATCH
   )
+  
   i = 0
   total = files.length
+
+  if total == 0
+    log error: "no assets found in #{BLUE}#{route.relative_path_from(Routes.root)}/"
+    return
+  end
 
   log success: "found #{total} assets in #{BLUE}#{route.relative_path_from(Routes.root)}"
   log "transferring assets..."

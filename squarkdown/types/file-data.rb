@@ -36,12 +36,12 @@ class FileData
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
-  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :shard, :date, :date_display, :clean
+  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :tags, :date, :date_display, :clean
 
-  Fields = [:dest, :title, :desc, :head, :capt, :style, :duality, :index, :shard, :date, :clean]
+  Fields = [:dest, :title, :desc, :head, :capt, :style, :duality, :index, :tags, :date, :clean]
 
 
-  def initialize(source = nil)
+  def initialize(source = nil, repo_config: nil)
     ## Meta
     @path = source && source.relative_path_from(Routes.repo).to_s
     @last_deploy = source && source.mtime
@@ -60,10 +60,16 @@ class FileData
     @desc = nil  # capt
     @head = nil
     @capt = nil
-    @style = ["article"]
+
+    if repo_config and repo_config["styles / base-style"]
+      @style = [repo_config["styles / base-style"]]
+    else
+      @style = []
+    end
+
     @duality = nil
     @index = []
-    @shard = nil  # index
+    @tags = nil  # index
     @date = nil
     @date_display = nil
     @clean = []
@@ -115,19 +121,24 @@ class FileData
 
     when :style
       styles = _split_(value)
+      base = repo_config["styles / base-style"]
 
       if styles.delete("#auto")
-        styles.unshift("article")
-      elsif !styles.include?("article")
-        styles.unshift "article"
+        if base
+          styles.unshift(base)
+        end
+      elsif base
+        if !styles.include?(base)
+          styles.unshift(base)
+        end
       end
 
       @style = styles
 
-    when :shard
-      @shard = _split_(value)
-      if @shard.delete("#index")
-        @shard.unshift(*@index)
+    when :tags
+      @tags = _split_(value)
+      if @tags.delete("#index")
+        @tags.unshift(*@index)
       end
 
     when :date
@@ -181,7 +192,7 @@ class FileData
     when :title then @title = @head
     when :desc then @desc = @capt
     when :duality then @duality = "light"
-    when :shard then @shard = @index
+    when :tags then @tags = @index
 
     end
   end
@@ -190,14 +201,14 @@ class FileData
   def export_internal
     return self.vars_sym.slice(
       :path, :last_deploy, :slocs, :chars, :isIndex, :flags,
-      :dest, :title, :head, :capt, :desc, :index, :shard, :date, :date_display
+      :dest, :title, :head, :capt, :desc, :index, :tags, :date, :date_display
     )
   end
 
   def export_external
     return self.vars_str.slice(
       "path", "last_deploy", "flags",
-      "title", "head", "capt", "desc", "index", "shard", "date_display"
+      "title", "head", "capt", "desc", "index", "tags", "date_display"
     )
   end
 

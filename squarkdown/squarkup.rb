@@ -1,9 +1,13 @@
 T_START = Time.now
 
+require_relative "../squark.version"
+require_relative "utils/ansi"
+require_relative "utils/log"
+log "#{CYAN}running Squarkdown v#{VERSION}"
+
 require_relative "config"
 require_relative "types/site-data"
 require_relative "types/file-data"
-require_relative "utils/log"
 
 require_relative "core/find"
 require_relative "core/process"
@@ -43,11 +47,11 @@ if ARGV.include? "scss"
   prep_scss(repo_config:)
 end
 
-if repo_config["sources"].nil? and repo_config["exclude"].nil?
+if repo_config["paths / sources"].nil? and repo_config["paths / exclude"].nil?
   log done: true
   exit(0)
 else
-  if repo_config["bases"].nil?
+  if repo_config["bases / path"].nil?
     log error: "no file base set!"
   end
 end
@@ -58,15 +62,15 @@ log "locating file base..."
 
 base = {}
 
-base["page.svelte"] = find_file_base("page.svelte", repo_config:)
-if base["page.svelte"].nil?
+base["bases / page.svelte"] = find_file_base("bases / page.svelte", repo_config:)
+if base["bases / page.svelte"].nil?
   log error: "no base for #{BLUE}+page.svelte#{RED} found"
 else
   log success: "found base for #{BLUE}+page.svelte#{CYAN}"
 end
 
-base["page.js"] = find_file_base("page.js", repo_config:)
-if base["page.js"].nil?
+base["bases / page.js"] = find_file_base("bases / page.js", repo_config:)
+if base["bases / page.js"].nil?
   log error: "no base for #{BLUE}+page.js#{RED} found"
 else
   log success: "found base for #{BLUE}+page.js#{CYAN}"
@@ -91,16 +95,15 @@ site_data.meta[:file_count] = total
 ## export articles
 log "exporting files..."
 
-i = 1
 index_files = []
 
-files.each do |file|
-  log "#{i}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
+files.each_with_index do |file, i|
+  log "#{i+1}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 
   begin
     ## process
     lines = file.readlines
-    file_data = FileData.new(file)
+    file_data = FileData.new(file, repo_config:)
     file_data = extract_data(lines:, data: file_data, repo_config:)
     
     if file_data.nil?
@@ -130,18 +133,17 @@ files.each do |file|
     file_data.index.each do |index|
       site_data.update_index(index:, page: file_data.path)
     end
-    file_data.shard.each do |shard|
-      site_data.update_shard(shard:, page: file_data.path)
+    file_data.tags.each do |tags|
+      site_data.update_tags(tags:, page: file_data.path)
     end
 
   rescue => e
-    if repo_config["on-error"] == "kill"
+    if repo_config["opts / on-error"] == "kill"
       raise
     else
       log error: "#{e.class}: #{e.message}"
     end
-  ensure
-    i += 1
+  
   end
 end
 
@@ -158,7 +160,7 @@ log "saving site data..."
 site_data.meta[:page_count] = site_data.pages.length
 
 save_site_data(site_data.export_json, repo_config:)
-log success: "saved site data to #{BLUE}#{repo_config['site-data']}"
+log success: "saved site data to #{BLUE}#{repo_config['out / site-data']}"
 
 
 ## finish

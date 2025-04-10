@@ -1,0 +1,16 @@
+@use 'src/styles/mixins/~colours' as *;
+
+
+@mixin nav-interact($col-hover: $col-charm) {
+  &:hover, &:focus:not(:active, :focus-visible) {
+    color: $col-hover;
+    background: light-dark(rgb(black, 2.5%), rgb(white, 10%));
+    cursor: pointer;
+  }
+  &:active {
+    background: light-dark(rgb(black, 7%), rgb(white, 15%));
+  }
+  &:focus-visible {
+    outline: 1px solid $col-squark;
+  }
+}

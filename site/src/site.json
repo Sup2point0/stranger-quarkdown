@@ -1,0 +1,296 @@
+{
+  "meta": {
+    "exported": "2025-03-17",
+    "file_count": 19,
+    "page_count": 15
+  },
+  "index": {},
+  "tags": {},
+  "pages": {
+    "edu.md": {
+      "path": "edu.md",
+      "last_deploy": "2025-01-28 14:13:04 +0000",
+      "slocs": 23,
+      "chars": 1452,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/decoded",
+      "title": "decoded: Stranger Quarkdown",
+      "head": "*decoded*: Stranger Quarkdown",
+      "capt": null,
+      "desc": "Lessons learnt from development",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "faq.md": {
+      "path": "faq.md",
+      "last_deploy": "2025-03-12 17:40:45 +0000",
+      "slocs": 28,
+      "chars": 2244,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/faq",
+      "title": "Frequently Asked Questions",
+      "head": "Frequently Asked Questions",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "synopsis.md": {
+      "path": "synopsis.md",
+      "last_deploy": "2025-03-12 17:40:54 +0000",
+      "slocs": 47,
+      "chars": 1810,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/synopsis",
+      "title": "Synopsis",
+      "head": "Hacking the Mainframe",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/README.md": {
+      "path": "docs/README.md",
+      "last_deploy": "2025-03-12 17:46:14 +0000",
+      "slocs": 8,
+      "chars": 211,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs",
+      "title": "Squarkdown Docs",
+      "head": "Squarkdown Docs",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/further-walkthrough.md": {
+      "path": "docs/further-walkthrough.md",
+      "last_deploy": "2025-01-28 20:18:12 +0000",
+      "slocs": 145,
+      "chars": 4503,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/further-walkthrough",
+      "title": "Making Full Use of Squarkdown",
+      "head": "Making Full Use of Squarkdown",
+      "capt": "A Further Walkthrough of Additional Squarkdown Features",
+      "desc": "A further walkthrough of additional Squarkdown features",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/glossary.md": {
+      "path": "docs/glossary.md",
+      "last_deploy": "2025-03-11 11:48:40 +0000",
+      "slocs": 14,
+      "chars": 846,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/glossary",
+      "title": "Glossary",
+      "head": "Glossary of Squarkdown Terminology",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/rationale.md": {
+      "path": "docs/rationale.md",
+      "last_deploy": "2025-03-12 17:43:40 +0000",
+      "slocs": 21,
+      "chars": 1587,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "info/rationale",
+      "title": "Rationale",
+      "head": "Rationale",
+      "capt": "What did I create Squarkdown for?",
+      "desc": "What did I create Squarkdown for?",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/reference/cleanup.md": {
+      "path": "docs/reference/cleanup.md",
+      "last_deploy": "2025-03-11 14:50:39 +0000",
+      "slocs": 34,
+      "chars": 1269,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/reference/cleanup",
+      "title": "Cleanup",
+      "head": "Cleanup",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/reference/squark-charm.md": {
+      "path": "docs/reference/squark-charm.md",
+      "last_deploy": "2025-03-13 09:21:19 +0000",
+      "slocs": 98,
+      "chars": 3426,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/reference/squark-charm",
+      "title": "Squark Charm",
+      "head": "Squark Charm",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/reference/squarkup-json.md": {
+      "path": "docs/reference/squarkup-json.md",
+      "last_deploy": "2025-03-17 14:32:36 +0000",
+      "slocs": 83,
+      "chars": 4569,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/reference/squarkup-json",
+      "title": "squarkup.json",
+      "head": "squarkup.json",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/README.md": {
+      "path": "docs/walkthrough/README.md",
+      "last_deploy": "2025-03-12 17:48:37 +0000",
+      "slocs": 13,
+      "chars": 592,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough",
+      "title": "Walkthrough",
+      "head": "Walkthrough",
+      "capt": null,
+      "desc": "A full walkthrough on how to use all of Squarkdown’s features.",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/project-requirements.md": {
+      "path": "docs/walkthrough/project-requirements.md",
+      "last_deploy": "2025-03-11 16:00:15 +0000",
+      "slocs": 10,
+      "chars": 867,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/project-requirements",
+      "title": "Project Requirements",
+      "head": "Project Requirements",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/quickstart.md": {
+      "path": "docs/walkthrough/quickstart.md",
+      "last_deploy": "2025-03-12 17:44:22 +0000",
+      "slocs": 266,
+      "chars": 6472,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/quickstart",
+      "title": "Using Squarkdown in a SvelteKit project",
+      "head": "Using Squarkdown in a SvelteKit project",
+      "capt": "A guided walkthrough on how to use Squarkdown in a SvelteKit project",
+      "desc": "A guided walkthrough on how to use Squarkdown in a SvelteKit project",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/squarkdown-flavoured-markdown.md": {
+      "path": "docs/walkthrough/squarkdown-flavoured-markdown.md",
+      "last_deploy": "2025-03-11 16:00:18 +0000",
+      "slocs": 88,
+      "chars": 2740,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/squarkdown-flavoured-markdown",
+      "title": "Squarkdown-flavoured Markdown",
+      "head": "Squarkdown-flavoured Markdown",
+      "capt": null,
+      "desc": null,
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    },
+    "docs/walkthrough/what-is-squarkdown.md": {
+      "path": "docs/walkthrough/what-is-squarkdown.md",
+      "last_deploy": "2025-03-11 16:00:21 +0000",
+      "slocs": 19,
+      "chars": 1664,
+      "isIndex": false,
+      "flags": [
+        "live"
+      ],
+      "dest": "docs/walkthrough/what-is-squarkdown",
+      "title": "What is Squarkdown?",
+      "head": "What is Squarkdown?",
+      "capt": null,
+      "desc": "An introduction to Stranger Quarkdown",
+      "index": [],
+      "tags": [],
+      "date": null,
+      "date_display": null
+    }
+  }
+}

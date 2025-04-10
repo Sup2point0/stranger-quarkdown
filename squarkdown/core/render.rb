@@ -75,7 +75,7 @@ end
 def _import_index_(data:, repo_config:)
   return (
     if data.isIndex
-      then "import IndexView from \"#{repo_config["index-view"]}\";"
+      then "import IndexView from \"#{repo_config["bases / index-view"]}\";"
     else ""
     end
   )
@@ -83,14 +83,14 @@ end
 
 
 def inject_style(content, data:, repo_config:)
-  path = repo_config["page-styles"]
+  path = repo_config["styles / page-styles"]
   if path.nil? then return content end
   
   styles = data.style.map do |style|
-    "@use './#{path}/#{style}' as *;"
+    "@use './#{File.join(path, style)}' as *;"
   end
 
-  content = if content.include?("<style") then
+  content = if content.include?("<style") and content.include?(("</style>")) then
     content.sub(/<style( lang="scss")?>/,
       """<style lang=\"scss\">
 

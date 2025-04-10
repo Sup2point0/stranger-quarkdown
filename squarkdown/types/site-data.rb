@@ -3,7 +3,7 @@ require "date"
 
 
 class SiteData
-  attr_accessor :meta, :pages, :index, :shards
+  attr_accessor :meta, :pages, :index, :tagss
 
   def initialize
     @meta = {
@@ -13,7 +13,7 @@ class SiteData
     }
     @pages = Hash.new
     @index = Hash.new
-    @shard = Hash.new
+    @tags = Hash.new
   end
 
   def add_page(page)
@@ -36,11 +36,11 @@ class SiteData
     end
   end
 
-  def update_shard(shard:, page:)
-    if !@shard.include?(shard)
-      @shard[shard] = [page]
+  def update_tags(tags:, page:)
+    if !@tags.include?(tags)
+      @tags[tags] = [page]
     else
-      @shard[shard].push(page)
+      @tags[tags].push(page)
     end
   end
 
@@ -48,7 +48,7 @@ class SiteData
     data = {
       meta: @meta,
       index: @index,
-      shard: @shard,
+      tags: @tags,
       pages: @pages.map {|page, data| [page, data.export_internal]}.to_h,
     }
     return JSON.pretty_generate(data)

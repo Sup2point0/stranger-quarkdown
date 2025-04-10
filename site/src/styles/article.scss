@@ -1,0 +1,130 @@
+@use 'src/styles/mixins/~colours' as *;
+@use 'src/styles/mixins/~fonts' as *;
+@use 'src/styles/mixins/~links' as *;
+
+
+p, li, td {
+  @include font-ui;
+  font-weight: 350;
+  line-height: 180%;
+
+  em {
+    font-style: italic;
+  }
+
+  strong {
+    font-weight: 500;
+  }
+}
+
+p {
+  margin: 1em 0;
+}
+
+h2,h3 {
+  @include font-ui;
+  color: $col-charm;
+}
+
+h2 {
+  width: 40%;
+  padding: 0.5em 0 0.2em;
+  font-size: 200%;
+  font-weight: 400;
+  border-bottom: 1px solid $col-line;
+}
+
+h3 {
+  padding: 1em 0 0;
+  font-size: 120%;
+  font-weight: 400;
+}
+
+:not(sup, .quicklinks p) > a:not(.footnote-backref) {
+  padding: 1em;
+  margin: -1em;
+
+  @include underlined-link(
+    $left: 1em,
+    $width: calc(100% - 2em),
+    $bottom: 0.9em,
+    $bottom-hover: 0.8em,
+  );
+}
+
+sup > a,
+a.footnote-backref {
+  padding: 0.2em 0.4em;
+  margin-left: 0.2em;
+  @include link;
+  background: color-mix(in oklch, $col-squark, transparent 90%);
+
+  &:hover {
+    background: color-mix(in oklch, $col-charm, transparent 90%);
+  }
+}
+
+ul {
+  li {
+    padding-left: 0.5em;
+    margin-left: 1em;
+    line-height: 200%;
+
+    &::marker {
+      color: $col-shadow;
+    }
+  }
+}
+
+table {
+  margin: 2rem 0;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 0.5em 0.75em;
+    margin: 0;
+    border: 1px solid $col-line;
+  }
+
+  th {
+    @include font-ui;
+    font-weight: 500;
+    background: light-dark(rgb(grey, 3%), rgb(white, 20%));
+  }
+
+  code {
+    padding: 0.25em 0.4em;
+    @include font-code;
+    font-size: 95%;
+    color: $col-light;
+    background: rgb(grey, 5%);
+    border-radius: 0.5em;
+  }
+}
+
+
+.quicklinks {
+  margin: -2em 0 0;
+  padding: 0;
+
+  a {
+    @include block-link;
+  }
+
+  .separator {
+    padding: 0 0.5em;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: $col-line;
+  }
+}
+
+.footnotes {
+  padding: 1em 0 0 1.5em;
+  margin: 3em 0 0;
+  color: $col-text-deut;
+  border-top: 1px solid $col-line;
+
+  hr {
+    display: none;
+  }
+}

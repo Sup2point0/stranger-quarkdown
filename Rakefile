@@ -1,17 +1,21 @@
 task default: :squark
-VERSION = "2.3.2"
-
-require_relative "squarkdown/utils/log"
-log "running Squarkdown v#{VERSION}"
 
 
 ## Tasks
+
 task :test do
   Dir.glob("./tests/**/*.rb").each { |file| require file }
 end
 
+task :schema do
+  require_relative ".github/scripts/schema-doc.rb"
+  ruby ".github/scripts/schema-sync.rb", get_version
+  log done: true
+end
+
 
 ## Scripts
+
 task :squark, :fonts, :assets, :scss do |task, args|
   args.with_defaults({
     fonts: nil,
@@ -19,4 +23,8 @@ task :squark, :fonts, :assets, :scss do |task, args|
     scss: nil
   })
   ruby "squarkdown/squarkup.rb", *args
+end
+
+task :init do
+  ruby "cli/init.rb"
 end

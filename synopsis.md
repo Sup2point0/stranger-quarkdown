@@ -1,4 +1,8 @@
 # Hacking the Mainframe
+<!-- #SQUARK live!
+| dest = info/synopsis
+| title = Synopsis
+-->
 
 *Stranger Quarkdown* is a successor to *Quarkdown*, one of my favourite projects. I say ‘a’ successor, because firstly it’s not indended to replace Quarkdown, it just satisfies a different purpose – integrating with Svelte/SvelteKit, rather than generating raw static websites – and secondly there ofc might always be other child projects.
 

@@ -1,0 +1,38 @@
+@use 'src/styles/mixins/~colours' as *;
+@use 'src/styles/mixins/~fonts' as *;
+
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  color-scheme: light dark;
+  font-size: 100%;
+}
+
+:not(pre code, pre code *)::selection {
+  background: color-mix(in oklch, $col-squark, transparent 60%) !important;
+}
+
+
+code {
+  @include font-code;
+
+  p & {
+    padding: 0.25em 0.4em;
+    font-size: 95%;
+    color: $col-light;
+    background: rgb(grey, 5%);
+    border-radius: 0.5em;
+  }
+}
+
+pre {
+  padding: 0.2em 3em;
+  font-size: 100%;
+  border-radius: 0.4rem;
+  scrollbar-width: thin;
+}

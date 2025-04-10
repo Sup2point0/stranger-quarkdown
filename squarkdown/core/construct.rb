@@ -4,6 +4,6 @@ require "json"
 
 
 def save_site_data(data, repo_config:)
-  route = Routes.site / repo_config["site-data"]
+  route = Routes.site / repo_config["out / site-data"]
   File.write(route, data)
 end

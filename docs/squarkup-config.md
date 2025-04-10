@@ -1,6 +1,6 @@
 # Configuring Squarkup for a Repository
-<!-- #SQUARK live!
-| dest = squarkup/config
+<!-- #SQUARK dead!
+| dest = docs/squarkup/config
 | desc =
 -->
 
