@@ -1,5 +1,5 @@
-*.html -linguist-detectable
-*.css -linguist-detectable
-*.scss -linguist-detectable
-*.js -linguist-detectable
-*.ts -linguist-detectable
+# *.html -linguist-detectable
+# *.css -linguist-detectable
+# *.scss -linguist-detectable
+# *.js -linguist-detectable
+# *.ts -linguist-detectable
