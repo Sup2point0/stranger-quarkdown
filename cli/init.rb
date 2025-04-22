@@ -9,6 +9,7 @@ require_relative "views/wait"
 require_relative "views/step"
 require_relative "views/select"
 require_relative "views/input"
+require_relative "final"
 
 require_relative "../squark.version"
 require_relative "../squarkdown/utils/ansi"
@@ -86,6 +87,19 @@ def script
   out
   out head: "Configuring Paths"
   wait
+
+  # TODO site, dest
+  # out
+  # choice = select(
+  #   before: "What directory folder contains your site?",
+  #   after: "What directory should Squarkdown output to?",
+  #   options: {
+  #     "site/" => "",
+  #     ".site/" => "",
+  #     "_site/" => "",
+  #     "other" => "enter manually"
+  #   }
+  # )
 
   out
   choice = select(
@@ -367,6 +381,8 @@ def script
   ## finalise
   out ""
   out "Finalising..."
+
+  export_json(data: config)
 
   print PREV, CLEAR
   out success: "Your #{BLUE}squarkup.json#{WHITE} has been created in #{BLUE}./.squarkdown/#{WHITE}."
