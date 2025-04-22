@@ -26,5 +26,5 @@ task :squark, :fonts, :assets, :scss do |task, args|
 end
 
 task :init do
-  ruby "cli/init.rb"
+  ruby "cli/init.rb", "--silent"
 end

@@ -9,11 +9,13 @@ class RoutesConfig
   attr_accessor :site
 
   def initialize()
-    log "locating routes..."
+    silent = ARGV.include?("--silent")
+
+    log "locating routes..." unless silent
 
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
-    log success: "found root#{GREY} = #{BLUE}#{@root}"
+    log success: "found root#{GREY} = #{BLUE}#{@root}" unless silent
 
     # find directory with .squarkdown folder
     @repo = nil
@@ -26,9 +28,11 @@ class RoutesConfig
     end
 
     if @repo.nil?
-      raise "failed to find directory with a .squarkdown/ folder"
+      log error: "failed to find directory with a #{WHITE}.squarkdown/#{RED} folder" unless silent
+      @repo = @root.parent
+      log "set repo = #{BLUE}#{@repo}" unless silent
     else
-      log success: "found repo#{GREY} = #{BLUE}#{@repo}"
+      log success: "found repo#{GREY} = #{BLUE}#{@repo}" unless silent
     end
 
     # default, but can be overridden
