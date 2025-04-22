@@ -45,7 +45,11 @@ def select(
     out GREY, selected[0]
   end
 
-  return selected[0]
+  if multi
+    return selected
+  else
+    return selected[0]
+  end
 end
 
 

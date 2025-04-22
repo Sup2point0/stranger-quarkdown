@@ -115,11 +115,11 @@ def script
 
   if choice == "other"
     out
-    config["paths / root"] = input(
+    config["paths / site"] = input(
       "What directory should Squarkdown output to?"
     )
   else
-    config["paths / root"] = choice
+    config["paths / site"] = choice
   end
 
   out
@@ -272,7 +272,8 @@ def script
     multi: true,
   )
 
-  if choice and choice.include? "assets preprocessing"
+  prep_assets = (choice and choice.include? "assets preprocessing")
+  while prep_assets  # minor hack to allow break-ing
     out
     choice = select(
       before: "Where should Squarkdown look for assets? #{GREY} Squarkdown will copy the contents of this directory to #{BLUE}static/#{GREY}.",
@@ -287,8 +288,9 @@ def script
 
     case choice
       when "cancel"
+        break
       when "other"
-        # TODO
+        config["assets / path"] = "// UNSET"
       when "./assets/"
         config["assets / path"] = choice
         assets = "assets/"
@@ -311,6 +313,7 @@ def script
 
     case choice
       when "cancel"
+        break
       when "other"
         # TODO enter manually
       else
@@ -322,8 +325,9 @@ def script
       "What types of assets should Squarkdown copy?",
       options: {
         ".png" => true,
-        ".jpg / .jpeg" => true,
-        ".svg" => "",
+        ".jpg" => true,
+        ".jpeg" => true,
+        ".svg" => true,
         ".webp" => "",
         "other" => "configure manually",
         "cancel" => "",
@@ -333,11 +337,14 @@ def script
 
     case choice
       when "cancel"
+        break
       when "other"
         config["assets / extensions"] = []
       else
         config["assets / extensions"] = choice
     end
+
+    prep_assets = false  # to avoid infinite loop!
   end
 
   ## final touches
@@ -367,7 +374,7 @@ def script
     }
   )
 
-  config["opts / on-missing-dir"] = case choice
+  config["opts / on-no-dir"] = case choice
     when "warn + create the directory"
       ["warn", "create"]
     when "ignore + create the directory"
@@ -382,6 +389,7 @@ def script
   out ""
   out "Finalising..."
 
+  config.compact!
   export_json(data: config)
 
   print PREV, CLEAR
