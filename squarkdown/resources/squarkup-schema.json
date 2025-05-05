@@ -1,6 +1,5 @@
 {
-  // "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "title": "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -114,7 +113,7 @@
     {
       "title": "Styles Directory",
       "description": "[ relative to site ]\nSquarkdown looks here for stylesheets.",
-      "type": "string",
+      "type": "string"
     },
     "styles / page-styles":
     {

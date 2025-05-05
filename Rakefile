@@ -16,11 +16,12 @@ end
 
 ## Scripts
 
-task :squark, :fonts, :assets, :scss do |task, args|
+task :squark, [:fonts, :assets, :scss, :root] do |task, args|
   args.with_defaults({
     fonts: nil,
     assets: nil,
-    scss: nil
+    scss: nil,
+    root: nil,  # internal flag for squarking up Squarkdown itself instead of the parent project
   })
   ruby "squarkdown/squarkup.rb", *args
 end

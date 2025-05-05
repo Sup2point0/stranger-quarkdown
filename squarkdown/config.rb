@@ -10,6 +10,7 @@ class RoutesConfig
 
   def initialize()
     silent = ARGV.include?("--silent")
+    root = ARGV.include?("root")
 
     log "locating routes..." unless silent
 
@@ -17,13 +18,17 @@ class RoutesConfig
     @root = Pathname(__dir__).parent
     log success: "found root#{GREY} = #{BLUE}#{@root}" unless silent
 
-    # find directory with .squarkdown folder
-    @repo = nil
+    if root
+      @repo = @root
+    else
+      # find directory with .squarkdown folder
+      @repo = nil
 
-    @root.parent.ascend do |dir|
-      if (dir / ".squarkdown").exist?
-        @repo = dir
-        break
+      @root.parent.ascend do |dir|
+        if (dir / ".squarkdown").exist?
+          @repo = dir
+          break
+        end
       end
     end
 

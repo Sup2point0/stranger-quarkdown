@@ -1,6 +1,6 @@
 {
   "meta": {
-    "exported": "2025-03-17",
+    "exported": "2025-05-05",
     "file_count": 19,
     "page_count": 15
   },
@@ -180,7 +180,7 @@
     },
     "docs/reference/squarkup-json.md": {
       "path": "docs/reference/squarkup-json.md",
-      "last_deploy": "2025-03-17 14:32:36 +0000",
+      "last_deploy": "2025-05-05 09:10:34 +0100",
       "slocs": 83,
       "chars": 4569,
       "isIndex": false,
