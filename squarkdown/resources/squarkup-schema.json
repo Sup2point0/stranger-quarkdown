@@ -1,6 +1,6 @@
 {
   // "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "5.0.1",
+  "version": "5.0.3",
   "title": "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -59,7 +59,14 @@
       "default": "src/site.json"
     },
 
-    "opts / if-no-dir":
+    "opts / on-error":
+    {
+      "title": "Exception Handling",
+      "description": "Action to take if an error is encountered while processing a file.",
+      "enum": ["warn", "kill"],
+      "default": "warn"
+    },
+    "opts / on-no-dir":
     {
       "title": "Nonexistent Directory Handling",
       "description": "Action to take if an export directory does not exist.",
@@ -68,13 +75,6 @@
         "enum": ["ignore", "warn", "create"]
       },
       "default": ["warn"]
-    },
-    "opts / on-error":
-    {
-      "title": "Exception Handling",
-      "description": "Action to take if an error is encountered while processing a file.",
-      "enum": ["warn", "kill"],
-      "default": "warn"
     },
 
     "bases / path":
@@ -115,28 +115,24 @@
       "title": "Styles Directory",
       "description": "[ relative to site ]\nSquarkdown looks here for stylesheets.",
       "type": "string",
-      "default": "src/styles/"
     },
     "styles / page-styles":
     {
       "title": "Page Styles Directory",
       "description": "[ relative to site ]\nSquarkdown looks here for stylesheets to inject during squarkup.",
-      "type": "string",
-      "default": "src/styles/"
+      "type": "string"
     },
     "styles / base-style":
     {
       "title": "Base Page Style",
       "description": "[ relative to `styles/page-styles` ]\nSquarkdown injects this stylesheet into every page.",
-      "type": "string",
-      "default": "article"
+      "type": "string"
     },
     "assets / path":
     {
       "title": "Assets Directory",
       "description": "[ relative to root ]\nSquarkdown looks here for static assets to preprocess.",
-      "type": "string",
-      "default": "assets"
+      "type": "string"
     },
     "assets / site-assets":
     {
@@ -155,16 +151,14 @@
           "jpg", "jpeg", "png", "svg",
           "ttf", "otf", "woff"
         ]
-      },
-      "default": ["jpg", "jpeg", "png", "svg"]
+      }
     },
     "fonts / queries":
     {
       "title": "Fonts",
       "description": "Individual URL query params for requesting fonts from Google Fonts.",
       "type": "array",
-      "items": {"type": "string"},
-      "default": []
+      "items": {"type": "string"}
     }
   }
 }

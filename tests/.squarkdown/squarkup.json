@@ -10,7 +10,7 @@
   ],
   "paths / dest": "export/routes/",
 
-  "opts / if-no-dir": ["warn"],
+  "opts / on-no-dir": ["warn"],
 
   "bases / path": "resources/",
   "bases / page.svelte": "test.svelte",
