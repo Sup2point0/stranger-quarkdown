@@ -10,6 +10,7 @@
   ],
   "paths / dest": "export/routes/",
 
+  "opts / on-error": "kill",
   "opts / on-no-dir": ["warn"],
 
   "bases / path": "resources/",

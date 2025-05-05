@@ -5,7 +5,7 @@
 
   "paths / site": "site",
   "paths / sources": [
-    ".",
+    "./",
     "docs/"
   ],
   "paths / exclude": null,
