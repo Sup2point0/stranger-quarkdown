@@ -144,9 +144,9 @@ _
 
 ------------------------------------------
 
->>> Finalising...
+<!-- >>> Finalising...
 
 > Your [squarkup.json] has been created in [./.squarkdown/].
 > If you selected options that needed to be filled manually, you can find them indicated with placeholder comments.
 > For more help or guidance, please visit the docs on GitHub at https://github.com/Sup2point0/stranger-quarkdown
-> Thanks for using Squarkdown, enjoy! 🥕
+> Thanks for using Squarkdown, enjoy! 🥕 -->

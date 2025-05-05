@@ -52,7 +52,7 @@ const delay = 240;
       <NavLink code="paths / dest" intern="docs/reference/squark-json#dest" />
       <NavLink code="out / file&#8209;name" intern="docs/reference/squark-json#file-name" />
       <NavLink code="out / site&#8209;data" intern="docs/reference/squark-json#site-data" />
-      <NavLink code="opts / if&#8209;no&#8209;dir" intern="docs/reference/squark-json#if-no-dir" />
+      <NavLink code="opts / if&#8209;no&#8209;dir" intern="docs/reference/squark-json#on-no-dir" />
       <NavLink code="opts / on&#8209;error" intern="docs/reference/squark-json#on-error" />
       <NavLink code="bases / path" intern="docs/reference/squark-json#path" />
       <NavLink code="bases / page.svelte" intern="docs/reference/squark-json#page.svelte" />

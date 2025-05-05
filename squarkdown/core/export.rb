@@ -10,7 +10,7 @@ def export_file(content, data:, base:, repo_config:)
   begin
     dest = route / (repo_config["out / file-name"] + ".svx")
     dest_display = dest.relative_path_from(Routes.repo)
-    handle = repo_config["opts / if-no-dir"]
+    handle = repo_config["opts / on-no-dir"]
 
     if !route.exist?
       if handle.include?("ignore")

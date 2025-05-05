@@ -26,7 +26,7 @@
 | `paths / dest` | `string` |  | `src/routes/` | [ relative to site ]<br>Markdown files are exported relative to this directory. |
 | `out / file-name` | `string` |  | `~content` | Name of exported `.svx` files (without the `.svx` file extension). |
 | `out / site-data` | `string` |  | `src/site.json` | File where Squarkdown exports the site data. Relative to site. |
-| `opts / if-no-dir` | `string[]` | `ignore` `warn` `create` | `["warn"]` | Action to take if an export directory does not exist. |
+| `opts / on-no-dir` | `string[]` | `ignore` `warn` `create` | `["warn"]` | Action to take if an export directory does not exist. |
 | `opts / on-error` | `option` | `warn` `kill` | `warn` | Action to take if an error is encountered while processing a file. |
 | `bases / path` | `string` |  |  | [ relative to site]<br>Squarkdown looks here for templates for generated `+page.svelte` and `+page.js`. |
 | `bases / page.svelte` | `string` |  |  | [ relative to `bases/path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files.<br>Required for Markdown exporting. |
@@ -67,7 +67,7 @@ Here’s what a Markdown file with a full squark charm would look like:
   "out / file-name": "~content",
   "out / site-data": "src/site.json",
   
-  "opts / if-no-dir": ["warn", "create"],
+  "opts / on-no-dir": ["warn", "create"],
   "opts / on-error": "kill",
   
   "assets / path": ".assets",

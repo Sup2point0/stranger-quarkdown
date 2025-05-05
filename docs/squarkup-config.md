@@ -40,6 +40,6 @@ Feel free to copy this as a starting template!
     "Fira+Sans"
   ],
 
-  "if-no-dir": ["warn", "create"]
+  "on-no-dir": ["warn", "create"]
 }
 ```

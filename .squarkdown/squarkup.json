@@ -13,7 +13,7 @@
   "out / file-name": "~content",
   "out / site-data": "src/site.json",
 
-  "opts / if-no-dir": ["warn", "create"],
+  "opts / on-no-dir": ["warn", "create"],
   "opts / on-error": "kill",
 
   "bases / path": "src/parts/bases/",

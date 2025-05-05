@@ -398,8 +398,8 @@ def script
   
   step "If you selected options that needed to be filled manually, you can find them indicated with placeholder comments."
   step(
-    before: "For more help or guidance, please visit the docs on GitHub at #{CYAN}https://sup2point0.github.io/stranger-quarkdown/docs",
-    after: "For more help or guidance, please visit the docs on GitHub at https://sup2point0.github.io/stranger-quarkdown/docs"
+    before: "For more help or guidance, please visit the docs at #{CYAN}https://sup2point0.github.io/stranger-quarkdown/docs",
+    after: "For more help or guidance, please visit the docs at https://sup2point0.github.io/stranger-quarkdown/docs"
   )
 end
 
