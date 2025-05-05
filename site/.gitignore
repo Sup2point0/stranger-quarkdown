@@ -1,4 +1,8 @@
+# squark
 ~content.svx
+
+site.json
+scss-config.js
 
 # output
 build/
