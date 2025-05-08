@@ -4,14 +4,10 @@
     url('/fonts/monaspace-neon.ttf') format('truetype'),
 }
 
-@mixin font-body {
-  font-family: 'Fira Sans', 'Segoe UI', system-ui, sans-serif;
-}
-
 @mixin font-ui {
   font-family: 'Sora', 'Segoe UI', system-ui, sans-serif;
 }
 
 @mixin font-code {
-  font-family: 'Monaspace Neon', 'Luckiest Guy', 'Consolas', monospace;
+  font-family: 'Monaspace Neon', 'Consolas', monospace;
 }
