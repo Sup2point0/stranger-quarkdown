@@ -12,7 +12,7 @@ log "syncing squarkup schema..."
 version = ARGV[0]
 
 route = Routes.root / "squarkdown/resources/squarkup-schema.json"
-dest = Routes.site / "static/squarkup-schema"
+dest = Routes.root / "site/static/squarkup-schema"
 
 dest.mkpath()
 FileUtils.cp(route, dest / "latest.json")

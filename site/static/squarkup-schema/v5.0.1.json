@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "5.0.1",
+  "title": "Squarkup Configuration Schema",
+  "description": "Squarkup configurations for a repository.",
+
+  "properties":
+  {
+    "repo":
+    {
+      "title": "Squarkup Repo",
+      "description": "Displayed name of the repository. This is injected into `<title>` in `<head>` of exported pages.",
+      "type": "string",
+      "default": "~"
+    },
+
+    "paths / site":
+    {
+      "title": "Site Directory",
+      "description": "[ relative to root ]\nBase directory of the site. Many other fields will provide paths relative to this directory. If your entire repo is the site, set this to `\".\"`.",
+      "type": "string",
+      "default": "site/"
+    },
+    "paths / sources":
+    {
+      "title": "Source Directories",
+      "description": "[ relative to root ]\nSquarkdown recursively searches these directories for `.md` files to squarkup.\nUse `\".\"` to target `.md` files in your project’s root.\nSet this field to `null` to disable Markdown exporting entirely.",
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "default": null
+    },
+    "paths / exclude":
+    {
+      "title": "Excluded Directory Patterns",
+      "description": "If a file’s path matches any of these RegEx patterns, squarkup will be skipped for it.\nNote the RegEx is matched against the file’s absolute path.",
+      "type": ["array", "null"],
+      "items": {"type": "string"},
+      "default": null
+    },
+    "paths / dest":
+    {
+      "title": "Destination Directory",
+      "description": "[ relative to site ]\nMarkdown files are exported relative to this directory.",
+      "type": "string",
+      "default": "src/routes/"
+    },
+    "out / file-name":
+    {
+      "title": "Export File Name",
+      "description": "Name of exported `.svx` files (without the `.svx` file extension).",
+      "type": "string",
+      "default": "~content"
+    },
+    "out / site-data":
+    {
+      "title": "Site Data File",
+      "description": "File where Squarkdown exports the site data. Relative to site.",
+      "type": "string",
+      "default": "src/site.json"
+    },
+
+    "opts / if-no-dir":
+    {
+      "title": "Nonexistent Directory Handling",
+      "description": "Action to take if an export directory does not exist.",
+      "type": "array",
+      "items": {
+        "enum": ["ignore", "warn", "create"]
+      },
+      "default": ["warn"]
+    },
+    "opts / on-error":
+    {
+      "title": "Exception Handling",
+      "description": "Action to take if an error is encountered while processing a file.",
+      "enum": ["warn", "kill"],
+      "default": "warn"
+    },
+
+    "bases / path":
+    {
+      "title": "File Templates Directory",
+      "description": "[ relative to site]\nSquarkdown looks here for templates for generated `+page.svelte` and `+page.js`.",
+      "type": "string"
+    },
+    "bases / page.svelte":
+    {
+      "title": "+page.svelte Template",
+      "description": "[ relative to `bases/path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files.\nRequired for Markdown exporting.",
+      "type": "string"
+    },
+    "bases / index.svelte":
+    {
+      "title": "Index +page.svelte Base",
+      "description": "[ relative to `bases/path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files for **index** pages.",
+      "type": ["string", "null"],
+      "default": null
+    },
+    "bases / page.js":
+    {
+      "title": "+page.js Template",
+      "description": "[ relative to site ]\nSquarkdown uses this file as a template for generated `+page.js` files.\nIf not supplied, Squarkdown will not create `+page.js` files.",
+      "type": ["string", "null"],
+      "default": null
+    },
+    "bases / index-view":
+    {
+      "title": "Index View Component",
+      "description": "The component imported and used to render page lists in index pages.\n\nIf not supplied, Squarkdown will not create or inject index pages.",
+      "type": ["string", "null"],
+      "default": null
+    },
+    "styles / path":
+    {
+      "title": "Styles Directory",
+      "description": "[ relative to site ]\nSquarkdown looks here for stylesheets.",
+      "type": "string",
+      "default": "src/styles/"
+    },
+    "styles / page-styles":
+    {
+      "title": "Page Styles Directory",
+      "description": "[ relative to site ]\nSquarkdown looks here for stylesheets to inject during squarkup.",
+      "type": "string",
+      "default": "src/styles/"
+    },
+    "styles / base-style":
+    {
+      "title": "Base Page Style",
+      "description": "[ relative to `styles/page-styles` ]\nSquarkdown injects this stylesheet into every page.",
+      "type": "string",
+      "default": "article"
+    },
+    "assets / path":
+    {
+      "title": "Assets Directory",
+      "description": "[ relative to root ]\nSquarkdown looks here for static assets to preprocess.",
+      "type": "string",
+      "default": "assets"
+    },
+    "assets / site-assets":
+    {
+      "title": "Site Assets Directory",
+      "description": "[ relative to root ]\nSquarkdown moves assets in this directory straight to the root of `site`/`static`.",
+      "type": ["string", "null"],
+      "default": null
+    },
+    "assets / extensions":
+    {
+      "title": "Asset File Extensions",
+      "description": "Only files with these extensions will be preprocessed by Squarkdown.",
+      "type": "array",
+      "items": {
+        "enum": [
+          "jpg", "jpeg", "png", "svg",
+          "ttf", "otf", "woff"
+        ]
+      },
+      "default": ["jpg", "jpeg", "png", "svg"]
+    },
+    "fonts / queries":
+    {
+      "title": "Fonts",
+      "description": "Individual URL query params for requesting fonts from Google Fonts.",
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    }
+  }
+}

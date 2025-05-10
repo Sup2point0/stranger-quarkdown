@@ -6,7 +6,8 @@ scss-config.js
 
 # output
 build/
-static/
+static/*
+!static/squarkup-schema/
 (docs)/
 
 # internal
