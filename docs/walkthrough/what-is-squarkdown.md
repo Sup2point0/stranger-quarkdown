@@ -16,4 +16,4 @@ Say you’ve got a project with `.md` (Markdown) files scattered all throughout 
 
 Squarkdown does that all for you. You tell it where to find `.md` files, and it’ll search your repo for them and export them to `.svx` files in your site’s directory. You can provide metadata and other preprocessing directives through Squarkdown-flavoured Markdown
 
-Squarkdown is built for integration with [Svelte], [SvelteKit] and [MDsveX]. If it isn’t clear already, it is a pretty niche tool! Exactly what sorts of projects Squarkdown can be used for are explored in [Project Requirements].
+Squarkdown is built for integration with [Svelte](https://svelte.dev/), [SvelteKit](https://svelte.dev/docs/kit) and [MDsveX](https://mdsvex.pngwn.io/). If it isn’t clear already, it is a pretty niche tool! Exactly what sorts of projects Squarkdown can be used for are explored in [Project Requirements].

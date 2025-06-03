@@ -17,12 +17,12 @@ Eh, decently? It really depends how many files you have. The more Squarkdown has
 
 For my personal wiki [Assort](https://github.com/Sup2point0/Assort), currently my largest project that uses Squarkdown, it ends up scanning 350+ files and 600+ assets during squarkup,[^lot] taking around 3 seconds. Execution time varies a lot depending on system speed and delays.
 
-[^lot]: It’s unlikely you’ll ever have this much in a GitHub repo unless you’re tryna host wiki too, lmao.
+[^lot]: It’s unlikely you’ll ever have this much in a GitHub repo unless you’re tryna host a wiki too, lmao.
 
 ### Why Ruby?
 It’s a cute language :3 I needed an excuse (or rather, a project) to use it, so I decided I’d give writing Squarkdown in Ruby. It went pretty swimmingly, to be honest, almost zero hitches. Ruby just works ^v^
 
 ### Was this website built with Squarkdown?
-Of course! (Imagine if it weren’t!) The text you’re reading now is sourced from a `.md` file [in the Squarkdown repo] ;)
+Of course! (Imagine if it weren’t!) The text you’re reading now is sourced from a `.md` file [in the Squarkdown repo](https://github.com/Sup2point0/stranger-quarkdown/blob/main/faq.md?plain=1) ;)
 
 More details are available in [Synopsis](synopsis.md).
