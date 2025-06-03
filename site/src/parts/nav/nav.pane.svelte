@@ -94,6 +94,10 @@ const delay = 240;
     <NavLink text="fonts" intern="features/fonts" />
   </NavSection>
 
+  <NavSection title="Schema" intern="squarkup-schema">
+    <NavLink text="latest" intern="squarkup-schema/latest.json" />
+  </NavSection>
+
   <NavSection title="Info" intern="info/synopsis">
     <NavLink text="synopsis" intern="info/synopsis" />
     <NavLink text="rationale" intern="info/rationale" />
