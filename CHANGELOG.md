@@ -1,5 +1,12 @@
 # Squarkdown Changelog
 
+
+## v3.0.1
+
+### Fixes
+- Anchor links in Markdown now correctly have `.md` removed while keeping the `#anchor`.
+
+
 ## v3.0.0
 
 ### New
