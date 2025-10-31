@@ -1,5 +1,5 @@
 {
-  "version": "5.0.4",
+  "version": "5.0.5",
   "title": "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -150,7 +150,8 @@
           "jpg", "jpeg", "png", "svg",
           "ttf", "otf", "woff"
         ]
-      }
+      },
+      "default": ["jpg", "jpeg", "png", "svg"]
     },
     "fonts / queries":
     {
