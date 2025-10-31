@@ -3,6 +3,7 @@ require "date"
 require_relative "../config"
 require_relative "../utils/ansi"
 require_relative "../utils/log"
+require_relative "../utils/error"
 
 
 def prep_scss(repo_config:)
@@ -11,7 +12,7 @@ def prep_scss(repo_config:)
   begin
     try_prep_scss(repo_config:)
   rescue => e
-    log error: e.to_s
+    error(e)
   end
 end
 

@@ -3,6 +3,7 @@ T_START = Time.now
 require_relative "../squark.version"
 require_relative "utils/ansi"
 require_relative "utils/log"
+require_relative "utils/error"
 log "#{CYAN}running Squarkdown v#{VERSION}"
 
 require_relative "config"
@@ -50,10 +51,6 @@ end
 if repo_config["paths / sources"].nil? and repo_config["paths / exclude"].nil?
   log done: true
   exit(0)
-else
-  if repo_config["bases / path"].nil?
-    log error: "no file base set!"
-  end
 end
 
 
@@ -62,18 +59,24 @@ log "locating file base..."
 
 base = {}
 
-base["bases / page.svelte"] = find_file_base("bases / page.svelte", repo_config:)
-if base["bases / page.svelte"].nil?
-  log error: "no base for #{BLUE}+page.svelte#{RED} found"
-else
-  log success: "found base for #{BLUE}+page.svelte#{CYAN}"
-end
+if repo_config["bases / path"].nil?
+  log error: "no base path set!"
 
-base["bases / page.js"] = find_file_base("bases / page.js", repo_config:)
-if base["bases / page.js"].nil?
-  log error: "no base for #{BLUE}+page.js#{RED} found"
 else
-  log success: "found base for #{BLUE}+page.js#{CYAN}"
+  base["bases / page.svelte"] = find_file_base("bases / page.svelte", repo_config:)
+  if base["bases / page.svelte"].nil?
+    log error: "no base for #{BLUE}+page.svelte#{RED} found"
+  else
+    log success: "found base for #{BLUE}+page.svelte#{CYAN}"
+  end
+
+  base["bases / page.js"] = find_file_base("bases / page.js", repo_config:)
+  if base["bases / page.js"].nil?
+    log error: "no base for #{BLUE}+page.js#{RED} found"
+  else
+    log success: "found base for #{BLUE}+page.js#{CYAN}"
+  end
+
 end
 
 
@@ -138,11 +141,7 @@ files.each_with_index do |file, i|
     end
 
   rescue => e
-    if repo_config["opts / on-error"] == "kill"
-      raise
-    else
-      log error: "#{e.class}: #{e.message}"
-    end
+    error(e)
   
   end
 end

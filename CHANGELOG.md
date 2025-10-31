@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.0.2
+
+### Fixes
+- Errors now correctly crash execution when `opts / on-error` is set to `kill`.
+
+
 ## v3.0.1
 
 ### Fixes

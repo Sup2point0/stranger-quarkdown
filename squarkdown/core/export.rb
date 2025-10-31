@@ -1,6 +1,7 @@
 require_relative "../config"
 require_relative "../utils/ansi"
 require_relative "../utils/log"
+require_relative "../utils/error"
 
 
 def export_file(content, data:, base:, repo_config:)
@@ -33,7 +34,7 @@ def export_file(content, data:, base:, repo_config:)
 
   rescue => e
     log "failed to export `#{repo_config["out / file-name"]}.svx`!"
-    log error: "#{e.class}: #{e.message}"
+    error(e)
     error = true
 
   end
@@ -47,7 +48,7 @@ def export_file(content, data:, base:, repo_config:)
 
     rescue => e
       log "failed to export `+page.svelte`!"
-      log error: "#{e.class}: #{e.message}"
+      error(e)
       error = true
 
     end
@@ -62,7 +63,7 @@ def export_file(content, data:, base:, repo_config:)
 
     rescue => e
       log "failed to export `+page.js`!"
-      log error: "#{e.class}: #{e.message}"
+      error(e)
       error = true
   
     end

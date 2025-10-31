@@ -9,7 +9,7 @@ def prep_fonts(repo_config:)
   begin
     try_prep_fonts(repo_config:)
   rescue => e
-    log error: e.to_s
+    error(e)
   end
 end
 
