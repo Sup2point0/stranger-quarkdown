@@ -9,7 +9,7 @@
 
 </div>
 
-The squark charm is an extended squark which should go under the `# h1` title of a page, providing metadata and directives for how Squarkdown should squarkup the page.
+The squark charm is an extended squark which should go under the `# h1` title of a page. It provides all the metadata and instructions for how Squarkdown should squarkup the page.
 
 
 <br>
@@ -37,16 +37,17 @@ For fields which accept multiple values, these values should be separated with `
 
 | Option | Parameters | Values | Description | Default | Notes |
 | :----- | :--------- | :----- | :---------- | :------ | :---- |
-| **`dest`** | `path` `list[path]` | any filepath | Where the file will be exported to. | | Relative to site routes (`<path/to/site>/src/routes`) |
-| `title` | `string` | any | Title injected into `<head>` of the exported HTML within `<title>`. | `head` | Different to `head` |
-| `desc` | `string` | any | Description injected into `<head>` of the exported HTML within `<meta name="description">` | `capt` if provided. | Different to `capt` |
+| **`dest`** | `path` `path[]` | any filepath | Where the file will be exported to. | | Relative to site routes (`.../site/src/routes/`) |
+| `title` | `string` | any | Title injected into `<title>` of the exported HTML. | `head` | Different to `head` |
+| `desc` | `string` | any | Description injected into `<meta name="description">` of the exported HTML. | `capt` if provided. | Different to `capt` |
 | `head` | `string` | any | Displayed `<h1>` text in the page header. | First detected `# ` text in the Markdown file. | Different to `title` |
 | `capt` | `string` | any | Short caption text displayed below the header. | | A description of what the page is (such as “Yu-Gi-Oh! Archetype”) rather than a unique concrete description – different to `desc`. |
-| `style` | `list[filename]` | any `.scss` file | Stylesheets to apply. | Base stylesheet. | Should be a list of file names without file extensions. |
+| `style` | `filename[]` | any `.scss` file | Stylesheets to apply. | Base stylesheet. | Should be a list of file names without file extensions. |
 | `duality` | `option` | `light` `dark` <br> `light!` `dark!` | Default colour theme to use if user has no preference. | `light` | User preference can be ignored by following it with a `!`. |
-| `index` | `list[string]` | any | Where to index the page. | | |
-| `date` | `year` `month/season?` `day>` | `<season>`: `spring` `summer` `autumn` `winter` | Creation or publish date of the page. | | Used as a sort parameter when searching. |
-| `clean` | `option` `list[option]` | `line-breaks` `comments` `braces` `angles` | Aspects of the text to cleanup. | | See [Cleanup](cleanup.md) for more. |
+| `index` | `string[]` | any | Where to index the page. | | |
+| `date` | `year` `month/season?` `day>` | `<season>`: `spring` `summer` `autumn` `winter` | Creation or publish date of the page. | | |
+| `update` | `year` `month/season?` `day>` | `<season>`: `spring` `summer` `autumn` `winter` | Last date on which the page was changed. | | Set manually, not automatically. |
+| `clean` | `option` `option[]` | `angles` `braces` `comments` `line-breaks` | Aspects of the text to cleanup. | | See [Cleanup](cleanup.md) for more. |
 
 
 <br>

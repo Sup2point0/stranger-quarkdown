@@ -48,7 +48,7 @@
 
 ## Example
 
-Here’s what a Markdown file with a full squark charm would look like:
+Here’s what Squarkdown’s own `squarkup.json` looks like:
 
 ```json
 {

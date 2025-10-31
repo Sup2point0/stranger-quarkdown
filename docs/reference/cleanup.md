@@ -9,19 +9,19 @@ Sometimes there’s a couple things in a Markdown file that need to be cleaned u
 <br>
 
 
-## Braces
+## HTML Tags
 
-Curly braces `{}` pose an issue since Svelte and MDSveX use them for interpolation. This means when we try to import the `.svx` file, errors are raised as Svelte attempts to process the text inside as JavaScript.
-
-To solve this, Squarkdown replaces all occurrences of `{` with `&amp;&lbrace;` (and likewise for `}`). The double escape is necessary since `&lbrace;` alone would still be rendered to `{` by MDSveX.
+Similarly, Svelte will try to process `<` and `>` as HTML tags, even if they aren’t used as such.
 
 
 <br>
 
 
-## HTML Tags
+## Braces
 
-Similarly, Svelte will try to process `<` and `>` as HTML tags, even if they aren’t used as such.
+Curly braces `{}` pose an issue since Svelte and MDSveX use them for interpolation. This means when we try to import the `.svx` file, errors are raised as Svelte attempts to process the text inside as JavaScript.
+
+To solve this, Squarkdown replaces all occurrences of `{` with `&amp;&lbrace;` (and likewise for `}`). The double escape is necessary since `&lbrace;` alone would still be rendered to `{` by MDSveX.
 
 
 <br>
