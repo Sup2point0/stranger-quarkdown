@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.0.3
+
+### Fixes
+- `rake init` now ignores `/stranger-quarkdown/`'s own `.squarkdown` folder.
+
+
 ## v3.0.2
 
 ### Fixes

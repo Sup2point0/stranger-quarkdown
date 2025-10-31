@@ -57,19 +57,21 @@ def script
   existing = false
   cwd.ascend do |dir|
     if (dir / ".squarkdown/squarkup.json").exist?
-      existing = true
+      if dir.to_s.end_with?("stranger-quarkdown") then next end
+
+      existing = existing || dir
     end
   end
 
   if existing
     out
-    out error: "Woah, looks like you already have an existing #{BLUE}.squarkdown/squarkup.json#{WHITE}!"
+    out error: "Woah, looks like you already have an existing #{BLUE}.squarkdown/squarkup.json#{WHITE} at #{BLUE}#{existing}#{WHITE}!"
     wait
 
     out
     choice = select("Continue running this script?", options: {
-      "Yes" => "all changes will overwrite any existing files.",
       "No" => ""
+      "Yes" => "all changes will overwrite any existing files.",
     })
     kill if choice == "No"
   
@@ -393,13 +395,13 @@ def script
   export_json(data: config)
 
   print PREV, CLEAR
-  out success: "Your #{BLUE}squarkup.json#{WHITE} has been created in #{BLUE}./.squarkdown/#{WHITE}."
+  out success: "Your #{BLUE}squarkup.json#{WHITE} has been created in #{BLUE}#{cwd.parent}/.squarkdown/#{WHITE}."
   wait
   
   step "If you selected options that needed to be filled manually, you can find them indicated with placeholder comments."
   step(
-    before: "For more help or guidance, please visit the docs at #{CYAN}https://sup2point0.github.io/stranger-quarkdown/docs",
-    after: "For more help or guidance, please visit the docs at https://sup2point0.github.io/stranger-quarkdown/docs"
+    before: "For more help or guidance, please visit the docs at #{CYAN}https://sup2point0.github.io/stranger-quarkdown/docs#{WHITE}!",
+    after: "For more help or guidance, please visit the docs at https://sup2point0.github.io/stranger-quarkdown/docs!"
   )
 end
 
