@@ -1,13 +1,19 @@
 # Squarkdown Changelog
 
 
+## v3.0.4
+
+### Fixes
+- [Fixes v3.0.2] Errors now pass the `repo_config:` parameter
+
+
 ## v3.0.3
 
 ### Fixes
 - `rake init` now ignores `/stranger-quarkdown/`'s own `.squarkdown` folder.
 
 
-## v3.0.2
+## v3.0.2 [broken]
 
 ### Fixes
 - Errors now correctly crash execution when `opts / on-error` is set to `kill`.

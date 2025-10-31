@@ -34,7 +34,7 @@ def export_file(content, data:, base:, repo_config:)
 
   rescue => e
     log "failed to export `#{repo_config["out / file-name"]}.svx`!"
-    error(e)
+    error(e, repo_config:)
     error = true
 
   end
@@ -48,7 +48,7 @@ def export_file(content, data:, base:, repo_config:)
 
     rescue => e
       log "failed to export `+page.svelte`!"
-      error(e)
+      error(e, repo_config:)
       error = true
 
     end
@@ -63,7 +63,7 @@ def export_file(content, data:, base:, repo_config:)
 
     rescue => e
       log "failed to export `+page.js`!"
-      error(e)
+      error(e, repo_config:)
       error = true
   
     end

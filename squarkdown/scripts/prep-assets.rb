@@ -12,7 +12,7 @@ def prep_assets(repo_config:)
   begin
     try_prep_assets(repo_config:)
   rescue => e
-    error(e)
+    error(e, repo_config:)
   end
 end
 
