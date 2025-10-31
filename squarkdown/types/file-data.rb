@@ -36,9 +36,16 @@ class FileData
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
-  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :tags, :date, :date_display, :clean
+  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :tags, :date, :date_display, :update, :update_display, :clean
 
-  Fields = [:dest, :title, :desc, :head, :capt, :style, :duality, :index, :tags, :date, :clean]
+  Fields = [
+    :dest, :title, :desc, :head, :capt,
+    :style, :duality,
+    :index, :tags,
+    :date, :update,
+    :clean,
+    :data,
+  ]
 
 
   def initialize(source = nil, repo_config: nil)
@@ -75,6 +82,7 @@ class FileData
     @clean = []
   end
 
+
   def _split_(value)
     value.downcase.split(" / ")
   end
@@ -105,6 +113,7 @@ class FileData
 
     return self
   end
+
 
   def _parse_(field:, value:, repo_config:)
     case field
@@ -143,34 +152,44 @@ class FileData
 
     when :date
       @date_display = value
-      
-      begin
-        @date = Date.strptime(value, "%Y %B %d")
-      rescue Date::Error
-        begin
-          @date = Date.strptime(value, "%Y %B")
-        rescue Date::Error
-          begin
-            @date = Date.strptime(value, "%Y")
-          rescue Date::Error
-            # 20XX season
-            begin
-              year, season = value.downcase.split(" ")
-              dec = Seasons[season.downcase] +1
-              @date = Date.civil(year.to_i, dec +1, -1)
-            rescue Date::Error
-              return
-            end
-          end
-        end
-      end
-
+      @date = _parse_date_(value)
+    
+    when :update
+      @update_display = value
+      @update = _parse_data_(value)
+    
     else
       return
 
     end
 
     return self
+  end
+
+
+  def _parse_date_(value)
+    begin
+      return Date.strptime(value, "%Y %B %d")
+    rescue Date::Error
+    end
+
+    begin
+      return Date.strptime(value, "%Y %B")
+    rescue Date::Error
+    end
+
+    begin
+      @date = Date.strptime(value, "%Y")
+    rescue Date::Error
+    end
+
+    # 20XX season
+    begin
+      year, season = value.downcase.split(" ")
+      dec = Seasons[season.downcase] +1
+      return Date.civil(year.to_i, dec +1, -1)
+    rescue Date::Error
+    end
   end
 
 
@@ -204,6 +223,7 @@ class FileData
       :dest, :title, :head, :capt, :desc, :index, :tags, :date, :date_display
     )
   end
+
 
   def export_external
     return self.vars_str.slice(

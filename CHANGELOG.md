@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.1.0
+
+### New
+- The squark charm now supports an `update` field. Use `date` for the original writing/publish date of a page, and `update` for subsequent updates.
+
+
 ## v3.0.4
 
 ### Fixes
