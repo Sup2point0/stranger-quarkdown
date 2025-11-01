@@ -9,9 +9,9 @@
 
 ---
 
-**Stranger Quarkdown** (*Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDSveX<sup>↗</sup>](https://mdsvex.pngwn.io).
+**Stranger Quarkdown** (*Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.io).
 
-Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.md) in any directory, then use Squarkdown to export them to `.svx` files in your SvelteKit project directory.
+Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.md) anywhere in your project repo, then use Squarkdown to automatically export them to `.svx` files in your SvelteKit project directory.
 
 
 <br>
@@ -45,6 +45,7 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.m
 | folder | notes |
 | :----- | :---- |
 | [`squarkdown`](squarkdown/) | source code |
+| [`cli`](cli/) | source code (CLI) |
 | [`tests`](tests/) | unit tests |
 | [`docs`](docs/) | documentation |
 | [`site`](site/) | project site |

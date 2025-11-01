@@ -10,6 +10,7 @@ end
 task :schema do
   require_relative ".github/scripts/schema-doc.rb"
   ruby ".github/scripts/schema-sync.rb", get_version
+  ruby ".github/scripts/schema-doc.rb"
   log done: true
 end
 

@@ -23,20 +23,23 @@ You can use these anywhere in your file to customise how Squarkdown should proce
 
 ```md
 # What is Squarkdown-flavoured Markdown?
-&lt;!-- #SQUARK live! feat!
+<!-- #SQUARK live! feat!
 | dest = tests/sq-fl-mk
 | capt = It’s Markdown with wacky comments.
 | tags = tests / demos / no-deploy
 | date = 2025 March 14
---&gt;
+-->
 
-&lt;!-- #SQUARK leave? --&gt;
+<!-- NOTE: There shouldn't be spaces between the `#` and the rest of the squark, but having a real squark in the demo code interferes with *actual* Squarkdown LMAO -->
+
+<!-- # SQUARK leave? -->
 Squarks won’t change your Markdown preview in any way.
-&lt;!-- #SQUARK leave. --&gt;
+<!-- # SQUARK leave. -->
 
-&lt;!-- #SQUARK only?
+<!-- # SQUARK only?
 But they can influence how it’s processed when rendered to HTML!
-     #SQUARK only. --&gt;
+     # SQUARK only. -->
+
 ```
 
 

@@ -20,7 +20,9 @@ For my personal wiki [Assort](https://github.com/Sup2point0/Assort), currently m
 [^lot]: It’s unlikely you’ll ever have this much in a GitHub repo unless you’re tryna host a wiki too, lmao.
 
 ### Why Ruby?
-It’s a cute language :3 I needed an excuse (or rather, a project) to use it, so I decided I’d give writing Squarkdown in Ruby. It went pretty swimmingly, to be honest, almost zero hitches. Ruby just works ^v^
+It’s a cute language :3
+
+I needed an excuse (or rather, a project) to use it, so I decided I’d give writing Squarkdown in Ruby. It went pretty swimmingly, to be honest, almost zero hitches. Ruby just works ^v^
 
 ### Was this website built with Squarkdown?
 Of course! (Imagine if it weren’t!) The text you’re reading now is sourced from a `.md` file [in the Squarkdown repo](https://github.com/Sup2point0/stranger-quarkdown/blob/main/faq.md?plain=1) ;)
