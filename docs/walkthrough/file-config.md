@@ -1,6 +1,6 @@
 # Configuring Squarkup for a File
 <!-- #SQUARK dead!
-| dest = walkthrough/file-config
+| dest = docs/walkthrough/file-config
 | desc = Flags and fields for how a Markdown file is processed by Squarkdown
 -->
 

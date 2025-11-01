@@ -29,7 +29,7 @@ So, we only really care about the actual info about the font, which looks like `
 
 ```json
 {
-  …
+  ...
 
   "fonts": [
     "Montserrat:ital,wght@0,100..900;1,100..900"

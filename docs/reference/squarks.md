@@ -1,6 +1,6 @@
-# Configuring Squarkup for a Repository
+# Squarks
 <!-- #SQUARK live!
-| dest = docs/walkthrough/repo-config
+| dest = docs/reference/squarks
 -->
 
 Under development, please bear with me!

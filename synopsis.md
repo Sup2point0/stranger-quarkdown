@@ -4,7 +4,7 @@
 | title = Synopsis
 -->
 
-*Stranger Quarkdown* is a successor to *Quarkdown*, one of my favourite projects. I say ‘a’ successor, because firstly it’s not indended to replace Quarkdown, it just satisfies a different purpose – integrating with Svelte/SvelteKit, rather than generating raw static websites – and secondly there ofc might always be other child projects.
+*Stranger Quarkdown* is a successor to *Quarkdown*, one of my favourite projects. I say ‘a’ successor, because firstly it’s not indended to replace Quarkdown, it just satisfies a different purpose – integrating with Svelte/Kit, rather than generating raw static websites – and secondly there ofc might always be other child projects.
 
 I affectionately call it *Squarkdown*. Weird name, definitely – and ‘squark’ sounds like ‘squawk’, a bird. I find that kinda funny tho, ngl. ‘Stranger’ ofc comes from the [strange quark](https://wikipedia.org/wiki/Strange_quark).
 

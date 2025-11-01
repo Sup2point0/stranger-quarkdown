@@ -1,6 +1,7 @@
 # Project Structure
 <!-- #SQUARK live!
 | dest = docs/walkthrough/project-structure
+| update = 2025 November 1
 -->
 
 Generally, the project structure Squarkdown expects is as follows:
