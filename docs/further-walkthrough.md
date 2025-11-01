@@ -1,6 +1,6 @@
 # Making Full Use of Squarkdown
 <!-- #SQUARK live!
-| dest = docs/further-walkthrough
+| dest = docs/walkthrough/further-features
 | desc = A further walkthrough of additional Squarkdown features
 | capt = A Further Walkthrough of Additional Squarkdown Features
 -->

@@ -5,7 +5,7 @@ The left navigation sidebar.
 
 <script lang="ts">
 
-import Schema from "#static/squarkup-schema/latest.json" with { type: "json" };
+import Schema from "#static/squarkup-schema/latest.json?url" with { type: "json" };
 
 import NavSection from "#src/parts/nav/section.nav.svelte";
 import NavLink from "#src/parts/nav/link.nav.svelte";
@@ -42,6 +42,7 @@ const delay = 240;
     <NavLink text="project structure" intern="docs/walkthrough/project-structure" />
     <NavLink text="configuring squarkup for a repo" intern="docs/walkthrough/repo-config" />
     <NavLink text="configuring squarkup for a file" intern="docs/walkthrough/file-config" />
+    <NavLink text="making full use of squarkdown" intern="docs/walkthrough/further-features" />
   </NavSection>
 
   <NavSection title="Docs" intern="docs">

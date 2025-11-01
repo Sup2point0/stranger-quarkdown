@@ -1,4 +1,7 @@
 # Roadmap
+<!-- #SQUARK live!
+| dest = info/roadmap
+-->
 
 
 ## Known Issues

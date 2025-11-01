@@ -21,10 +21,10 @@
 code {
   @include font-code;
 
-  p & {
+  p &, li & {
     padding: 0.25em 0.4em;
     font-size: 95%;
-    color: $col-light;
+    color: $col-down;
     background: rgb(grey, 5%);
     border-radius: 0.5em;
   }

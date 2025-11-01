@@ -70,7 +70,7 @@ let open = $state(false);
   align-content: stretch;
 
   &:where(.live) a {
-    color: $col-light;
+    color: $col-down;
   }
 }
 

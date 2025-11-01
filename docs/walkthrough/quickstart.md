@@ -18,7 +18,7 @@ Here’s a guided walkthrough on how to use Squarkdown in a SvelteKit project.
 > [!Important]
 > Squarkdown was made for integration with SvelteKit projects, and nothing else!
 
-Let’s say we’ve got some Markdown files in a repository we’d like to quickly and easily turn into a static website – perhaps you’re writing a blog or have documentation for software. And since we love nice things, you we Svelte/Kit for building the website.
+Let’s say we’ve got some Markdown files in a repository we’d like to quickly and easily turn into a static website – perhaps you’re writing a blog or have documentation for software. And since we love nice things, we use Svelte/Kit for building the website.
 
 Awesome, but now you need to find a way to import the content from our repository to the SvelteKit project. These Markdown files could be scattered all throughout the repository, so it’s not exactly something a 1-liner could solve.
 

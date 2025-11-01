@@ -1,15 +1,12 @@
 # Configuring Squarkup for a File
 <!-- #SQUARK dead!
-| dest = squarkup/file
-| desc = Flags and fields for configuring how a Markdown file is processed by Squarkdown
-| shard = file / squark / charm
+| dest = walkthrough/file-config
+| desc = Flags and fields for how a Markdown file is processed by Squarkdown
 -->
 
-<div align="center">
+<div class="quicklinks" align="center">
 
-<!-- #SQUARK quicklinks? -->
-[Example](#Example) • [Cheatsheet](#Cheatsheet)
-<!-- #SQUARK quicklinks. -->
+[Example](#example) <span class="separator">•</span> [Cheatsheet](#cheatsheet)
 
 </div>
 

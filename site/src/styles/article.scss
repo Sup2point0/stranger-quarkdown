@@ -66,21 +66,21 @@ a.footnote-backref {
 }
 
 blockquote {
-  --col: #{$col-light};
+  --col: #{$col-up};
   padding-left: 1em;
   color: $col-text-deut;
   border-left: 2px solid var(--col);
 
   .gfm-alert-indicator {
-    margin-bottom: -1em;
-    color: $col-light;
+    margin-bottom: -1.5em;
+    color: $col-up;
     color: var(--col);
     font-size: 90%;
     font-weight: 450;
   }
 
   &.gfm-alert.tip {
-    --col: #{$col-light};
+    --col: #{$col-up};
   }
 }
 
@@ -116,7 +116,7 @@ table {
     padding: 0.25em 0.4em;
     @include font-code;
     font-size: 95%;
-    color: $col-light;
+    color: $col-down;
     background: rgb(grey, 5%);
     border-radius: 0.5em;
   }
