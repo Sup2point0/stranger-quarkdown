@@ -27,7 +27,8 @@ h2,h3 {
 }
 
 h2 {
-  width: 40%;
+  width: max-content;
+  min-width: 80%;
   padding: 0.5em 0 0.2em;
   font-size: 200%;
   font-weight: 400;
@@ -61,6 +62,25 @@ a.footnote-backref {
 
   &:hover {
     background: color-mix(in oklch, $col-charm, transparent 90%);
+  }
+}
+
+blockquote {
+  --col: #{$col-light};
+  padding-left: 1em;
+  color: $col-text-deut;
+  border-left: 2px solid var(--col);
+
+  .gfm-alert-indicator {
+    margin-bottom: -1em;
+    color: $col-light;
+    color: var(--col);
+    font-size: 90%;
+    font-weight: 450;
+  }
+
+  &.gfm-alert.tip {
+    --col: #{$col-light};
   }
 }
 

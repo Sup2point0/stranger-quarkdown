@@ -8,6 +8,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 import scss_config from "./scss-config.js";
+import { remark_alerts } from "./preprocess-alerts.js";
 
 
 const config = {
@@ -43,6 +44,7 @@ const config = {
       remarkPlugins: [
         remarkFootnotes,
         remarkIndexFootnotes,
+        remark_alerts,
       ],
       rehypePlugins: [
         rehypeSlug,
