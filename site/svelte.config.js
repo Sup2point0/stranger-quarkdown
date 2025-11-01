@@ -30,6 +30,7 @@ const config = {
       "#parts": "./src/parts",
       "#styles": "./src/styles",
       "#scripts": "./src/scripts",
+      "#static": "./static/",
     },
     prerender: {
       handleHttpError: "warn",

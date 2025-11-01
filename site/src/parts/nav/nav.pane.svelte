@@ -5,6 +5,8 @@ The left navigation sidebar.
 
 <script lang="ts">
 
+import Schema from "#static/squarkup-schema/latest.json" with { type: "json" };
+
 import NavSection from "#src/parts/nav/section.nav.svelte";
 import NavLink from "#src/parts/nav/link.nav.svelte";
 
@@ -95,7 +97,9 @@ const delay = 240;
   </NavSection>
 
   <NavSection title="Schema" intern="squarkup-schema">
-    <NavLink text="latest" intern="squarkup-schema/latest.json" />
+    <NavLink text="latest (v{Schema.version})" intern="squarkup-schema/latest.json" />
+    <NavLink text="v5.0.4" intern="squarkup-schema/v5.0.4.json" />
+    <NavLink text="v5.0.1" intern="squarkup-schema/v5.0.1.json" />
   </NavSection>
 
   <NavSection title="Info" intern="info/synopsis">
@@ -174,7 +178,7 @@ $size: 2.5rem;
   right: 0;
   bottom: 0;
   background: white;
-  border-radius: $size / 2;
+  border-radius: calc($size / 2);
 }
 
 button#show-hide {
@@ -184,7 +188,7 @@ button#show-hide {
   font-size: 150%;
   background: light-dark(white, black);
   border: none;
-  border-radius: $size / 2;
+  border-radius: calc($size / 2);
   box-shadow: 0 1px 3px $col-shadow;
   transition: background 0.1s ease-out;
 
