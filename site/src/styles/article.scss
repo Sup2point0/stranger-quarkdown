@@ -123,6 +123,11 @@ table {
   margin: 3em 0 0;
   color: $col-text-deut;
   border-top: 1px solid $col-line;
+  transition: color 0.16s ease-out;
+
+  &:hover {
+    color: $col-text;
+  }
 
   hr {
     display: none;
