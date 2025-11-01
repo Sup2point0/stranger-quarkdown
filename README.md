@@ -9,9 +9,15 @@
 
 ---
 
+<div align="center">
+
+[Quickstart](docs/walkthrough/quickstart.md) · [Docs](docs/) · [Site](https://sup2point0.github.io/stranger-quarkdown/docs)
+
+</div>
+
 **Stranger Quarkdown** (*Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.io).
 
-Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.md) anywhere in your project repo, then use Squarkdown to automatically export them to `.svx` files in your SvelteKit project directory.
+Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough/quickstart.md) anywhere in your project repo, then use Squarkdown to automatically export them to `.svx` files in your SvelteKit project directory.
 
 
 <br>
@@ -40,8 +46,6 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.m
 
 ## Directory
 
-> I mean, these should be pretty self-explanatory, but here you go anyway ;)
-
 | folder | notes |
 | :----- | :---- |
 | [`squarkdown`](squarkdown/) | source code |
@@ -58,7 +62,7 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough.m
 ## Usage
 
 > [!Tip]
-> See [Using Squarkdown in a SvelteKit project](docs/walkthrough.md) for a full detailed walkthrough.
+> See [Using Squarkdown in a SvelteKit project](docs/walkthrough/quickstart.md) for a full detailed walkthrough.
 
 This project is designed to be used as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
@@ -68,7 +72,7 @@ Add it to a repo:
 git submodule add https://github.com/Sup2point0/stranger-quarkdown
 ```
 
-Make sure you’ve got your [repo config](docs/squarkup-config.md) in `./.squarkdown/squarkup.json` if needed.
+Make sure you’ve got your [repo config](docs/squarkup-config.md) in `./.squarkdown/squarkup.json`.
 
 Run `rake` in the `./stranger-quarkdown/` directory to start the squarkup process. You can add this to your `npm run build` definition in `package.json`, so that it executes whenever you build the site:
 
@@ -82,7 +86,9 @@ Run `rake` in the `./stranger-quarkdown/` directory to start the squarkup proces
 
 Squarkdown will recursively look for all `.md` files starting from the root of the repo, and export them to `.svx` files in `src/routes`.
 
-Many additional configurations are available to customise this process, although the defaults should cover most projects.
+Many additional configurations are available to customise this process (although the defaults should actually cover most projects!).
+
+For more, visit [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs).
 
 
 <br>
