@@ -16,6 +16,7 @@ class SquarkupProcess < Minitest::Test
       repo_config: RepoConfig,
       fill_defaults: false
     )
+
     assert data.live == true
   end
 
@@ -28,6 +29,7 @@ class SquarkupProcess < Minitest::Test
       repo_config: RepoConfig,
       fill_defaults: false
     )
+
     assert data.nil?
   end
 
@@ -60,8 +62,8 @@ class SquarkupProcess < Minitest::Test
 | index = tests
 | tags = #INDEX / testing
 | date = 1984 April 1
--->"""
-
+-->
+"""
     data = extract_data(
       lines: content.split("\n"),
       repo_config: RepoConfig,
@@ -84,8 +86,8 @@ class SquarkupProcess < Minitest::Test
     content = """# Testing
 <!-- #SQUARK live!
 | dest = testing/defaults
--->"""
-
+-->
+"""
     data = extract_data(
       lines: content.split("\n"),
       repo_config: RepoConfig,
@@ -110,10 +112,34 @@ class SquarkupProcess < Minitest::Test
 """
     lines = content.split("\n")
 
-    data = extract_data(lines:, repo_config: RepoConfig)
+    data = extract_data(
+      lines:,
+      repo_config: RepoConfig,
+      fill_defaults: false
+    )
 
     assert data.head == "Testing"
     assert !lines.include?("# Testing")
+  end
+
+  def test_excess
+    content = """
+# Testing
+<!-- #SQUARK live!
+| dest = testing/excess
+-->
+
+<!-- #SQUARK live!
+| dest = testing/wrong
+-->
+"""
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: false
+    )
+
+    assert data.dest == "testing/excess"
   end
 
 end

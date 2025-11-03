@@ -6,6 +6,8 @@
 
 ## Known Issues
 
+- File processing accepts multiple squark charms, but it should only accept 1
+
 
 ## Under Development
 
