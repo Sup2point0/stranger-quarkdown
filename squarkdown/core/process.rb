@@ -17,6 +17,10 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   idx = nil
 
   lines[0, ProcessedLines].each_with_index do |line, i|
+    if line.start_with?("-->")
+      break
+    end
+
     if data.head.nil?
       if line.start_with?("# ")
         data.head = line[2..-1].strip

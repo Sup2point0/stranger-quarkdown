@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.1.1
+
+## Fixes
+- Data extraction now correctly exits when it encounters the closing `-->` of the squark charm.
+
+
 ## v3.1.0
 
 ### New
