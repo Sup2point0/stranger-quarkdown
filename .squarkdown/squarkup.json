@@ -8,7 +8,6 @@
     "./",
     "docs/"
   ],
-  "paths / exclude": null,
   "paths / dest": "src/routes/(docs)/",
   "out / file-name": "~content",
   "out / site-data": "src/site.json",
