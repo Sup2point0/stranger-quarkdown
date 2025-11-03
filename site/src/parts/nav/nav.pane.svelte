@@ -40,8 +40,8 @@ const delay = 240;
     <NavLink text="project requirements" intern="docs/walkthrough/project-requirements" />
     <NavLink text="squarkdown-flavoured markdown" intern="docs/walkthrough/squarkdown-flavoured-markdown" />
     <NavLink text="project structure" intern="docs/walkthrough/project-structure" />
-    <NavLink text="configuring squarkup for a repo" intern="docs/walkthrough/repo-config" />
-    <NavLink text="configuring squarkup for a file" intern="docs/walkthrough/file-config" />
+    <NavLink text="configuring repositories" intern="docs/walkthrough/repo-config" />
+    <NavLink text="configuring files" intern="docs/walkthrough/file-config" />
     <NavLink text="making full use of squarkdown" intern="docs/walkthrough/further-features" />
   </NavSection>
 

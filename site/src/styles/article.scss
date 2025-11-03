@@ -19,6 +19,7 @@ p, li, td {
 
 p {
   margin: 1em 0;
+  line-height: 150%;
 }
 
 h2,h3 {
@@ -72,7 +73,7 @@ blockquote {
   border-left: 2px solid var(--col);
 
   .gfm-alert-indicator {
-    margin-bottom: -1.5em;
+    margin-bottom: -0.5em;
     color: $col-up;
     color: var(--col);
     font-size: 90%;

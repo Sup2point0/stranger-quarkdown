@@ -49,12 +49,12 @@ const shard = total;
 <style lang="scss">
 
 button.copy {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   aspect-ratio: 1;
   padding: 0.5em;
   position: absolute;
-  top: 1rem;
+  top: 0.6rem;
   right: 1rem;
   background: rgb(black, 12%);
   border: none;
