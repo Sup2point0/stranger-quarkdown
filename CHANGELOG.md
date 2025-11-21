@@ -1,9 +1,15 @@
 # Squarkdown Changelog
 
 
+## v3.2.0
+
+### Breaking
+- Bumped Ruby version from `3.3.5` to `3.4.7`
+
+
 ## v3.1.1
 
-## Fixes
+### Fixes
 - Data extraction now correctly exits when it encounters the closing `-->` of the squark charm.
 
 

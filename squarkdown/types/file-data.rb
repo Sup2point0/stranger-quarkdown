@@ -88,6 +88,8 @@ class FileData
   end
 
 
+  ##
+  # Given a line of text, detect the flags present and update the file data.
   def update_flags(text)
     if text.include?("dead!") then raise Squarkless end
     if text.include?("live!") then @live = true end
