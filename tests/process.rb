@@ -3,13 +3,16 @@ require "minitest/autorun"
 require_relative "../squarkdown/core/process"
 
 
-class SquarkupProcess < Minitest::Test
+class TestFlags < Minitest::Test
 
   RepoConfig = {}
 
+
   def test_live
-    content = """# Testing
-<!-- #SQUARK live! -->"""
+    content =
+"""# Testing
+<!-- #SQUARK live! -->
+"""
 
     data = extract_data(
       lines: content.split("\n"),
@@ -20,9 +23,12 @@ class SquarkupProcess < Minitest::Test
     assert data.live == true
   end
 
+
   def test_dead
-    content = """# Testing
-<!-- #SQUARK dead! -->"""
+    content =
+"""# Testing
+<!-- #SQUARK dead! -->
+"""
 
     data = extract_data(
       lines: content.split("\n"),
@@ -33,9 +39,12 @@ class SquarkupProcess < Minitest::Test
     assert data.nil?
   end
 
+
   def test_flags
-    content = """# Testing
-<!-- #SQUARK live! index! feat! woozy! dev! -->"""
+    content =
+"""# Testing
+<!-- #SQUARK live! index! feat! woozy! dev! -->
+"""
 
     data = extract_data(
       lines: content.split("\n"),
@@ -50,8 +59,17 @@ class SquarkupProcess < Minitest::Test
     assert data.flags.include?("dev")
   end
 
+end
+
+
+class TestFields < Minitest::Test
+
+  RepoConfig = {}
+
+
   def test_fields
-    content = """# Testing
+    content =
+"""# Testing
 <!-- #SQUARK live!
 | dest = testing/fields
 | capt = A unit test
@@ -64,6 +82,7 @@ class SquarkupProcess < Minitest::Test
 | date = 1984 April 1
 -->
 """
+
     data = extract_data(
       lines: content.split("\n"),
       repo_config: RepoConfig,
@@ -82,12 +101,14 @@ class SquarkupProcess < Minitest::Test
     assert data.date
   end
 
+
   def test_fields_default
     content = """# Testing
 <!-- #SQUARK live!
 | dest = testing/defaults
 -->
 """
+
     data = extract_data(
       lines: content.split("\n"),
       repo_config: RepoConfig,
@@ -103,6 +124,7 @@ class SquarkupProcess < Minitest::Test
     assert data.tags == []
   end
 
+
   def test_head
     content = """
 # Testing
@@ -110,6 +132,7 @@ class SquarkupProcess < Minitest::Test
 | dest = testing/head
 -->
 """
+    
     lines = content.split("\n")
 
     data = extract_data(
@@ -122,6 +145,48 @@ class SquarkupProcess < Minitest::Test
     assert !lines.include?("# Testing")
   end
 
+
+  def test_date
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| date = 1984 April 1
+-->
+"""
+    
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: true
+    )
+
+    assert data.date == Date.new(1984, 4, 1), (got data.date)
+    assert data.update == Date.new(1984, 4, 1), (got data.update)
+  end
+
+
+  def test_update
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| update = 1984 April 1
+-->
+"""
+    
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: true
+    )
+
+    assert data.update == Date.new(1984, 4, 1), (got data.update)
+  end
+
+
   def test_excess
     content = """
 # Testing
@@ -133,6 +198,7 @@ class SquarkupProcess < Minitest::Test
 | dest = testing/wrong
 -->
 """
+
     data = extract_data(
       lines: content.split("\n"),
       repo_config: RepoConfig,

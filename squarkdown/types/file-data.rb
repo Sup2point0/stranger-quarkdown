@@ -79,6 +79,8 @@ class FileData
     @tags = nil  # index
     @date = nil
     @date_display = nil
+    @update = nil
+    @update_display = nil
     @clean = []
   end
 
@@ -106,7 +108,8 @@ class FileData
     value.strip!
 
     Fields.each do |field|
-      if text.match("#{field} ?=")
+      # NOTE: line start, `|field`, ` field` are valid
+      if text.match("(?:[ |]|^)#{field} ?=")
         if _parse_(field:, value:, repo_config:)
           break
         end
@@ -158,7 +161,7 @@ class FileData
     
     when :update
       @update_display = value
-      @update = _parse_data_(value)
+      @update = _parse_date_(value)
     
     else
       return
@@ -188,8 +191,8 @@ class FileData
     # 20XX season
     begin
       year, season = value.downcase.split(" ")
-      dec = Seasons[season.downcase] +1
-      return Date.civil(year.to_i, dec +1, -1)
+      dec = Seasons[season.downcase] + 1
+      return Date.civil(year.to_i, dec+1, -1)
     rescue Date::Error
     end
   end
@@ -209,12 +212,11 @@ class FileData
 
   def _parse_default_(field:, repo_config:)
     case field
-    
-    when :title then @title = @head
-    when :desc then @desc = @capt
-    when :duality then @duality = "light"
-    when :tags then @tags = @index
-
+      when :title   then @title = @head
+      when :desc    then @desc = @capt
+      when :duality then @duality = "light"
+      when :tags    then @tags = @index
+      when :update  then @update = @date
     end
   end
 
@@ -222,7 +224,7 @@ class FileData
   def export_internal
     return self.vars_sym.slice(
       :path, :last_deploy, :slocs, :chars, :isIndex, :flags,
-      :dest, :title, :head, :capt, :desc, :index, :tags, :date, :date_display
+      :dest, :title, :head, :capt, :desc, :index, :tags, :date, :date_display, :update, :update_display
     )
   end
 
@@ -230,7 +232,7 @@ class FileData
   def export_external
     return self.vars_str.slice(
       "path", "last_deploy", "flags",
-      "title", "head", "capt", "desc", "index", "tags", "date_display"
+      "title", "head", "capt", "desc", "index", "tags", "date_display", "update_display"
     )
   end
 

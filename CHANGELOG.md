@@ -1,6 +1,13 @@
 # Squarkdown Changelog
 
 
+## v3.2.3
+
+### Fixes
+- `@update` and `@update_display` fields for files are now correctly exposed.
+- `FileData.update_fields()` has more exhaustive RegEx checks for correct patterns
+
+
 ## v3.2.2
 
 ### New
@@ -9,7 +16,7 @@
 
 ## v3.2.1
 
-### Fix
+### Fixes
 - Fix syntax error in `rake init` script...
 
 

@@ -1,5 +1,7 @@
 require "minitest/autorun"
 
+require_relative "utils"
+
 require_relative "../squarkdown/types/file-data"
 require_relative "../squarkdown/core/render"
 require_relative "../squarkdown/core/find"
@@ -33,7 +35,7 @@ class SquarkupRender < Minitest::Test
 
     out = inject_head(content, data: Data, repo_config: RepoConfig)
 
-    assert out.include?("<title> Squarkdown is epic · Squarkdown Tests </title>")
+    assert out.include?("<title> Squarkdown is epic · Squarkdown Tests </title>"), (got out)
   end
 
 
