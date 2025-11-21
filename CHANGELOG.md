@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.2.1
+
+### Fix
+- Fix syntax error in `rake init` script...
+
+
 ## v3.2.0
 
 ### Breaking

@@ -70,7 +70,7 @@ def script
 
     out
     choice = select("Continue running this script?", options: {
-      "No" => ""
+      "No" => "",
       "Yes" => "all changes will overwrite any existing files.",
     })
     kill if choice == "No"
