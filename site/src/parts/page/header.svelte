@@ -3,16 +3,20 @@
 <script lang="ts">
 
 interface Props {
-  title: string;
+  page: object;
 }
 
-let { title }: Props = $props();
+let { page }: Props = $props();
 
 </script>
 
 
 <header>
-  <h1> {title} </h1>
+  <h1> {page.head} </h1>
+
+  {#if page.update_display}
+    <p> Last updated <span>{page.update_display}</span> </p>
+  {/if}
 </header>
 
 

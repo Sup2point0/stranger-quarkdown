@@ -29,7 +29,7 @@ let { children } = $props();
     <NavLeft />
 
     <main>
-      <PageHeader title={page.data.head} />
+      <PageHeader page={page.data} />
 
       <article>
         {#if children}
