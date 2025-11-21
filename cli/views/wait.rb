@@ -9,7 +9,7 @@ def wait(
   if text
     print GREY, " "*BASE_INDENT, "#{text}"
   else
-    print GREY, " "*BASE_INDENT, "any key to continue"
+    print GREY, " "*BASE_INDENT, "any key to continue, ESC to exit"
     if init
       print ", #{BLUE}esc#{GREY} to exit"
     end

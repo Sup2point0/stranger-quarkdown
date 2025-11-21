@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.2.2
+
+### New
+- Added `ESC to exit` hint in CLI
+
+
 ## v3.2.1
 
 ### Fix
