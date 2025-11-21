@@ -3,7 +3,7 @@ name: Tests
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 4 * * 6'
+    - cron: '20 4 4,20 * *'
   push:
     paths-ignore:
       - '**.md'
@@ -14,21 +14,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Git / checkout'
+      - name: 'git / checkout'
         uses: actions/checkout@v4
       
-      - name: 'Git / Ruby / setup'
+      - name: 'git / ruby / setup'
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
           bundler-cache: true
           
-      - name: 'Ruby / bundle / install'
+      - name: 'bundle install'
         run: |
           bundle config set frozen false
           bundle install
-          gem install json-schema
+        # gem install json-schema
         # FIXME
           
-      - name: 'Ruby / rake / run'
+      - name: 'rake test'
         run: rake test
