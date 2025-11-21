@@ -2,8 +2,6 @@ name: Tests
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '20 4 4,20 * *'
   push:
     paths-ignore:
       - '**.md'
@@ -22,12 +20,12 @@ jobs:
         with:
           bundler-cache: true
           
-      - name: 'bundle install'
+      - name: 'ruby / bundle install'
         run: |
           bundle config set frozen false
           bundle install
         # gem install json-schema
         # FIXME
           
-      - name: 'rake test'
-        run: rake test
+      - name: 'ruby / rake test'
+        run: bundle exec rake test
