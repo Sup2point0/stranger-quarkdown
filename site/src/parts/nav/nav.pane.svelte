@@ -5,7 +5,7 @@ The left navigation sidebar.
 
 <script lang="ts">
 
-import Schema from "#static/squarkup-schema/latest.json?url" with { type: "json" };
+import Schema from "#static/squarkup-schema/latest.json" with { type: "json" };
 
 import NavSection from "#src/parts/nav/section.nav.svelte";
 import NavLink from "#src/parts/nav/link.nav.svelte";
