@@ -67,6 +67,11 @@ const delay = 240;
       <NavLink code="assets / extensions" intern="docs/reference/squark-json#extensions" />
       <NavLink code="fonts / queries" intern="docs/reference/squark-json#queries" />
     </NavLink>
+    <NavLink text="CLI" intern="docs/reference/cli">
+      <NavLink code="rake init" intern="docs/reference/cli/init" />
+      <NavLink code="rake squark" intern="docs/reference/cli/squark" />
+      <NavLink code="rake skeleton" intern="docs/reference/cli/skeleton" />
+    </NavLink>
     <NavLink text="squark charm" intern="docs/reference/squark-charm">
       <NavLink code="live" intern="docs/reference/squark-charm#live" />
       <NavLink code="flags" intern="docs/reference/squark-charm#flags" />
