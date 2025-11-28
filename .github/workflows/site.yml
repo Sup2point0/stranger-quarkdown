@@ -21,9 +21,6 @@ jobs:
         with:
           bundler-cache: true
 
-      # - name: 'ruby / bundle install'
-      #   run: bundle install
-
       - name: 'github / node / setup'
         uses: actions/setup-node@v4
         with:

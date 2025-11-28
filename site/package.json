@@ -8,7 +8,7 @@
 		"prep": "npm run squark",
       "prepx": "npm run squarkx && rake schema",
 		"squark": "cd .. && rake squark[fonts,scss,root] && cd site",
-      "squarkx": "cd .. && rake squark[fonts,scss,assets,root] && cd site",
+      "squarkx": "cd .. && bundle exec rake squark[fonts,scss,assets,root] && cd site",
 		"build": "vite build",
       "buildx": "npm run prepx && vite build",
 		"preview": "vite preview"
