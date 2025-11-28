@@ -41,7 +41,7 @@ class RoutesConfig
     end
 
     # default, but can be overridden
-    @site = repo / "site"
+    @site = @repo / "site"
   end
 end
 
