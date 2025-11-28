@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    with:
+      defaults:
+        working-directory: './site/'
         
     steps:
       - name: 'github / checkout'
@@ -22,7 +25,7 @@ jobs:
           bundler-cache: true
 
       - name: 'ruby / bundle install'
-        run: bundle install
+        run: cd .. && bundle install
 
       - name: 'github / node / setup'
         uses: actions/setup-node@v4
