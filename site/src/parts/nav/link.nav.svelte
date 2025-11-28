@@ -31,7 +31,7 @@ let open = $state(false);
   class:live={page.url.href.endsWith(link || extern || intern || "...")}
 >
   <a href={link || extern || `${base}/${intern}`}
-    target={extern ? "_blank" : "_self"}
+    target={extern ? "_blank" : undefined}
   >
     {#if code}
       <code>{code}</code>
