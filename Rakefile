@@ -8,8 +8,15 @@ task :test do
 end
 
 task :schema do
-  require_relative ".github/scripts/schema-doc.rb"
-  ruby ".github/scripts/schema-sync.rb", get_version
+  ARGV.append("root")
+  require_relative "squarkdown/config.rb"
+
+  require_relative ".github/scripts/schema-doc"
+  version = doc_schema
+
+  require_relative ".github/scripts/schema-sync.rb"
+  sync_schema version
+
   log done: true
 end
 

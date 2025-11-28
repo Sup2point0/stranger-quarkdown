@@ -2,32 +2,32 @@ name: Site
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'site.yml'
   schedule:
     - cron: '20 4 4,20 * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: './site'
         
     steps:
-      - name: 'git / checkout'
+      - name: 'github / checkout'
         uses: actions/checkout@v4
 
-      - name: 'git / ruby / setup'
+      - name: 'github / ruby / setup'
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
       - name: 'ruby / bundle install'
-        run: cd .. && bundle install
+        run: bundle install
 
-      - name: 'git / node / setup'
+      - name: 'github / node / setup'
         uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: 'latest'
           cache: 'npm'
           cache-dependency-path: './site/package-lock.json'
 
@@ -36,13 +36,13 @@ jobs:
 
       - name: 'svelte / npm run buildx'
         env:
-          BASE_PATH: '/${{ github.event.repository.name }}/site'
+          BASE_PATH: '/${{ github.event.repository.name }}'
         run: npm run buildx
 
-      - name: 'git / upload artifacts'
+      - name: 'github / upload artifacts'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './site/build/'
+          path: 'site/build/'
 
   deploy:
     needs: build
@@ -57,6 +57,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: 'git / deploy'
+      - name: 'github / deploy'
         id: deployment
         uses: actions/deploy-pages@v4
