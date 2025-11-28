@@ -5,7 +5,7 @@ on:
   push:
     paths-ignore:
       - '**.md'
-      - 'site/'
+      - 'site/**'
 
 jobs:
   test:
