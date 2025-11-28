@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'site.yml'
+      - '**/site.yml'
   schedule:
     - cron: '20 4 4,20 * *'
 
@@ -21,8 +21,8 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: 'ruby / bundle install'
-        run: bundle install
+      # - name: 'ruby / bundle install'
+      #   run: bundle install
 
       - name: 'github / node / setup'
         uses: actions/setup-node@v4
