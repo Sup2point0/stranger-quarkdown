@@ -3,6 +3,7 @@ require_relative "../../squarkdown/utils/ansi"
 require_relative "out"
 
 
+# Wait for the user to select an option(s) from `options`.
 def select(
   text = nil,
   before: nil,

@@ -27,6 +27,7 @@ def try_prep_scss(repo_config:)
 
   data = files.each_with_index.map do |file, i|
     log "#{i+1}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
+    
     dest = file.relative_path_from(route)
     full = partial / dest
     "@use './#{full}' as *;"

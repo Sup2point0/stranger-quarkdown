@@ -6,7 +6,14 @@
 
 Access Squarkdown’s features through the CLI.
 
+<!-- #SQUARK leave? -->
 To run these commands, you’ll need to have [cloned the StrangerQuarkdown repo as a submodule](../../walkthrough/quickstart.md#add-squarkdown) into your project, and installed Ruby. Remember to also install StrangerQuarkdown’s dependencies before using it:
+<!-- #SQUARK leave. -->
+<!-- #SQUARK only?
+
+To run these commands, you’ll need to have [cloned the StrangerQuarkdown repo as a submodule](https://sup2point0.github.io/stranger-quarkdown/docs/walkthrough/quickstart#add-squarkdown) into your project, and installed Ruby. Remember to also install StrangerQuarkdown’s dependencies before using it:
+
+     #SQUARK leave. -->
 
 ```bash
 /your-project/stranger-quarkdown> bundle install

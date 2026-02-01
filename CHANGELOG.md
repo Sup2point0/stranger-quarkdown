@@ -1,6 +1,18 @@
 # Squarkdown Changelog
 
 
+## v3.2.4
+
+### New
+- New options in CLI
+- CLI now adds `$schema` field to exported JSON
+
+### Fixes
+- Visual, logic and fallback fixes for CLI
+  - All `enter manually` options now ask for input
+  - Output JSON no longer has comments or malformed syntax
+
+
 ## v3.2.3
 
 ### Fixes
