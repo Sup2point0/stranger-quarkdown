@@ -4,6 +4,7 @@ task default: :squark
 ## Tasks
 
 task :test do
+  ARGV.append("root")
   Dir.glob("./tests/**/*.rb").each { |file| require file }
 end
 
