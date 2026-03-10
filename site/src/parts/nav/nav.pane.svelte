@@ -38,8 +38,8 @@ const delay = 240;
     <NavLink text="quickstart" intern="docs/walkthrough/quickstart" />
     <NavLink text="what is squarkdown?" intern="docs/walkthrough/what-is-squarkdown" />
     <NavLink text="project requirements" intern="docs/walkthrough/project-requirements" />
-    <NavLink text="squarkdown-flavoured markdown" intern="docs/walkthrough/squarkdown-flavoured-markdown" />
     <NavLink text="project structure" intern="docs/walkthrough/project-structure" />
+    <NavLink text="squarkdown-flavoured markdown" intern="docs/walkthrough/squarkdown-flavoured-markdown" />
     <NavLink text="configuring repositories" intern="docs/walkthrough/repo-config" />
     <NavLink text="configuring files" intern="docs/walkthrough/file-config" />
     <NavLink text="making full use of squarkdown" intern="docs/walkthrough/further-features" />
@@ -104,6 +104,8 @@ const delay = 240;
 
   <NavSection title="Schema" intern="squarkup-schema">
     <NavLink text="latest (v{Schema.version})" intern="squarkup-schema/latest.json" />
+    <NavLink text="v5.0.6" intern="squarkup-schema/v5.0.6.json" />
+    <NavLink text="v5.0.5" intern="squarkup-schema/v5.0.5.json" />
     <NavLink text="v5.0.4" intern="squarkup-schema/v5.0.4.json" />
     <NavLink text="v5.0.1" intern="squarkup-schema/v5.0.1.json" />
   </NavSection>
@@ -113,7 +115,7 @@ const delay = 240;
     <NavLink text="rationale" intern="info/rationale" />
     <NavLink text="decoded" intern="info/decoded" />
     <NavLink text="credits" intern="info/credits" />
-    <NavLink text="license" intern="info/license" />
+    <NavLink text="licence" intern="info/licence" />
   </NavSection>
 
   <div style:padding="1rem"></div>
