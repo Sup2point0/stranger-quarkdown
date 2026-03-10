@@ -1,6 +1,6 @@
 # Roadmap
 <!-- #SQUARK live!
-| dest   = info/roadmap
+| dest = info/roadmap
 | update = 2026 February 1
 -->
 
