@@ -33,7 +33,7 @@ Turns out complex string manipulation and filepath handling in Ruby is just as s
 
 ## Site
 
-What would this project even be if it didn’t use itself to build its own webpage. The [Squarkdown site](~) is built with [Svelte]()/[SvelteKit](), using MDSveX for Markdown integration, Squarkdown for preprocessing, and a couple more Ruby helper scripts for automation.
+What would this project even be if it didn’t use itself to build its own webpage. The [Squarkdown site](https://sup2point0.github.io/stranger-quarkdown) is built with [Svelte](https://svelte.dev)/[Kit](https://svelte.dev/docs/kit), using [MDsveX](https://mdsvex.pngwn.io) for Markdown integration, Squarkdown for preprocessing, and a couple more Ruby helper scripts for automation.
 
 
 <br>

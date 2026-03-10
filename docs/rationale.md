@@ -11,7 +11,7 @@ Like any sane developer, I created *Squarkdown* because I needed a tool to do so
 
 The situation which led me to create Squarkdown should actually pretty clearly illustrate what it’s for. (I hope.)
 
-So I store my personal wiki, [Assort](https://sup2point0.github.io/Assort), as a [repo on GitHub](https://github.com/Sup2point0/Assort). It’s filled with hundreds of `.md` files stored in a meshwork of folders. You can browse through them right on GitHub, and GitHub renders a lovely preview with [GitHub-Flavoured Markdown]() for each file. This is certainly my preferred way of reading their content!
+So I store my personal wiki, [Assort](https://sup2point0.github.io/Assort), as a [repo on GitHub](https://github.com/Sup2point0/Assort). It’s filled with hundreds of `.md` files stored in a meshwork of folders. You can browse through them right on GitHub, and GitHub renders a lovely preview with [GitHub-Flavoured Markdown](https://github.github.com/gfm) for each file. This is certainly my preferred way of reading their content!
 
 At the same time, I also wanted to share the content with non-techy people who probably wouldn’t be accustomed to browsing content through a GitHub repo. In this case, a website would be ideal.
 
