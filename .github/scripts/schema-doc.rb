@@ -12,6 +12,7 @@ def doc_schema
   ## Load
   content = File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
   schema = JSON.parse(content)
+  schema["properties"].delete("$schema")
 
   ## Render
   rows = schema["properties"].map do |field, props|
