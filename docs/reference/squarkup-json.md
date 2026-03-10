@@ -35,7 +35,7 @@
 | `bases / page.svelte` | `string` |  |  | [ relative to `bases/path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files.<br>Required for Markdown exporting. |
 | `bases / index.svelte` | `string` `null` |  |  | [ relative to `bases/path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files for **index** pages. |
 | `bases / page.js` | `string` `null` |  |  | [ relative to site ]<br>Squarkdown uses this file as a template for generated `+page.js` files.<br>If not supplied, Squarkdown will not create `+page.js` files. |
-| `bases / index-view` | `string` `null` |  |  | The component imported and used to render page lists in index pages.<br><br>If not supplied, Squarkdown will not create or inject index pages. |
+| `bases / index-view` | `string` `null` |  |  | The component imported and used to render page lists in index pages.<br>If not supplied, Squarkdown will not create or inject index pages. |
 | `styles / path` | `string` |  |  | [ relative to site ]<br>Squarkdown looks here for stylesheets. |
 | `styles / page-styles` | `string` |  |  | [ relative to site ]<br>Squarkdown looks here for stylesheets to inject during squarkup. |
 | `styles / base-style` | `string` |  |  | [ relative to `styles/page-styles` ]<br>Squarkdown injects this stylesheet into every page. |

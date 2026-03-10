@@ -1,5 +1,5 @@
 {
-  "version": "5.0.7",
+  "version": "5.0.6",
   "title":       "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -31,7 +31,7 @@
       "title":       "Source Directories",
       "description": "[ relative to root ]\nSquarkdown recursively searches these directories for `.md` files to squarkup.\nUse `\".\"` to target `.md` files in your project’s root.\nSet this field to `null` to disable Markdown exporting entirely.",
       "type":        ["array", "null"],
-      "items": {"type": "string"},
+      "items": {"type":        "string"},
       "default":     null
     },
     "paths / exclude":
@@ -39,7 +39,7 @@
       "title":       "Excluded Directory Patterns",
       "description": "If a file’s path matches any of these RegEx patterns, squarkup will be skipped for it.\nNote the RegEx is matched against the file’s absolute path.",
       "type":        ["array", "null"],
-      "items": {"type": "string"},
+      "items": {"type":        "string"},
       "default":     null
     },
     "paths / dest":
@@ -111,7 +111,7 @@
     "bases / index-view":
     {
       "title":       "Index View Component",
-      "description": "The component imported and used to render page lists in index pages.\nIf not supplied, Squarkdown will not create or inject index pages.",
+      "description": "The component imported and used to render page lists in index pages.\n\nIf not supplied, Squarkdown will not create or inject index pages.",
       "type":        ["string", "null"],
       "default":     null
     },
@@ -164,7 +164,7 @@
       "title":       "Fonts",
       "description": "Individual URL query params for requesting fonts from Google Fonts.",
       "type":        "array",
-      "items": {"type": "string"}
+      "items": {"type":        "string"}
     }
   }
 }
