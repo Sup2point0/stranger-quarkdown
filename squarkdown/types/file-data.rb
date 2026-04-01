@@ -104,12 +104,13 @@ class FileData
 
 
   def update_fields(text, repo_config:)
-    _, _, value = text.partition("=")
+    # NOTE: Allow spaces around `=` for alignment
+    target, _, value = text.partition(/[ ]+=[ ]*/)
     value.strip!
 
     Fields.each do |field|
       # NOTE: line start, `|field`, ` field` are valid
-      if text.match("(?:[ |]|^)#{field} ?=")
+      if target.match("(?:[ |]|^)#{field}")
         if _parse_(field:, value:, repo_config:)
           break
         end

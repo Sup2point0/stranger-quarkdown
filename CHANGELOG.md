@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.2.5
+
+### New
+- Squarkdown now accepts spaces around `=` in squark charm, if you wish to align the `=` with extra whitespace
+
+
 ## v3.2.4
 
 ### New
@@ -16,7 +22,7 @@
 ## v3.2.3
 
 ### Fixes
-- `@update` and `@update_display` fields for files are now correctly exposed.
+- `@update` and `@update_display` fields for files are now correctly exposed
 - `FileData.update_fields()` has more exhaustive RegEx checks for correct patterns
 
 
