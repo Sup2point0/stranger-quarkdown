@@ -128,9 +128,9 @@ class FileData
 
     if allow_arbitrary
       field = target.match(/(?:[ |]|^)[a-zA-Z\-]+/)
-      
+
       if field
-        field = field[0].strip
+        field = field[0].strip.gsub("-", "_")
         values = _split_(value)
         @rest[field] = if values.length == 1 then values[0] else values end
       end

@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.3.2
+
+### Fixes
+- Arbitrary fields auto-convert `-` in identifiers to `_` in exported metadata
+
+
 ## v3.3.1
 
 ### Fixes
