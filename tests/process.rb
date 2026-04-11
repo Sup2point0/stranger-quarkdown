@@ -102,6 +102,42 @@ class TestFields < Minitest::Test
   end
 
 
+  def test_fields_multiline
+    content =
+"""# Testing
+<!-- #SQUARK live!
+| dest = testing/fields-expanded
+| capt = A
+    rather long caption
+| title =
+    Squarkdown is very awesome
+| desc = Making sure everything works
+         like really works
+         like really genuinely works
+| style =
+  / #AUTO
+  / test
+| tags =
+    tests /
+    testing /
+-->
+"""
+
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: true
+    )
+
+    assert_equal data.dest, "testing/fields-expanded"
+    assert_equal data.capt, "A rather long caption"
+    assert_equal data.title, "Squarkdown is very awesome"
+    assert_equal data.desc, "Making sure everything works like really works like really genuinely works"
+    assert_equal data.style, ["test"]
+    assert_equal data.tags, ["tests", "testing"]
+  end
+
+
   def test_fields_default
     content = """# Testing
 <!-- #SQUARK live!
@@ -206,6 +242,30 @@ class TestFields < Minitest::Test
     )
 
     assert data.dest == "testing/excess"
+  end
+
+
+  def test_arbitrary
+    content = """
+# Testing
+<!-- #SQUARK live!
+| dest = testing/arbitrary
+---
+| arbitrary = sup
+| arbitrary-long = a long value
+| arbitrary-poly = many / arbitrary / values
+-->
+"""
+
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: false
+    )
+
+    assert data.rest["arbitrary"] = "sup"
+    assert data.rest["arbitrary-long"] = "a long value"
+    assert data.rest["arbitrary-poly"] = ["many", "arbitrary", "values"]
   end
 
 end

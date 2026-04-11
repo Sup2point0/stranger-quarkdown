@@ -2,7 +2,7 @@ require_relative "../types/file-data"
 
 
 # Max lines parsed
-ProcessedLines = 20
+PROCESSED_LINES = 20
 
 
 def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
@@ -13,42 +13,53 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   data.slocs = lines.length
   data.chars = lines.join.length
 
-  processing = false
-  idx = nil
+  is_processing = false
+  allow_arbitrary = false
+  load = []
+  head_line_idx = nil
 
-  lines[0, ProcessedLines].each_with_index do |line, i|
+  lines[0, PROCESSED_LINES].each_with_index do |line, i|
     if line.start_with?("-->")
+      if !load.empty?
+        data.update_fields(load.join(" "), repo_config:)
+      end
       break
     end
 
-    if data.head.nil?
-      if line.start_with?("# ")
-        data.head = line[2..-1].strip
-        idx = i
-      end
+    if data.head.nil? and line.start_with?("# ")
+      data.head = line[2..-1].strip
+      head_line_idx = i
     end
 
-    if !processing
-      if line.upcase.include?("#SQUARK")
-        processing = true
-        begin
-          data.update_flags(line)
-        rescue FileData::Squarkless
-          return
-        end
-      else
+    if !is_processing
+      if !line.upcase.include?("#SQUARK")
         next
+      end
+
+      is_processing = true
+
+      begin
+        data.update_flags(line)
+      rescue FileData::Squarkless
+        return
       end
     end
 
     if data.live
-      data.update_fields(line, repo_config:)
-    end
+      if line.start_with?("|")
+        data.update_fields(load.join(" "), repo_config:)
+        load = [line.strip]
+      elsif line.start_with?("---")
+        allow_arbitrary = true
+      else
+        load.push(line.strip)
+      end
+    end 
   end
 
   # remove the line with head
-  if !idx.nil?
-    lines.delete_at(idx)
+  if !head_line_idx.nil?
+    lines.delete_at(head_line_idx)
   end
 
   if data.live

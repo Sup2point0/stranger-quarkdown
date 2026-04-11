@@ -36,7 +36,7 @@ class FileData
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
-  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :tags, :date, :date_display, :update, :update_display, :clean
+  attr_reader :path, :last_deploy, :isIndex, :flags, :dest, :title, :capt, :desc, :style, :duality, :index, :tags, :date, :date_display, :update, :update_display, :clean, :rest
 
   Fields = [
     :dest, :title, :desc, :head, :capt,
@@ -44,7 +44,6 @@ class FileData
     :index, :tags,
     :date, :update,
     :clean,
-    :data,
   ]
 
 
@@ -82,11 +81,21 @@ class FileData
     @update = nil
     @update_display = nil
     @clean = []
+    
+    @rest = {}
   end
 
 
   def _split_(value)
-    value.downcase.split(" / ")
+    out = value
+      .downcase
+      .split(" / ")
+      .map { |val| val.strip }
+
+    out[0].delete_prefix!("/ ")
+    out[-1].delete_suffix!(" /")
+
+    out
   end
 
 
@@ -103,7 +112,7 @@ class FileData
   end
 
 
-  def update_fields(text, repo_config:)
+  def update_fields(text, repo_config:, allow_arbitrary: false)
     # NOTE: Allow spaces around `=` for alignment
     target, _, value = text.partition(/[ ]+=[ ]*/)
     value.strip!
@@ -111,7 +120,7 @@ class FileData
     Fields.each do |field|
       # NOTE: line start, `|field`, ` field` are valid
       if target.match("(?:[ |]|^)#{field}")
-        if _parse_(field:, value:, repo_config:)
+        if _parse_(field:, value:, repo_config:, allow_arbitrary:)
           break
         end
       end
@@ -121,9 +130,8 @@ class FileData
   end
 
 
-  def _parse_(field:, value:, repo_config:)
+  def _parse_(field:, value:, repo_config:, allow_arbitrary:)
     case field
-
     when :dest then @dest = value
     when :title then @title = value
     when :desc then @desc = value
@@ -165,6 +173,11 @@ class FileData
       @update = _parse_date_(value)
     
     else
+      if allow_arbitrary
+        @rest[field] = _split_(value)
+      else
+        log error: "encountered unknown field `#{field}` with value `#{value}`"
+      end
       return
 
     end
