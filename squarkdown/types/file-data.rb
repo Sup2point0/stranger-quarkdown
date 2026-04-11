@@ -131,8 +131,14 @@ class FileData
 
       if field
         field = field[0].strip.gsub("-", "_")
+
+        # NOTE:
+        # - `field = value` is not a list
+        # - `field = value /` and `field = / value` explicitly force a 1-item list
         values = _split_(value)
-        @rest[field] = if values.length == 1 then values[0] else values end
+        is_list = value.strip.start_with?("/ ") || value.strip.end_with?(" /")
+
+        @rest[field] = if is_list then values else values[0] end
       end
     end
 

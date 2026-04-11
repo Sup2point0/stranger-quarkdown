@@ -252,7 +252,7 @@ class TestFields < Minitest::Test
 | dest = testing/arbitrary
 ---
 | arbitrary = sup
-| arbitrary-long = a long value
+| arbitrary-long = / a singleton collection
 | arbitrary-poly = many / arbitrary / values
 -->
 """
@@ -264,7 +264,7 @@ class TestFields < Minitest::Test
     )
 
     assert_equal data.rest["arbitrary"], "sup"
-    assert_equal data.rest["arbitrary-long"], "a long value"
+    assert_equal data.rest["arbitrary-long"], ["a singleton collection"]
     assert_equal data.rest["arbitrary-poly"], ["many", "arbitrary", "values"]
   end
 

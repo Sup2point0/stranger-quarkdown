@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.3.3
+
+### Fixes
+- Distinguish between non-list and singleton list values for arbitrary fields
+
+
 ## v3.3.2
 
 ### Fixes
