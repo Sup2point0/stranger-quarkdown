@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.3.1
+
+### Fixes
+- Correctly export `rest` arbitrary fields in file data
+
+
 ## v3.3.0
 
 ### New

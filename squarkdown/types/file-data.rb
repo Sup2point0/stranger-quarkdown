@@ -238,7 +238,8 @@ class FileData
   def export_internal
     return self.vars_sym.slice(
       :path, :last_deploy, :slocs, :chars, :isIndex, :flags,
-      :dest, :title, :head, :capt, :desc, :index, :tags, :date, :date_display, :update, :update_display
+      :dest, :title, :head, :capt, :desc, :index, :tags, :date, :date_display, :update, :update_display,
+      :rest,
     )
   end
 
@@ -246,7 +247,8 @@ class FileData
   def export_external
     return self.vars_str.slice(
       "path", "last_deploy", "flags",
-      "title", "head", "capt", "desc", "index", "tags", "date_display", "update_display"
+      "title", "head", "capt", "desc", "index", "tags", "date_display", "update_display",
+      "rest"
     )
   end
 
