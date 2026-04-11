@@ -1,6 +1,15 @@
 # Squarkdown Changelog
 
 
+## v3.4.0
+
+### Breaking
+- Updated vulnerable dependencies
+
+### Fixes
+- Fix list and non-list distinguishing for arbitrary fields
+
+
 ## v3.3.3
 
 ### Fixes
