@@ -264,8 +264,8 @@ class TestFields < Minitest::Test
     )
 
     assert_equal data.rest["arbitrary"], "sup"
-    assert_equal data.rest["arbitrary-long"], ["a singleton collection"]
-    assert_equal data.rest["arbitrary-poly"], ["many", "arbitrary", "values"]
+    assert_equal data.rest["arbitrary_long"], ["a singleton collection"]
+    assert_equal data.rest["arbitrary_poly"], ["many", "arbitrary", "values"]
   end
 
 end

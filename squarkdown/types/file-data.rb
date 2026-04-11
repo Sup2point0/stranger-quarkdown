@@ -136,7 +136,7 @@ class FileData
         # - `field = value` is not a list
         # - `field = value /` and `field = / value` explicitly force a 1-item list
         values = _split_(value)
-        is_list = value.strip.start_with?("/ ") || value.strip.end_with?(" /")
+        is_list = values.length > 1 || value.strip.start_with?("/ ") || value.strip.end_with?(" /")
 
         @rest[field] = if is_list then values else values[0] end
       end
