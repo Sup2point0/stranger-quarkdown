@@ -4,6 +4,7 @@
 ## v3.3.1
 
 ### Fixes
+- Fix arbitrary field processing
 - Correctly export `rest` arbitrary fields in file data
 
 

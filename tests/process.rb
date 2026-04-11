@@ -263,9 +263,9 @@ class TestFields < Minitest::Test
       fill_defaults: false
     )
 
-    assert data.rest["arbitrary"] = "sup"
-    assert data.rest["arbitrary-long"] = "a long value"
-    assert data.rest["arbitrary-poly"] = ["many", "arbitrary", "values"]
+    assert_equal data.rest["arbitrary"], "sup"
+    assert_equal data.rest["arbitrary-long"], "a long value"
+    assert_equal data.rest["arbitrary-poly"], ["many", "arbitrary", "values"]
   end
 
 end

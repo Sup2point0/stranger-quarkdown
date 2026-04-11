@@ -120,9 +120,19 @@ class FileData
     Fields.each do |field|
       # NOTE: line start, `|field`, ` field` are valid
       if target.match("(?:[ |]|^)#{field}")
-        if _parse_(field:, value:, repo_config:, allow_arbitrary:)
-          break
+        if _parse_(field:, value:, repo_config:)
+          return self
         end
+      end
+    end
+
+    if allow_arbitrary
+      field = target.match(/(?:[ |]|^)[a-zA-Z\-]+/)
+      
+      if field
+        field = field[0].strip
+        values = _split_(value)
+        @rest[field] = if values.length == 1 then values[0] else values end
       end
     end
 
@@ -130,7 +140,7 @@ class FileData
   end
 
 
-  def _parse_(field:, value:, repo_config:, allow_arbitrary:)
+  def _parse_(field:, value:, repo_config:)
     case field
     when :dest then @dest = value
     when :title then @title = value
@@ -173,13 +183,9 @@ class FileData
       @update = _parse_date_(value)
     
     else
-      if allow_arbitrary
-        @rest[field] = _split_(value)
-      else
-        log error: "encountered unknown field `#{field}` with value `#{value}`"
-      end
+      log error: "encountered unknown field `#{field}` with value `#{value}`"
       return
-
+    
     end
 
     return self

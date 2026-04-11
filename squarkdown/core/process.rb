@@ -15,13 +15,14 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
 
   is_processing = false
   allow_arbitrary = false
+  
   load = []
   head_line_idx = nil
 
   lines[0, PROCESSED_LINES].each_with_index do |line, i|
     if line.start_with?("-->")
       if !load.empty?
-        data.update_fields(load.join(" "), repo_config:)
+        data.update_fields(load.join(" "), repo_config:, allow_arbitrary:)
       end
       break
     end
@@ -47,7 +48,7 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
 
     if data.live
       if line.start_with?("|")
-        data.update_fields(load.join(" "), repo_config:)
+        data.update_fields(load.join(" "), repo_config:, allow_arbitrary:)
         load = [line.strip]
       elsif line.start_with?("---")
         allow_arbitrary = true
