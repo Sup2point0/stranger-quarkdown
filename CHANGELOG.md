@@ -1,6 +1,13 @@
 # Squarkdown Changelog
 
 
+## v3.3.0
+
+### New
+- Squarkdown now accepts values over multiple lines
+- Squarkdown now accepts arbitrary fields in the squark charm after a `---` delimiter
+
+
 ## v3.2.5
 
 ### New
