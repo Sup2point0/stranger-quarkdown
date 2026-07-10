@@ -1,11 +1,19 @@
 # Project Requirements
 <!-- #SQUARK live!
 | dest = docs/walkthrough/project-requirements
-| update = 2026 March 10
+| update = 2026 July 10
 -->
 
-Squarkdown is built for [Svelte](https://svelte.dev)/[Kit](https://svelte.dev/docs/kit) projects that use [MDsveX](https://mdsvex.pngwn.io) for Markdown. If your repo has scattered content in Markdown which you’d like to automatically deploy to a website, Squarkdown may be just the tool for you.
+Squarkdown is built for any project that has a [Svelte](https://svelte.dev)/[Kit](https://svelte.dev/docs/kit) website.
 
-Yes, Squarkdown is a very niche and stack-specific tool, lmao. If you’re considering checking it out or even using it, firstly I’m honoured(!), secondly make sure you understand what kind of project it’s intended for.
+It takes Markdown content scattered across your repo, and preprocesses it to be consumed by SvelteKit via [MDsveX](https://mdsvex.pngwn.io).
 
-All this being said, Squarkdown’s flexible nature means you could probably use it for all sorts of projects! Although Markdown preprocessing is the main purpose of Squarkdown, the other features like [assets](further-features.md#assets) and [fonts preprocessing](further-features.md#fonts) may come in really handy on their own – even in frameworks other than Svelte/SvelteKit!
+Those are the 2 prerequisites: SvelteKit and MDsveX.[^specific] How you use the Markdown beyond that is completely up to you!
+
+[^specific]: Yeah, Squarkdown is a very niche and stack-specific tool, lmao. Make sure you know what you’re using it for!
+
+Squarkdown doesn’t care where your files are located – it will recursively scan for them, with rules configurable to suit your needs. You will, however, need to add `<!-- #SUQARK live! -->` headers to `.md` files you wish for Squarkdown to process.
+
+For instance, it could be a CLI tool for which you’d like to have docs online.[^cli-tool] Squarkdown would help you extract the docs from the repo to the built site.
+
+[^cli-tool]: Sound familiar? That’s what Squarkdown is, which is why it uses itself!
