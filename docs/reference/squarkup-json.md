@@ -9,7 +9,11 @@
 
 </div>
 
-`squarkup.json` goes in a `.squarkdown/` directory in your project’s root directory, configuring how Squarkdown should squarkup the repo.
+`squarkup.json` goes in a `.squarkdown/` directory in your project’s root directory. It’s how you configure Squarkdown to suit your project’s needs.
+
+The structure is flat to keep things simple. Keys follow a `<category> / <option>` format.
+
+Most settings simply tell Squarkdown what filepaths to use for your particular project, since these can obviously be different between projects!
 
 <br>
 
@@ -84,3 +88,7 @@ Here’s what Squarkdown’s own `squarkup.json` looks like:
   ]
 }
 ```
+
+Hopefully, it should be pretty self-explanatory what all the settings do!
+
+Writing it by hand can be tedious, so remember the Squarkdown CLI can [do it for you](cli/)!
