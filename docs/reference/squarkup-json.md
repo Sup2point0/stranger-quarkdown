@@ -1,6 +1,7 @@
 # squarkup.json
 <!-- #SQUARK live!
 | dest = docs/reference/squarkup-json
+| update = 2026 July 10
 -->
 
 <div class="quicklinks" align="center">
