@@ -37,23 +37,7 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough/q
 
 ### Future
 - Search root directory without recursively searching every directory
-- Allow arbitrary JSON data in squark charm
 - Correct internal relative links to correct absolute links in production
-
-
-<br>
-
-
-## Directory
-
-| folder | notes |
-| :----- | :---- |
-| [`squarkdown`](squarkdown/) | source code |
-| [`cli`](cli/) | source code (CLI) |
-| [`tests`](tests/) | unit tests |
-| [`docs`](docs/) | documentation |
-| [`site`](site/) | project site |
-| [`.github/scripts`](.github/scripts/) | helper scripts for generating docs and site |
 
 
 <br>
@@ -62,31 +46,29 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough/q
 ## Usage
 
 > [!Tip]
-> See [Using Squarkdown in a SvelteKit project](docs/walkthrough/quickstart.md) for a full detailed walkthrough.
+> See [Using Squarkdown in a SvelteKit project](docs/walkthrough/quickstart.md) for a full walkthrough.
 
-This project is designed to be used as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+Add Squarkdown to your project as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules):
 
-Add it to a repo:
-
-```console
-git submodule add https://github.com/Sup2point0/stranger-quarkdown
+```bash
+project> git submodule add https://github.com/Sup2point0/stranger-quarkdown
 ```
 
-Make sure you’ve got your [repo config](docs/squarkup-config.md) in `./.squarkdown/squarkup.json`.
+Setup:
 
-Run `rake` in the `./stranger-quarkdown/` directory to start the squarkup process. You can add this to your `npm run build` definition in `package.json`, so that it executes whenever you build the site:
-
-```diff
-  {
-    "scripts": {
-+     "build": "cd stranger-quarkdown && rake && cd .. && vite build"
-    }
-  }
+```bash
+stranger-quarkdown> rake init
 ```
 
-Squarkdown will recursively look for all `.md` files starting from the root of the repo, and export them to `.svx` files in `src/routes`.
+Run:
 
-Many additional configurations are available to customise this process (although the defaults should actually cover most projects!).
+```bash
+stranger-quarkdown> rake squark
+```
+
+Squarkdown will look for `.md` files in your repo with a `<!-- #SQUARK live! -->` [squark](docs/reference/squarks.md), and export them to `.svx` files in `src/routes`.
+
+Many additional configurations are available (although the defaults should actually cover most projects!).
 
 For more, visit [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs).
 
@@ -94,9 +76,9 @@ For more, visit [the docs](docs/) in this repo, or view them on [the website](ht
 <br>
 
 
-## License
+## Licence
 
-MIT. It’s not that even that good code, lmao.
+MIT. The code’s not even that good, lmao.
 
 
 <br>
