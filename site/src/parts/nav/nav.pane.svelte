@@ -151,7 +151,7 @@ nav {
   overflow-x: hidden;
   overflow-y: scroll;
   scrollbar-width: thin;
-  background: light-dark(#f7f7f7, black);
+  background: light-dark(#fcfcfc, black);
   transition: max-width 0.6s cubic-bezier(0.19, 1, 0.22, 1);  // ease-out-expo
   transition-delay: 0ms;
   
