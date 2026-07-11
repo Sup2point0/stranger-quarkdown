@@ -119,7 +119,7 @@ class FileData
 
     Fields.each do |field|
       # NOTE: line start, `|field`, ` field` are valid
-      if target.match("(?:[ |]|^)#{field}")
+      if target.match(/(?:[ |]|^)#{field}\z/)
         if _parse_(field:, value:, repo_config:)
           return self
         end
@@ -214,12 +214,18 @@ class FileData
     if parts.length == 2
       year, season = parts
       month = Seasons[season]
-      return Date.civil(year.to_i, month, -1)
+
+      begin
+        Date.civil(year.to_i, month, -1)
+      rescue
+      end
+    
     else
       begin
         return Date.strptime(value, "%Y")
       rescue Date::Error
       end
+    
     end
   end
 
