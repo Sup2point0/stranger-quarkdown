@@ -199,27 +199,27 @@ class FileData
 
 
   def _parse_date_(value)
-    begin
-      return Date.strptime(value, "%Y %B %d")
-    rescue Date::Error
+    [
+      "%Y %B %d",
+      "%Y %B"
+    ].each do |format|
+      begin
+        return Date.strptime(value, format)
+      rescue Date::Error
+      end
     end
 
-    begin
-      return Date.strptime(value, "%Y %B")
-    rescue Date::Error
-    end
+    parts = value.downcase.split(" ")
 
-    begin
-      @date = Date.strptime(value, "%Y")
-    rescue Date::Error
-    end
-
-    # 20XX season
-    begin
-      year, season = value.downcase.split(" ")
-      dec = Seasons[season.downcase] + 1
-      return Date.civil(year.to_i, dec+1, -1)
-    rescue Date::Error
+    if parts.length == 2
+      year, season = parts
+      month = Seasons[season]
+      return Date.civil(year.to_i, month, -1)
+    else
+      begin
+        return Date.strptime(value, "%Y")
+      rescue Date::Error
+      end
     end
   end
 

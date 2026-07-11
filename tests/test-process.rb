@@ -183,6 +183,7 @@ class TestFields < Minitest::Test
 
 
   def test_date
+    # year + month + day
     content =
 """
 # Testing
@@ -198,8 +199,65 @@ class TestFields < Minitest::Test
       fill_defaults: true
     )
 
-    assert data.date == Date.new(1984, 4, 1), (got data.date)
-    assert data.update == Date.new(1984, 4, 1), (got data.update)
+    assert_equal data.date, Date.new(1984, 4, 1)
+    assert_equal data.update, Date.new(1984, 4, 1)
+    
+    # year + month
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| date = 1984 April
+-->
+"""
+    
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: true
+    )
+
+    assert_equal data.date, Date.new(1984, 4, 1)
+    assert_equal data.update, Date.new(1984, 4, 1)
+    
+    # year + season
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| date = 1984 winter
+-->
+"""
+    
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: true
+    )
+
+    assert_equal Date.new(1984, 12, 31), data.date
+    assert_equal Date.new(1984, 12, 31), data.update
+    
+    # year
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| date = 1984
+-->
+"""
+    
+    data = extract_data(
+      lines: content.split("\n"),
+      repo_config: RepoConfig,
+      fill_defaults: true
+    )
+
+    assert_equal data.date, Date.new(1984, 1, 1)
+    assert_equal data.update, Date.new(1984, 1, 1)
   end
 
 
