@@ -46,7 +46,7 @@ Most settings simply tell Squarkdown what filepaths to use for your particular p
 | `styles / base-style` | `string` |  |  | [ relative to `styles/page-styles` ]<br>Squarkdown injects this stylesheet into every page. |
 | `assets / path` | `string` |  |  | [ relative to root ]<br>Squarkdown looks here for static assets to preprocess. |
 | `assets / site-assets` | `string` `null` |  |  | [ relative to root ]<br>Squarkdown moves assets in this directory straight to the root of `site`/`static`. |
-| `assets / extensions` | `string[]` | `jpg` `jpeg` `png` `svg` `ttf` `otf` `woff` | `["jpg", "jpeg", "png", "svg"]` | Only files with these extensions will be preprocessed by Squarkdown. |
+| `assets / extensions` | `string[]` |  | `["jpg", "jpeg", "png", "svg", "webp"]` | Only files with these extensions will be preprocessed by Squarkdown. |
 | `fonts / queries` | `string[]` |  |  | Individual URL query params for requesting fonts from Google Fonts. |
 <!-- #SQUARK inject. -->
 

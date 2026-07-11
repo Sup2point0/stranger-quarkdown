@@ -1,5 +1,5 @@
 {
-  "version":     "5.0.7",
+  "version":     "5.0.9",
   "title":       "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -31,7 +31,7 @@
       "title":       "Source Directories",
       "description": "[ relative to root ]\nSquarkdown recursively searches these directories for `.md` files to squarkup.\nUse `\".\"` to target `.md` files in your project’s root.\nSet this field to `null` to disable Markdown exporting entirely.",
       "type":        ["array", "null"],
-      "items": {"type": "string"},
+      "items":       {"type": "string"},
       "default":     null
     },
     "paths / exclude":
@@ -39,7 +39,7 @@
       "title":       "Excluded Directory Patterns",
       "description": "If a file’s path matches any of these RegEx patterns, squarkup will be skipped for it.\nNote the RegEx is matched against the file’s absolute path.",
       "type":        ["array", "null"],
-      "items": {"type": "string"},
+      "items":       {"type": "string"},
       "default":     null
     },
     "paths / dest":
@@ -68,7 +68,7 @@
     {
       "title":       "Exception Handling",
       "description": "Action to take if an error is encountered while processing a file.",
-      "enum": ["warn", "kill"],
+      "enum":        ["warn", "kill"],
       "default":     "warn"
     },
     "opts / on-no-dir":
@@ -76,9 +76,7 @@
       "title":       "Nonexistent Directory Handling",
       "description": "Action to take if an export directory does not exist.",
       "type":        "array",
-      "items": {
-        "enum": ["ignore", "warn", "create"]
-      },
+      "items":       { "enum": ["ignore", "warn", "create"] },
       "default":     ["warn"]
     },
 
@@ -151,20 +149,15 @@
       "title":       "Asset File Extensions",
       "description": "Only files with these extensions will be preprocessed by Squarkdown.",
       "type":        "array",
-      "items": {
-        "enum": [
-          "jpg", "jpeg", "png", "svg",
-          "ttf", "otf", "woff"
-        ]
-      },
-      "default":     ["jpg", "jpeg", "png", "svg"]
+      "items":       {"type": "string"},
+      "default":     ["jpg", "jpeg", "png", "svg", "webp"]
     },
     "fonts / queries":
     {
       "title":       "Fonts",
       "description": "Individual URL query params for requesting fonts from Google Fonts.",
       "type":        "array",
-      "items": {"type": "string"}
+      "items":       {"type": "string"}
     }
   }
 }
