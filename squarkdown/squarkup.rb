@@ -1,12 +1,8 @@
 T_START = Time.now
 
-require_relative "../squark.version"
-require_relative "utils/ansi"
-require_relative "utils/log"
-require_relative "utils/error"
+require_relative "__init__"
 log "#{CYAN}running Squarkdown v#{VERSION}"
 
-require_relative "routes"
 require_relative "types/site-data"
 require_relative "types/file-data"
 

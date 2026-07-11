@@ -1,6 +1,3 @@
-require_relative "ansi"
-
-
 $started_logging = false
 
 
@@ -12,6 +9,8 @@ def log(
   done: false,
   **kwargs
 )
+  return if Silent
+  
   puts "#{GREY}#{
     if !$started_logging then ">>> #{PINK}Squark#{GREY} / "
     elsif           done then ">>> #{PINK}Squark#{GREY} / "

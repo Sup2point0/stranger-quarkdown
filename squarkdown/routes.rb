@@ -9,14 +9,13 @@ class RoutesConfig
   attr_accessor :site
 
   def initialize()
-    silent = ARGV.include?("--silent")
     root = ARGV.include?("root")
 
-    log "locating routes..." unless silent
+    log "locating routes..."
 
     # root directory of Squarkdown
     @root = Pathname(__dir__).parent
-    log success: "found root#{GREY} = #{BLUE}#{@root}" unless silent
+    log success: "found root#{GREY} = #{BLUE}#{@root}"
 
     if root
       @repo = @root
@@ -33,18 +32,14 @@ class RoutesConfig
     end
 
     if @repo.nil?
-      log error: "failed to find directory with a #{WHITE}.squarkdown/#{RED} folder" unless silent
+      log error: "failed to find directory with a #{WHITE}.squarkdown/#{RED} folder"
       @repo = @root.parent
-      log "set repo = #{BLUE}#{@repo}" unless silent
+      log "set repo = #{BLUE}#{@repo}"
     else
-      log success: "found repo#{GREY} = #{BLUE}#{@repo}" unless silent
+      log success: "found repo#{GREY} = #{BLUE}#{@repo}"
     end
 
-    # default, but can be overridden
+    # default, but can (and should) be overridden
     @site = @repo / "site"
   end
 end
-
-
-## Global paths for Squarkdown to operate relative to.
-Routes = RoutesConfig.new()
