@@ -11,7 +11,7 @@ The top navigation bar.
 <nav>
   <section class="left">
     <a class="nav-link" href="https://sup2point0.github.io/stranger-quarkdown">
-      StrangerQuarkdown
+      Stranger Quarkdown
     </a>
   </section>
 

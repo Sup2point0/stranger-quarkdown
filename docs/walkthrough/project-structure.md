@@ -24,7 +24,7 @@ project/
       static/...
 ```
 
-- `stranger-quarkdown/` is the StrangerQuarkdown repo, as a Git submodule.
+- `stranger-quarkdown/` is the Stranger Quarkdown repo, as a Git submodule.
   - This is how you run Squarkdown.
   - It may be preferable to alias this as `.stranger-quarkdown/` to distinguish it from your actual project files.
 - `.squarkdown/` contains your project-specific configuration.

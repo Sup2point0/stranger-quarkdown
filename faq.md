@@ -20,7 +20,7 @@ Yeah, Squarkdown was made for a very particular purpose. It’s totally geared t
 It’s happened to be perfect for many of my projects, such as [pyco:bytes](https://sup2point0.github.io/pycobytes), [Integrity](https://sup2point0.github.io/integrity), and ofc [*Assort*](https://sup2point0.github.io/Assort). It really does make development so much easier when I don’t have to worry about where I put everything. After having all the infrastructure set up, being able to just add comments to a `.md` file and have it automatically render to a webpage complete with metadata is pretty awesome. The best part is, you can’t even see any of it when previewing the Markdown file!
 
 ### Where does the name *Squarkdown* come from?
-*Squarkdown* is an abbreviation of the full name *StrangerQuarkdown*. It’s the successor to my original tool [*Quarkdown*](https://github.com/Sup2point0/quarkdown) (now deprecated). You can find out more in [Synopsis](synopsis.md)!
+*Squarkdown* is an abbreviation of the full name *Stranger Quarkdown*. It’s the successor to my original tool [*Quarkdown*](https://github.com/Sup2point0/quarkdown) (now deprecated). You can find out more in [Synopsis](synopsis.md)!
 
 ### How fast is Squarkdown?
 Eh, decently? It really depends how many files you have. The more Squarkdown has to search through and parse, the longer squarkup will take. This is why [setting your sources properly](~) is important!

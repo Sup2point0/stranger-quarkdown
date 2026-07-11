@@ -5,7 +5,7 @@
 | update = 2026 July 10
 -->
 
-**StrangerQuarkdown**, or *Squarkdown* `/ˌskwɑːkdaʊn/` for short, is a preprocessing tool for using Markdown content in a SvelteKit website.
+**Stranger Quarkdown**, or *Squarkdown* `/ˌskwɑːkdaʊn/` for short, is a preprocessing tool for using Markdown content in a SvelteKit website.
 
 > No, it’s not yet another JavaScript framework, nor is it a documentation generator like [MkDocs](https://www.mkdocs.org) or CDN like [Wordpress](https://wordpress.com).
 
