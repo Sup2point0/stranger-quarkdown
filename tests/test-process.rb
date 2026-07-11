@@ -1,119 +1,112 @@
-require "minitest/autorun"
-
 require_relative "../squarkdown/core/process"
 
 
-class TestFlags < Minitest::Test
+def extract(content, fill_defaults: false)
+  return extract_data(
+    lines: content.split("\n"),
+    repo_config: RepoConfig,
+    fill_defaults:
+  )
+end
 
-  RepoConfig = {}
 
+class Test_Process_Flags_ < Minitest::Test
 
   def test_live
     content =
-"""# Testing
-<!-- #SQUARK live! -->
 """
+# Testing
+<!-- #SQUARK live! -->
+""".lstrip
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: false
-    )
+    data = extract(content)
 
-    assert data.live == true
+    assert_equal true, data.live
   end
 
 
   def test_dead
     content =
-"""# Testing
-<!-- #SQUARK dead! -->
 """
+# Testing
+<!-- #SQUARK dead! -->
+""".lstrip
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: false
-    )
+    data = extract(content)
 
-    assert data.nil?
+    assert_nil data
   end
 
 
   def test_flags
     content =
-"""# Testing
-<!-- #SQUARK live! index! feat! woozy! dev! -->
 """
+# Testing
+<!-- #SQUARK live! index! feat! woozy! dev! -->
+""".lstrip
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: false
-    )
+    data = extract(content)
 
-    assert data.flags.include?("live")
-    assert data.flags.include?("index")
-    assert data.flags.include?("feat")
-    assert data.flags.include?("woozy")
-    assert data.flags.include?("dev")
+    assert_includes data.flags, "live"
+    assert_includes data.flags, "index"
+    assert_includes data.flags, "feat"
+    assert_includes data.flags, "woozy"
+    assert_includes data.flags, "dev"
+    assert_equal 5, data.flags.length  # FIXME `-->` being picked up as a flag 💀
   end
 
 end
 
 
-class TestFields < Minitest::Test
-
-  RepoConfig = {}
-
+class Test_Process_Fields_ < Minitest::Test
 
   def test_fields
     content =
-"""# Testing
-<!-- #SQUARK live!
-| dest = testing/fields
-| capt = A unit test
-| title = Squarkdown is awesome
-| desc = Making sure everything works
-| style = #AUTO / test
-| duality = dark
-| index = tests
-| tags = #INDEX / testing
-| date = 1984 April 1
--->
 """
+# Testing
+<!-- #SQUARK live!
+| dest    = testing/fields
+| capt    = A unit test
+| title   = Squarkdown Tests
+| desc    = Does it work?
+| style   = #AUTO / test
+| duality = dark
+| index   = tests
+| tags    = #INDEX / testing
+| date    = 1984 April 1
+-->
+""".lstrip
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert data.dest == "testing/fields"
-    assert data.head == "Testing"
-    assert data.capt == "A unit test"
-    assert data.title == "Squarkdown is awesome"
-    assert data.desc == "Making sure everything works"
-    assert data.style == ["test"]
-    assert data.duality == "dark"
-    assert data.index == ["tests"]
-    assert data.tags == ["tests", "testing"]
-    assert data.date
+    assert_equal "testing/fields",     data.dest
+    assert_equal "Testing",            data.head
+    assert_equal "A unit test",        data.capt
+    assert_equal "Squarkdown Tests",   data.title
+    assert_equal "Does it work?",      data.desc
+    assert_equal ["test"],             data.style
+    assert_equal "dark",               data.duality
+    assert_equal ["tests"],            data.index
+    assert_equal ["tests", "testing"], data.tags
+    assert !data.date.nil?
   end
 
 
   def test_fields_multiline
     content =
-"""# Testing
+"""
+# Testing
 <!-- #SQUARK live!
 | dest = testing/fields-expanded
 | capt = A
     rather long caption
 | title =
     Squarkdown is very awesome
-| desc = Making sure everything works
-         like really works
-         like really genuinely works
+| desc = Never
+         gonna
+          give
+           you
+            up
 | style =
   / #AUTO
   / test
@@ -121,48 +114,45 @@ class TestFields < Minitest::Test
     tests /
     testing /
 -->
-"""
+""".lstrip
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert_equal data.dest, "testing/fields-expanded"
-    assert_equal data.capt, "A rather long caption"
-    assert_equal data.title, "Squarkdown is very awesome"
-    assert_equal data.desc, "Making sure everything works like really works like really genuinely works"
-    assert_equal data.style, ["test"]
-    assert_equal data.tags, ["tests", "testing"]
+    assert_equal "testing/fields-expanded",    data.dest
+    assert_equal "A rather long caption",      data.capt
+    assert_equal "Squarkdown is very awesome", data.title
+    assert_equal "Never gonna give you up",    data.desc
+    assert_equal ["test"],                     data.style
+    assert_equal ["tests", "testing"],         data.tags
   end
 
 
   def test_fields_default
-    content = """# Testing
-<!-- #SQUARK live!
-| dest = testing/defaults
--->
+    content =
 """
+# Testing
+<!-- #SQUARK live!
+| dest = test/defaults
+-->
+""".lstrip
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert data.dest == "testing/defaults"
-    assert data.head == "Testing"
-    assert data.title == "Testing"
-    assert data.style == []
-    assert data.duality == "light"
-    assert data.index == []
-    assert data.tags == []
+    assert_equal "test/defaults", data.dest
+    assert_equal "Testing",       data.head
+    assert_equal "Testing",       data.title
+    assert_equal [],              data.style
+    assert_equal "light",         data.duality
+    assert_equal [],              data.index
+    assert_equal [],              data.tags
+    assert_nil data.date
+    assert_nil data.update
   end
 
 
   def test_head
-    content = """
+    content =
+"""
 # Testing
 <!-- #SQUARK live!
 | dest = testing/head
@@ -177,8 +167,9 @@ class TestFields < Minitest::Test
       fill_defaults: false
     )
 
-    assert data.head == "Testing"
+    assert_equal "Testing", data.head
     assert !lines.include?("# Testing")
+    assert !lines.include?("Testing")
   end
 
 
@@ -189,18 +180,14 @@ class TestFields < Minitest::Test
 # Testing
 <!-- #SQUARK live!
 | dest = testing/dates
-| date = 1984 April 1
+| date = 1984 April 2
 -->
 """
     
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert_equal data.date, Date.new(1984, 4, 1)
-    assert_equal data.update, Date.new(1984, 4, 1)
+    assert_equal Date.new(1984, 4, 2), data.date
+    assert_equal Date.new(1984, 4, 2), data.update
     
     # year + month
     content =
@@ -212,14 +199,10 @@ class TestFields < Minitest::Test
 -->
 """
     
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert_equal data.date, Date.new(1984, 4, 1)
-    assert_equal data.update, Date.new(1984, 4, 1)
+    assert_equal Date.new(1984, 4, 1), data.date
+    assert_equal Date.new(1984, 4, 1), data.update
     
     # year + season
     content =
@@ -231,11 +214,7 @@ class TestFields < Minitest::Test
 -->
 """
     
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
     assert_equal Date.new(1984, 12, 31), data.date
     assert_equal Date.new(1984, 12, 31), data.update
@@ -250,39 +229,94 @@ class TestFields < Minitest::Test
 -->
 """
     
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert_equal data.date, Date.new(1984, 1, 1)
-    assert_equal data.update, Date.new(1984, 1, 1)
-  end
+    assert_equal Date.new(1984, 1, 1), data.date
+    assert_equal Date.new(1984, 1, 1), data.update
 
-
-  def test_update
+    # error
     content =
 """
 # Testing
 <!-- #SQUARK live!
 | dest = testing/dates
-| update = 1984 April 1
+| date = winter 2077
 -->
 """
     
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: true
-    )
+    data = extract(content, fill_defaults: true)
 
-    assert data.update == Date.new(1984, 4, 1), (got data.update)
+    assert_nil data.date
+    assert_nil data.update
+  end
+
+
+  def test_update
+    # year + month + day
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| update = 2069 April 2
+-->
+"""
+    
+    data = extract(content, fill_defaults: true)
+
+    assert_equal Date.new(2069, 4, 2), data.update
+    assert_nil data.date
+    
+    # year + month
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| update = 2069 April
+-->
+"""
+    
+    data = extract(content, fill_defaults: true)
+
+    assert_equal Date.new(2069, 4, 1), data.update
+    assert_nil data.date
+    
+    # year
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| update = 2069
+-->
+"""
+    
+    data = extract(content, fill_defaults: true)
+
+    assert_equal Date.new(2069, 1, 1), data.update
+    assert_nil data.date
+    
+    # error
+    content =
+"""
+# Testing
+<!-- #SQUARK live!
+| dest = testing/dates
+| update = future
+-->
+"""
+    
+    data = extract(content, fill_defaults: true)
+
+    assert_nil data.update
+    assert_nil data.date
   end
 
 
   def test_excess
-    content = """
+    content =
+"""
 # Testing
 <!-- #SQUARK live!
 | dest = testing/excess
@@ -293,18 +327,15 @@ class TestFields < Minitest::Test
 -->
 """
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: false
-    )
+    data = extract(content)
 
-    assert data.dest == "testing/excess"
+    assert_equal "testing/excess", data.dest
   end
 
 
   def test_arbitrary
-    content = """
+    content =
+"""
 # Testing
 <!-- #SQUARK live!
 | dest = testing/arbitrary
@@ -315,15 +346,11 @@ class TestFields < Minitest::Test
 -->
 """
 
-    data = extract_data(
-      lines: content.split("\n"),
-      repo_config: RepoConfig,
-      fill_defaults: false
-    )
+    data = extract(content)
 
-    assert_equal data.rest["arbitrary"], "sup"
-    assert_equal data.rest["arbitrary_long"], ["a singleton collection"]
-    assert_equal data.rest["arbitrary_poly"], ["many", "arbitrary", "values"]
+    assert_equal "sup",                           data.rest["arbitrary"]
+    assert_equal ["a singleton collection"],      data.rest["arbitrary_long"]
+    assert_equal ["many", "arbitrary", "values"], data.rest["arbitrary_poly"]
   end
 
 end
