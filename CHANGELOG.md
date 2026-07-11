@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## Next
+
+### Fixes
+- Update SCSS config generation to use `includePaths` for compatibility with newer versions of SCSS
+
+
 ## v3.4.0
 
 ### Breaking
