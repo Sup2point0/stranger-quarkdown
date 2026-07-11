@@ -12,7 +12,7 @@ let { page }: Props = $props();
 
 
 <header>
-  <h1> {page.head} </h1>
+  <h1> {@html page.head} </h1>
 
   {#if page.update_display}
     <p> Last updated <span>{page.update_display}</span> </p>

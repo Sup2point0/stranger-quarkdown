@@ -3,6 +3,7 @@
 | dest = info/decoded
 | title = decoded: Stranger Quarkdown
 | desc = Lessons learnt from development
+| head = <em>decoded</em>: Stranger Quarkdown
 -->
 
 > [!Note]
