@@ -2,19 +2,21 @@
 <!-- #SQUARK live!
 | dest = docs/walkthrough/what-is-squarkdown
 | desc = An introduction to Stranger Quarkdown
-| update = 2026 March 10
+| update = 2026 July 10
 -->
 
-**StrangerQuarkdown**, or *Squarkdown* `/ˌskwɑːkdaʊn/` for short, is a lightweight but feature-rich preprocessing tool for building a Svelte website with Markdown content.
+**StrangerQuarkdown**, or *Squarkdown* `/ˌskwɑːkdaʊn/` for short, is a preprocessing tool for using Markdown content in a SvelteKit website.
 
 > No, it’s not yet another JavaScript framework, nor is it a documentation generator like [MkDocs](https://www.mkdocs.org) or CDN like [Wordpress](https://wordpress.com).
 
-You can write content for a website in [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md), then run Squarkdown to preprocess and collect that content for your website to import and use however you see fit. It means you can put the content anywhere, and use Squarkdown to collect
+Squarkdown allows you to:
 
-The best way to understand what Squarkdown is for, is probably to just follow the story of why I created it.
+- Write Markdown content anywhere in your repo
+- Use [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md) to provide extra metadata and instructions
+- Use Squarkdown to copy that content into your website
 
-Say you’ve got a project with `.md` (Markdown) files scattered all throughout it. You want to build a website for the project, using the content in these Markdown files. But there’s no easy way you to access the content in them, and control how they’ll be handled and rendered.
+To illustrate, say you’ve got a project with `.md` (Markdown) files scattered all throughout it. You want to build a website for the project, using the content in these Markdown files. But there’s no easy way you to access the content in them, and control how they’ll be handled and rendered.
 
-Squarkdown does that all for you. You tell it where to find `.md` files, and it’ll search your repo for them and export them to `.svx` files in your site’s directory. You can provide metadata and other preprocessing directives through Squarkdown-flavoured Markdown.
+Squarkdown does that all for you. You tell it where to find `.md` files, and it’ll search your repo for them and export them to `.svx` files in your site’s directory.
 
 Squarkdown is built for integration with [Svelte](https://svelte.dev), [SvelteKit](https://svelte.dev/docs/kit) and [MDsveX](https://mdsvex.pngwn.io). If it isn’t clear already, it is a pretty niche tool! Exactly what sorts of projects Squarkdown can be used for are explored in [Project Requirements](project-requirements.md).
