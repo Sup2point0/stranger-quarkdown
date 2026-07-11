@@ -41,16 +41,19 @@ def load_default_repo_config()
 end
 
 
-## Find template for `+page.svelte`
+##
+# Find template for `file` (`+page.svelte` or `+page.js`)
 def find_file_base(file, from: Routes.site, repo_config:)
   return nil if repo_config[file].nil?
+
   route = from / repo_config["bases / path"] / repo_config[file]
-  content = File.read(route)
-  return content
+
+  return File.read(route)
 end
 
 
-## Find .md files to squarkup
+##
+# Recursively search for `.md` files to squarkup
 def find_files(from: nil, repo_config:)
   from = Routes.repo unless !from.nil?
 
