@@ -5,6 +5,7 @@
 
 ### Fixes
 - SCSS prep: Updated to use `includePaths` for compatibility with newer versions of SCSS
+- SCSS prep: Remove unnecessary `.scss` extensions from `@use` statements
 - Fonts prep: Handle empty `fonts / queries` edge case
 - Fonts prep: When there’s no existing Google Fonts `<link>` query, inject it instead of silently no-opping
 - `rake init`: fix issues
