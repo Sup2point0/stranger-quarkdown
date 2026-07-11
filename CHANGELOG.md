@@ -1,7 +1,9 @@
 # Squarkdown Changelog
 
 
-## Next
+## v3.4.1
+
+Schema version: `5.0.9`
 
 ### Fixes
 - SCSS prep: Updated to use `includePaths` for compatibility with newer versions of SCSS
