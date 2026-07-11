@@ -5,21 +5,19 @@
 
 To use Squarkdown in a repo, you’ll need 2 things:
 
-- The [Stranger Quarkdown repo](https://github.com/Sup2point0/stranger-quarkdown) included in your project as a Git submodule
+- The [Stranger Quarkdown repo](https://github.com/Sup2point0/stranger-quarkdown) included in your project as a [Git submodule<sup>↗</sup>](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
 - A `squarkup.json` file inside a `.squarkdown/` folder at the root of your project
 
 This means your project files will include these directories:
 
-```
+```py
 ./
    .squarkdown/
       squarkup.json
+   
    stranger-quarkdown/
       ...
 ```
-
-> [!Note]
-> Since you are free to name the `stranger-quarkdown` submodule directory whatever you wish, we will refer to it as the “Stranger Quarkdown directory” throughout the rest of this page to avoid ambiguity.
 
 
 <br>
@@ -30,10 +28,10 @@ This means your project files will include these directories:
 The Git submodule stores Squarkdown’s code. When you want to run Squarkdown, you’ll `cd` into this directory and run `rake squark`.
 
 ### Adding the Submodule
-In your project root, run the following command:
+In your project root, run:
 
 ```bash
-git submodule add https://github.com/Sup2point0/stranger-quarkdown
+your-project> git submodule add https://github.com/Sup2point0/stranger-quarkdown
 ```
 
 This clones the Stranger Quarkdown repo into the `stranger-quarkdown/` folder. That folder is a Git submodule, so it’ll look a little different in most IDEs and on GitHub.
@@ -41,24 +39,27 @@ This clones the Stranger Quarkdown repo into the `stranger-quarkdown/` folder. T
 If you’d like to give the folder a different name, just add your alias at the end of the command. I recommend `.stranger-quarkdown` for separating it from your actual project files:
 
 ```bash
-git submodule add https://github.com/Sup2point0/stranger-quarkdown .stranger-quarkdown
+your-project> git submodule add https://github.com/Sup2point0/stranger-quarkdown .stranger-quarkdown
 ```
 
+> [!Note]
+> Since you are free to name the `stranger-quarkdown` submodule directory whatever you wish, we’ll refer to it as the “Stranger Quarkdown directory” throughout the rest of this page to avoid ambiguity.
+
 ### Updating the Submodule
-As Squarkdown receives updates and fixes, you’ll want to pull them into your project. To do this, just run the following command:
+As Squarkdown receives updates and fixes, you’ll want to pull them into your project. To do this, run:
 
 ```bash
-git submodule update
+your-project/stranger-quarkdown> git submodule update
 ```
 
 > [!Tip]
-> If you have other Git submodules in your project, you may want to run this command in your Stranger Quarkdown directory to avoid unintentionally updating those other Git submodules.
+> If you have other Git submodules in your project, running this command in your Stranger Quarkdown directory avoids unintentionally updating those other Git submodules.
 
 ### Cloning the Submodule
 Bear in mind that submodules are not cloned by default when cloning their parent repository. If you’re cloning your project that uses Squarkdown, make sure to include the `--recurse-submodules` flag:
 
 ```bash
-git clone <project-url> --recurse-submodules
+your-project> git clone <your-project-url> --recurse-submodules
 ```
 
 If you’ve already cloned your project repo and the Stranger Quarkdown directory is empty, you can still clone it by pulling with the `--init` flag:
@@ -82,7 +83,7 @@ For better IDE support, make sure to start your JSON body with a reference to a 
 
 ```json
 {
-  "$schema": ""
+  "$schema": "https://sup2point0.github.io/stranger-quarkdown/squarkup-schema/latest.json"
 }
 ```
 
@@ -94,10 +95,10 @@ The body has no nesting and contains keys with the format `<category> / <field>`
 
 > *New in v3.0*.
 
-In your Stranger Quarkdown directory, run this:
+In your Stranger Quarkdown directory, run:
 
 ```bash
-rake init
+your-project/stranger-quarkdown> rake init
 ```
 
 All you need to do is follow the CLI, which will provide you with sensible options and automatically write your `squarkup.json` for you!

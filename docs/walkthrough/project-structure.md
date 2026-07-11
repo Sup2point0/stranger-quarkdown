@@ -1,13 +1,13 @@
 # Project Structure
 <!-- #SQUARK live!
 | dest = docs/walkthrough/project-structure
-| update = 2026 July 10
+| update = 2026 July 11
 -->
 
-Generally, the project structure Squarkdown expects is as follows:
+A project using Squarkdown looks like this:
 
 ```py
-project/
+your-project/
    .squarkdown/
       squarkup.json
 

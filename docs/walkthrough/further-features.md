@@ -3,11 +3,12 @@
 | dest = docs/walkthrough/further-features
 | desc = A further walkthrough of additional Squarkdown features
 | capt = A Further Walkthrough of Additional Squarkdown Features
+| update = 2026 July 11
 -->
 
-Squarkdown has grown much beyond moving Markdown files around into a full-blown content deployment framework.[^framework] There are many other features that can help with automating the process of building up a website, which can be enabled at an instant.
+Squarkdown has grown much beyond moving Markdown files around into a feature-rich content preprocessing framework.[^framework] There are many other features that can help with automating the process of building up a website, which can be enabled at an instant.
 
-[^framework]: Okay, ‘framework’ is a bit of a stretch.
+[^framework]: Okay, “framework” is a bit of a stretch.
 
 
 <br>
@@ -52,12 +53,14 @@ rake run squark[fonts]
 ## Assets
 
 > [!Note]
-> ‘Assets’ refers to images, videos, audio files, and other media.
+> “Assets” refers to images, videos, audio files, and other media.
 
 SvelteKit wants assets in `static/`, but this isn’t always practical. Oftentimes, the site is just part of a larger project, so your asset files need to be shared across the entire project. They probably end up in their own folder at the project root, like so:
 
-```
-project/
+```py
+your-project/
+   README.md
+
    assets/
       collection/
          rickroll.mp4
@@ -65,28 +68,27 @@ project/
       ...
 
    site/
-      src/...
-      static/...
-      svelte.config.js
-      ...
-
-   README.md
+      src/
+      static/
 ```
 
-Getting SvelteKit to look there for assets is gonna be more than a little fiddly (maybe ever impossible), so Squarkdown can save you the pain and just copy all asset files from `assets/` to `site/static/`.
+Getting SvelteKit to look there for assets is gonna be more than a little fiddly (maybe even impossible), so Squarkdown can save you the pain and just copy all asset files from `assets/` to `site/static/`.
 
-> Now of course, this essentially duplicates the files locally, which can waste a lot of storage space (and assets tend to be the largest part of a repo too) – there’s not really a permanent solution to this, but if you're not working on the site, you can clear the `static/` folder, since the files will be regenerated next time anyway.
+> Now of course, this duplicates the files locally, which can waste a lot of storage space (and assets tend to be the largest part of a repo too). Hopefully, for larger projects you’re using a dedicated CDN for media.
+
+> [!Tip]
+> If you store all your assets in `assets/` and gitignore `static/`, then you can safely delete it when you’re not working on a project to save on storage space – Squarkdown will regenerate all the assets next time you need it anyway!
 
 To enable this feature, add the `assets` option when running the task:
 
-``` console
-rake run squark[assets]
+```bash
+your-project/stranger-quarkdown> rake run squark[assets]
 ```
 
 Squarkdown copies the file structure exactly, transferring all `.png`, `.jpg`, `.jpeg`, `.svg` files and ignoring those with other extensions. So after running Squarkdown, our repo will look like so:
 
 ```diff
-  project/
+  your-project/
      assets/
         collection/
            rickroll.mp4
@@ -103,7 +105,7 @@ Squarkdown copies the file structure exactly, transferring all `.png`, `.jpg`, `
 But what if we had assets we’re only using on the website? We’d probably store them under their own folder `site/` in `assets/`:
 
 ```diff
-  project/
+  your-project/
      assets/
         collection/
            rickroll.mp4
@@ -118,7 +120,7 @@ Before this would’ve gone in `static/` and we could’ve accessed it directly 
 Just provide a directory to the `site-assets` option in `squarkup.json`, and Squarkdown will move all assets/folders in that directory straight to the root of `static/`. So if we set `site-assets` to `assets/site`, after running Squarkdown we would have:
 
 ```diff
-  project/
+  your-project/
      assets/
         collection/
            rickroll.mp4
@@ -140,6 +142,8 @@ Just provide a directory to the `site-assets` option in `squarkup.json`, and Squ
 
 
 ## SCSS
+
+TODO
 
 
 <br>
