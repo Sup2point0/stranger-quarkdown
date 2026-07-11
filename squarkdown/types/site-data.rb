@@ -2,8 +2,9 @@ require "json"
 require "date"
 
 
+## All the metadata Squarkdown collected while processing files.
 class SiteData
-  attr_accessor :meta, :pages, :index, :tagss
+  attr_accessor :meta, :pages, :index, :tags
 
   def initialize
     @meta = {

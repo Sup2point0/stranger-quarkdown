@@ -1,4 +1,4 @@
-require_relative "../config"
+require_relative "../routes"
 require_relative "../maps/squarks"
 require_relative "../maps/cleanup"
 

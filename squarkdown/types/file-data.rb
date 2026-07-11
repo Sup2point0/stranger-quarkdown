@@ -18,7 +18,7 @@
 require "json"
 require "yaml"
 
-require_relative "../config"
+require_relative "../routes"
 require_relative "../utils/vars"
 require_relative "../maps/seasons"
 

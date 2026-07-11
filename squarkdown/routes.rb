@@ -46,4 +46,5 @@ class RoutesConfig
 end
 
 
+## Global paths for Squarkdown to operate relative to.
 Routes = RoutesConfig.new()

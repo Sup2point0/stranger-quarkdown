@@ -1,17 +1,19 @@
 task default: :squark
 
 
-## Tasks
+## == Tasks ==
 
+## Run unit tests.
 task :test do
   ARGV.append("root")
 
   Dir.glob("./tests/**/*.rb").each { |file| require file }
 end
 
+## Update documentation for the latest version of the Squarkup schema.
 task :schema do
   ARGV.append("root")
-  require_relative "squarkdown/config.rb"
+  require_relative "squarkdown/routes"
 
   require_relative ".github/scripts/schema-doc"
   version = doc_schema
@@ -23,8 +25,9 @@ task :schema do
 end
 
 
-## Scripts
+## == Scripts ==
 
+## Run Squarkdown on a project.
 task :squark, [:fonts, :assets, :scss, :root] do |task, args|
   args.with_defaults({
     fonts: nil,
@@ -35,6 +38,7 @@ task :squark, [:fonts, :assets, :scss, :root] do |task, args|
   ruby "squarkdown/squarkup.rb", *args
 end
 
+## Setup Squarkdown for a project.
 task :init do
   ruby "cli/init.rb", "--silent"
 end
