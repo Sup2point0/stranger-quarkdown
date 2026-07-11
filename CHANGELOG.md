@@ -4,9 +4,11 @@
 ## Next
 
 ### Fixes
-- Update SCSS config generation to use `includePaths` for compatibility with newer versions of SCSS
-- Fix issues in `rake init`
-- Update dependencies
+- SCSS prep: Updated to use `includePaths` for compatibility with newer versions of SCSS
+- Fonts prep: Handle empty `fonts / queries` edge case
+- Fonts prep: When there’s no existing Google Fonts `<link>` query, inject it instead of silently no-opping
+- `rake init`: fix issues
+- Update gem dependencies
 
 
 ## v3.4.0
