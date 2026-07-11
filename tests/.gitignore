@@ -1,4 +1,5 @@
-test-site/scss-config.js
+site.json
+scss-config.js
 
 static/
 export/

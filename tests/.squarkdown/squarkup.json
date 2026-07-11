@@ -4,6 +4,9 @@
   "repo": "Squarkdown Tests",
 
   "paths / site": "tests/test-site/",
+  "paths / sources": [
+    "tests/"
+  ],
   "paths / exclude": [
     "/_.*?\\.md",
     "/-.*?\\.md"
@@ -11,10 +14,10 @@
   "paths / dest": "src/routes/export/",
 
   "opts / on-error": "kill",
-  "opts / on-no-dir": ["warn", "create"],
+  "opts / on-no-dir": ["create"],
 
-  "bases / path": "resources/",
-  "bases / page.svelte": "test.svelte",
+  "bases / path": "src/bases/",
+  "bases / page.svelte": "~page.svelte",
   
   "styles / path": "src/styles/",
   "styles / page-styles": "src/styles/",
