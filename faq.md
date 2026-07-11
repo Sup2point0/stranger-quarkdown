@@ -2,7 +2,17 @@
 <!-- #SQUARK live!
 | dest = info/faq
 | head = Frequently Asked Questions
+| update = 2026 July 10
 -->
+
+### What is Squarkdown?
+<!-- #SQUARK leave? -->
+See [What is Squarkdown?](docs/walkthrough/what-is-squarkdown.md).
+<!-- #SQUARK leave. -->
+
+<!-- #SQUARK only?
+See [What is Squarkdown?](/docs/walkthrough/what-is-squarkdown.md).
+     #SQUARK only. -->
 
 ### Why does Squarkdown only work with SvelteKit and MDsveX?
 Yeah, Squarkdown was made for a very particular purpose. It’s totally geared towards the technologies I use, but that’s purely because I made it for myself :P
@@ -22,7 +32,7 @@ For my personal wiki [Assort](https://github.com/Sup2point0/Assort), currently m
 ### Why Ruby?
 It’s a cute language :3
 
-I needed an excuse (or rather, a project) to use it, so I decided I’d give writing Squarkdown in Ruby. It went pretty swimmingly, to be honest, almost zero hitches. Ruby just works ^v^
+I needed an excuse (or rather, a project) to use it, so I decided I’d give writing Squarkdown in Ruby a shot. It went pretty swimmingly, to be honest, almost zero hitches. Ruby just works ^v^
 
 ### Was this website built with Squarkdown?
 Of course! (Imagine if it weren’t!) The text you’re reading now is sourced from a `.md` file [in the Squarkdown repo](https://github.com/Sup2point0/stranger-quarkdown/blob/main/faq.md?plain=1) ;)
