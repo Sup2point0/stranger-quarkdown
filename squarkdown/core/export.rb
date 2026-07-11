@@ -6,7 +6,7 @@ require_relative "../utils/error"
 
 ##
 # Export a processed `.md` file to ``.svx``, as well as its `+page.svelte` and `+page.js` if desired.
-def export_file(content, data:, base:, repo_config:)
+def export_file(content, data:, bases:, repo_config:)
   route = Routes.site / repo_config["paths / dest"] / data.dest
   filename = repo_config["out / file-name"]
 
@@ -43,10 +43,10 @@ def export_file(content, data:, base:, repo_config:)
   end
 
   ## == +page.svelte ==
-  if base["bases / page.svelte"]
+  if bases["bases / page.svelte"]
     begin
       dest = route / "+page.svelte"
-      content = base["bases / page.svelte"] % {file: filename}
+      content = bases["bases / page.svelte"] % {file: filename}
       File.write(dest, content)
 
     rescue => e
@@ -58,10 +58,10 @@ def export_file(content, data:, base:, repo_config:)
   end
 
   ## == +page.js ==
-  if base["bases / page.js"]
+  if bases["bases / page.js"]
     begin
       dest = route / "+page.js"
-      content = base["bases / page.js"] % {file: filename}
+      content = bases["bases / page.js"] % {file: filename}
       File.write(dest, content)
 
     rescue => e
