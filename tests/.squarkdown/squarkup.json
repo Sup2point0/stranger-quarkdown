@@ -3,7 +3,7 @@
 
   "repo": "Squarkdown Tests",
 
-  "paths / site": "tests/",
+  "paths / site": "tests/test-site",
   "paths / exclude": [
     "/_.*?\\.md",
     "/-.*?\\.md"
@@ -15,7 +15,8 @@
 
   "bases / path": "resources/",
   "bases / page.svelte": "test.svelte",
-  "styles / path": "resources/",
-  "styles / page-styles": "resources/",
+  "styles / path": "src/styles/",
+  "styles / page-styles": "src/styles/",
+  // TODO test assets
   "fonts / queries": ["testing"]
 }

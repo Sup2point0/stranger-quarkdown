@@ -7,7 +7,7 @@ class SquarkupConfig < Minitest::Test
 
   def test_paths
     assert Routes.root == Pathname(__dir__).parent
-    # NOTE no good way to test Routes.repo?
+    # FIXME: No good way to test Routes.repo?
   end
 
 end
