@@ -154,7 +154,7 @@ def script
   sep = "(/|\\\\)"
   config["paths / exclude"] = case choice
     when "project root"                then ["."]
-    when "directories starting with ." then [sep + "\..*?" + sep]
+    when "directories starting with ." then [sep + "\\..*?" + sep]
     when "directories starting with _" then [sep + "_.*?" + sep]
     else []
   end
