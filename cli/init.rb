@@ -24,6 +24,8 @@ $i = 0
 # Total number of options
 $t = 0
 
+$created = false
+
 
 class AbandonFeature < StandardError
 end
@@ -111,10 +113,8 @@ def script
   )
 
   config["paths / site"] = case choice
-    when "other"
-      input "What directory should Squarkdown output to?"
-    else
-      choice
+    when "other" then input "What directory should Squarkdown output to?"
+    else choice
   end
 
   out
@@ -153,10 +153,10 @@ def script
   
   sep = "(/|\\\\)"
   config["paths / exclude"] = case choice
-    when "project root"                ["."]
-    when "directories starting with ." [sep + "\..*?" + sep]
-    when "directories starting with _" [sep + "_.*?" + sep]
-    else                               []
+    when "project root"                then ["."]
+    when "directories starting with ." then [sep + "\..*?" + sep]
+    when "directories starting with _" then [sep + "_.*?" + sep]
+    else []
   end
 
   ## == Exporting Files ==
@@ -176,10 +176,8 @@ def script
   )
 
   config["out / site-data"] = case choice
-    when "other"
-      input "Where should Squarkdown export the JSON file containing all site data?"
-    else
-      choice
+    when "other" then input "Where should Squarkdown export the JSON file containing all site data?"
+    else choice
   end
 
   out
@@ -195,10 +193,8 @@ def script
   )
   
   config["out / file-name"] = case choice
-    when "other"
-      input "When Squarkdown exports .md files, what should it name the output .svx file?"
-    else
-      choice
+    when "other" then input "When Squarkdown exports .md files, what should it name the output .svx file?"
+    else choice
   end
 
   out
@@ -213,15 +209,12 @@ def script
       "no"                     => "skip this feature",
     }
   )
-
-  should_autogen = choice.include? "page."
-  config_save = config
   
   ## == Autogeneration ==
-  while should_autogen
+  if (choice.include? "page.") then begin
     out
     choice = select(
-      "Squarkdown will need templates for these other auto-generated files. Where can it find them?",
+      "Squarkdown needs templates for these other auto-generated files. Where can it find them?",
       options: {
         "src/lib/bases/"   => "",
         "src/parts/bases/" => "",
@@ -231,41 +224,32 @@ def script
     )
 
     config["bases / path"] = case choice
-      when "cancel"
-        break
-      when "other"
-        input "Where can Squarkdown find templates for auto-generated files?"
-      else
-        choice
+      when "cancel" then raise AbandonFeature
+      when "other"  then input "Where can Squarkdown find templates for auto-generated files?"
+      else choice
     end
 
     out
     choice = select(
       "When Squarkdown applies page styles to these auto-generated pages, where should it get the stylesheets from?",
       options: {
-        "src/styles/"      => "",
-        "src/styles/bases" => "",
-        "src/styles/pages" => "",
-        "other"            => "enter manually",
-        "cancel"           => "skip this feature",
+        "src/styles/"     => "",
+        "src/lib/styles/" => "",
+        "other"           => "enter manually",
+        "cancel"          => "skip this feature",
       }
     )
 
-    config["styles / path"] = case choice
-      when "cancel"
-        break
-      when "other"
-        input "Where should Squarkdown get stylesheets from for auto-generated pages?"
-      else
-        choice
+    config["styles / page-styles"] = case choice
+      when "cancel" then raise AbandonFeature
+      when "other" then input "Where should Squarkdown get stylesheets from for auto-generated pages?"
+      else choice
     end
-
-    should_autogen = false  # NOTE: To avoid infinite loop!
+  
+  rescue AbandonFeature
+    config.delete "style / page_styles"
   end
 
-  # NOTE: If we broke early `should_autogen` won't be reset to `false`, so we need to restore the save.
-  if should_autogen
-    config = config_save
   end
 
   ## == Extra Features ==
@@ -284,33 +268,32 @@ def script
     multi: true,
   )
 
-  if (choice and choice.include? "assets") then begin
+  should_prep_assets = (choice and choice.include? "assets")
+  should_prep_scss   = (choice and choice.include? "SCSS")
+  should_prep_fonts  = (choice and choice.include? "Google Fonts")
+
+  if should_prep_assets then begin
     out
     choice = select(
-      before: "Where should Squarkdown look for assets? #{GREY} Squarkdown will copy the contents of this directory to #{BLUE}static/#{GREY}.",
+      before: "Where should Squarkdown look for assets? #{GREY} Squarkdown will copy the contents of this directory to #{BLUE}static/#{GREY}",
       after:  "Where should Squarkdown look for assets?",
       options: {
         "/assets/"  => "",
         "/.assets/" => "",
-        "other"      => "enter manually",
-        "cancel"     => "",
+        "other"     => "enter manually",
+        "cancel"    => "",
       }
     )
 
     case choice
-      when "cancel"
-        raise AbandonFeature
-      
+      when "cancel"    then raise AbandonFeature
+      when "/assets/"  then config["assets / path"] = "assets/"
+      when "/.assets/" then config["assets / path"] = ".assets/"
       when "other"
-        config["assets / path"] = input "Where should Squarkdown look for assets?"
-      
-      when "/assets/"
-        config["assets / path"] = choice
-        assets = "assets/"
-      
-      when "/.assets/"
-        config["assets / path"] = choice
-        assets = ".assets/"
+        config["assets / path"] = input(
+          before: "Where should Squarkdown look for assets? #{GREY} Enter 1 directory",
+          after:  "Where should Squarkdown look for assets?" 
+        )
     end
 
     out
@@ -319,8 +302,8 @@ def script
       after:  "Do you have a folder containing site-specific assets?",
       options: {
         "no"                     => "default",
-        "#{assets || '/'}site/"  => "",
-        "#{assets || '/'}.site/" => "",
+        "#{choice || '/'}site/"  => "",
+        "#{choice || '/'}.site/" => "",
         "other"                  => "enter manually",
         "cancel"                 => "skip this feature",
       }
@@ -341,7 +324,7 @@ def script
         "jpg"    => true,
         "jpeg"   => true,
         "svg"    => true,
-        "webp"   => "",
+        "webp"   => true,
         "other"  => "enter manually",
         "cancel" => "skip this feature",
       },
@@ -349,17 +332,12 @@ def script
     )
 
     config["assets / extensions"] = case choice
-      when "cancel"
-        raise AbandonFeature
+      when "cancel" then raise AbandonFeature
       when "other"
-        exts = input "What types of assets should Squarkdown copy? #{GREY} Provide 1 or more file extensions (without leading `.`) separated by spaces."
-        exts.map { |ext| "." + ext }
+        exts = input "What types of assets should Squarkdown copy? #{GREY} Enter 1+ file extensions separated by spaces"
+        exts.map { |ext| if ext.start_with "." then ext else ("." + ext) end }
       else
-        if choice.include? "cancel"
-          raise AbandonFeature
-        else
-          choice
-        end
+        if choice.include? "cancel" then (raise AbandonFeature) else choice end
     end
   
   rescue AbandonFeature
@@ -367,6 +345,41 @@ def script
     config.delete "assets / extensions"
   end
 
+  end
+
+  if should_prep_scss then begin
+    out
+    out head: "SCSS"
+    wait
+
+    out
+    choice = select(
+      before: "Where can Squarkdown find global stylesheets? #{GREY} Global stylesheets start with ~ in their filename",
+      after: "Where can Squarkdown find global stylesheets?",
+      options: {
+        "src/styles"     => "",
+        "src/lib/styles" => "",
+        "other"          => "enter manually",
+        "cancel"         => "",
+      }
+    )
+
+    config["styles / path"] = case choice
+      when "cancel" then raise AbandonFeature
+      when "other" then input(
+        before: "Where can Squarkdown find global stylesheets? #{GREY} Enter 1 directory",
+        after:  "Where can Squarkdown find global stylesheets?"
+      )
+      else choice
+    end
+
+  rescue AbandonFeature
+  end
+
+  end
+
+  if should_prep_fonts
+    config["fonts / queries"] = ["Fira+Mono:wght@400;500;700"]
   end
 
   ## == Final Touches ==
@@ -397,17 +410,10 @@ def script
   )
 
   config["opts / on-no-dir"] = case choice
-    when "warn   + create the directory"
-      ["warn", "create"]
-    
-    when "ignore + create the directory"
-      ["ignore", "create"]
-    
-    when "warn   + skip directory"
-      ["warn"]
-    
-    when "ignore + skip directory"
-      ["ignore"]
+    when "warn   + create the directory" then ["warn", "create"]
+    when "ignore + create the directory" then ["ignore", "create"]
+    when "warn   + skip directory"       then ["warn"]
+    when "ignore + skip directory"       then ["ignore"]
   end
 
   ## == Finalise ==
@@ -416,6 +422,7 @@ def script
 
   config.compact!
   export_json(data: config)
+  $created = true
 
   print PREV, CLEAR
   out success: "Your #{BLUE}squarkup.json#{WHITE} has been created in #{BLUE}#{cwd.parent}/.squarkdown/#{WHITE}."
@@ -449,10 +456,10 @@ def setup
 end
 
 
-def kill(created: false)
+def kill()
   print CLEAR
   out
-  out close: "#{CYAN}Thanks for using Squarkdown#{if created then ', enjoy' else '' end}!#{WHITE} 🥕"
+  out close: "#{CYAN}Thanks for using Squarkdown#{if $created then ', enjoy' else '' end}!#{WHITE} 🥕"
   puts
   exit
 end
@@ -461,4 +468,4 @@ end
 
 setup
 script
-kill created: true
+kill
