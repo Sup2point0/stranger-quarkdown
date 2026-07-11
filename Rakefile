@@ -39,7 +39,7 @@ task :squark, [:fonts, :assets, :scss, :root] do |task, args|
     scss: nil,
     root: nil,  # internal flag for squarking up Squarkdown itself instead of the parent project
   })
-  ruby "squarkdown/squarkup.rb", *args
+  ruby "squarkdown/__main__.rb", *args
 end
 
 ## Setup Squarkdown for a project.
