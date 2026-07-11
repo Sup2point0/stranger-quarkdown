@@ -6,13 +6,10 @@ task default: :squark
 ## Run unit tests.
 task :test do
   ARGV.append("root")
-  # ARGV.append("silent")
+  ARGV.append("silent")
 
   require_relative "squarkdown/__init__"
-
-  require "pathname"
-  require_relative "squarkdown/core/find"
-  find_repo_config(from: Pathname(__dir__) / "tests")
+  require_relative "tests/__init__"
 
   Dir.glob("./tests/**/test-*.rb").each { |file| require file }
 end

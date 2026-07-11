@@ -33,7 +33,6 @@ def try_prep_assets(repo_config:)
     File::FNM_DOTMATCH
   )
   
-  i = 0
   total = files.length
 
   if total == 0
@@ -44,8 +43,7 @@ def try_prep_assets(repo_config:)
   log success: "found #{total} assets in #{BLUE}#{route.relative_path_from(Routes.root)}"
   log "transferring assets..."
 
-  files.each do |file|
-    i += 1
+  files.each_with_index do |file, i|
     if i % 10 == 0
       log "#{i}#{GREY} of #{total}..."
     end

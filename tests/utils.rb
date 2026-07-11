@@ -1,7 +1,7 @@
-def got(text)
+def got(code)
   return (
 "got ```
-#{text}  
+#{code}  
 ```"
 )
 

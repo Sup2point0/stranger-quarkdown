@@ -11,12 +11,20 @@
   "paths / dest": "export/routes/",
 
   "opts / on-error": "kill",
-  "opts / on-no-dir": ["warn"],
+  "opts / on-no-dir": ["warn", "create"],
 
   "bases / path": "resources/",
   "bases / page.svelte": "test.svelte",
+  
   "styles / path": "src/styles/",
   "styles / page-styles": "src/styles/",
-  // TODO test assets
-  "fonts / queries": ["testing"]
+
+  "assets / path": ".assets",
+  "assets / site-assets": ".assets/site",
+  "assets / extensions": [
+    "png",
+    "svg"
+  ],
+
+  "fonts / queries": ["Test Sans"]
 }
