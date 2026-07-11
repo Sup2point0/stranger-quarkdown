@@ -18,7 +18,7 @@ end
 
 def inject_repl(content)
   Replace.each do |pattern, repl|
-    content.sub!(pattern, repl)
+    content.gsub!(pattern, repl)
   end
 
   return content
