@@ -6,26 +6,31 @@
   "paths / site": "site",
   "paths / sources": [
     "./",
-    "docs/"
+    "docs/",
+    ".squarkdown/content/"
   ],
   "paths / dest": "src/routes/(docs)/",
+  
   "out / file-name": "~content",
   "out / site-data": "src/site.json",
 
   "opts / on-no-dir": ["warn", "create"],
-  "opts / on-error": "kill",
+  "opts / on-error":  "kill",
 
-  "bases / path": "src/parts/bases/",
+  "bases / path":        "src/parts/bases/",
   "bases / page.svelte": "~page.svelte",
-  "bases / page.js": "~page.js",
-  "styles / path": "src/styles/",
+  "bases / page.js":     "~page.js",
+
+  "styles / path":        "src/styles/",
   "styles / page-styles": "src/styles/",
-  "styles / base-style": "article",
+  "styles / base-style":  "article",
+
   "assets / path": ".assets",
   "assets / site-assets": ".assets/site",
   "assets / extensions": [
     "jpg", "jpeg", "png", "svg", "ttf"
   ],
+
   "fonts / queries": [
     "Sora:wght@100..800"
   ]

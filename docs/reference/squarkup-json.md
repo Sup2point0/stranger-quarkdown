@@ -60,35 +60,45 @@ Here’s what Squarkdown’s own `squarkup.json` looks like:
 
 ```json
 {
-  "$schema": "https://sup2point0.github.io/stranger-quarkdown/squarkup-schema/latest.json",
-  
-  "repo": "Stranger Quarkdown",
-  
-  "paths / site": "site/",
+  "$schema": "../squarkdown/resources/squarkup-schema.json",
+
+  "repo": "Squarkdown",
+
+  "paths / site": "site",
   "paths / sources": [
-    ".",
-    "docs/"
+    "./",
+    "docs/",
+    ".squarkdown/content/"
   ],
-  "paths / exclude": [
-    "stranger-quarkdown/README.md"
-  ],
+  "paths / dest": "src/routes/(docs)/",
+  
   "out / file-name": "~content",
   "out / site-data": "src/site.json",
-  
+
   "opts / on-no-dir": ["warn", "create"],
   "opts / on-error": "kill",
-  
+
+  "bases / path": "src/parts/bases/",
+  "bases / page.svelte": "~page.svelte",
+  "bases / page.js": "~page.js",
+
+  "styles / path": "src/styles/",
+  "styles / page-styles": "src/styles/",
+  "styles / base-style": "article",
+
   "assets / path": ".assets",
   "assets / site-assets": ".assets/site",
   "assets / extensions": [
     "jpg", "jpeg", "png", "svg", "ttf"
   ],
+
   "fonts / queries": [
-    "Fira+Mono:wght@400;500;700",
     "Sora:wght@100..800"
   ]
 }
 ```
+
+> (comments added for clarity)
 
 Hopefully, it should be pretty self-explanatory what all the settings do!
 
