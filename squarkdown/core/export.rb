@@ -21,8 +21,8 @@ def export_file(content, data:, bases:, repo_config:)
       end
 
       if handle.include?("warn")
-        dest = dest.relative_path_from(Routes.repo)
-        log error: "destination directory does not exist: #{BLUE}#{dest}"
+        dest_display = dest.relative_path_from(Routes.repo)
+        log error: "destination directory does not exist: #{BLUE}#{dest_display}"
       end
         
       if handle.include?("create")
