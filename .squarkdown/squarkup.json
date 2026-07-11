@@ -9,7 +9,7 @@
     "docs/",
     ".squarkdown/content/"
   ],
-  "paths / dest": "src/routes/(docs)/",
+  "paths / dest": "src/routes/(docs)/(dyna)/",
   
   "out / file-name": "~content",
   "out / site-data": "src/site.json",

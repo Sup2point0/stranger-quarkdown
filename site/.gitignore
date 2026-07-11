@@ -8,7 +8,7 @@ scss-config.js
 build/
 static/*
 !static/squarkup-schema/
-(docs)/
+(dyna)/
 
 # internal
 node_modules/
