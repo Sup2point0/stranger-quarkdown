@@ -14,7 +14,6 @@ require_relative "core/find"
 require_relative "core/process"
 require_relative "core/render"
 require_relative "core/export"
-require_relative "core/construct"
 
 
 log "squarking up..."

@@ -1,4 +1,4 @@
-## Injects the Squarkup JSON Schema into `docs/squarkup-config.md`.
+## Copies the current `squarkup.json` to `site/static/squarkup-schema` for archival.
 
 require "json"
 

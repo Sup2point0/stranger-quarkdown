@@ -4,13 +4,15 @@ require_relative "../utils/log"
 require_relative "../utils/error"
 
 
+##
+# Export a processed `.md` file to ``.svx``, as well as its `+page.svelte` and `+page.js` if desired.
 def export_file(content, data:, base:, repo_config:)
   route = Routes.site / repo_config["paths / dest"] / data.dest
+  filename = repo_config["out / file-name"]
 
-  # content.svx
+  ## == .svx ==
   begin
-    dest = route / (repo_config["out / file-name"] + ".svx")
-    dest_display = dest.relative_path_from(Routes.repo)
+    dest = route / (filename + ".svx")
     handle = repo_config["opts / on-no-dir"]
 
     if !route.exist?
@@ -19,7 +21,8 @@ def export_file(content, data:, base:, repo_config:)
       end
 
       if handle.include?("warn")
-        log error: "destination directory does not exist: #{BLUE}#{dest_display}"
+        dest = dest.relative_path_from(Routes.repo)
+        log error: "destination directory does not exist: #{BLUE}#{dest}"
       end
         
       if handle.include?("create")
@@ -33,17 +36,17 @@ def export_file(content, data:, base:, repo_config:)
     File.write(dest, content)
 
   rescue => e
-    log "failed to export `#{repo_config["out / file-name"]}.svx`!"
+    log "failed to export `#{filename}.svx`!"
     squark_error(e, repo_config:)
     error = true
 
   end
 
-  # +page.svelte
+  ## == +page.svelte ==
   if base["bases / page.svelte"]
     begin
       dest = route / "+page.svelte"
-      content = base["bases / page.svelte"] % {file: repo_config["out / file-name"]}
+      content = base["bases / page.svelte"] % {file: filename}
       File.write(dest, content)
 
     rescue => e
@@ -54,11 +57,11 @@ def export_file(content, data:, base:, repo_config:)
     end
   end
 
-  # +page.js
+  ## == +page.js ==
   if base["bases / page.js"]
     begin
       dest = route / "+page.js"
-      content = base["bases / page.js"] % {file: repo_config["out / file-name"]}
+      content = base["bases / page.js"] % {file: filename}
       File.write(dest, content)
 
     rescue => e
@@ -70,4 +73,10 @@ def export_file(content, data:, base:, repo_config:)
   end
 
   return !error
+end
+
+
+def save_site_data(data, repo_config:)
+  route = Routes.site / repo_config["out / site-data"]
+  File.write(route, data)
 end

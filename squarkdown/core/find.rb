@@ -1,16 +1,21 @@
+require "pathname"
 require "json"
 require "json-schema"
 
-require_relative "../config"
+require_relative "../routes"
 require_relative "../utils/ansi"
 require_relative "../utils/log"
 
 
-Schema = JSON.parse(
+SquarkupSchema = JSON.parse(
   File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
 )
 
 
+##
+# Look under `from` for a `.squarkdown/squarkup.json`, and produce a complete repo config, with absent values filled in by defaults.
+#
+# This also sets the global `Routes.site` with the value provided by `squarkup.json`.
 def find_repo_config(from: Routes.repo)
   repo_config = load_default_repo_config()
 
@@ -18,7 +23,7 @@ def find_repo_config(from: Routes.repo)
   content = File.read(route)
   data = JSON.parse(content)
 
-  JSON::Validator.validate!(Schema, data)
+  JSON::Validator.validate!(SquarkupSchema, data)
   
   repo_config.merge!(data)
   Routes.site = Routes.repo / repo_config["paths / site"]
@@ -28,7 +33,7 @@ end
 
 
 def load_default_repo_config()
-  data = Schema["properties"].map do |prop, data|
+  data = SquarkupSchema["properties"].map do |prop, data|
     [prop, data["default"]]
   end.to_h
   
