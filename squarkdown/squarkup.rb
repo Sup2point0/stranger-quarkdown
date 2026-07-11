@@ -141,7 +141,7 @@ files.each_with_index do |file, i|
     end
 
   rescue => e
-    error(e, repo_config:)
+    squark_error(e, repo_config:)
   
   end
 end
