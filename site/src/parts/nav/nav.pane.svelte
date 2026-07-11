@@ -114,6 +114,7 @@ const delay = 240;
     <NavLink text="synopsis" intern="info/synopsis" />
     <NavLink text="rationale" intern="info/rationale" />
     <NavLink text="decoded" intern="info/decoded" />
+    <NavLink text="roadmap" intern="info/roadmap" />
     <NavLink text="licence" intern="info/licence" />
   </NavSection>
 
