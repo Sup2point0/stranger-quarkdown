@@ -1,9 +1,10 @@
 require_relative "ansi"
 
 
-$started = false
+$started_logging = false
 
 
+## Print a prettified message from Squarkdown.
 def log(
   text = nil,
   success: nil,
@@ -11,31 +12,20 @@ def log(
   done: false,
   **kwargs
 )
-  out = GREY
+  puts "#{GREY}#{
+    if !$started_logging then ">>> #{PINK}Squark#{GREY} / "
+    elsif           done then ">>> #{PINK}Squark#{GREY} / "
+    elsif        success then "           #{CYAN}✓ "
+    elsif          error then "           #{RED}⨯ "
+    else                      "           / "
+    end
+  }#{
+    if  success then "#{CYAN}#{success}"
+    elsif error then "#{RED}#{error}"
+    elsif  done then "#{CYAN}done!"
+    else             "#{YELLOW}#{text}"
+    end
+  }#{WHITE}"
 
-  if !$started
-    out += ">>> #{PINK}Squark#{GREY} / "
-  elsif done
-    out += ">>> #{PINK}Squark#{GREY} / "
-  elsif success
-    out += "           #{CYAN}✓ "
-  elsif error
-    out += "           #{RED}⨯ "
-  else
-    out += "           / "
-  end
-
-  if success
-    out += "#{CYAN}#{success}"
-  elsif error
-    out += "#{RED}#{error}"
-  elsif done
-    out += "#{CYAN}done!"
-  else
-    out += "#{YELLOW}#{text}"
-  end
-
-  out += WHITE
-  puts out
-  $started = true
+  $started_logging = true
 end

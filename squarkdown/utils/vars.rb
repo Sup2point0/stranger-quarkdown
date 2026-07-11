@@ -1,5 +1,4 @@
-## Implements the `Vars` mixin for fetching the instance variables of an object as a hash.
-
+## Allows fetching the instance variables of an object as a hash of strings or symbols.
 module Vars
   def vars_str
     Hash[
