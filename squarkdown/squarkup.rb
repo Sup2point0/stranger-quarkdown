@@ -13,6 +13,7 @@ def squarkup(repo_config:)
   # Squarkdown only runs if `sources` or `exclude` have been set.
   if repo_config["paths / sources"].nil? and repo_config["paths / exclude"].nil?
     log done: true
+    return
   end
 
   log "squarking up..."
