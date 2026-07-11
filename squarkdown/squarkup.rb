@@ -38,7 +38,7 @@ private def _find_file_bases_(repo_config:)
   log "locating file bases..."
   bases = {}
 
-  if repo_config.include? "bases / page.svelte"
+  if repo_config["bases / page.svelte"]
     bases["bases / page.svelte"] = find_file_base("bases / page.svelte", repo_config:)
     if bases["bases / page.svelte"].nil?
       log error: "no base for #{BLUE}+page.svelte#{RED} found!"
@@ -47,7 +47,7 @@ private def _find_file_bases_(repo_config:)
     end
   end
 
-  if repo_config.include? "bases / page.js"
+  if repo_config["bases / page.js"]
     bases["bases / page.js"] = find_file_base("bases / page.js", repo_config:)
     if bases["bases / page.js"].nil?
       log error: "no base for #{BLUE}+page.js#{RED} found!"
