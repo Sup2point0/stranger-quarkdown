@@ -25,12 +25,16 @@ $i = 0
 $t = 0
 
 
+class AbandonFeature < StandardError
+end
+
+
 def script
   config = load_default_repo_config
 
   puts
 
-  ## == Intro == ##
+  ## == Intro ==
   print GREY, " ", PRE_START, "  #{CYAN}Welcome to Squarkdown!  #{GREY}#{LINE * 42}"
   puts
 
@@ -40,8 +44,8 @@ def script
   )
 
   step(
-    before: "This script will help you get your project’s #{BLUE}squarkup.json#{WHITE} set up!",
-    after:  "This script will help you get your project’s squarkup.json set up.",
+    before: "This script will get your project’s #{BLUE}squarkup.json#{WHITE} set up!",
+    after:  "This script will get your project’s squarkup.json set up!",
     newline: false,
   )
 
@@ -54,9 +58,9 @@ def script
     after:  "Don’t worry if you’re unsure what a question means, just skip it. You can always manually edit squarkup.json afterwards."
   )
 
-  step "Note no files will be created until the very end of the script."
+  step "No file will be created until the very end of the script."
 
-  ## == Check Existing == ##
+  ## == Check Existing ==
   cwd = Pathname(__dir__).parent
   existing = false
   cwd.ascend do |dir|
@@ -89,23 +93,10 @@ def script
   
   end
 
-  ## == Configuring Paths == ##
+  ## == Configuring Paths ==
   out
   out head: "Configuring Paths"
   wait
-
-  # TODO site, dest
-  # out
-  # choice = select(
-  #   before: "What directory folder contains your site?",
-  #   after:  "What directory should Squarkdown output to?",
-  #   options: {
-  #     "site/" => "",
-  #     ".site/" => "",
-  #     "_site/" => "",
-  #     "other" => "enter manually"
-  #   }
-  # )
 
   out
   choice = select(
@@ -138,14 +129,13 @@ def script
   )
   
   config["paths / sources"] = case choice
-    when "project root + all subdirectories"
-      [""]
-    
-    when "project root only"
-      ["."]
-    
+    when "project root + all subdirectories" then [""]
+    when "project root only"                 then ["."]
     when "other"
-      paths = input "Where should Squarkdown look for Markdown files to export? #{GREY} Provide directories separated by spaces."
+      paths = input(
+        before: "Where should Squarkdown look for Markdown files to export? #{GREY} Provide directories separated by spaces.",
+        after: "Where should Squarkdown look for Markdown files to export?"
+      )
       paths.split
   end
 
@@ -169,7 +159,7 @@ def script
     else                               []
   end
 
-  ## == Exporting Files == ##
+  ## == Exporting Files ==
   out
   out head: "Exporting Files"
   wait
@@ -227,7 +217,7 @@ def script
   should_autogen = choice.include? "page."
   config_save = config
   
-  ## == Autogeneration == ##
+  ## == Autogeneration ==
   while should_autogen
     out
     choice = select(
@@ -278,7 +268,7 @@ def script
     config = config_save
   end
 
-  ## == Extra Features == ##
+  ## == Extra Features ==
   out
   out head: "Extras"
   wait
@@ -294,17 +284,14 @@ def script
     multi: true,
   )
 
-  should_prep_assets = (choice and choice.include? "assets")
-  config_save = config
-
-  while should_prep_assets
+  if (choice and choice.include? "assets") then begin
     out
     choice = select(
       before: "Where should Squarkdown look for assets? #{GREY} Squarkdown will copy the contents of this directory to #{BLUE}static/#{GREY}.",
       after:  "Where should Squarkdown look for assets?",
       options: {
-        "./assets/"  => "",
-        "./.assets/" => "",
+        "/assets/"  => "",
+        "/.assets/" => "",
         "other"      => "enter manually",
         "cancel"     => "",
       }
@@ -312,17 +299,16 @@ def script
 
     case choice
       when "cancel"
-        break
+        raise AbandonFeature
       
       when "other"
-        config["assets / path"] =
-          input "Where should Squarkdown look for assets?"
+        config["assets / path"] = input "Where should Squarkdown look for assets?"
       
-      when "./assets/"
+      when "/assets/"
         config["assets / path"] = choice
         assets = "assets/"
       
-      when "./.assets/"
+      when "/.assets/"
         config["assets / path"] = choice
         assets = ".assets/"
     end
@@ -341,14 +327,10 @@ def script
     )
 
     config["assets / site"] = case choice
-      when "cancel"
-        break
-      when "other"
-        input "Which folder contains site-specific assets?"
-      when "no"
-        nil
-      else
-        choice
+      when "cancel" then raise AbandonFeature
+      when "other"  then input "Which folder contains site-specific assets?"
+      when "no"     then nil
+      else          choice
     end
 
     out
@@ -368,26 +350,26 @@ def script
 
     config["assets / extensions"] = case choice
       when "cancel"
-        break
+        raise AbandonFeature
       when "other"
         exts = input "What types of assets should Squarkdown copy? #{GREY} Provide 1 or more file extensions (without leading `.`) separated by spaces."
         exts.map { |ext| "." + ext }
       else
         if choice.include? "cancel"
-          break
+          raise AbandonFeature
         else
           choice
         end
     end
-
-    should_prep_assets = false  # NOTE: To avoid infinite loop!
+  
+  rescue AbandonFeature
+    config.delete "assets / path"
+    config.delete "assets / extensions"
   end
 
-  if should_prep_assets
-    config = config_save
   end
 
-  ## final touches
+  ## == Final Touches ==
   out
   out head: "Final Touches"
   wait
@@ -428,7 +410,7 @@ def script
       ["ignore"]
   end
 
-  ## == Finalise == ##
+  ## == Finalise ==
   out ""
   out "Finalising..."
 

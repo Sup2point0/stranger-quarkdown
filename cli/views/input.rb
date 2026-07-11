@@ -12,7 +12,7 @@ def input(text = nil, before: nil, after: nil)
   raw = $reader.read_line(prompt).strip
   print PREV, PREV, CLEAR
   out success: after || text
-  out raw
+  out GREY, raw
   
   return raw
 end
