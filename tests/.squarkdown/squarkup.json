@@ -3,12 +3,12 @@
 
   "repo": "Squarkdown Tests",
 
-  "paths / site": "tests/test-site",
+  "paths / site": "tests/test-site/",
   "paths / exclude": [
     "/_.*?\\.md",
     "/-.*?\\.md"
   ],
-  "paths / dest": "export/routes/",
+  "paths / dest": "src/routes/export/",
 
   "opts / on-error": "kill",
   "opts / on-no-dir": ["warn", "create"],

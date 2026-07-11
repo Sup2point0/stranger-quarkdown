@@ -1,12 +1,14 @@
 require "minitest/autorun"
 
-require_relative "../squarkdown/config"
+require_relative "../squarkdown/routes"
 
 
-class SquarkupConfig < Minitest::Test
+class Test_Routes_ < Minitest::Test
 
   def test_paths
-    assert Routes.root == Pathname(__dir__).parent
+    assert_equal Routes.root.cleanpath, Pathname(__dir__).parent
+    assert_equal Routes.site.cleanpath, (Pathname(__dir__) / "test-site")
+
     # FIXME: No good way to test Routes.repo?
   end
 
