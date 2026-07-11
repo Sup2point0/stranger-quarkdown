@@ -17,7 +17,7 @@ end
 ## Update documentation for the latest version of the Squarkup schema.
 task :schema do
   ARGV.append("root")
-  require_relative "squarkdown/routes"
+  require_relative "squarkdown/__init__"
 
   require_relative ".github/scripts/schema-doc"
   version = doc_schema
