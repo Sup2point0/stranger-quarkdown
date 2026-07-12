@@ -4,23 +4,40 @@ require "date"
 
 ## All the metadata Squarkdown collected while processing files.
 class SiteData
-  attr_accessor :meta, :pages, :index, :tags
+  attr_accessor(
+    ## :: Hash Any
+    :meta,
+    
+    ## :: Hash FileData
+    :pages,
+    
+    ## :: Hash { "route": FileData, "pages": [FileData] }
+    :index,
+    
+    ## :: Hash [FileData]
+    :tags
+  )
 
-  def initialize
+
+  def initialize()
     @meta = {
       exported: Date.today.to_s,
       file_count: 0,
       page_count: 0,
     }
-    @pages = Hash.new
-    @index = Hash.new
-    @tags = Hash.new
+    @pages = {}
+    @index = {}
+    @tags = {}
   end
 
+
+  ## :: *FileData -> ()
   def add_page(page)
     @pages[page.path] = page
   end
 
+
+  ## :: String -> *FileData -> ()
   def create_index(index:, page:)
     if !@index.include?(index)
       @index[index] = {"route" => page, "pages" => []}
@@ -29,6 +46,8 @@ class SiteData
     end
   end
 
+
+  ## :: String -> *FileData -> ()
   def update_index(index:, page:)
     if !@index.include?(index)
       @index[index] = {"route" => nil, "pages" => [page]}
@@ -37,15 +56,19 @@ class SiteData
     end
   end
 
-  def update_tags(tags:, page:)
-    if !@tags.include?(tags)
-      @tags[tags] = [page]
+
+  ## :: String -> *FileData -> ()
+  def update_tags(tag:, page:)
+    if !@tags.include?(tag)
+      @tags[tag] = [page]
     else
-      @tags[tags].push(page)
+      @tags[tag].push(page)
     end
   end
 
-  def export_json
+
+  ## :: -> String
+  def export_json()
     data = {
       meta: @meta,
       index: @index,
@@ -54,4 +77,5 @@ class SiteData
     }
     return JSON.pretty_generate(data)
   end
+
 end

@@ -1,28 +1,26 @@
-# FileData
-# Represents all the data of a file processed and exported by Squarkdown
-# 
-# The class exports to 2 kinds of representations: INTERNAL and EXTERNAL
-# 
-# INTERNAL
-# - for JSON
-# - stores a lot more data
-# - exports as symbols
-# 
-# EXTERNAL
-# - for YAML
-# - stored as frontmatter in .svx files
-# - mostly properties relevant to page rendering
-#   (used through $page.data in SvelteKit)
-# - exports as strings
-
 require "json"
 require "yaml"
 
-require_relative "../routes"
 require_relative "../utils/vars"
 require_relative "../maps/seasons"
 
 
+## All the metadata of a file processed by Squarkdown.
+#
+# Exports to 2 representations: "internal" and "external".
+# 
+# Internal:
+# - For JSON
+# - stored in site data
+# - includes fields not-so-relevant to page rendering
+# - exports as symbols
+# 
+# External:
+# - for YAML
+# - stored as frontmatter in .svx files
+# - includes mostly only properties relevant to page rendering
+#     (used through $page.data in SvelteKit)
+# - exports as strings
 class FileData
   include Vars
 
@@ -32,7 +30,7 @@ class FileData
   class ValidationError < StandardError
   end
   
-  # sentinel for unset required fields
+  ## Sentinel for unset required fields.
   Unset = Object.new
 
   attr_accessor :live, :slocs, :chars, :head
@@ -47,9 +45,10 @@ class FileData
   ]
 
 
-  def initialize(source = nil, repo_config: nil)
+  ## :: SystemFile -> *Routes -> *RepoConfig -> FileData
+  def initialize(source = nil, routes:, repo_config: nil)
     ## Meta
-    @path = source && source.relative_path_from(Routes.repo).to_s
+    @path = source && source.relative_path_from(routes.repo).to_s
     @last_deploy = source && source.mtime
     @slocs = 0
     @chars = 0
@@ -67,8 +66,8 @@ class FileData
     @head = nil
     @capt = nil
 
-    if repo_config and repo_config["styles / base-style"]
-      @style = [repo_config["styles / base-style"]]
+    if repo_config.styles.base_style
+      @style = [repo_config.styles.base_style]
     else
       @style = []
     end
@@ -160,7 +159,7 @@ class FileData
 
     when :style
       styles = _split_(value)
-      base = repo_config["styles / base-style"]
+      base = repo_config.styles.base_style
 
       if styles.delete("#auto")
         if base
@@ -274,4 +273,5 @@ class FileData
   def to_yaml
     return self.export_external.to_yaml + "---\n\n"
   end
+
 end
