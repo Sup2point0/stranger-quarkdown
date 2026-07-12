@@ -9,7 +9,7 @@ def log(
   done: false,
   **kwargs
 )
-  return if (Silent and error.nil?)
+  return if (SILENT and error.nil?)
   
   puts "#{GREY}#{
     if !$started_logging then ">>> #{PINK}Squark#{GREY} / "
