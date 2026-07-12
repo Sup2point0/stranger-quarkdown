@@ -44,17 +44,17 @@ log success: "all setup done, ready to squarkup!"
 ## == Extras ==
 if ARGV.include? "fonts"
   require_relative "extras/prep-fonts"
-  prep_fonts(routes:, repo_config:)
+  Extras.prep_fonts(routes:, repo_config:)
 end
 
 if ARGV.include? "assets"
   require_relative "extras/prep-assets"
-  prep_assets(routes:, repo_config:)
+  Extras.prep_assets(routes:, repo_config:)
 end
 
 if ARGV.include? "scss"
   require_relative "extras/prep-scss"
-  prep_scss(routes:, repo_config:)
+  Extras.prep_scss(routes:, repo_config:)
 end
 
 
