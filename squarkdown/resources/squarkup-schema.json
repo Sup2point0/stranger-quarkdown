@@ -1,5 +1,5 @@
 {
-  "version":     "5.0.9",
+  "version":     "5.0.10",
   "title":       "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -83,26 +83,26 @@
     "bases / path":
     {
       "title":       "File Templates Directory",
-      "description": "[ relative to site]\nSquarkdown looks here for templates for generated `+page.svelte` and `+page.js`.",
+      "description": "[ relative to site ]\nSquarkdown looks here for templates for generated `+page.svelte` and `+page.js`.",
       "type":        "string"
     },
     "bases / page.svelte":
     {
       "title":       "+page.svelte Template",
-      "description": "[ relative to `bases/path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files.\nRequired for Markdown exporting.",
+      "description": "[ relative to `bases / path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files.\nRequired for Markdown exporting.",
       "type":        "string"
     },
     "bases / index.svelte":
     {
       "title":       "Index +page.svelte Base",
-      "description": "[ relative to `bases/path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files for **index** pages.",
+      "description": "[ relative to `bases / path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files for **index** pages.",
       "type":        ["string", "null"],
       "default":     null
     },
     "bases / page.js":
     {
       "title":       "+page.js Template",
-      "description": "[ relative to site ]\nSquarkdown uses this file as a template for generated `+page.js` files.\nIf not supplied, Squarkdown will not create `+page.js` files.",
+      "description": "[ relative to `bases / path` ]\nSquarkdown uses this file as a template for generated `+page.js` files.\nIf not supplied, Squarkdown will not create `+page.js` files.",
       "type":        ["string", "null"],
       "default":     null
     },
