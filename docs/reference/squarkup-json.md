@@ -36,10 +36,10 @@ Most settings simply tell Squarkdown what filepaths to use for your particular p
 | `out / site-data` | `string` |  | `src/site.json` | File where Squarkdown exports the site data. Relative to site. |
 | `opts / on-error` | `option` | `warn` `kill` | `warn` | Action to take if an error is encountered while processing a file. |
 | `opts / on-no-dir` | `string[]` | `ignore` `warn` `create` | `["warn"]` | Action to take if an export directory does not exist. |
-| `bases / path` | `string` |  |  | [ relative to site]<br>Squarkdown looks here for templates for generated `+page.svelte` and `+page.js`. |
-| `bases / page.svelte` | `string` |  |  | [ relative to `bases/path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files.<br>Required for Markdown exporting. |
-| `bases / index.svelte` | `string` `null` |  |  | [ relative to `bases/path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files for **index** pages. |
-| `bases / page.js` | `string` `null` |  |  | [ relative to site ]<br>Squarkdown uses this file as a template for generated `+page.js` files.<br>If not supplied, Squarkdown will not create `+page.js` files. |
+| `bases / path` | `string` |  |  | [ relative to site ]<br>Squarkdown looks here for templates for generated `+page.svelte` and `+page.js`. |
+| `bases / page.svelte` | `string` |  |  | [ relative to `bases / path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files.<br>Required for Markdown exporting. |
+| `bases / index.svelte` | `string` `null` |  |  | [ relative to `bases / path` ]<br>Squarkdown uses this file as a template for generated `+page.svelte` files for **index** pages. |
+| `bases / page.js` | `string` `null` |  |  | [ relative to `bases / path` ]<br>Squarkdown uses this file as a template for generated `+page.js` files.<br>If not supplied, Squarkdown will not create `+page.js` files. |
 | `bases / index-view` | `string` `null` |  |  | The component imported and used to render page lists in index pages.<br>If not supplied, Squarkdown will not create or inject index pages. |
 | `styles / path` | `string` |  |  | [ relative to site ]<br>Squarkdown looks here for stylesheets. |
 | `styles / page-styles` | `string` |  |  | [ relative to site ]<br>Squarkdown looks here for stylesheets to inject during squarkup. |
