@@ -247,7 +247,7 @@ def script
     end
   
   rescue AbandonFeature
-    config.delete "style / page_styles"
+    config.delete "style / page-styles"
   end
 
   end
@@ -309,7 +309,7 @@ def script
       }
     )
 
-    config["assets / site"] = case choice
+    config["assets / site-assets"] = case choice
       when "cancel" then raise AbandonFeature
       when "other"  then input "Which folder contains site-specific assets?"
       when "no"     then nil
