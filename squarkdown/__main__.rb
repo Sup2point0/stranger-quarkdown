@@ -41,20 +41,20 @@ end
 log success: "all setup done, ready to squarkup!"
 
 
-## == Further Features ==
+## == Extras ==
 if ARGV.include? "fonts"
-  require_relative "scripts/prep-fonts"
-  prep_fonts(repo_config:)
+  require_relative "extras/prep-fonts"
+  prep_fonts(routes:, repo_config:)
 end
 
 if ARGV.include? "assets"
-  require_relative "scripts/prep-assets"
-  prep_assets(repo_config:)
+  require_relative "extras/prep-assets"
+  prep_assets(routes:, repo_config:)
 end
 
 if ARGV.include? "scss"
-  require_relative "scripts/prep-scss"
-  prep_scss(repo_config:)
+  require_relative "extras/prep-scss"
+  prep_scss(routes:, repo_config:)
 end
 
 
