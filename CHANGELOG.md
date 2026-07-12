@@ -1,6 +1,12 @@
 # Squarkdown Changelog
 
 
+## v3.5.0 (Next)
+
+### New
+- Huge internal restructuring to make configuration, runtime and processing more resilient
+
+
 ## v3.4.3
 
 Squarkup Schema version: `5.0.10`

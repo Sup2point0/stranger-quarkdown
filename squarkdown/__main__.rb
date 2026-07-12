@@ -4,10 +4,7 @@ SILENT = ARGV.include? "--silent"
 
 
 ## == Startup ==
-require_relative "utils/ansi"
-require_relative "utils/error"
-require_relative "utils/log"
-
+require_relative "utils/__include__"
 
 require_relative "../squark.version"
 log "#{CYAN}running Squarkdown v#{VERSION}"
@@ -42,25 +39,14 @@ log success: "all setup done, ready to squarkup!"
 
 
 ## == Extras ==
-if ARGV.include? "fonts"
-  require_relative "extras/prep-fonts"
-  Extras.prep_fonts(routes:, repo_config:)
-end
-
-if ARGV.include? "assets"
-  require_relative "extras/prep-assets"
-  Extras.prep_assets(routes:, repo_config:)
-end
-
-if ARGV.include? "scss"
-  require_relative "extras/prep-scss"
-  Extras.prep_scss(routes:, repo_config:)
-end
+if ARGV.include? "fonts"  then require_relative "extras/prep-fonts";  Extras.prep_fonts(routes:, repo_config:) end
+if ARGV.include? "assets" then require_relative "extras/prep-assets"; Extras.prep_assets(routes:, repo_config:) end
+if ARGV.include? "scss"   then require_relative "extras/prep-scss";   Extras.prep_scss(routes:, repo_config:) end
 
 
 ## == Squarkup ==
 require_relative "squarkup"
-squarkup(repo_config:)
+Squarkup.squarkup(routes:, repo_config:)
 
 
 ## == Finish ==
