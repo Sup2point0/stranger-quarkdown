@@ -3,7 +3,7 @@ module Extras
 require "fileutils"
 
 
-## &Routes -> &RepoConfig -> ()
+## :: &Routes -> &RepoConfig -> Result () (Error | IO)
 def self.prep_assets(routes:, repo_config:)
   log "preprocessing assets..."
 
@@ -17,6 +17,7 @@ end
 
 private 
 
+## :: &Routes -> &RepoConfig -> Result () (Error | IO)
 def self.try_prep_assets(routes:, repo_config:)
   assets_dir = routes.repo / repo_config.assets.path
   raise "asset directory does not exist: #{BLUE}#{assets_dir}" unless assets_dir.exist?
@@ -27,8 +28,9 @@ def self.try_prep_assets(routes:, repo_config:)
   files = assets_dir.glob("**/*.{#{extensions.join(',')}}", File::FNM_DOTMATCH)
   total = files.length
 
+  # NOTE: Non-critical, let user know and no-op
   if total == 0
-    log error: "no assets found in #{BLUE}#{assets_dir}"
+    log error: "no assets found in #{BLUE}#{assets_dir}, skipping asset preprocessing"
     return
   end
 
