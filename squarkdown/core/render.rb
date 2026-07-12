@@ -1,4 +1,3 @@
-require_relative "../routes"
 require_relative "../maps/squarks"
 require_relative "../maps/cleanup"
 
@@ -49,7 +48,7 @@ end
 
 def inject_head(content, data:, repo_config:)
   return """<svelte:head>
-  <title> #{data.title} · #{repo_config["repo"]} </title>
+  <title> #{data.title} · #{repo_config.core.repo} </title>
 </svelte:head>
 
 """ + content
@@ -75,7 +74,7 @@ end
 def _import_index_(data:, repo_config:)
   return (
     if data.isIndex
-      then "import IndexView from \"#{repo_config["bases / index-view"]}\";"
+      then "import IndexView from \"#{repo_config.bases.index_svelte}\";"
     else ""
     end
   )
@@ -83,7 +82,7 @@ end
 
 
 def inject_style(content, data:, repo_config:)
-  path = repo_config["styles / page-styles"]
+  path = repo_config.styles.page_styles
   return content if path.nil?
   
   styles = data.style.map do |style|
