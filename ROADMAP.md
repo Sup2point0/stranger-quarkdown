@@ -6,14 +6,16 @@
 
 ## Known Issues
 
+- `-->` picked up as flag
 - `#SQUARK slash` not yet implemented, conflicts with docs
 
 
 ## Under Development
 
+- `rake squark`: Migrate to recursive descent parser
 - `rake skeleton` command
-- Single-pick options (Cancel, Manual) in multi-select for CLI
-- Highlight keywords in Squarkdown docs
+- `rake init`: Single-pick options (Cancel, Manual) in multi-select
+- Docs: Highlight keywords
 
 
 ## Future

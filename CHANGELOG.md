@@ -1,9 +1,20 @@
 # Squarkdown Changelog
 
 
+## v3.4.2
+
+Squarkup Schema version: `5.0.10`
+
+### Fixes
+- `rake squark`: Correctly terminate when neither `paths / sources` nor `paths / exclude` provided in `squarkup.json`
+- `rake squark`: Correctly include `.dir` and `.file` paths regardless of `paths / sources` settings
+- File processing: Stricten RegEx parsing of fields so things like `| header =` can't be mistaken for `| head =`
+- `rake init`: Fix improper escaping when selecting `.` for `paths / exclude`
+
+
 ## v3.4.1
 
-Schema version: `5.0.9`
+Squarkup Schema version: `5.0.9`
 
 ### Fixes
 - SCSS prep: Updated to use `includePaths` for compatibility with newer versions of SCSS
