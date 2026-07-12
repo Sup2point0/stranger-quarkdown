@@ -1,7 +1,9 @@
 # Squarkdown Changelog
 
 
-## Next
+## v3.4.3
+
+Squarkup Schema version: `5.0.10`
 
 ### Fixes
 - `rake squark`: Fix dead error handling code when finding `squarkup.json`
