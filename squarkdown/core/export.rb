@@ -1,19 +1,13 @@
-require_relative "../routes"
-require_relative "../utils/ansi"
-require_relative "../utils/log"
-require_relative "../utils/error"
-
-
 ##
 # Export a processed `.md` file to ``.svx``, as well as its `+page.svelte` and `+page.js` if desired.
-def export_file(content, data:, bases:, repo_config:)
-  route = Routes.site / repo_config["paths / dest"] / data.dest
-  filename = repo_config["out / file-name"]
+def export_file(content, data:, bases:, routes:, repo_config:)
+  route = routes.site / repo_config.paths.dest / data.dest
+  filename = repo_config.out.file_name
 
   ## == .svx ==
   begin
     dest = route / (filename + ".svx")
-    handle = repo_config["opts / on-no-dir"]
+    handle = repo_config.opts.on_no_dir
 
     if !route.exist?
       if handle.include?("ignore")
@@ -21,7 +15,7 @@ def export_file(content, data:, bases:, repo_config:)
       end
 
       if handle.include?("warn")
-        dest_display = dest.relative_path_from(Routes.repo)
+        dest_display = dest.relative_path_from(routes.repo)
         log error: "destination directory does not exist: #{BLUE}#{dest_display}"
       end
         
@@ -76,7 +70,17 @@ def export_file(content, data:, bases:, repo_config:)
 end
 
 
-def save_site_data(data, repo_config:)
-  route = Routes.site / repo_config["out / site-data"]
-  File.write(route, data)
+## :: *SiteData -> *Routes -> *RepoConfig -> ()
+def save_site_data(data, routes:, repo_config:)
+
+  log "saving site data..."
+
+  dest = routes.site / repo_config.out.site_data
+  unless dest.exist?
+    squark_error("#{WHITE}out / site-data #{RED}does not exist: #{BLUE}#{dest}", repo_config:)
+  end
+
+  File.write(dest, data)
+
+  log success: "saved site data to #{BLUE}#{repo_config.out.site_data}"
 end
