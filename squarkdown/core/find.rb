@@ -48,12 +48,16 @@ end
 ##
 # Find template for `base_type` (`+page.svelte` or `+page.js`)
 def find_file_base(base_type, from: Routes.site, repo_config:)
-  filepath = repo_config[file]
+  filepath = repo_config[base_type]
   return nil if filepath.nil? or filepath.empty?
 
   route = from / repo_config["bases / path"] / filepath
+  raise "no base for #{BLUE}#{base_type}#{RED} found!" unless route.exist?
 
-  return File.read(route)
+  out = File.read(route)
+  log success: "found base for #{BLUE}#{base_type}#{CYAN}"
+
+  return out
 end
 
 
