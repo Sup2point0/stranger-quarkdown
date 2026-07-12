@@ -23,7 +23,7 @@ def build_query(repo_config:)
   if fonts.empty?
     nil
   else
-    data = fonts.map { |font| "family=" + font }
+    data = fonts.map { |font| "family=" + font.gsub(" ", "+") }
     "css2?" + data.join("&") + "&display=swap"
   end
 end

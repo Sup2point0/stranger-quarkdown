@@ -14,7 +14,7 @@ class Test_Further_Features_  < Minitest::Test
 
     assert before != after
     assert_includes after, "display=swap"
-    assert_includes after, "Test Sans"
+    assert_includes after, "Test+Sans"
     assert_includes after, "</head>"
 
     File.write(path, before)

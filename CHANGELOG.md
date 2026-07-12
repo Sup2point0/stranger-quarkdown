@@ -6,6 +6,7 @@
 ### Fixes
 - `rake squark`: Fix dead error handling code when finding `squarkup.json`
 - `rake squark`: Remove spurious "no file base found" errors
+- `[fonts]`: Automatically replace ` ` with `+` in queries
 - `rake init`: Fix incorrect key names
 - `rake init`: Fix incorrect handling of extensions
 - Print backtraces on errors
