@@ -1,7 +1,9 @@
 $started_logging = false
 
 
-## Print a prettified message from Squarkdown.
+## :: String -> () | IO ()
+#
+# Print a prettified message from Squarkdown.
 def log(
   text = nil,
   success: nil,
@@ -27,4 +29,16 @@ def log(
   }#{WHITE}"
 
   $started_logging = true
+end
+
+
+## :: String -> () | IO ()
+#
+# Print a message from Squarkdown counting a number of processed files.
+# 
+# If `sparse`, only print a message every 10 files.
+def log_count(n, total:, file:, sparse: false)
+  return if SILENT
+
+  log "#{n} #{GREY}of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 end

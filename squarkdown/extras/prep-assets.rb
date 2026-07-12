@@ -21,21 +21,28 @@ private
 ## :: &Routes -> &RepoConfig -> Result () (Error | IO)
 def self.try_prep_assets(routes:, repo_config:)
   assets_dir = routes.repo / repo_config.assets.path
-  raise "asset directory does not exist: #{BLUE}#{assets_dir}" unless assets_dir.exist?
+  unless assets_dir.exist?
+    raise "#{WHITE}assets / path #{RED}directory does not exist: #{BLUE}#{assets_dir}"
+  end
 
   site_assets_dir = routes.repo / repo_config.assets.site_assets
+  unless site_assets_dir.exist?
+    # NOTE: Non-critical, let user know and fallback
+    log error: "#{WHITE}assets / site-assets #{RED}directory does not exist: #{BLUE}#{site_assets_dir}"
+  end
+
   extensions = repo_config.assets.extensions
 
   files = assets_dir.glob("**/*.{#{extensions.join(',')}}", File::FNM_DOTMATCH)
   total = files.length
 
-  # NOTE: Non-critical, let user know and no-op
   if total == 0
+    # NOTE: Non-critical, let user know and no-op
     log error: "no assets found in #{BLUE}#{assets_dir}, skipping asset preprocessing"
     return
+  else
+    log success: "found #{total} assets in #{BLUE}#{assets_dir}"
   end
-
-  log success: "found #{total} assets in #{BLUE}#{assets_dir}"
 
   dest_dir = routes.site / "static"
   log "copying assets to #{BLUE}#{dest_dir}#{YELLOW}..."
