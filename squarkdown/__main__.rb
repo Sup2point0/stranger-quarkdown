@@ -4,14 +4,13 @@ require_relative "__init__"
 log "#{CYAN}running Squarkdown v#{VERSION}"
 
 require_relative "core/find"
-repo_config = find_repo_config()
-
-if repo_config.nil? or repo_config.length == 0
-  log error: "could not find #{CYAN}squarkup.json"
-  exit
-else
-  log success: "found #{BLUE}squarkup.json"
+begin
+  repo_config = find_repo_config()
+rescue => e
+  log error: e
+  exit 1
 end
+log success: "found #{BLUE}squarkup.json"
 
 if ARGV.include? "fonts"
   require_relative "scripts/prep-fonts"

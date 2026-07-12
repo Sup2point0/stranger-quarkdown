@@ -2,13 +2,14 @@ require "pathname"
 require "json"
 require "json-schema"
 
-require_relative "../routes"
 require_relative "../utils/ansi"
 require_relative "../utils/log"
 
 
 SquarkupSchema = JSON.parse(
-  File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
+  File.read(
+    Routes.root / "squarkdown/resources/squarkup-schema.json"
+  )
 )
 
 
@@ -20,7 +21,10 @@ def find_repo_config(from: Routes.repo)
   repo_config = load_default_repo_config()
 
   route = from / ".squarkdown/squarkup.json"
+  raise "could not find #{CYAN}squarkup.json" if !route.exist?
+
   content = File.read(route)
+
   data = JSON.parse(content)
 
   JSON::Validator.validate!(SquarkupSchema, data)
