@@ -3,7 +3,7 @@ module Extras
 GOOGLE_FONTS_URL = "https://fonts.googleapis.com/"
 
 
-## :: &Routes -> &RepoConfig -> Result () (Error | IO)
+## :: *Routes -> *RepoConfig -> ()
 #
 # Handle preprocessing fonts by writing the Google Fonts query to `src/app.html`.
 def self.prep_fonts(routes:, repo_config:)
@@ -32,7 +32,7 @@ end
 
 private
 
-## :: &Routes -> &RepoConfig -> Result String Error
+## :: *Routes -> *RepoConfig -> String
 #
 # Build the Google Fonts query, by extracting the params from `repo-config`.
 def self.build_query(routes:, repo_config:)
@@ -48,7 +48,8 @@ def self.build_query(routes:, repo_config:)
 end
 
 
-## :: String -> &Routes -> &RepoConfig -> Result () Error
+## :: String -> *Routes -> *RepoConfig -> ()
+#
 # Write the Google Fonts `query` to `app.html`.
 def self.write_query(query, routes:, repo_config:)
 

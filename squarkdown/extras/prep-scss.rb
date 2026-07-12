@@ -3,7 +3,7 @@ module Extras
 require "date"
 
 
-## :: &Routes -> &RepoConfig -> Result () (Error | IO)
+## :: *Routes -> *RepoConfig -> ()
 def self.prep_scss(routes:, repo_config:)
 
   log "preprocessing SCSS..."
@@ -21,7 +21,7 @@ end
 
 private
 
-## :: &Routes -> &RepoConfig -> Result () (Error | IO)
+## :: *Routes -> *RepoConfig -> ()
 def self.try_prep_scss(routes:, repo_config:)
   
   routes.check_site_resolved()

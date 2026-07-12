@@ -3,7 +3,7 @@ module Extras
 require "fileutils"
 
 
-## :: &Routes -> &RepoConfig -> Result () (Error | IO)
+## :: *Routes -> *RepoConfig -> ()
 def self.prep_assets(routes:, repo_config:)
 
   log "preprocessing assets..."
@@ -18,7 +18,7 @@ end
 
 private 
 
-## :: &Routes -> &RepoConfig -> Result () (Error | IO)
+## :: *Routes -> *RepoConfig -> ()
 def self.try_prep_assets(routes:, repo_config:)
   assets_dir = routes.repo / repo_config.assets.path
   unless assets_dir.exist?

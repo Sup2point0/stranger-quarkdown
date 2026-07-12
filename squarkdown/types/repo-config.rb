@@ -34,6 +34,7 @@ SCHEMA_MAP = {
 class RepoConfigData
 
   attr_reader(
+    :core,
     :paths,
     :out,
     :opts,
