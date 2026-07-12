@@ -92,17 +92,15 @@ private def _export_files_(files, bases:, repo_config:, site_data:)
       lines = file.readlines
       file_data = FileData.new(file, repo_config:)
       file_data = extract_data(lines:, data: file_data, repo_config:)
-      
-      if file_data.nil?
-        next
-      end
+      next if file_data.nil?
 
       ## render
       content = lines.join("")
       render = render_file(content, data: file_data, repo_config:)
 
       ## export
-      export_file(render, data: file_data, bases:, repo_config:)
+      created = export_file(render, data: file_data, bases:, repo_config:)
+      next unless created
 
       site_data.add_page(file_data)
 

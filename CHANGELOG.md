@@ -1,6 +1,15 @@
 # Squarkdown Changelog
 
 
+## Next
+
+### Fixes
+- `rake squark`: Fix dead error handling code when finding `squarkup.json`
+- `rake init`: Fix incorrect key names
+- `rake init`: Fix incorrect handling of extensions
+- Print backtraces on errors
+
+
 ## v3.4.2
 
 Squarkup Schema version: `5.0.10`

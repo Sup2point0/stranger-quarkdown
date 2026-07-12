@@ -6,6 +6,7 @@
 
 ## Known Issues
 
+- `rake init`: Single-pick options (Cancel, Manual) in multi-select
 - `-->` picked up as flag
 - `#SQUARK slash` not yet implemented, conflicts with docs
 
@@ -14,7 +15,6 @@
 
 - `rake squark`: Migrate to recursive descent parser
 - `rake skeleton` command
-- `rake init`: Single-pick options (Cancel, Manual) in multi-select
 - Docs: Highlight keywords
 - Deprecate `%` format in `page.svelte`
 
