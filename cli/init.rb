@@ -67,7 +67,8 @@ def script
   existing = false
   cwd.ascend do |dir|
     if (dir / ".squarkdown/squarkup.json").exist?
-      if dir.to_s.end_with?("stranger-quarkdown") then next end
+      # NOTE: This is to skip Squarkdown's own .squarkdown files
+      next if dir.to_s.end_with?("stranger-quarkdown")
 
       existing = existing || dir
     end
@@ -75,7 +76,7 @@ def script
 
   if existing
     out
-    out error: "Woah, looks like you already have an existing #{BLUE}squarkup.json#{WHITE} in #{BLUE}#{existing}/.stranger-quarkdown/#{WHITE}!"
+    out error: "Woah, looks like you already have an existing #{BLUE}squarkup.json#{WHITE} in #{BLUE}#{existing}/.squarkdown/#{WHITE}!"
     wait
 
     out

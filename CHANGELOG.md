@@ -9,6 +9,7 @@
 - `[fonts]`: Automatically replace ` ` with `+` in queries
 - `rake init`: Fix incorrect key names
 - `rake init`: Fix incorrect handling of extensions
+- `rake init`: Fix incorrect path name in error message
 - Print backtraces on errors
 
 
