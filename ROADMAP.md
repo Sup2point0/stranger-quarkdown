@@ -1,7 +1,7 @@
 # Roadmap
 <!-- #SQUARK live!
 | dest = info/roadmap
-| update = 2026 July 11
+| update = 2026 July 12
 -->
 
 ## Known Issues
@@ -16,6 +16,7 @@
 - `rake skeleton` command
 - `rake init`: Single-pick options (Cancel, Manual) in multi-select
 - Docs: Highlight keywords
+- Deprecate `%` format in `page.svelte`
 
 
 ## Future
