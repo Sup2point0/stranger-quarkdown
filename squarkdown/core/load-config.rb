@@ -16,14 +16,14 @@ def self.load_repo_config!(routes:)
   log success: "found your #{BLUE}squarkup.json"
 
   JSON::Validator.validate!(schema, json)
-  log success: "validated your #{BLUE}squarkup.json #{YELLOW}against the schema"
+  log success: "validated your #{BLUE}squarkup.json #{CYAN}against the schema"
 
   defaults = load_repo_config_defaults(routes:)
   out = RepoConfigData.new(json:, routes:, defaults:)
-  log success: "processed your configurations"
+  log success: "processed your config"
 
   routes.resolve_site(repo_config: out)
-  log success: "found your project site: #{BLUE}#{routes.site}"
+  log success: "found your project site: #{BLUE}#{routes.site.expand_path}"
   
   return out
 end
@@ -35,7 +35,7 @@ private
 def self.load_squarkup_schema(routes:)
 
   route = routes.root / "squarkdown/resources/squarkup-schema.json"
-  raise "Internal Error: failed to find #{CYAN}squarkup-schema.json" if !route.exist?
+  raise "Internal Error: failed to find #{CYAN}squarkup-schema.json" unless route.exist?
         
   content = File.read(route)
   out = JSON.parse(content)

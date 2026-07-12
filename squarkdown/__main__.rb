@@ -1,6 +1,6 @@
 T_START = Time.now
 
-SILENT = ARGV.include? "silent"
+SILENT = ARGV.include? "--silent"
 
 
 ## == Startup ==
@@ -14,11 +14,11 @@ log "#{CYAN}running Squarkdown v#{VERSION}"
 
 
 ## == Routes ==
-log "finding routes..."
+log "resolving routes..."
 require_relative "core/load-routes"
 
 begin
-  routes = Load.load_routes internal: (ARGV.include? "root")
+  routes = Load.load_routes(internal: ARGV.include?("--root"))
 rescue => e
   log error: e
   raise e
@@ -28,7 +28,7 @@ log success: "resolved routes!"
 
 
 ## == Config ==
-log "finding #{BLUE}squarkup.json#{YELLOW}..."
+log "configuring..."
 require_relative "core/load-config"
 
 begin
@@ -38,7 +38,7 @@ rescue => e
   raise e
 end
 
-log success: "found #{BLUE}squarkup.json"
+log success: "all setup done, ready to squarkup!"
 
 
 ## == Further Features ==

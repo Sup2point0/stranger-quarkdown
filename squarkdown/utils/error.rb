@@ -4,6 +4,6 @@ def squark_error(e, repo_config:)
     raise e
   else
     log error: e.to_s
-    log error: e.backtrace
+    log error: e.backtrace[0]
   end
 end

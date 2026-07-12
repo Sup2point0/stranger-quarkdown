@@ -6,12 +6,6 @@ require_relative "../utils/ansi"
 require_relative "../utils/log"
 
 
-SquarkupSchema = JSON.parse(
-  File.read(
-    Routes.root / "squarkdown/resources/squarkup-schema.json"
-  )
-)
-
 
 ##
 # Look under `from` for a `.squarkdown/squarkup.json`, and produce a complete repo config, with absent values filled in by defaults.
@@ -33,15 +27,6 @@ def find_repo_config(from: Routes.repo)
   Routes.site = Routes.repo / repo_config["paths / site"]
 
   return repo_config
-end
-
-
-def load_default_repo_config()
-  data = SquarkupSchema["properties"].map do |prop, data|
-    [prop, data["default"]]
-  end.to_h
-  
-  return data
 end
 
 

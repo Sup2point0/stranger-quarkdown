@@ -17,6 +17,7 @@ def self.load_routes(internal: false)
 
   if internal
     repo = root
+    log "#{GREY}internal: overriding `repo`"
   else
     repo = nil
 

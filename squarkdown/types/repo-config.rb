@@ -49,7 +49,7 @@ class RepoConfigData
   # Paths are resolved to `Pathname`s relative to `routes:`.
   # 
   # If `fill_defaults`, also load the Squarkup schema to find default values for missing fields. This requires `Routes` to be initialised.
-  def initialize(json:, routes:, defaults: nil)    
+  def initialize(json:, routes:, defaults: nil)
 
     @core   = Core.new 
     @paths  = Paths.new
@@ -62,8 +62,7 @@ class RepoConfigData
 
     json.each do |key, value|
       next if key.start_with? "$"
-    
-      puts "key = #{key}, value = #{value}"
+
       category_symbol, option_symbol = SCHEMA_MAP[key]
 
       category = instance_variable_get(category_symbol)
