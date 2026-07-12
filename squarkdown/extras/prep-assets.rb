@@ -5,6 +5,7 @@ require "fileutils"
 
 ## :: &Routes -> &RepoConfig -> Result () (Error | IO)
 def self.prep_assets(routes:, repo_config:)
+
   log "preprocessing assets..."
 
   begin
@@ -61,7 +62,7 @@ def self.try_prep_assets(routes:, repo_config:)
     FileUtils.cp(file, dest)
   end
 
-  log success: "transferred all assets!"
+  log success: "preprocessed assets!"
 end
 
 

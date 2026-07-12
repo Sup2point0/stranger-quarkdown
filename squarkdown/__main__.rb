@@ -53,6 +53,7 @@ if ARGV.include? "assets"
 end
 
 if ARGV.include? "scss"
+  log "preprocessing SCSS..."
   require_relative "extras/prep-scss"
   Extras.prep_scss(routes:, repo_config:)
 end

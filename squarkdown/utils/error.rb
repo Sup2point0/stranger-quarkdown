@@ -1,4 +1,4 @@
-## :: Error -> &RepoConfig -> Result IO Error
+## :: Error -> &RepoConfig -> Result () (Error | IO)
 #
 # Raise an error for Squarkdown to handle.
 def squark_error(e, repo_config:)

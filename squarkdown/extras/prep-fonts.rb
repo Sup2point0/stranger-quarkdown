@@ -1,43 +1,68 @@
+module Extras
+
 GOOGLE_FONTS_URL = "https://fonts.googleapis.com/"
 
 
-##
-# Handle preprocessing fonts by writing the Google Fonts query to `app.html`.
-def prep_fonts(repo_config:)
+## :: &Routes -> &RepoConfig -> Result () (Error | IO)
+#
+# Handle preprocessing fonts by writing the Google Fonts query to `src/app.html`.
+def self.prep_fonts(routes:, repo_config:)
+
   log "preprocessing fonts..."
 
   begin
-    query = build_query(repo_config:)
-    write(query, repo_config:) if query
+    query = self.build_query(routes:, repo_config:)
+
+    if query.nil?
+      # NOTE: Non-critical, let user know and no-op
+      log error: "no Google Fonts queries provided, skipping fonts preprocessing"
+      return
+    end
+
+    self.write_query(query, routes:, repo_config:)
+
+    log success: "preprocessed fonts!"
+  
   rescue => e
     squark_error(e, repo_config:)
+  
   end
 end
 
-##
-# Build the Google Fonts query params, by reading the fonts in `squarkup.json``.
-def build_query(repo_config:)
-  fonts = repo_config["fonts / queries"]
-  raise "no fonts configured" unless fonts
 
-  if fonts.empty?
-    nil
-  else
-    data = fonts.map { |font| "family=" + font.gsub(" ", "+") }
-    "css2?" + data.join("&") + "&display=swap"
-  end
+private
+
+## :: &Routes -> &RepoConfig -> Result String Error
+#
+# Build the Google Fonts query, by extracting the params from `repo-config`.
+def self.build_query(routes:, repo_config:)
+
+  fonts = repo_config.fonts.queries
+  raise "no fonts configured, skipping fonts preprocessing" unless fonts
+  return nil if fonts.empty?
+  
+  params = fonts.map { |font| "family=" + font.gsub(" ", "+") }
+  query = "css2?" + params.join("&") + "&display=swap"
+
+  return query
 end
 
-##
+
+## :: String -> &Routes -> &RepoConfig -> Result () Error
 # Write the Google Fonts `query` to `app.html`.
-def write(query, repo_config:)
-  path = Routes.site / "src/app.html"
-  pattern = /css2.*display=swap/
+def self.write_query(query, routes:, repo_config:)
+
+  routes.check_site_resolved()
+
+  path = routes.site / "src/app.html"
+  raise "failed to find directory: #{BLUE}#{PATH}" unless path.exist?
   
   app_html = File.read(path)
-  raise "failed to find #{BLUE}app.html#{RED}!" if app_html.nil?
+  raise "#{BLUE}app.html #{RED}appears to be empty, skipping fonts preprocessing" if app_html.nil?
 
-  if app_html.match pattern
+  pattern = /css2.*display=swap/
+
+  if app_html.match(pattern)
     content = app_html.sub(pattern, query)
   else
     content = app_html.sub(
@@ -46,5 +71,9 @@ def write(query, repo_config:)
     )
   end
 
+    log "writing fonts query to #{BLUE}#{path}#{YELLOW}..."
   File.write(path, content)
+end
+
+
 end
