@@ -46,11 +46,12 @@ end
 
 
 ##
-# Find template for `file` (`+page.svelte` or `+page.js`)
-def find_file_base(file, from: Routes.site, repo_config:)
-  return nil if repo_config[file].nil?
+# Find template for `base_type` (`+page.svelte` or `+page.js`)
+def find_file_base(base_type, from: Routes.site, repo_config:)
+  filepath = repo_config[file]
+  return nil if filepath.nil? or filepath.empty?
 
-  route = from / repo_config["bases / path"] / repo_config[file]
+  route = from / repo_config["bases / path"] / filepath
 
   return File.read(route)
 end

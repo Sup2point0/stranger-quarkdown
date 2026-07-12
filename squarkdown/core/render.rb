@@ -84,25 +84,25 @@ end
 
 def inject_style(content, data:, repo_config:)
   path = repo_config["styles / page-styles"]
-  if path.nil? then return content end
+  return content if path.nil?
   
   styles = data.style.map do |style|
-    "@use './#{File.join(path, style)}' as *;"
+    "@use '#{File.join(path, style)}' as *;"
   end
 
   content = if content.include?("<style") and content.include?(("</style>")) then
     content.sub(/<style( lang="scss")?>/,
-      """<style lang=\"scss\">
+      "<style lang=\"scss\">
 
 #{styles.join("\n")}
-""")
+")
   
-  else content + """
+  else content + "
 <style lang=\"scss\">
 
 #{styles.join("\n")}
 </style>
-"""
+"
 
   end
 
