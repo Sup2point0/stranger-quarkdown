@@ -248,7 +248,7 @@ def script
     end
   
   rescue AbandonFeature
-    config.delete "style / page-styles"
+    config.delete "styles / page-styles"
   end
 
   end
@@ -335,8 +335,8 @@ def script
     config["assets / extensions"] = case choice
       when "cancel" then raise AbandonFeature
       when "other"
-        exts = input "What types of assets should Squarkdown copy? #{GREY} Enter 1+ file extensions separated by spaces".split
-        exts.map { |ext| if ext.start_with "." then ext[1..] else ext end }
+        exts = input "What types of assets should Squarkdown copy? #{GREY} Enter 1+ file extensions separated by spaces"
+        exts.split.map { |ext| if ext.start_with "." then ext[1..] else ext end }
       else
         if choice.include? "cancel" then (raise AbandonFeature) else choice end
     end
