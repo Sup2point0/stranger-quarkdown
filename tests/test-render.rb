@@ -40,8 +40,6 @@ class SquarkupRender < Minitest::Test
 
 
   def test_style
-    Routes.site = Routes.root / "tests"
-
     content = """# Testing
     """
 
