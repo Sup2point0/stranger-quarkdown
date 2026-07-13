@@ -17,6 +17,7 @@ def self.find_base_for(base_type, routes:, repo_config:)
   filepath = routes.site / repo_config.bases.path / filename
   unless filepath.exist?
     squark_error("no base for #{BLUE}#{base_type}#{RED} found!", repo_config:)
+    return
   end
 
   log success: "found base for #{WHITE}#{base_type}#{CYAN}: #{BLUE}#{filepath}"
@@ -44,7 +45,7 @@ def self.find_files_to_squarkup(routes:, repo_config:)
         if path == "." or path == "./"
           from.glob("*.md", File::FNM_DOTMATCH)
         else
-          # FIXME ignore .git, etc.
+          # FIXME ignore .git, etc. using Find
           (from / path).glob("**/*.md", File::FNM_DOTMATCH)
         end
       end
