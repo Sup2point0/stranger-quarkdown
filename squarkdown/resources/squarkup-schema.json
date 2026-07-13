@@ -1,7 +1,9 @@
 {
-  "version":     "5.0.10",
+  "version":     "5.1.0",
   "title":       "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
+
+  "additionalProperties": false,
 
   "properties":
   {
@@ -13,7 +15,7 @@
 
     "repo":
     {
-      "title":       "Squarkup Repo",
+      "title":       "Repo Name",
       "description": "Displayed name of the repository. This is injected into `<title>` in `<head>` of exported pages.",
       "type":        "string",
       "default":     "~"
@@ -26,22 +28,25 @@
       "type":        "string",
       "default":     "site/"
     },
+    
     "paths / sources":
     {
       "title":       "Source Directories",
       "description": "[ relative to root ]\nSquarkdown recursively searches these directories for `.md` files to squarkup.\nUse `\".\"` to target `.md` files in your project’s root.\nSet this field to `null` to disable Markdown exporting entirely.",
       "type":        ["array", "null"],
-      "items":       {"type": "string"},
+      "items":       { "type": "string" },
       "default":     null
     },
+    
     "paths / exclude":
     {
-      "title":       "Excluded Directory Patterns",
+      "title":       "Exclude RegEx Patterns",
       "description": "If a file’s path matches any of these RegEx patterns, squarkup will be skipped for it.\nNote the RegEx is matched against the file’s absolute path.",
       "type":        ["array", "null"],
-      "items":       {"type": "string"},
+      "items":       { "type": "string" },
       "default":     null
     },
+    
     "paths / dest":
     {
       "title":       "Destination Directory",
@@ -49,16 +54,18 @@
       "type":        "string",
       "default":     "src/routes/"
     },
+
     "out / file-name":
     {
-      "title":       "Export File Name",
+      "title":       ".svx Filename",
       "description": "Name of exported `.svx` files (without the `.svx` file extension).",
       "type":        "string",
       "default":     "~content"
     },
+    
     "out / site-data":
     {
-      "title":       "Site Data File",
+      "title":       "Site Data Filename",
       "description": "File where Squarkdown exports the site data. Relative to site.",
       "type":        "string",
       "default":     "src/site.json"
@@ -68,16 +75,23 @@
     {
       "title":       "Exception Handling",
       "description": "Action to take if an error is encountered while processing a file.",
-      "enum":        ["warn", "kill"],
-      "default":     "warn"
+      "anyOf": [
+        { "title": "warn", "description": "Log the error and continue processing." },
+        { "title": "kill", "description": "Crash and exit Squarkdown." }
+      ],
+      "default": "warn"
     },
-    "opts / on-no-dir":
+    
+    "opts / on-file-exists":
     {
-      "title":       "Nonexistent Directory Handling",
-      "description": "Action to take if an export directory does not exist.",
-      "type":        "array",
-      "items":       { "enum": ["ignore", "warn", "create"] },
-      "default":     ["warn"]
+      "title":       "File Overwrite Handling",
+      "description": "When a file Squarkdown’s about to write already exists, what should it do?",
+      "anyOf": [
+        { "title": "overwrite", "description": "Overwrite the existing file." },
+        { "title": "skip",      "description": "Skip exporting this file." },
+        { "title": "kill",      "description": "Throw an error." }
+      ],
+      "default": "overwrite"
     },
 
     "bases / path":
@@ -86,12 +100,14 @@
       "description": "[ relative to site ]\nSquarkdown looks here for templates for generated `+page.svelte` and `+page.js`.",
       "type":        "string"
     },
+    
     "bases / page.svelte":
     {
       "title":       "+page.svelte Template",
       "description": "[ relative to `bases / path` ]\nSquarkdown uses this file as a template for generated `+page.svelte` files.\nRequired for Markdown exporting.",
       "type":        "string"
     },
+    
     "bases / index.svelte":
     {
       "title":       "Index +page.svelte Base",
@@ -99,6 +115,7 @@
       "type":        ["string", "null"],
       "default":     null
     },
+    
     "bases / page.js":
     {
       "title":       "+page.js Template",
@@ -106,6 +123,7 @@
       "type":        ["string", "null"],
       "default":     null
     },
+    
     "bases / index-view":
     {
       "title":       "Index View Component",
@@ -113,30 +131,35 @@
       "type":        ["string", "null"],
       "default":     null
     },
+    
     "styles / path":
     {
       "title":       "Styles Directory",
       "description": "[ relative to site ]\nSquarkdown looks here for stylesheets.",
       "type":        "string"
     },
+    
     "styles / page-styles":
     {
       "title":       "Page Styles Directory",
       "description": "[ relative to site ]\nSquarkdown looks here for stylesheets to inject during squarkup.",
       "type":        "string"
     },
+    
     "styles / base-style":
     {
       "title":       "Base Page Style",
       "description": "[ relative to `styles/page-styles` ]\nSquarkdown injects this stylesheet into every page.",
       "type":        "string"
     },
+    
     "assets / path":
     {
       "title":       "Assets Directory",
       "description": "[ relative to root ]\nSquarkdown looks here for static assets to preprocess.",
       "type":        "string"
     },
+    
     "assets / site-assets":
     {
       "title":       "Site Assets Directory",
@@ -144,20 +167,22 @@
       "type":        ["string", "null"],
       "default":     null
     },
+    
     "assets / extensions":
     {
       "title":       "Asset File Extensions",
       "description": "Only files with these extensions will be preprocessed by Squarkdown.",
       "type":        "array",
-      "items":       {"type": "string"},
+      "items":       { "type": "string" },
       "default":     ["jpg", "jpeg", "png", "svg", "webp"]
     },
+    
     "fonts / queries":
     {
       "title":       "Fonts",
       "description": "Individual URL query params for requesting fonts from Google Fonts.",
       "type":        "array",
-      "items":       {"type": "string"}
+      "items":       { "type": "string" }
     }
   }
 }
