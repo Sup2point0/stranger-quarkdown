@@ -11,10 +11,10 @@ class SiteData
     ## :: Hash FileData
     :pages,
     
-    ## :: Hash { "route": FileData, "pages": [FileData] }
+    ## :: Hash { "route": FileData, "pages": [String] }
     :index,
     
-    ## :: Hash [FileData]
+    ## :: Hash [String]
     :tags
   )
 

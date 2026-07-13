@@ -56,7 +56,7 @@ def self.write_query(query, routes:, repo_config:)
   routes.check_site_resolved()
 
   path = routes.site / "src/app.html"
-  raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{PATH}" unless path.exist?
+  raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{path}" unless path.exist?
   
   app_html = File.read(path)
   raise "#{BLUE}app.html #{RED}appears to be empty, skipping fonts preprocessing" if app_html.nil?

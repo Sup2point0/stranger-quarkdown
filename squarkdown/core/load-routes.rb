@@ -31,7 +31,7 @@ def self.load_routes(internal: false)
 
   if repo.nil?
     repo = root.parent
-    log error: "failed to find directory with a #{BLUE}#{CONFIG_DIR}/ #{RED}folder"
+    log error: "failed to find directory with a #{BLUE}.squarkdown/ #{RED}folder"
     log "defaulting your project = #{BLUE}#{repo}"
   else
     log success: "found your project: #{BLUE}#{repo}"

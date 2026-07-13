@@ -39,8 +39,6 @@ def self.squarkup(routes:, repo_config:)
 end
 
 
-private
-
 ## :: *Routes -> *RepoConfig -> Hash Content
 def self.find_file_bases(routes:, repo_config:)
 
