@@ -1,96 +1,95 @@
+module Squarkdown
+
 require_relative "../maps/squarks"
 require_relative "../maps/cleanup"
 
 
-def render_file(content, data:, repo_config:)
-  content = inject_repl(content)
-  content = cleanup(content, data:)
-  content = fix_links(content)
-  content = inject_index(content, data:)
-  content = inject_head(content, data:, repo_config:)
-  content = inject_script(content, data:, repo_config:)
-  content = inject_style(content, data:, repo_config:)
-  content = inject_data(content, data:)
+## :: FileContent -> *FileData -> *RepoConfig -> FileContent
+#
+# Render `content` using `file_data:` and `repo_config:`, returning the content to be written to the `.svx` file.
+def self.render_file!(content, file_data:, repo_config:)
+  self.inject_repl!(content)
+  self.cleanup!(content, file_data:)
+  self.fix_links!(content)
+  self.inject_index!(content, file_data:)
+  self.inject_head!(content, file_data:, repo_config:)
+  self.inject_script!(content, file_data:, repo_config:)
+  self.inject_style!(content, file_data:, repo_config:)
+  self.inject_data!(content, file_data:)
   return content
 end
 
 
-def inject_repl(content)
+def self.inject_repl!(content)
   Replace.each do |pattern, repl|
-    content.gsub(pattern, repl)
+    content.gsub!(pattern, repl)
   end
-
-  return content
 end
 
 
-def cleanup(content, data:)
-  if clean = data.clean
+def self.cleanup!(content, file_data:)
+  if clean = file_data.clean
     if clean.include?("braces")
-      content = Cleanup[:braces].call(content)
+      Cleanup[:braces].call(content)
     end
 
     if clean.include?("angles")
-      content = Cleanup[:angles].call(content)
+      Cleanup[:angles].call(content)
     end
   end
-
-  return content
 end
 
 
-def fix_links(content)
-  content = content.gsub(/(\.\.\/)*\.?assets\/(\.?site\/)?/, '{base}/')
-  content = content.gsub(/\.md(#[^\)]*?)?\)/, '\1)')
-  return content
+def self.fix_links!(content)
+  content.gsub!(/(\.\.\/)*\.?assets\/(\.?site\/)?/, '{base}/')
+  content.gsub!(/\.md(#[^\)]*?)?\)/, '\1)')
 end
 
 
-def inject_head(content, data:, repo_config:)
-  return """<svelte:head>
-  <title> #{data.title} · #{repo_config.core.repo} </title>
+def self.inject_head!(content, file_data:, repo_config:)
+  content.prepend "<svelte:head>
+  <title> #{file_data.title} · #{repo_config.core.repo} </title>
 </svelte:head>
 
-""" + content
+"
 end
 
 
-def inject_index(content, data:)
-  return content.gsub(/<!-- ?#SQUARK index~ ?-->/, "<IndexView />")
+def self.inject_index!(content, file_data:)
+  content.gsub!(/<!-- ?#SQUARK index~ ?-->/, "<IndexView />")
 end
 
 
-def inject_script(content, data:, repo_config:)
-  return """<script>
+def self.inject_script!(content, file_data:, repo_config:)
+  content.prepend "<script>
 
 import { base } from \"$app/paths\";
-#{_import_index_(data:, repo_config:)}
+#{self._import_index_(file_data:, repo_config:)}
 </script>
 
-""" + content
+"
 end
 
 
-def _import_index_(data:, repo_config:)
+def self._import_index_(file_data:, repo_config:)
   return (
-    if data.isIndex
-      then "import IndexView from \"#{repo_config.bases.index_svelte}\";"
-    else ""
-    end
+    file_data.isIndex ?
+      "import IndexView from \"#{repo_config.bases.index_svelte}\";"
+    : ""
   )
 end
 
 
-def inject_style(content, data:, repo_config:)
+def self.inject_style!(content, file_data:, repo_config:)
   path = repo_config.styles.page_styles
-  return content if path.nil?
+  return if path.nil?
   
-  styles = data.style.map do |style|
+  styles = file_data.style.map do |style|
     "@use '#{File.join(path, style)}' as *;"
   end
 
   content = if content.include?("<style") and content.include?(("</style>")) then
-    content.sub(/<style( lang="scss")?>/,
+    content.sub!(/<style( lang="scss")?>/,
       "<style lang=\"scss\">
 
 #{styles.join("\n")}
@@ -102,13 +101,12 @@ def inject_style(content, data:, repo_config:)
 #{styles.join("\n")}
 </style>
 "
-
   end
-
-  return content
 end
 
 
-def inject_data(content, data:)
-  return data.to_yaml + content
+def self.inject_data!(content, file_data:)
+  content.prepend(file_data.to_yaml)
+end
+
 end

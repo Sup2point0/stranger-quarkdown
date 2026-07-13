@@ -1,3 +1,5 @@
+module Squarkdown
+
 require_relative "../types/file-data"
 
 
@@ -5,13 +7,14 @@ require_relative "../types/file-data"
 PROCESSED_LINES = 20
 
 
-def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
-  if data.nil?
-    data = FileData.new
+## :: [String] -> *mut FileData -> *RepoConfig -> Bool -> Option FileData
+def self.extract_file_data!(lines:, file_data: nil, repo_config:, fill_defaults: true)
+  if file_data.nil?
+    file_data = FileData.new
   end
 
-  data.slocs = lines.length
-  data.chars = lines.join.length
+  file_data.slocs = lines.length
+  file_data.chars = lines.join.length
 
   is_processing = false
   allow_arbitrary = false
@@ -22,13 +25,13 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
   lines[0, PROCESSED_LINES].each_with_index do |line, i|
     if line.start_with?("-->")
       if !load.empty?
-        data.update_fields(load.join(" "), repo_config:, allow_arbitrary:)
+        file_data.update_fields(load.join(" "), repo_config:, allow_arbitrary:)
       end
       break
     end
 
-    if data.head.nil? and line.start_with?("# ")
-      data.head = line[2..-1].strip
+    if file_data.head.nil? and line.start_with?("# ")
+      file_data.head = line[2..-1].strip
       head_line_idx = i
     end
 
@@ -40,15 +43,15 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
       is_processing = true
 
       begin
-        data.update_flags(line)
+        file_data.update_flags(line)
       rescue FileData::Squarkless
         return
       end
     end
 
-    if data.live
+    if file_data.live
       if line.start_with?("|")
-        data.update_fields(load.join(" "), repo_config:, allow_arbitrary:)
+        file_data.update_fields(load.join(" "), repo_config:, allow_arbitrary:)
         load = [line.strip]
       elsif line.start_with?("---")
         allow_arbitrary = true
@@ -63,10 +66,13 @@ def extract_data(lines:, data: nil, repo_config:, fill_defaults: true)
     lines.delete_at(head_line_idx)
   end
 
-  if data.live
-    data.fill_fields(repo_config:) if fill_defaults
-    return data
+  if file_data.live
+    file_data.fill_fields(repo_config:) if fill_defaults
+    return file_data
   else
     return
   end
+end
+
+
 end

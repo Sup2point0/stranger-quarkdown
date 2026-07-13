@@ -35,11 +35,11 @@ def self.squarkup(routes:, repo_config:)
   #   log "exporting index pages..."
   # end
 
-  save_site_data(site_data.export_json, routes:, repo_config:)
+  Squarkdown.save_site_data(site_data.export_json, routes:, repo_config:)
 end
 
 
-## :: *Routes -> *RepoConfig -> Hash Content
+## :: *Routes -> *RepoConfig -> Hash FileContent
 def self.find_file_bases(routes:, repo_config:)
 
   return {} if repo_config.bases.path.nil?
@@ -71,8 +71,9 @@ def self.find_files(routes:, repo_config:)
 end
 
 
-## :: [Pathname] -> *Routes -> *RepoConfig -> *mut SiteData -> Hash String -> ()
+## :: [Pathname] -> Hash FileContent -> *Routes -> *RepoConfig -> *mut SiteData -> ()
 def self.export_files(files, bases:, routes:, repo_config:, site_data:)
+
   log "exporting files..."
 
   total = files.length
@@ -85,15 +86,15 @@ def self.export_files(files, bases:, routes:, repo_config:, site_data:)
       ## process
       lines = file.readlines
       file_data = FileData.new(file, routes:, repo_config:)
-      file_data = extract_data(lines:, data: file_data, repo_config:)
+      file_data = Squarkdown.extract_file_data!(lines:, file_data:, repo_config:)
       next if file_data.nil?
 
       ## render
       content = lines.join("")
-      render = render_file(content, data: file_data, repo_config:)
+      render = Squarkdown.render_file!(content, file_data:, repo_config:)
 
       ## export
-      created = export_file(render, data: file_data, bases:, routes:, repo_config:)
+      created = Squarkdown.export_file(render, file_data:, bases:, routes:, repo_config:)
       next unless created
 
       site_data.add_page(file_data)

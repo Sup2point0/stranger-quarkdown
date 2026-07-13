@@ -1,7 +1,13 @@
-##
-# Export a processed `.md` file to ``.svx``, as well as its `+page.svelte` and `+page.js` if desired.
-def export_file(content, data:, bases:, routes:, repo_config:)
-  route = routes.site / repo_config.paths.dest / data.dest
+module Squarkdown
+
+
+## :: FileContent -> *FileData -> Hash FileContent -> *Routes -> *RepoConfig -> Bool
+#
+# Export a processed `.md` file to `.svx`, as well as its `+page.svelte` and `+page.js` if desired.
+# 
+# Returns `true` if the export was successful, or `false` if any error(s) were encountered.
+def self.export_file(content, file_data:, bases:, routes:, repo_config:)
+  route = routes.site / repo_config.paths.dest / file_data.dest
   filename = repo_config.out.file_name
 
   ## == .svx ==
@@ -40,7 +46,7 @@ def export_file(content, data:, bases:, routes:, repo_config:)
   if bases["page.svelte"]
     begin
       dest = route / "+page.svelte"
-      content = bases["bases / page.svelte"] % {file: filename}
+      content = bases["page.svelte"] % {file: filename}
       File.write(dest, content)
 
     rescue => e
@@ -55,7 +61,7 @@ def export_file(content, data:, bases:, routes:, repo_config:)
   if bases["page.js"]
     begin
       dest = route / "+page.js"
-      content = bases["bases / page.js"] % {file: filename}
+      content = bases["page.js"] % {file: filename}
       File.write(dest, content)
 
     rescue => e
@@ -71,7 +77,7 @@ end
 
 
 ## :: *SiteData -> *Routes -> *RepoConfig -> ()
-def save_site_data(data, routes:, repo_config:)
+def self.save_site_data(data, routes:, repo_config:)
 
   log "saving site data..."
 
@@ -83,4 +89,7 @@ def save_site_data(data, routes:, repo_config:)
   File.write(dest, data)
 
   log success: "saved site data to #{BLUE}#{repo_config.out.site_data}"
+end
+
+
 end
