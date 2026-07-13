@@ -94,8 +94,7 @@ def self.export_files(files, bases:, routes:, repo_config:, site_data:)
       render = Squarkdown.render_file!(content, file_data:, repo_config:)
 
       ## export
-      created = Squarkdown.export_file(render, file_data:, bases:, routes:, repo_config:)
-      next unless created
+      Squarkdown.export_file(render, file_data:, bases:, routes:, repo_config:)
 
       site_data.add_page(file_data)
 

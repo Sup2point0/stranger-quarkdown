@@ -4,75 +4,73 @@ module Squarkdown
 ## :: FileContent -> *FileData -> Hash FileContent -> *Routes -> *RepoConfig -> Bool
 #
 # Export a processed `.md` file to `.svx`, as well as its `+page.svelte` and `+page.js` if desired.
-# 
-# Returns `true` if the export was successful, or `false` if any error(s) were encountered.
 def self.export_file(content, file_data:, bases:, routes:, repo_config:)
-  route = routes.site / repo_config.paths.dest / file_data.dest
-  filename = repo_config.out.file_name
 
-  ## == .svx ==
-  begin
-    dest = route / (filename + ".svx")
-    handle = repo_config.opts.on_no_dir
-
-    if !route.exist?
-      if handle.include?("ignore")
-        return false
-      end
-
-      if handle.include?("warn")
-        dest_display = dest.relative_path_from(routes.repo)
-        log error: "destination directory does not exist: #{BLUE}#{dest_display}"
-      end
-        
-      if handle.include?("create")
-        log "creating destination directory..."
-        route.mkpath()
-      else
-        return false
-      end
-    end
-    
-    File.write(dest, content)
-
-  rescue => e
-    log "failed to export `#{filename}.svx`!"
-    squark_error(e, repo_config:)
-    error = true
-
+  if content.empty?
+    raise "received no content to render for #{file_data.path}"
   end
 
-  ## == +page.svelte ==
-  if bases["page.svelte"]
-    begin
-      dest = route / "+page.svelte"
-      content = bases["page.svelte"] % {file: filename}
-      File.write(dest, content)
+  out_dir = routes.site / repo_config.paths.dest / file_data.dest
+  out_dir.mkpath()
 
-    rescue => e
-      log "failed to export `+page.svelte`!"
-      squark_error(e, repo_config:)
-      error = true
+  self._export_svx_(content, out_dir:, routes:, repo_config:)
+  self._export_svelte_(out_dir:, bases:, routes:, repo_config:)
+  self._export_js_(out_dir:, bases:, routes:, repo_config:)
 
-    end
-  end
+end
 
-  ## == +page.js ==
-  if bases["page.js"]
-    begin
-      dest = route / "+page.js"
-      content = bases["page.js"] % {file: filename}
-      File.write(dest, content)
+## :: FileContent -> Pathname -> *Routes -> *RepoConfig -> ()
+def self._export_svx_(content, out_dir:, routes:, repo_config:)
 
-    rescue => e
-      log "failed to export `+page.js`!"
-      squark_error(e, repo_config:)
-      error = true
+  filepath = out_dir / (repo_config.out.file_name + ".svx")
+  self._export_component_(content, filepath:, routes:, repo_config:)
+
+end
+
+## :: Pathname -> Hash Content -> *Routes -> *RepoConfig -> ()
+def self._export_svelte_(out_dir:, bases:, routes:, repo_config:)
+
+  content = bases["page.svelte"]
+  return if content.nil?
+
+  filepath = out_dir / "+page.svelte"
+  self._export_component_(content, filepath:, routes:, repo_config:)
+
+end
+
+## :: Pathname -> Hash Content -> *Routes -> *RepoConfig -> ()
+def self._export_js_(out_dir:, bases:, routes:, repo_config:)
+
+  content = bases["page.js"]
+  return if content.nil?
+
+  filepath = out_dir / "+page.js"
+
+  self._export_component_(content, filepath:, routes:, repo_config:)
   
+end
+
+## :: FileContent -> Pathname -> *Routes -> *RepoConfig -> ()
+def self._export_component_(content, filepath:, routes:, repo_config:)
+
+  if filepath.exist?
+    case repo_config.opts.on_file_exists
+    when "kill"
+      raise "destination file already exists: #{filepath}"
+    
+    when "skip"
+      log error: "destination file already exists: #{BLUE}#{filepath}#{RED}, skipping..."
+    
+    when "overwrite"
+      log "overwriting destination file: #{BLUE}#{
+          filepath.relative_path_from(routes.repo)
+        }#{YELLOW}"
+      
+        File.write(filepath, content)
+    
     end
   end
 
-  return !error
 end
 
 

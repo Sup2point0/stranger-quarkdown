@@ -3,27 +3,27 @@ require_relative "../utils/log"
 
 
 SCHEMA_MAP = {
-  "repo"                => [:@core,   :@repo],
-  "paths / site"         => [:@paths,  :@site],
-  "paths / sources"      => [:@paths,  :@sources],
-  "paths / exclude"      => [:@paths,  :@exclude],
-  "paths / dest"         => [:@paths,  :@dest],
-  "out / file-name"      => [:@out,    :@file_name],
-  "out / site-data"      => [:@out,    :@site_data],
-  "opts / on-error"      => [:@opts,   :@on_error],
-  "opts / on-no-dir"     => [:@opts,   :@on_no_dir],
-  "bases / path"         => [:@bases,  :@path],
-  "bases / page.svelte"  => [:@bases,  :@page_svelte],
-  "bases / index.svelte" => [:@bases,  :@index_svelte],
-  "bases / page.js"      => [:@bases,  :@page_js],
-  "bases / index-view"   => [:@bases,  :@index_view],
-  "styles / path"        => [:@styles, :@path],
-  "styles / page-styles" => [:@styles, :@page_styles],
-  "styles / base-style"  => [:@styles, :@base_style],
-  "assets / path"        => [:@assets, :@path],
-  "assets / site-assets" => [:@assets, :@site_assets],
-  "assets / extensions"  => [:@assets, :@extensions],
-  "fonts / queries"      => [:@fonts,  :@queries],
+  "repo"                 => [:@core,   :@repo],
+  "paths / site"          => [:@paths,  :@site],
+  "paths / sources"       => [:@paths,  :@sources],
+  "paths / exclude"       => [:@paths,  :@exclude],
+  "paths / dest"          => [:@paths,  :@dest],
+  "out / file-name"       => [:@out,    :@file_name],
+  "out / site-data"       => [:@out,    :@site_data],
+  "opts / on-error"       => [:@opts,   :@on_error],
+  "opts / on-file-exists" => [:@opts,   :@on_file_exists],
+  "bases / path"          => [:@bases,  :@path],
+  "bases / page.svelte"   => [:@bases,  :@page_svelte],
+  "bases / index.svelte"  => [:@bases,  :@index_svelte],
+  "bases / page.js"       => [:@bases,  :@page_js],
+  "bases / index-view"    => [:@bases,  :@index_view],
+  "styles / path"         => [:@styles, :@path],
+  "styles / page-styles"  => [:@styles, :@page_styles],
+  "styles / base-style"   => [:@styles, :@base_style],
+  "assets / path"         => [:@assets, :@path],
+  "assets / site-assets"  => [:@assets, :@site_assets],
+  "assets / extensions"   => [:@assets, :@extensions],
+  "fonts / queries"       => [:@fonts,  :@queries],
 }
 
 
@@ -102,7 +102,7 @@ class RepoConfigData
   class Opts
     attr_reader(
       :on_error,
-      :on_no_dir
+      :on_file_exists
     )
   end
 
