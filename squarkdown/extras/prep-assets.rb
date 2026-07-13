@@ -21,14 +21,19 @@ private
 ## :: *Routes -> *RepoConfig -> ()
 def self.try_prep_assets(routes:, repo_config:)
   assets_dir = routes.repo / repo_config.assets.path
+  site_assets_dir = nil
+
   unless assets_dir.exist?
     raise "#{WHITE}assets / path #{RED}directory does not exist: #{BLUE}#{assets_dir}"
   end
 
-  site_assets_dir = routes.repo / repo_config.assets.site_assets
-  unless site_assets_dir.exist?
-    # NOTE: Non-critical, let user know and fallback
-    log error: "#{WHITE}assets / site-assets #{RED}directory does not exist: #{BLUE}#{site_assets_dir}"
+  if repo_config.assets.site_assets
+    site_assets_dir = routes.repo / repo_config.assets.site_assets
+
+    unless site_assets_dir.exist?
+      # NOTE: Non-critical, let user know and fallback
+      log error: "#{WHITE}assets / site-assets #{RED}directory does not exist: #{BLUE}#{site_assets_dir}"
+    end
   end
 
   extensions = repo_config.assets.extensions
@@ -54,9 +59,9 @@ def self.try_prep_assets(routes:, repo_config:)
     
     filepath = file.relative_path_from(assets_dir)
 
-    # FIXME could be cleaner
     site_rel = nil
     unless site_assets_dir.nil?
+      # FIXME could be cleaner
       if file.parent.relative_path_from(site_assets_dir) == Pathname(".") 
         site_rel = file.relative_path_from(site_assets_dir)
       end
