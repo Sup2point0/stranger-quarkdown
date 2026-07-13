@@ -1,6 +1,7 @@
 ## == Colours ==
 WHITE = "\033[0m"
 GREY  = "\033[90m"
+BLACK = "\033[30m"
 
 RED    = "\033[31m"
 GREEN  = "\033[92m"

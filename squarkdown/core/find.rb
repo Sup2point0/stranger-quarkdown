@@ -20,7 +20,7 @@ def self.find_base_for(base_type, routes:, repo_config:)
     return
   end
 
-  log success: "found base for #{WHITE}#{base_type}#{CYAN}: #{BLUE}#{filepath}"
+  log success: "found base for #{WHITE}+#{base_type[1..].sub("_", ".")}#{CYAN}: #{BLUE}#{filepath}"
 
   out = File.read(filepath)
   if out.empty?

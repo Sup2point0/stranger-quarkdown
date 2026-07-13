@@ -62,11 +62,9 @@ def self._export_component_(content, filepath:, routes:, repo_config:)
       log error: "destination file already exists: #{BLUE}#{filepath}#{RED}, skipping..."
     
     when "overwrite"
-      log "overwriting destination file: #{BLUE}#{
-          filepath.relative_path_from(routes.repo)
-        }#{YELLOW}"
+      log "#{BLACK}overwriting file: #{filepath.relative_path_from(routes.repo)}"
       
-        File.write(filepath, content)
+      File.write(filepath, content)
     
     end
   end
