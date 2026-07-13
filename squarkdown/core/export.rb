@@ -37,7 +37,7 @@ def export_file(content, data:, bases:, routes:, repo_config:)
   end
 
   ## == +page.svelte ==
-  if bases["bases / page.svelte"]
+  if bases["page.svelte"]
     begin
       dest = route / "+page.svelte"
       content = bases["bases / page.svelte"] % {file: filename}
@@ -52,7 +52,7 @@ def export_file(content, data:, bases:, routes:, repo_config:)
   end
 
   ## == +page.js ==
-  if bases["bases / page.js"]
+  if bases["page.js"]
     begin
       dest = route / "+page.js"
       content = bases["bases / page.js"] % {file: filename}
