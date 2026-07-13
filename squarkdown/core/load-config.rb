@@ -43,9 +43,11 @@ private
 def self.load_squarkup_schema(routes:)
 
   route = routes.root / "squarkdown/resources/squarkup-schema.json"
-  raise "Internal Error: failed to find #{CYAN}squarkup-schema.json" unless route.exist?
+  raise "Internal Error: failed to find #{BLUE}squarkup-schema.json" unless route.exist?
         
   content = File.read(route)
+  raise "Internal Error: read no content from #{BLUE}squarkup-schema.json" if content.empty?
+
   out = JSON.parse(content)
   
   return out
@@ -56,9 +58,11 @@ end
 def self.load_user_repo_config(routes:)
 
   route = routes.repo / ".squarkdown/squarkup.json"
-  raise "could not find #{CYAN}squarkup.json" unless route.exist?
+  raise "could not find #{BLUE}squarkup.json" unless route.exist?
 
   content = File.read(route)
+  raise "read no content from #{BLUE}squarkup.json" if content.empty?
+  
   out = JSON.parse(content)
 
   return out

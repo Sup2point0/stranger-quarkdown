@@ -59,7 +59,7 @@ def self.write_query(query, routes:, repo_config:)
   raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{path}" unless path.exist?
   
   app_html = File.read(path)
-  raise "#{BLUE}app.html #{RED}appears to be empty, skipping fonts preprocessing" if app_html.nil?
+  raise "read no content from #{BLUE}app.html#{RED}, skipping fonts preprocessing" if app_html.empty?
 
   pattern = /css2.*display=swap/
 

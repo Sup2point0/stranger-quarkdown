@@ -5,6 +5,7 @@
 
 ### New
 - Huge internal restructuring to make configuration, runtime and processing more resilient
+- Improve error messages with hints
 
 ### Fixes
 - Fix `nil` check in `FileData.new`

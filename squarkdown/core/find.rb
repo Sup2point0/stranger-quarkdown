@@ -23,7 +23,7 @@ def self.find_base_for(base_type, routes:, repo_config:)
   log success: "found base for #{WHITE}#{base_type}#{CYAN}: #{BLUE}#{filepath}"
 
   out = File.read(filepath)
-  if out.nil?
+  if out.empty?
     squark_error("#{WHITE}#{base_type} #{RED}appears to be empty!", repo_config:)
   end
 
