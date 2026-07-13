@@ -5,6 +5,9 @@ require "json"
 require "json-schema"
 
 
+private $schema = nil
+
+
 ## :: *mut Routes -> RepoConfig
 #
 # Load the user's repo config.
@@ -14,7 +17,7 @@ require "json-schema"
 # Also extracts `paths / site` and updates `routes.site`.
 def self.load_repo_config!(routes:)
 
-  schema = load_squarkup_schema(routes:)
+  $schema = load_squarkup_schema(routes:)
   log success: "found Squarkdown's #{BLUE}squarkup-schema.json"
 
   json = load_user_repo_config(routes:)
@@ -65,10 +68,10 @@ end
 ## :: *Routes -> Hash String Any
 def self.load_repo_config_defaults(routes:)
 
-  schema = load_squarkup_schema(routes:)
-  raise "could not access `properties` field on #{BLUE}squarkup-schema.json" if schema["properties"].nil?
+  $schema = load_squarkup_schema(routes:) if $schema.nil?
+  raise "could not access `properties` field on #{BLUE}squarkup-schema.json" if $schema["properties"].nil?
 
-  out = schema["properties"].map do |key, data|
+  out = $schema["properties"].map do |key, data|
     [key, data["default"]]
   end.to_h
 
