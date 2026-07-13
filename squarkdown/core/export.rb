@@ -76,7 +76,7 @@ def save_site_data(data, routes:, repo_config:)
   log "saving site data..."
 
   dest = routes.site / repo_config.out.site_data
-  unless dest.exist?
+  unless dest.dirname.exist?
     squark_error("#{WHITE}out / site-data #{RED}does not exist: #{BLUE}#{dest}", repo_config:)
   end
 
