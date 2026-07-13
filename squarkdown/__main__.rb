@@ -12,14 +12,14 @@ log "#{CYAN}running Squarkdown v#{VERSION}"
 
 ## == Routes ==
 log "resolving routes..."
-require_relative "core/load-routes"
+require_relative "load/load-routes"
 routes = Load.load_routes(internal: ARGV.include?("--root"))
 log success: "resolved routes!"
 
 
 ## == Config ==
 log "loading config..."
-require_relative "core/load-config"
+require_relative "load/load-config"
 repo_config = Load.load_repo_config!(routes:)
 log success: "all set up, ready to squarkup!"
 

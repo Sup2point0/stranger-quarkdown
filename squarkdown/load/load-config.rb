@@ -5,7 +5,7 @@ require "json"
 require "json-schema"
 
 
-private $schema = nil
+$schema = nil
 
 
 ## :: *mut Routes -> RepoConfig
@@ -23,7 +23,7 @@ def self.load_repo_config!(routes:)
   json = load_user_repo_config(routes:)
   log success: "found your #{BLUE}squarkup.json"
 
-  JSON::Validator.validate!(schema, json)
+  JSON::Validator.validate!($schema, json)
   log success: "validated your #{BLUE}squarkup.json #{CYAN}against the schema"
 
   defaults = load_repo_config_defaults(routes:)
