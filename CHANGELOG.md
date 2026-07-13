@@ -6,6 +6,9 @@
 ### New
 - Huge internal restructuring to make configuration, runtime and processing more resilient
 
+### Fixes
+- Fix `nil` check in `FileData.new`
+
 
 ## v3.4.3
 

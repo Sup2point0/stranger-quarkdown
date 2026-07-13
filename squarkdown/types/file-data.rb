@@ -66,7 +66,7 @@ class FileData
     @head = nil
     @capt = nil
 
-    if repo_config.styles.base_style
+    if repo_config and repo_config.styles.base_style
       @style = [repo_config.styles.base_style]
     else
       @style = []
