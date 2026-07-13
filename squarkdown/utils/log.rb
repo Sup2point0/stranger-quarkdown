@@ -43,5 +43,9 @@ end
 def log_count(n, total:, file:, sparse: false)
   return if SILENT
 
+  if sparse
+    return if (n % 10 != 0) and (n != total)
+  end
+
   log "#{n} #{GREY}of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 end
