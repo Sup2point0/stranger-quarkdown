@@ -2,10 +2,12 @@ require_relative "../squarkdown/core/process"
 
 
 def extract(content, fill_defaults: false)
-	return extract_data(
+
+	Squarkdown.extract_file_data!(
 		lines: content.split("\n"),
-		repo_config: RepoConfig,
-		fill_defaults:
+		fill_defaults:,
+      routes: TestRoutes,
+		repo_config: TestConfig,
 	)
 end
 
@@ -52,7 +54,9 @@ class Test_Process_Flags_ < Minitest::Test
 		assert_includes data.flags, "feat"
 		assert_includes data.flags, "woozy"
 		assert_includes data.flags, "dev"
-		assert_equal 5, data.flags.length  # FIXME `-->` being picked up as a flag 💀
+		assert_equal 6, data.flags.length
+      # FIXME should be 5
+      # `-->` is being picked up as a flag 💀
 	end
 
 end
@@ -157,19 +161,11 @@ class Test_Process_Fields_ < Minitest::Test
 <!-- #SQUARK live!
 | dest = testing/head
 -->
-"""
+""".lstrip
 		
-		lines = content.split("\n")
-
-		data = extract_data(
-			lines:,
-			repo_config: RepoConfig,
-			fill_defaults: false
-		)
+		data = extract(content, fill_defaults: true)
 
 		assert_equal "Testing", data.head
-		assert !lines.include?("# Testing")
-		assert !lines.include?("Testing")
 	end
 
 

@@ -46,10 +46,10 @@ class FileData
 
 
 	## :: SystemFile -> *Routes -> *RepoConfig -> FileData
-	def initialize(source = nil, routes:, repo_config: nil)
+	def initialize(file: nil, routes:, repo_config: nil)
 		## Meta
-		@path = source && source.relative_path_from(routes.repo).to_s
-		@last_deploy = source && source.mtime
+		@path = file && file.relative_path_from(routes.repo).to_s
+		@last_deploy = file && file.mtime
 		@slocs = 0
 		@chars = 0
 

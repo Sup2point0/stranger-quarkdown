@@ -7,10 +7,16 @@ require_relative "../types/file-data"
 PROCESSED_LINES = 20
 
 
-## :: [String] -> *mut FileData -> *RepoConfig -> Bool -> Option FileData
-def self.extract_file_data!(lines:, file_data: nil, repo_config:, fill_defaults: true)
+## :: [String] -> *mut FileData -> Bool -> *Routes -> *RepoConfig -> Option FileData
+def self.extract_file_data!(
+	lines:,
+	file_data: nil,
+	fill_defaults: true,
+	routes:,
+	repo_config:
+)
 	if file_data.nil?
-		file_data = FileData.new
+		file_data = FileData.new(routes:)
 	end
 
 	file_data.slocs = lines.length
