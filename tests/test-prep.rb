@@ -1,6 +1,6 @@
-require_relative "../squarkdown/scripts/prep-fonts"
-require_relative "../squarkdown/scripts/prep-assets"
-require_relative "../squarkdown/scripts/prep-scss"
+require_relative "../squarkdown/extras/prep-fonts"
+require_relative "../squarkdown/extras/prep-assets"
+require_relative "../squarkdown/extras/prep-scss"
 
 
 class Test_Further_Features_  < Minitest::Test
