@@ -8,25 +8,25 @@ GOOGLE_FONTS_URL = "https://fonts.googleapis.com/"
 # Handle preprocessing fonts by writing the Google Fonts query to `src/app.html`.
 def self.prep_fonts(routes:, repo_config:)
 
-  log "preprocessing fonts..."
+	log "preprocessing fonts..."
 
-  begin
-    query = self.build_query(routes:, repo_config:)
+	begin
+		query = self.build_query(routes:, repo_config:)
 
-    if query.nil?
-      # NOTE: Non-critical, let user know and no-op
-      log error: "no Google Fonts queries provided, skipping fonts preprocessing"
-      return
-    end
+		if query.nil?
+			# NOTE: Non-critical, let user know and no-op
+			log error: "no Google Fonts queries provided, skipping fonts preprocessing"
+			return
+		end
 
-    self.write_query(query, routes:, repo_config:)
+		self.write_query(query, routes:, repo_config:)
 
-    log success: "preprocessed fonts!"
-  
-  rescue => e
-    squark_error(e, repo_config:)
-  
-  end
+		log success: "preprocessed fonts!"
+	
+	rescue => e
+		squark_error(e, repo_config:)
+	
+	end
 end
 
 
@@ -37,14 +37,14 @@ private
 # Build the Google Fonts query, by extracting the params from `repo-config`.
 def self.build_query(routes:, repo_config:)
 
-  fonts = repo_config.fonts.queries
-  raise "no fonts configured, skipping fonts preprocessing" unless fonts
-  return nil if fonts.empty?
-  
-  params = fonts.map { |font| "family=" + font.gsub(" ", "+") }
-  query = "css2?" + params.join("&") + "&display=swap"
+	fonts = repo_config.fonts.queries
+	raise "no fonts configured, skipping fonts preprocessing" unless fonts
+	return nil if fonts.empty?
+	
+	params = fonts.map { |font| "family=" + font.gsub(" ", "+") }
+	query = "css2?" + params.join("&") + "&display=swap"
 
-  return query
+	return query
 end
 
 
@@ -53,27 +53,27 @@ end
 # Write the Google Fonts `query` to `app.html`.
 def self.write_query(query, routes:, repo_config:)
 
-  routes.check_site_resolved()
+	routes.check_site_resolved()
 
-  path = routes.site / "src/app.html"
-  raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{path}" unless path.exist?
-  
-  app_html = File.read(path)
-  raise "read no content from #{BLUE}app.html#{RED}, skipping fonts preprocessing" if app_html.empty?
+	path = routes.site / "src/app.html"
+	raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{path}" unless path.exist?
+	
+	app_html = File.read(path)
+	raise "read no content from #{BLUE}app.html#{RED}, skipping fonts preprocessing" if app_html.empty?
 
-  pattern = /css2.*display=swap/
+	pattern = /css2.*display=swap/
 
-  if app_html.match(pattern)
-    content = app_html.sub(pattern, query)
-  else
-    content = app_html.sub(
-      /( *)(<\/head>)/,
-      "\n\\1  <link rel=\"stylesheet\" href=\"#{GOOGLE_FONTS_URL}#{query}\" />\n\\1\\2"
-    )
-  end
+	if app_html.match(pattern)
+		content = app_html.sub(pattern, query)
+	else
+		content = app_html.sub(
+			/( *)(<\/head>)/,
+			"\n\\1  <link rel=\"stylesheet\" href=\"#{GOOGLE_FONTS_URL}#{query}\" />\n\\1\\2"
+		)
+	end
 
-    log "writing fonts query to #{BLUE}#{path}#{YELLOW}..."
-  File.write(path, content)
+		log "writing fonts query to #{BLUE}#{path}#{YELLOW}..."
+	File.write(path, content)
 end
 
 

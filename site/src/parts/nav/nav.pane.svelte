@@ -104,6 +104,7 @@ const delay = 240;
 
   <NavSection title="Schemas" intern="squarkup-schemas">
     <NavLink text="latest (v{Schema.version})" intern="squarkup-schema/latest.json" />
+    <NavLink text="v5.0.7" intern="squarkup-schema/v5.0.7.json" />
     <NavLink text="v5.0.6" intern="squarkup-schema/v5.0.6.json" />
     <NavLink text="v5.0.5" intern="squarkup-schema/v5.0.5.json" />
     <NavLink text="v5.0.4" intern="squarkup-schema/v5.0.4.json" />

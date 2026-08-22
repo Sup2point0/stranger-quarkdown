@@ -7,34 +7,34 @@ require_relative "helpers/render-table"
 
 
 def doc_schema
-  log "documenting squarkup schema..."
+	log "documenting squarkup schema..."
 
-  ## Load
-  content = File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
-  schema = JSON.parse(content)
-  schema["properties"].delete("$schema")
+	## Load
+	content = File.read(Routes.root / "squarkdown/resources/squarkup-schema.json")
+	schema = JSON.parse(content)
+	schema["properties"].delete("$schema")
 
-  ## Render
-  rows = schema["properties"].map do |field, props|
-    render_table(field:, props:)
-  end
-  content = rows.join("\n")
+	## Render
+	rows = schema["properties"].map do |field, props|
+		render_table(field:, props:)
+	end
+	content = rows.join("\n")
 
-  ## Inject
-  pattern = /<!-- #SQUARK inject\? -->.*?<!-- #SQUARK inject. -->/m
-  repl = """<!-- #SQUARK inject? -->
+	## Inject
+	pattern = /<!-- #SQUARK inject\? -->.*?<!-- #SQUARK inject. -->/m
+	repl = """<!-- #SQUARK inject? -->
 | Field | Type | Values | Default | Description |
 | :---- | :--- | :----- | :------ | :---------- |
 #{content}
 <!-- #SQUARK inject. -->"""
 
-  route = Routes.root / "docs/reference/squarkup-json.md"
-  existing = File.read(route)
-  text = existing.sub(pattern, repl)
+	route = Routes.root / "docs/reference/squarkup-json.md"
+	existing = File.read(route)
+	text = existing.sub(pattern, repl)
 
-  ## Save
-  File.write(route, text)
+	## Save
+	File.write(route, text)
 
-  ## Out
-  return schema["version"]
+	## Out
+	return schema["version"]
 end

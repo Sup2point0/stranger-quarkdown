@@ -5,33 +5,33 @@ $started_logging = false
 #
 # Print a prettified message from Squarkdown.
 def log(
-  text = nil,
-  success: nil,
-  error: nil,
-  hint: nil,
-  done: false,
-  **kwargs
+	text = nil,
+	success: nil,
+	error: nil,
+	hint: nil,
+	done: false,
+	**kwargs
 )
-  return if (SILENT and error.nil?)
-  
-  puts "#{GREY}#{
-    if !$started_logging then ">>> #{PINK}Squark#{GREY} / "
-    elsif           done then ">>> #{PINK}Squark#{GREY} / "
-    elsif        success then "           #{CYAN}✓ "
-    elsif          error then "           #{RED}⨯ "
-    elsif           hint then "           #{WHITE}= "
-    else                      "           / "
-    end
-  }#{
-    if  success then "#{CYAN}#{success}"
-    elsif error then "#{RED}#{error}"
-    elsif  hint then "hint: #{GREEN}#{hint}"
-    elsif  done then "#{CYAN}done!"
-    else             "#{YELLOW}#{text}"
-    end
-  }#{WHITE}"
+	return if (SILENT and error.nil?)
+	
+	puts "#{GREY}#{
+		if !$started_logging then ">>> #{PINK}Squark#{GREY} / "
+		elsif           done then ">>> #{PINK}Squark#{GREY} / "
+		elsif        success then "           #{CYAN}✓ "
+		elsif          error then "           #{RED}⨯ "
+		elsif           hint then "           #{WHITE}= "
+		else                      "           / "
+		end
+	}#{
+		if  success then "#{CYAN}#{success}"
+		elsif error then "#{RED}#{error}"
+		elsif  hint then "hint: #{GREEN}#{hint}"
+		elsif  done then "#{CYAN}done!"
+		else             "#{YELLOW}#{text}"
+		end
+	}#{WHITE}"
 
-  $started_logging = true
+	$started_logging = true
 end
 
 
@@ -41,11 +41,11 @@ end
 # 
 # If `sparse`, only print a message every 10 files.
 def log_count(n, total:, file:, sparse: false)
-  return if SILENT
+	return if SILENT
 
-  if sparse
-    return if (n % 10 != 0) and (n != total)
-  end
+	if sparse
+		return if (n % 10 != 0) and (n != total)
+	end
 
-  log "#{n} #{GREY}of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
+	log "#{n} #{GREY}of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 end

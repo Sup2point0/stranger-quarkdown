@@ -1,5 +1,5 @@
 module Load
-  
+	
 require "pathname"
 
 require_relative "../types/routes"
@@ -12,32 +12,32 @@ require_relative "../types/routes"
 # This does not resolve `routes.site`, which will need to later be read from the user's config.
 def self.load_routes(internal: false)
 
-  root = Pathname(__dir__).parent.parent
-  log success: "found squarkdown: #{BLUE}#{root}"
+	root = Pathname(__dir__).parent.parent
+	log success: "found squarkdown: #{BLUE}#{root}"
 
-  if internal
-    repo = root
-    log "#{GREY}internal: overriding `repo`"
-  else
-    repo = nil
+	if internal
+		repo = root
+		log "#{GREY}internal: overriding `repo`"
+	else
+		repo = nil
 
-    root.parent.ascend do |dir|
-      if (dir / ".squarkdown").exist?
-        repo = dir
-        break
-      end
-    end
-  end
+		root.parent.ascend do |dir|
+			if (dir / ".squarkdown").exist?
+				repo = dir
+				break
+			end
+		end
+	end
 
-  if repo.nil?
-    repo = root.parent
-    log error: "failed to find directory with a #{BLUE}.squarkdown/ #{RED}folder"
-    log "defaulting your project = #{BLUE}#{repo}"
-  else
-    log success: "found your project: #{BLUE}#{repo}"
-  end
+	if repo.nil?
+		repo = root.parent
+		log error: "failed to find directory with a #{BLUE}.squarkdown/ #{RED}folder"
+		log "defaulting your project = #{BLUE}#{repo}"
+	else
+		log success: "found your project: #{BLUE}#{repo}"
+	end
 
-  return RoutesData.new(root:, repo:)
+	return RoutesData.new(root:, repo:)
 end
 
 

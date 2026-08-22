@@ -6,18 +6,18 @@ require_relative "wait"
 
 
 def step(
-  text = nil,
-  before: nil,
-  after: nil,
-  newline: true
+	text = nil,
+	before: nil,
+	after: nil,
+	newline: true
 )
-  out
-  out step: before || text
-  wait
+	out
+	out step: before || text
+	wait
 
-  print PREV unless !newline
-  print PREV, CLEAR
-  out GREY, after || text
+	print PREV unless !newline
+	print PREV, CLEAR
+	out GREY, after || text
 
-  print CLEAR
+	print CLEAR
 end

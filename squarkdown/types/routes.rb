@@ -5,37 +5,37 @@ require_relative "../utils/ansi"
 
 
 class RoutesData
-  attr_reader(
-    :root,
-    :repo,
-    :site,
-    :has_resolved_site
-  )
+	attr_reader(
+		:root,
+		:repo,
+		:site,
+		:has_resolved_site
+	)
 
-  
-  def initialize(root:, repo:, site: nil)
-    @root = root
-    @repo = repo
-    @site = site
-    @has_resolved_site = !site.nil?
-  end
-
-
-  ## :: () Error
-  def check_site_resolved()
-    if !@has_resolved_site
-      raise "CRITICAL: #{WHITE}routes.site #{RED}not configured, aborting"
-    end
-  end
+	
+	def initialize(root:, repo:, site: nil)
+		@root = root
+		@repo = repo
+		@site = site
+		@has_resolved_site = !site.nil?
+	end
 
 
-  ## :: *RepoConfig -> ()
-  def resolve_site(repo_config:)
-    raise "cannot set `Routes.site` from #{repo_config}" unless repo_config.is_a? RepoConfigData
-    
-    @site = @repo / repo_config.paths.site
-    raise "site directory does not exist: #{@site}" unless @site.exist?
+	## :: () Error
+	def check_site_resolved()
+		if !@has_resolved_site
+			raise "CRITICAL: #{WHITE}routes.site #{RED}not configured, aborting"
+		end
+	end
 
-    @has_resolved_site = true
-  end
+
+	## :: *RepoConfig -> ()
+	def resolve_site(repo_config:)
+		raise "cannot set `Routes.site` from #{repo_config}" unless repo_config.is_a? RepoConfigData
+		
+		@site = @repo / repo_config.paths.site
+		raise "site directory does not exist: #{@site}" unless @site.exist?
+
+		@has_resolved_site = true
+	end
 end

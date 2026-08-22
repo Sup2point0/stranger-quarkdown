@@ -10,117 +10,117 @@ require_relative "core/__include__"
 # Run squarkup on a repository.
 def self.squarkup(routes:, repo_config:)
 
-  if repo_config.paths.sources.nil? and repo_config.paths.exclude.nil?
-    log error: "no #{WHITE}paths / sources #{RED}or #{WHITE}paths / exclude #{RED}set in #{BLUE}squarkup.json"
-    log hint: "Squarkdown needs at least 1 of these set to run"
-    log done: true
-    return
-  end
+	if repo_config.paths.sources.nil? and repo_config.paths.exclude.nil?
+		log error: "no #{WHITE}paths / sources #{RED}or #{WHITE}paths / exclude #{RED}set in #{BLUE}squarkup.json"
+		log hint: "Squarkdown needs at least 1 of these set to run"
+		log done: true
+		return
+	end
 
-  log "squarking up..."
+	log "squarking up..."
 
-  site_data = SiteData.new
+	site_data = SiteData.new
 
-  bases = self.find_file_bases(routes:, repo_config:)
-  files = self.find_files(routes:, repo_config:)
-  
-  site_data.meta[:file_count] = files.length
+	bases = self.find_file_bases(routes:, repo_config:)
+	files = self.find_files(routes:, repo_config:)
+	
+	site_data.meta[:file_count] = files.length
 
-  self.export_files(files, bases:, routes:, repo_config:, site_data:)
-  
-  site_data.meta[:page_count] = site_data.pages.length
+	self.export_files(files, bases:, routes:, repo_config:, site_data:)
+	
+	site_data.meta[:page_count] = site_data.pages.length
 
-  # TODO export index pages
-  # if index_files.length > 0
-  #   log "exporting index pages..."
-  # end
+	# TODO export index pages
+	# if index_files.length > 0
+	#   log "exporting index pages..."
+	# end
 
-  Squarkdown.save_site_data(site_data.export_json, routes:, repo_config:)
+	Squarkdown.save_site_data(site_data.export_json, routes:, repo_config:)
 end
 
 
 ## :: *Routes -> *RepoConfig -> Hash FileContent
 def self.find_file_bases(routes:, repo_config:)
 
-  return {} if repo_config.bases.path.nil?
-  
-  log "locating file bases..."
+	return {} if repo_config.bases.path.nil?
+	
+	log "locating file bases..."
 
-  return {
-    "page.svelte" => Squarkdown.find_base_for(:@page_svelte, routes:, repo_config:),
-    "page.js"     => Squarkdown.find_base_for(:@page_js, routes:, repo_config:),
-  }
+	return {
+		"page.svelte" => Squarkdown.find_base_for(:@page_svelte, routes:, repo_config:),
+		"page.js"     => Squarkdown.find_base_for(:@page_js, routes:, repo_config:),
+	}
 end
 
 
 ## :: *Routes -> *RepoConfig -> [Pathname]
 def self.find_files(routes:, repo_config:)
 
-  log "locating files..."
-  
-  files = Squarkdown.find_files_to_squarkup(routes:, repo_config:)
-  total = files.length
+	log "locating files..."
+	
+	files = Squarkdown.find_files_to_squarkup(routes:, repo_config:)
+	total = files.length
 
-  if total == 0
-    log error: "no files found!"
-  else
-    log success: "found #{total} files!"
-  end
+	if total == 0
+		log error: "no files found!"
+	else
+		log success: "found #{total} files!"
+	end
 
-  return files
+	return files
 end
 
 
 ## :: [Pathname] -> Hash FileContent -> *Routes -> *RepoConfig -> *mut SiteData -> ()
 def self.export_files(files, bases:, routes:, repo_config:, site_data:)
 
-  log "exporting files..."
+	log "exporting files..."
 
-  total = files.length
-  index_files = []
+	total = files.length
+	index_files = []
 
-  files.each_with_index do |file, i|
-    log "#{i+1}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
+	files.each_with_index do |file, i|
+		log "#{i+1}#{GREY} of #{total}: #{WHITE}#{file.parent.basename}#{GREY}/#{BLUE}#{file.basename}"
 
-    begin
-      ## process
-      lines = file.readlines
-      file_data = FileData.new(file, routes:, repo_config:)
-      file_data = Squarkdown.extract_file_data!(lines:, file_data:, repo_config:)
-      next if file_data.nil?
+		begin
+			## process
+			lines = file.readlines
+			file_data = FileData.new(file, routes:, repo_config:)
+			file_data = Squarkdown.extract_file_data!(lines:, file_data:, repo_config:)
+			next if file_data.nil?
 
-      ## render
-      content = lines.join("")
-      render = Squarkdown.render_file!(content, file_data:, repo_config:)
+			## render
+			content = lines.join("")
+			render = Squarkdown.render_file!(content, file_data:, repo_config:)
 
-      ## export
-      Squarkdown.export_file(render, file_data:, bases:, routes:, repo_config:)
+			## export
+			Squarkdown.export_file(render, file_data:, bases:, routes:, repo_config:)
 
-      site_data.add_page(file_data)
+			site_data.add_page(file_data)
 
-      if file_data.flags.include?("index")
-        index_files.append(file_data.index)
-        
-        file_data.index.each do |index|
-          site_data.create_index(index:, page: file_data.dest)
-        end
+			if file_data.flags.include?("index")
+				index_files.append(file_data.index)
+				
+				file_data.index.each do |index|
+					site_data.create_index(index:, page: file_data.dest)
+				end
 
-        next
-      end
+				next
+			end
 
-      ## index + tag
-      file_data.index.each do |index|
-        site_data.update_index(index:, page: file_data.path)
-      end
-      file_data.tags.each do |tag|
-        site_data.update_tags(tag:, page: file_data.path)
-      end
+			## index + tag
+			file_data.index.each do |index|
+				site_data.update_index(index:, page: file_data.path)
+			end
+			file_data.tags.each do |tag|
+				site_data.update_tags(tag:, page: file_data.path)
+			end
 
-    rescue => e
-      squark_error(e, repo_config:)
-    
-    end
-  end
+		rescue => e
+			squark_error(e, repo_config:)
+		
+		end
+	end
 end
 
 
