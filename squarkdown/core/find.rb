@@ -32,12 +32,13 @@ def self.find_base_for(base_type, routes:, repo_config:)
 end
 
 
-## `:: Pathname -> *RepoConfig -> [Pathname]`
+## `:: *Routes -> *RepoConfig -> [Pathname]`
 #
 # Recursively search for `.md` files to squarkup.
 ##
-def self.find_files_to_squarkup(from:, repo_config:)
+def self.find_files_to_squarkup(routes:, repo_config:)
 
+	from = routes.repo
 	sources = repo_config.paths.sources
 
 	paths = (
@@ -54,8 +55,6 @@ def self.find_files_to_squarkup(from:, repo_config:)
 			from.glob("**/*.md", File::FNM_DOTMATCH)
 		end
 	)
-
-	puts "paths = #{paths}"
 
 	exclude = repo_config.paths.exclude
 

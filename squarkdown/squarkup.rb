@@ -58,7 +58,7 @@ def self.find_files(routes:, repo_config:)
 
 	log "locating files..."
 	
-	files = Squarkdown.find_files_to_squarkup(from: routes.repo, repo_config:)
+	files = Squarkdown.find_files_to_squarkup(routes:, repo_config:)
 	total = files.length
 
 	if total == 0
