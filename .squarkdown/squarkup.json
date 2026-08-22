@@ -14,8 +14,8 @@
   "out / file-name": "~content",
   "out / site-data": "src/site.json",
 
-  "opts / on-no-dir": ["warn", "create"],
-  "opts / on-error":  "kill",
+  "opts / on-error":       "kill",
+  "opts / on-file-exists": "overwrite",
 
   "bases / path":        "src/parts/bases/",
   "bases / page.svelte": "~page.svelte",
@@ -25,8 +25,8 @@
   "styles / page-styles": "src/styles/",
   "styles / base-style":  "article",
 
-  "assets / path": ".assets",
-  "assets / site-assets": ".assets/site",
+  "assets / path": ".assets/",
+  "assets / site-assets": ".assets/site/",
   "assets / extensions": [
     "jpg", "jpeg", "png", "svg", "ttf"
   ],
