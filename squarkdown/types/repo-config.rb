@@ -29,6 +29,7 @@ SCHEMA_MAP = {
 
 ##
 # The end user's configuration for Squarkdown, processed from `squarkup.json`.
+##
 class RepoConfigData
 
 	attr_reader(
@@ -43,11 +44,10 @@ class RepoConfigData
 	)
 
 	##
-	# Create a new `RepoConfig` with data extracted from `json:`.
+	# Create a new `RepoConfig` with data extracted from `json:`, filling in defaults from `defaults:`.
 	# 
 	# Paths are resolved to `Pathname`s relative to `routes:`.
-	# 
-	# If `fill_defaults`, also load the Squarkup schema to find default values for missing fields. This requires `Routes` to be initialised.
+	##
 	def initialize(json:, routes:, defaults: nil)
 
 		@core   = Core.new 
@@ -60,7 +60,9 @@ class RepoConfigData
 		@fonts  = Fonts.new
 
 		json.each do |key, value|
-			next if key.start_with? "$"
+			if key.start_with? "$"
+				next
+			end
 
 			category_symbol, option_symbol = SCHEMA_MAP[key]
 

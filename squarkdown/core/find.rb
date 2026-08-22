@@ -4,9 +4,10 @@ require "find"
 require "pathname"
 
 
-## :: keyof RepoConfig.bases -> *Routes -> *RepoConfig -> String
+## `:: keyof RepoConfig.bases -> *Routes -> *RepoConfig -> String`
 #
 # Find the template for `base_type` (`+page.svelte` or `+page.js`).
+##
 def self.find_base_for(base_type, routes:, repo_config:)
 
 	filename = repo_config.bases.instance_variable_get(base_type)
@@ -31,12 +32,12 @@ def self.find_base_for(base_type, routes:, repo_config:)
 end
 
 
-## :: *Routes -> *RepoConfig -> [Pathname]
+## `:: Pathname -> *RepoConfig -> [Pathname]`
 #
 # Recursively search for `.md` files to squarkup.
-def self.find_files_to_squarkup(routes:, repo_config:)
+##
+def self.find_files_to_squarkup(from:, repo_config:)
 
-	from = routes.repo
 	sources = repo_config.paths.sources
 
 	paths = (
@@ -54,13 +55,15 @@ def self.find_files_to_squarkup(routes:, repo_config:)
 		end
 	)
 
+	puts "paths = #{paths}"
+
 	exclude = repo_config.paths.exclude
 
 	unless exclude.nil? or exclude.empty?
 		paths.filter! do |path|
-			(exclude.map { |pattern|
+			exclude.map { |pattern|
 				path.realpath.to_s.match(pattern)
-			}).none?
+			}.none?
 		end
 	end
 

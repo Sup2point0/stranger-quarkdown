@@ -5,6 +5,7 @@ require "json"
 require "json-schema"
 
 
+# Cache the loaded schema to avoid repeat reads
 $schema = nil
 
 
@@ -36,8 +37,6 @@ def self.load_repo_config!(routes:)
 	return out
 end
 
-
-private
 
 ## :: *Routes -> JSON
 def self.load_squarkup_schema(routes:)
@@ -72,8 +71,13 @@ end
 ## :: *Routes -> Hash String Any
 def self.load_repo_config_defaults(routes:)
 
-	$schema = load_squarkup_schema(routes:) if $schema.nil?
-	raise "could not access `properties` field on #{BLUE}squarkup-schema.json" if $schema["properties"].nil?
+	if $schema.nil?
+		$schema = load_squarkup_schema(routes:)
+	end
+	
+	if $schema["properties"].nil?
+		raise "could not access `properties` field on #{BLUE}squarkup-schema.json"
+	end
 
 	out = $schema["properties"].map do |key, data|
 		[key, data["default"]]

@@ -55,10 +55,10 @@ def self.write_query(query, routes:, repo_config:)
 
 	routes.check_site_resolved()
 
-	path = routes.site / "src/app.html"
-	raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{path}" unless path.exist?
+	dest = routes.site / "src/app.html"
+	raise "could not find #{WHITE}app.html #{RED}at: #{BLUE}#{dest}" unless dest.exist?
 	
-	app_html = File.read(path)
+	app_html = File.read(dest)
 	raise "read no content from #{BLUE}app.html#{RED}, skipping fonts preprocessing" if app_html.empty?
 
 	pattern = /css2.*display=swap/
@@ -72,8 +72,8 @@ def self.write_query(query, routes:, repo_config:)
 		)
 	end
 
-		log "writing fonts query to #{BLUE}#{path}#{YELLOW}..."
-	File.write(path, content)
+		log "writing fonts query to #{BLUE}#{dest}#{YELLOW}..."
+	File.write(dest, content)
 end
 
 

@@ -21,7 +21,7 @@ class Routes
 	end
 
 
-	## :: () Error
+	## :: () | Error
 	def check_site_resolved()
 		if !@has_resolved_site
 			raise "CRITICAL: #{WHITE}routes.site #{RED}not configured, aborting"
