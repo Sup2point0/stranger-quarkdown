@@ -37,7 +37,7 @@ def self.load_routes(internal: false)
 		log success: "found your project: #{BLUE}#{repo}"
 	end
 
-	return RoutesData.new(root:, repo:)
+	return Routes.new(root:, repo:)
 end
 
 

@@ -4,7 +4,7 @@ require_relative "repo-config"
 require_relative "../utils/ansi"
 
 
-class RoutesData
+class Routes
 	attr_reader(
 		:root,
 		:repo,
