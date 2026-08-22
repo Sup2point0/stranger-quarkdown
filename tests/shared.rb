@@ -1,8 +1,7 @@
 def got(code)
-	return (
-"got ```
+
+	"got ```
 #{code}  
 ```"
-)
 
 end

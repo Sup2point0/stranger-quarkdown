@@ -4,7 +4,12 @@ require "minitest/autorun"
 require_relative "../squarkdown/core/find"
 
 
-Tests = Pathname(__dir__)
-TestSite = Tests / "test-site"
+here = Pathname(__dir__)
 
-RepoConfig = find_repo_config(from: Tests)
+TestRoutes = Routes.new(
+	root: here.parent,
+	repo: here,
+	site: here / "test-site"
+)
+
+TestConfig = load_repo_config(routes: TestRoutes)
