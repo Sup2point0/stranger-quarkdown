@@ -20,5 +20,7 @@
   - At times, I wonder if I’ve just irreparably broken it and it’ll never work again.
 - When you come back to a project after months of inactivity, you will never thank yourself enough for your own documentation.
 - Versioning a project and tracking its features with a changelog is probably a good idea.
-  - Yeah, I find myself wishing I’d done it with Squarkdown.
+  - Yeah, I find myself wishing I’d done it earlier with Squarkdown.
   - Again, you often can’t expect how much projects grow beyond what you initially imagined.
+- I forgot how I learnt Ruby.
+  - I think I also forgot how to write Ruby =/
