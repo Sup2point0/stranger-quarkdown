@@ -1,7 +1,5 @@
 T_START = Time.now
 
-SILENT = ARGV.include? "--silent"
-
 
 ## == Startup ==
 require_relative "utils/__include__"

@@ -1,3 +1,5 @@
+SILENT = ARGV.include? "--silent"
+
 $started_logging = false
 
 
