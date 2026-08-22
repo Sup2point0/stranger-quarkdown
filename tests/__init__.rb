@@ -1,7 +1,8 @@
 require "pathname"
 require "minitest/autorun"
 
-require_relative "../squarkdown/core/find"
+require_relative "../squarkdown/types/routes"
+require_relative "../squarkdown/load/load-config"
 
 
 here = Pathname(__dir__)
@@ -12,4 +13,4 @@ TestRoutes = Routes.new(
 	site: here / "test-site"
 )
 
-TestConfig = load_repo_config(routes: TestRoutes)
+TestConfig = Load.load_repo_config!(routes: TestRoutes)
