@@ -16,7 +16,7 @@ def self.extract_file_data!(
 	repo_config:
 )
 	if file_data.nil?
-		file_data = FileData.new(routes:)
+		file_data = FileData.new
 	end
 
 	file_data.slocs = lines.length

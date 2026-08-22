@@ -85,8 +85,8 @@ def self.export_files(files, bases:, routes:, repo_config:, site_data:)
 		begin
 			## process
 			lines = file.readlines
-			file_data = FileData.new(file, routes:, repo_config:)
-			file_data = Squarkdown.extract_file_data!(lines:, file_data:, repo_config:)
+			file_data = FileData.new(file:, routes:, repo_config:)
+			file_data = Squarkdown.extract_file_data!(lines:, file_data:, routes:, repo_config:)
 			next if file_data.nil?
 
 			## render

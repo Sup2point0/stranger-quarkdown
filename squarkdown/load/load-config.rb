@@ -9,13 +9,14 @@ require "json-schema"
 $schema = nil
 
 
-## :: *mut Routes -> RepoConfig
+## `:: *mut Routes -> RepoConfig`
 #
 # Load the user's repo config.
 # 
 # Finds `.squarkdown/squarkup.json` in their project repo, validates it with the squarkup JSON schema, and fills in absent values with defaults.
 # 
 # Also extracts `paths / site` and updates `routes.site`.
+##
 def self.load_repo_config!(routes:)
 
 	$schema = load_squarkup_schema(routes:)
@@ -38,7 +39,7 @@ def self.load_repo_config!(routes:)
 end
 
 
-## :: *Routes -> JSON
+## `:: *Routes -> JSON`
 def self.load_squarkup_schema(routes:)
 
 	route = routes.root / "squarkdown/resources/squarkup-schema.json"
@@ -53,7 +54,7 @@ def self.load_squarkup_schema(routes:)
 end
 
 
-## :: *Routes -> JSON
+## `:: *Routes -> JSON`
 def self.load_user_repo_config(routes:)
 
 	route = routes.repo / ".squarkdown/squarkup.json"
@@ -68,7 +69,7 @@ def self.load_user_repo_config(routes:)
 end
 
 
-## :: *Routes -> Hash String Any
+## `:: *Routes -> Hash String Any`
 def self.load_repo_config_defaults(routes:)
 
 	if $schema.nil?

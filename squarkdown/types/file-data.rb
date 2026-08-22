@@ -46,7 +46,7 @@ class FileData
 
 
 	## :: SystemFile -> *Routes -> *RepoConfig -> FileData
-	def initialize(file: nil, routes:, repo_config: nil)
+	def initialize(file: nil, routes: nil, repo_config: nil)
 		## Meta
 		@path = file && file.relative_path_from(routes.repo).to_s
 		@last_deploy = file && file.mtime
