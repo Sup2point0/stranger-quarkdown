@@ -12,10 +12,22 @@ use super::*;
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
 impl<'l, Source: Read> CharmParser<'l, Source>
 {
+	/// Is the parser currently pointing outside the bounds of the current chunk?
+	pub(super) fn is_past_end_of_line(&self) -> bool
+	{
+		self._index >= self._line.len()
+	}
+
 	/// The current character in the source the parser is pointing to, or `None` if it is out of bounds.
 	pub(super) fn current(&self) -> Option<char>
 	{
 		self._line.get(self._index).copied()
+	}
+
+	/// Peek the next character in the source immediately after the current character, or `None` if the parser is currently at the very end of the source.
+	pub(super) fn peek(&self) -> Option<char>
+	{
+		self._line.get(self._index + 1).copied()
 	}
 
 	/// Get a preview of the upcoming text (for error messages).
@@ -210,37 +222,107 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 
-	#[test] fn test_parse_ident()
+	#[test] fn test_preview()
 	{
 		test_exact(&[
-			"identifier",
-			"camelCase",
-			"PascalCase",
-			"kebab-case",
-			"snake_case",
-			"dot.case",
-			"very-much_mixedCase",
+			"Sup",
+			"Sup World",
 		],
-		|mut parser, case| {
-			assert_eq!( parser.parse_ident(), Ok(case.to_string()) );
+		|parser, case| {
+			assert_eq!( parser.preview(), case );
 		});
 	}
 
-	#[test] fn test_eat_whitespace_matches()
+	#[test] fn test_next_line()
+	{
+		test_expected(&[
+			(
+				"# Sup\n<!-- #SQUARK live! -->\n\nSup, World!\n",
+				["# Sup", "<!-- #SQUARK live! -->", "", "Sup, World!"],
+			)
+		],
+		|mut parser, _expected| {
+			for line in _expected {
+				assert_eq!( parser._line, line.chars().collect::<Vec<_>>() );
+				let _ = parser.next_line(err_msg!());
+			}
+		});
+	}
+
+	#[test] fn test_eat_fails()
+	{
+		test_exact(&[
+			" ",
+			"test",
+			"testing testing",
+			"testing 123",
+		],
+		|mut parser, _case| {
+			assert_matches!( parser.eat("FAIL", err_msg!()), Err(ParseError::UnexpectedInput{..}) );
+		});
+	}
+
+	#[test] fn test_eat_matches()
+	{
+		test_exact(&[
+			" ",
+			"test",
+			"testing testing",
+			"testing 123",
+		],
+		|mut parser, case| {
+			assert_eq!( parser.eat(case, err_msg!()), Ok(()) );
+		});
+	}
+
+	#[test] fn test_eat_caseless_matches()
+	{
+		test_exact(&[
+			" ",
+			"Test",
+			"Testing TESTING",
+			"tEsTiNg 123",
+		],
+		|mut parser, case| {
+			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase(), err_msg!()), Ok(()) );
+		});
+	}
+
+	#[test] fn test_eat_spaces_fails()
+	{
+		test_exact(&[
+			"nothing",
+			"nothing ",
+			"n othing ",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_spaces(), false );
+			assert_eq!( parser.current(), Some('n') );
+		});
+	}
+
+	#[test] fn test_eat_spaces_stops()
+	{
+		test_exact(&[
+			" stop",
+			" stop ",
+			"  stop ",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_spaces(), true );
+			assert_eq!( parser.current(), Some('s') );
+		});
+	}
+
+	#[test] fn test_eat_spaces_matches()
 	{
 		test_exact(&[
 			" ",
 			"  ",
 			"        ",
-			" \n",
-			"\n ",
-			" \n ",
-			" \n \n\n",
-			"\t",
-			" \n\t ",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.eat_whitespace(), true );
+			assert_eq!( parser.eat_spaces(), true );
 			assert_eq!( parser.current(), None );
 		});
 	}
@@ -268,108 +350,38 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_spaces_matches()
+	#[test] fn test_eat_whitespace_matches()
 	{
 		test_exact(&[
 			" ",
 			"  ",
 			"        ",
+			" \n",
+			"\n ",
+			" \n ",
+			" \n \n\n",
+			"\t",
+			" \n\t ",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.eat_spaces(), true );
+			assert_eq!( parser.eat_whitespace(), true );
 			assert_eq!( parser.current(), None );
 		});
 	}
 
-	#[test] fn test_eat_spaces_stops()
+	#[test] fn test_parse_ident()
 	{
 		test_exact(&[
-			" stop",
-			" stop ",
-			"  stop ",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_spaces(), true );
-			assert_eq!( parser.current(), Some('s') );
-		});
-	}
-
-	#[test] fn test_eat_spaces_fails()
-	{
-		test_exact(&[
-			"nothing",
-			"nothing ",
-			"n othing ",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_spaces(), false );
-			assert_eq!( parser.current(), Some('n') );
-		});
-	}
-
-	#[test] fn test_eat_caseless_matches()
-	{
-		test_exact(&[
-			" ",
-			"Test",
-			"Testing TESTING",
-			"tEsTiNg 123",
+			"identifier",
+			"camelCase",
+			"PascalCase",
+			"kebab-case",
+			"snake_case",
+			"dot.case",
+			"very-much_mixedCase",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase(), err_msg!()), Ok(()) );
-		});
-	}
-
-	#[test] fn test_eat_matches()
-	{
-		test_exact(&[
-			" ",
-			"test",
-			"testing testing",
-			"testing 123",
-		],
-		|mut parser, case| {
-			assert_eq!( parser.eat(case, err_msg!()), Ok(()) );
-		});
-	}
-
-	#[test] fn test_eat_fails()
-	{
-		test_exact(&[
-			" ",
-			"test",
-			"testing testing",
-			"testing 123",
-		],
-		|mut parser, _case| {
-			assert_matches!( parser.eat("FAIL", err_msg!()), Err(ParseError::UnexpectedInput{..}) );
-		});
-	}
-
-	#[test] fn test_next_line()
-	{
-		test_expected(&[
-			(
-				"# Sup\n<!-- #SQUARK live! -->\n\nSup, World!\n",
-				["# Sup", "<!-- #SQUARK live! -->", "", "Sup, World!"],
-			)
-		],
-		|mut parser, _expected| {
-			for line in _expected {
-				assert_eq!( parser._line, line.chars().collect::<Vec<_>>() );
-				let _ = parser.next_line(err_msg!());
-			}
-		});
-	}
-
-	#[test] fn test_preview()
-	{
-		test_exact(&[
-			"Sup",
-			"Sup World",
-		],
-		|parser, case| {
-			assert_eq!( parser.preview(), case );
+			assert_eq!( parser.parse_ident(), Ok(case.to_string()) );
 		});
 	}
 }
