@@ -134,6 +134,25 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(())
 	}
 
+	fn parse_flags(&mut self) -> ParseResult<Vec<String>>
+	{
+		let mut flags = vec![];
+
+		loop {
+			self.eat_spaces();
+			if self.current() == None { break; }
+
+			let ident = self.parse_ident()?;
+
+			if self.current() == Some('!') {
+				flags.push(ident);
+				let _ = self.advance();
+			}
+		}
+
+		Ok(flags)
+	}
+
 	fn err(&self) -> ParseError
 	{
 		if self.is_live {
@@ -354,6 +373,41 @@ mod test
 		],
 		|mut parser, _case| {
 			assert_eq!( parser.parse_heading(), Err(ParseError::NoMatch) );
+		});
+	}
+
+	#[test] fn test_parse_flags_matches()
+	{
+		test_expected(&[
+			("live!", vec![str!("live")]),
+			("one! two!", vec![str!("one"), str!("two")]),
+			("kebab-case! snake_case!", vec![str!("kebab-case"), str!("snake_case")]),
+		],
+		|mut parser, expected_flags| {
+			let flags = parser.parse_flags().unwrap();
+
+			for (found, expected) in flags.into_iter().zip(expected_flags) {
+				assert_eq!( found, *expected );
+			}
+		});
+	}
+	
+	#[test] fn test_parse_flags_fails()
+	{
+		test_expected(&[
+			("live! ignore", vec![str!("live")]),
+			("live!\nignore", vec![str!("live")]),
+			("live! \nignore", vec![str!("live")]),
+			("live!\n ignore", vec![str!("live")]),
+			("one! ignore two!", vec![str!("one"), str!("two")]),
+			("kebab-case! ignore-me snake_case! ignore_me", vec![str!("kebab-case"), str!("snake_case")]),
+		],
+		|mut parser, expected_flags| {
+			let flags = parser.parse_flags().unwrap();
+
+			for (found, expected) in flags.into_iter().zip(expected_flags) {
+				assert_eq!( found, *expected );
+			}
 		});
 	}
 
