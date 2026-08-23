@@ -22,10 +22,21 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self._line.get(self._index).copied()
 	}
 
-	/// Peek the next character in the source immediately after the current character, or `None` if the parser is currently at the very end of the source.
+	/// Peek the next character in the line immediately after the current character.
+	/// 
+	/// Edge cases:
+	/// 
+	/// - `Some('\n')` if at the last character of a line
+	/// - `None` if past the last character of a line
 	pub(super) fn peek(&self) -> Option<char>
 	{
-		self._line.get(self._index + 1).copied()
+		let next = self._line.get(self._index + 1);
+
+		if next == None && self.current() != None {
+			return Some('\n')
+		} else {
+			return next.copied();
+		}
 	}
 
 	/// Get a preview of the upcoming text (for error messages).
@@ -220,7 +231,7 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 
-	#[test] fn advance_and_current()
+	#[test] fn advance_and_current_single_line()
 	{
 		let cursor = Cursor::new("012345");
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
@@ -233,8 +244,23 @@ mod test
 		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('5') );
 		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
 	}
+	
+	#[test] fn advance_and_current_multi_line()
+	{
+		let cursor = Cursor::new("012\n345");
+		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
-	#[test] fn advance_and_peek()
+		assert_eq!( parser.current(), Some('0') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('1') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('2') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('3') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('4') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('5') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
+	}
+
+	#[test] fn advance_and_peek_single_line()
 	{
 		let cursor = Cursor::new("012345");
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
@@ -244,6 +270,22 @@ mod test
 		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('3') );
 		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('4') );
 		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('5') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('\n') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
+	}
+
+	#[test] fn advance_and_peek_multi_line()
+	{
+		let cursor = Cursor::new("012\n345");
+		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+
+		assert_eq!( parser.peek(), Some('1') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('2') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('\n') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('4') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('5') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('\n') );
 		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
 	}
 
