@@ -66,9 +66,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Run the parser to completion, extracting the metadata from the squark charm (if present) of the target file.
 	pub fn parse(&mut self) -> Option<FileData>
 	{
-		match self._parse() {
+		match self._parse()
+		{
 			Ok(r) => Some(r),
-			Err(ParseError::NoMatch) => None,
+			
+			Err(ParseError::NoMatch) | Err(ParseError::NotLive) => None,
+			
 			Err(e) => {
 				log::err(e);
 				None
@@ -110,7 +113,21 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	
 	fn parse_charm_squark(&mut self) -> ParseResult<FileData>
 	{
+		self.parse_squark_live()?;
+
 		unimplemented!()
+	}
+
+	/// Look for `<!-- #SQUARK live!`, and if found set `.is_live: true`.
+	fn parse_squark_live(&mut self) -> ParseResult
+	{
+		self.eat("<!--")?;
+		self.eat_whitespace(); self.eat("#")?;
+		self.eat_spaces(); self.eat_caseless("SQUARK")?;
+		self.eat_spaces(); self.eat_caseless("live!")?;
+
+		self.is_live = true;
+		Ok(())
 	}
 
 	fn err(&self) -> ParseError
@@ -118,7 +135,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		if self.is_live {
 			ParseError::FatalEnd
 		} else {
-			ParseError::NoMatch
+			ParseError::NotLive
 		}
 	}
 }
@@ -138,8 +155,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self._chunk_buffer.clear();
 
 		match self._reader.read_line(&mut self._chunk_buffer) {
-			Ok(0) => return Err(ParseError::EndOfFile),
-			Err(_) => return Err(self.err()),
+			Ok(0) | Err(_) => return Err(self.err()),
 			Ok(_) => (),
 		}
 
@@ -183,6 +199,29 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			};
 
 			if found != expected {
+				return Err(ParseError::NoMatch);
+			}
+			
+			self.advance()?;
+		}
+	}
+	
+	/// Consume `target`, without considering casing for letters.
+	fn eat_caseless(&mut self, target: &str) -> ParseResult
+	{
+		let normalised = target.to_ascii_lowercase();
+		let mut chars = normalised.chars();
+
+		loop {
+			let Some(expected) = chars.next() else {
+				return Ok(());
+			};
+
+			let Some(found) = self.current() else {
+				return Err(ParseError::NoMatch);
+			};
+
+			if found.to_ascii_lowercase() != expected {
 				return Err(ParseError::NoMatch);
 			}
 			

@@ -4,9 +4,14 @@ pub type ParseResult<T = ()> = Result<T, ParseError>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ParseError
 {
-	EndOfFile,
-	NoMatch,
+	/// The parser unexpectedly reached the end of its source.
 	FatalEnd,
+
+	/// The required input for a parse wasn't present.
+	NoMatch,
+
+	/// This file does not have a `<!-- #SQUARK live! -->` so does not need to be squarked up.
+	NotLive,
 }
 
 impl std::error::Error for ParseError {}
