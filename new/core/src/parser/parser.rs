@@ -189,6 +189,20 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self._chunk.get(self._index).map(|c| *c)
 	}
 
+	/// Get a preview of the upcoming text (for error messages).
+	fn preview(&self) -> String
+	{
+		const PREVIEW_CHARS: usize = 20;
+
+		let end = (self._index + PREVIEW_CHARS).min(self._chunk.len());
+		let chars = self._chunk.get(self._index..end);
+		
+		match chars {
+			Some(c) => c.iter().collect(),
+			None => str!("END OF FILE"),
+		}
+	}
+
 	/// Read the next line of the source text into memory.
 	fn next_line(&mut self, cause: impl FnOnce() -> String) -> ParseResult
 	{
@@ -594,6 +608,17 @@ mod test
 				assert_eq!( parser._chunk, chunk.chars().collect::<Vec<_>>() );
 				let _ = parser.next_line(err_msg!());
 			}
+		});
+	}
+
+	#[test] fn test_preview()
+	{
+		test_exact(&[
+			"Sup",
+			"Sup World",
+		],
+		|parser, case| {
+			assert_eq!( parser.preview(), case );
 		});
 	}
 }
