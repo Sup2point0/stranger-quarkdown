@@ -38,21 +38,21 @@ pub struct CharmParser<'l, Source: Read = File>
 	/// The backing buffer that reads from the target file.
 	_reader: BufReader<Source>,
 
-	/// The current index in the current chunk the parser is pointing to.
+	/// The current index in the current line the parser is pointing to.
 	_index: usize,
 
 	/* NOTE:
-		Storing a `Chars` iterator over `_chunk_buffer` origind lifetime issues =(
+		Storing a `Chars` iterator over `_line_buffer` origind lifetime issues =(
 		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
 	*/
 
-	/// Individual characters of the currently in-memory chunk to process.
-	_chunk: Vec<char>,
+	/// Individual characters of the currently in-memory line to process.
+	_line: Vec<char>,
 	
-	/// The currently in-memory chunk to process.
+	/// The currently in-memory line to process.
 	/// 
-	/// This backs `._chunk`. Reuse this between line reads to avoid excessive allocations!
-	_chunk_buffer: String,
+	/// This backs `._line`. Reuse this between line reads to avoid excessive allocations!
+	_line_buffer: String,
 }
 
 /// The public parser interface.
@@ -65,8 +65,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			config,
 			_reader: BufReader::new(file),
 			_index: 0,
-			_chunk: vec![],
-			_chunk_buffer: String::new(),
+			_line: vec![],
+			_line_buffer: String::new(),
 			is_live: false,
 		};
 		
@@ -119,7 +119,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self.eat("# ", err_msg!("parsing heading"))?;
 		self.eat_spaces();
 
-		Ok(self._chunk[self._index..].iter().collect())
+		Ok(self._line[self._index..].iter().collect())
 	}
 	
 	/// Parse the `<!-- #SQUARK live! ... -->` charm squark.

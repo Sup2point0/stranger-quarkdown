@@ -15,7 +15,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// The current character in the source the parser is pointing to, or `None` if it is out of bounds.
 	pub(super) fn current(&self) -> Option<char>
 	{
-		self._chunk.get(self._index).copied()
+		self._line.get(self._index).copied()
 	}
 
 	/// Get a preview of the upcoming text (for error messages).
@@ -23,8 +23,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	{
 		const PREVIEW_CHARS: usize = 20;
 
-		let end = (self._index + PREVIEW_CHARS).min(self._chunk.len());
-		let chars = self._chunk.get(self._index..end);
+		let end = (self._index + PREVIEW_CHARS).min(self._line.len());
+		let chars = self._line.get(self._index..end);
 		
 		match chars {
 			Some(c) => c.iter().collect(),
@@ -35,17 +35,17 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Read the next line of the source text into memory.
 	pub(super) fn next_line(&mut self, origin: impl Fn() -> String) -> ParseResult
 	{
-		self._chunk_buffer.clear();
+		self._line_buffer.clear();
 
-		match self._reader.read_line(&mut self._chunk_buffer) {
+		match self._reader.read_line(&mut self._line_buffer) {
 			Ok(0) | Err(_) => return self.err_eof(origin),
 			Ok(_) => (),
 		}
 
-		self._chunk = self._chunk_buffer.chars().collect();
+		self._line = self._line_buffer.chars().collect();
 
-		if self._chunk.last() == Some(&'\n') {
-			self._chunk.pop();
+		if self._line.last() == Some(&'\n') {
+			self._line.pop();
 		}
 
 		self._index = 0;
@@ -355,8 +355,8 @@ mod test
 			)
 		],
 		|mut parser, _expected| {
-			for chunk in _expected {
-				assert_eq!( parser._chunk, chunk.chars().collect::<Vec<_>>() );
+			for line in _expected {
+				assert_eq!( parser._line, line.chars().collect::<Vec<_>>() );
 				let _ = parser.next_line(err_msg!());
 			}
 		});
