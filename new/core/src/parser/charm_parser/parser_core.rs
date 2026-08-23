@@ -64,6 +64,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 
 		self._line = self._line_buffer.chars().collect();
+
+		/* NOTE: We rely on `\n` as the indicator of a new line, so even the last line must have one */
+		if self._line.last() != Some(&'\n') {
+			self._line.push('\n');
+		}
+
 		self._index = 0;
 
 		Ok(())
@@ -228,7 +234,8 @@ mod test
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
 		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
 	}
 	
@@ -244,7 +251,8 @@ mod test
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
 		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
 	}
 
@@ -258,6 +266,7 @@ mod test
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('3') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
@@ -274,6 +283,7 @@ mod test
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
@@ -286,7 +296,7 @@ mod test
 			"Sup World",
 		],
 		|parser, case| {
-			assert_eq!( parser.preview(), case );
+			assert_eq!( parser.preview(), case.to_string() + "\n" );
 		});
 	}
 
@@ -294,7 +304,7 @@ mod test
 	{
 		test_expected(&[
 			(
-				"# Sup\n<!-- #SQUARK live! -->\n\nSup, World!\n",
+				"# Sup\n<!-- #SQUARK live! -->\n\nSup, World!",
 				["# Sup\n", "<!-- #SQUARK live! -->\n", "\n", "Sup, World!\n"],
 			)
 		],
@@ -380,7 +390,7 @@ mod test
 		],
 		|mut parser, _case| {
 			assert_eq!( parser.eat_spaces(), true );
-			assert_eq!( parser.current(), None );
+			assert_eq!( parser.current(), Some('\n') );
 		});
 	}
 
