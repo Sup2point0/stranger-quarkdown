@@ -4,6 +4,6 @@ mod parser;
 mod types;
 
 pub use types::{
-   SquarkupConfig,
-   FileData,
+	SquarkupConfig,
+	FileData,
 };
