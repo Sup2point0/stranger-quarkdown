@@ -1,7 +1,7 @@
-mod parser;
+mod charm_parser;
 mod parse_result;
 mod utils;
 
-pub use parser::*;
+pub use charm_parser::*;
 pub use parse_result::*;
 pub use utils::*;

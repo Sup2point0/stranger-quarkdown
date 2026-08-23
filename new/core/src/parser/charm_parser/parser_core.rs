@@ -15,7 +15,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// The current character in the source the parser is pointing to, or `None` if it is out of bounds.
 	pub(super) fn current(&self) -> Option<char>
 	{
-		self._chunk.get(self._index).map(|c| *c)
+		self._chunk.get(self._index).copied()
 	}
 
 	/// Get a preview of the upcoming text (for error messages).
