@@ -1,10 +1,8 @@
-use std::{
-	collections::HashMap,
-	fs::File,
-	io::{ BufRead, BufReader, Read },
-	iter,
-	assert_matches,
-};
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::{ BufRead, BufReader, Read };
+use std::iter;
+use std::assert_matches;
 
 use super::*;
 
@@ -222,7 +220,34 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 
-	#[test] fn test_preview()
+	#[test] fn advance_and_current()
+	{
+		let cursor = Cursor::new("012345");
+		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+
+		assert_eq!( parser.current(), Some('0') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('1') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('2') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('3') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('4') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('5') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
+	}
+
+	#[test] fn advance_and_peek()
+	{
+		let cursor = Cursor::new("012345");
+		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+
+		assert_eq!( parser.peek(), Some('1') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('2') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('3') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('4') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('5') );
+		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
+	}
+
+	#[test] fn preview()
 	{
 		test_exact(&[
 			"Sup",
@@ -233,7 +258,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_next_line()
+	#[test] fn next_line()
 	{
 		test_expected(&[
 			(
@@ -249,7 +274,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_fails()
+	#[test] fn eat_fails()
 	{
 		test_exact(&[
 			" ",
@@ -262,7 +287,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_matches()
+	#[test] fn eat_matches()
 	{
 		test_exact(&[
 			" ",
@@ -275,7 +300,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_caseless_matches()
+	#[test] fn eat_caseless_matches()
 	{
 		test_exact(&[
 			" ",
@@ -288,7 +313,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_spaces_fails()
+	#[test] fn eat_spaces_fails()
 	{
 		test_exact(&[
 			"nothing",
@@ -301,7 +326,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_spaces_stops()
+	#[test] fn eat_spaces_stops()
 	{
 		test_exact(&[
 			" stop",
@@ -314,7 +339,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_spaces_matches()
+	#[test] fn eat_spaces_matches()
 	{
 		test_exact(&[
 			" ",
@@ -327,7 +352,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_whitespace_stops()
+	#[test] fn eat_whitespace_stops()
 	{
 		test_exact(&[
 			" stop",
@@ -350,7 +375,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_whitespace_matches()
+	#[test] fn eat_whitespace_matches()
 	{
 		test_exact(&[
 			" ",
@@ -369,7 +394,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_parse_ident()
+	#[test] fn parse_ident()
 	{
 		test_exact(&[
 			"identifier",
