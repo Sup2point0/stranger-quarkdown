@@ -5,8 +5,11 @@ use std::{
 	str::Chars,
 };
 
-use super::{ BufferedParser, ParseResult, ParseError };
-use crate::{ log, SquarkupConfig, FileData };
+use super::*;
+use crate::{
+	log,
+	SquarkupConfig, FileData,
+};
 
 
 /// A parser for the 'squark charm' header of a file.
@@ -44,7 +47,7 @@ pub struct CharmParser<'l, Source: Read = File>
 /// The public parser interface.
 impl<'l, Source: Read> CharmParser<'l, Source>
 {
-	pub fn init(file: Source, config: &'l SquarkupConfig) -> Self
+	pub fn init(file: Source, config: &'l SquarkupConfig) -> Result<Self, ParseError>
 	{
 		let mut out = Self {
 			config,
@@ -55,9 +58,9 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			is_live: false,
 		};
 		
-		out.next_line();
+		out.next_line()?;
 		
-		out
+		Ok(out)
 	}
 	
 	/// Run the parser to completion, extracting the metadata from the squark charm (if present) of the target file.
@@ -97,7 +100,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
-		self.eat("#");
+		self.eat("#")?;
 		unimplemented!()
 	}
 	
@@ -154,21 +157,28 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	
 	fn eat(&mut self, chars: &str) -> ParseResult
 	{
-		// TODO
 		let mut chars = chars.chars();
 
 		loop {
-			let Some(required) = chars.next() else {
-				return Ok(())
+			let Some(expected) = chars.next() else {
+				return Ok(());
 			};
+
+			let Some(found) = self.current() else {
+				return Err(ParseError::NoMatch);
+			};
+
+			if found != expected {
+				return Err(ParseError::NoMatch);
+			}
 			
-			self.advance();
+			self.advance()?;
 		}
 	}
 	
 	fn eat_spaces(&mut self) -> ParseResult
 	{
-		while self.c == Some(' ') {
+		while self.current() == Some(' ') {
 			self.advance()?;
 		}
 
@@ -182,14 +192,42 @@ mod test
 {
 	use std::io::Cursor;
 
-	use crate::parser::CharmParser;
+	use crate::parser::*;
 	use crate::utils::*;
 
-	#[test] fn test_eat()
+	#[test] fn test_eat_matches()
 	{
-		let source = Cursor::new("test");
-		let mut parser = CharmParser::init(source, &TEST_CONFIG);
-		let r = parser.eat("test");
-		assert_eq!(r, Ok(()));
+		let sources = [
+			" ",
+			"test",
+			"testing testing",
+			"testing 123",
+		];
+
+		for source in sources {
+			let cursor = Cursor::new(source);
+			let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+
+			let r = parser.eat(source);
+			assert_eq!(r, Ok(()));
+		}
+	}
+
+	#[test] fn test_eat_fails()
+	{
+		let sources = [
+			" ",
+			"test",
+			"testing testing",
+			"testing 123",
+		];
+
+		for source in sources {
+			let cursor = Cursor::new(str!("FAIL") + source);
+			let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+
+			let r = parser.eat(source);
+			assert_eq!(r, Err(ParseError::NoMatch));
+		}
 	}
 }

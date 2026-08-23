@@ -1,9 +1,10 @@
 pub type ParseResult<T = ()> = Result<T, ParseError>;
 
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ParseError
 {
+	EndOfFile,
 	NoMatch,
 	FatalEnd,
 }
