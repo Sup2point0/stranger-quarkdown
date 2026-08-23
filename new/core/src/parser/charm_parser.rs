@@ -299,19 +299,22 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				// `-->` terminates
 				'-' if can_terminate && let Ok(_) = self.try_eat("-->") => break,
 
-				'\n' => {
-					can_terminate = true;
-					
-					// normalise newlines into spaces
-					self.eat_whitespace();
-					chars.push(' ');
-				},
+				_ => (),
+			}
 
-				_ => {
-					chars.push(c);
-					can_terminate = utils::is_whitespace(c);
-					self.advance(origin)?;
-				}
+			can_terminate = utils::is_whitespace(c);
+			
+			if utils::is_whitespace(c) {
+				chars.push(' ');
+			} else {
+				chars.push(c);
+			}
+
+			// normalise multiple whitespace into one ' '
+			if can_terminate {
+				self.eat_whitespace();
+			} else {
+				self.advance(origin)?
 			}
 		}
 
