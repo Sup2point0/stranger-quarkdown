@@ -101,7 +101,9 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
 		self.eat("#")?;
-		unimplemented!()
+		self.eat_spaces()?;
+
+		Ok(self._chunk[self._index..].iter().collect())
 	}
 	
 	fn parse_charm(&mut self) -> ParseResult
@@ -155,9 +157,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 	}
 	
-	fn eat(&mut self, chars: &str) -> ParseResult
+	/// Consume exactly `target`.
+	fn eat(&mut self, target: &str) -> ParseResult
 	{
-		let mut chars = chars.chars();
+		let mut chars = target.chars();
 
 		loop {
 			let Some(expected) = chars.next() else {
@@ -176,10 +179,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 	}
 	
+	/// Consume 0 or more space characters.
 	fn eat_spaces(&mut self) -> ParseResult
 	{
 		while self.current() == Some(' ') {
-			self.advance()?;
+			let r = self.advance();
+			debug_assert!(r.is_ok());
 		}
 
 		Ok(())
@@ -195,39 +200,80 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 
-	#[test] fn test_eat_matches()
+	fn parse_cases(cases: &[&str], test: impl Fn(CharmParser<Cursor<&&str>>, &str))
 	{
-		let sources = [
-			" ",
-			"test",
-			"testing testing",
-			"testing 123",
-		];
+		for case in cases {
+			let cursor = Cursor::new(case);
+			let parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
-		for source in sources {
-			let cursor = Cursor::new(source);
-			let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
-
-			let r = parser.eat(source);
-			assert_eq!(r, Ok(()));
+			test(parser, case)
 		}
 	}
 
-	#[test] fn test_eat_fails()
-	{
-		let sources = [
+	#[test] fn test_parse_heading_matches() {
+		parse_cases(&[
+			"#",
+			"# ",
+			"# Sup",
+			"# Suppety Sup",
+		],
+		|mut parser, case| {
+			let r = parser.parse_heading();
+			assert_eq!(r, Ok(case.chars().skip(2).collect()));
+		});
+	}
+
+	#[test] fn test_parse_heading_fails() {
+		parse_cases(&[
+			"",
+			" ",
+			"Sup",
+			"Don't Do It",
+		],
+		|mut parser, _case| {
+			let r = parser.parse_heading();
+			assert_eq!(r, Err(ParseError::NoMatch))
+		});
+	}
+
+	#[test] fn test_eat_spaces_matches() {
+		parse_cases(&[
+			" ",
+			"  ",
+			"        ",
+			" stop",
+			" stop ",
+			"nothing",
+		],
+		|mut parser, case| {
+			let r = parser.eat(case);
+			assert_eq!(r, Ok(()));
+		});
+	}
+
+	#[test] fn test_eat_matches() {
+		parse_cases(&[
 			" ",
 			"test",
 			"testing testing",
 			"testing 123",
-		];
+		],
+		|mut parser, case| {
+			let r = parser.eat(case);
+			assert_eq!(r, Ok(()));
+		});
+	}
 
-		for source in sources {
-			let cursor = Cursor::new(str!("FAIL") + source);
-			let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
-
-			let r = parser.eat(source);
+	#[test] fn test_eat_fails() {
+		parse_cases(&[
+			" ",
+			"test",
+			"testing testing",
+			"testing 123",
+		],
+		|mut parser, _case| {
+			let r = parser.eat("FAIL");
 			assert_eq!(r, Err(ParseError::NoMatch));
-		}
+		});
 	}
 }
