@@ -28,6 +28,9 @@ pub struct CharmParser<'l, Source: Read = File>
 {
 	/// Settings to use when resolving e.g. filepaths.
 	config: &'l SquarkupConfig,
+
+	/// Non-crashing errors to report to the user.
+	errors: Vec<ParseError>,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
 	///
@@ -67,6 +70,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	{
 		let mut out = Self {
 			config,
+			errors: vec![],
 			is_live: false,
 			is_eof: false,
 			_reader: BufReader::new(file),
@@ -160,18 +164,29 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_flags(&mut self) -> ParseResult<Vec<String>>
 	{
+		let origin = err_msg!("parsing charm squark flags");
+
 		let mut flags = vec![];
 
-		loop {
-			self.eat_spaces();
-			if self.current() == None { break; }
+		self.eat_spaces();
 
+		while let Some(c) = self.current()
+			&& c != '\n'
+		{
 			let ident = self.parse_ident()?;
 
 			if self.current() == Some('!') {
 				flags.push(ident);
-				let _ = self.advance(err_msg!("parsing charm squark flags"));
 			}
+			else {
+				self.errors.push(ParseError::MissingInput {
+					origin: origin(),
+					expected: format!("{ident}!"),
+					actual: ident,
+				})
+			}
+			
+			self.advance(origin)?;
 		}
 
 		Ok(flags)
@@ -318,12 +333,12 @@ mod test
 	#[test] fn parse_flags_fails()
 	{
 		test_expected(&[
-			("live! ignore", vec![str!("live")]),
-			("live!\nignore", vec![str!("live")]),
-			("live! \nignore", vec![str!("live")]),
-			("live!\n ignore", vec![str!("live")]),
-			("one! ignore two!", vec![str!("one"), str!("two")]),
-			("kebab-case! ignore-me snake_case! ignore_me", vec![str!("kebab-case"), str!("snake_case")]),
+			("live! ignore\n", vec![str!("live")]),
+			("live!\nignore\n", vec![str!("live")]),
+			("live! \nignore\n", vec![str!("live")]),
+			("live!\n ignore\n", vec![str!("live")]),
+			("one! ignore two!\n", vec![str!("one"), str!("two")]),
+			("kebab-case! ignore-me snake_case! ignore_me\n", vec![str!("kebab-case"), str!("snake_case")]),
 		],
 		|mut parser, expected_flags| {
 			let flags = parser.parse_flags().unwrap();

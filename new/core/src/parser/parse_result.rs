@@ -17,12 +17,19 @@ pub enum ParseError
 		origin: String,
 	},
 
+	/// The parser did not find input it expected (required).
+	MissingInput {
+		origin: String,
+		expected: String,
+		actual: String,
+	},
+
 	/// Input did not match what was expected (required) by the context.
 	UnexpectedInput {
 		origin: String,
 		expected: String,
 		actual: String,
-	}
+	},
 }
 
 impl std::error::Error for ParseError {}
