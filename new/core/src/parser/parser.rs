@@ -9,7 +9,7 @@ use super::*;
 use crate::{
 	log,
 	FileData, SquarkupConfig,
-	types::CharmField,
+	types::SquarkValue,
 	str,
 };
 
@@ -138,7 +138,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(FileData::init(flags, fields))
 	}
 
-	/// Look for `<!-- #SQUARK live!`, and if found set `.is_live: true`.
+	/// Look for `<!-- #SQUARK live!`, and if found, set `.is_live: true`.
 	fn parse_squark_live(&mut self) -> ParseResult
 	{
 		self.eat("<!--")?;
@@ -150,6 +150,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(())
 	}
 
+	/// Parse the flags in the charm squark and return their identifiers.
+	/// 
+	/// ```ts
+	/// <!-- #SQUARK live! feat! dev! -->
+	///                    ^^^^  ^^^
+	/// ```
 	fn parse_flags(&mut self) -> ParseResult<Vec<String>>
 	{
 		let mut flags = vec![];
@@ -169,7 +175,44 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(flags)
 	}
 
-	fn err(&self) -> ParseError
+	fn parse_fields(&mut self) -> ParseResult<HashMap<String, SquarkValue>>
+	{
+		let mut data = HashMap::new();
+
+		loop {
+			self.eat_whitespace();
+
+			match self.current() {
+				// done
+				Some('-') => {
+					self.eat("-->")?;
+					break;
+				},
+
+				// another field
+				Some('|') => (),
+
+				// bad
+				Some(_) => Err(ParseError::MissingInput {
+					expected: "`|` to start field in charm squark",
+					actual: self.preview(),
+				})?,
+
+				None => self.advance(err_msg!("Parsing charm squark fields"))?,  // force error
+			}
+
+			let (key, value) = self.parse_field()?;
+			data.insert(key, value);
+		}
+
+		Ok(data)
+	}
+
+	fn parse_field(&mut self) -> ParseResult<(String, SquarkValue)>
+	{
+		unimplemented!()
+	}
+
 	fn err(&self, cause: impl FnOnce() -> String) -> ParseError
 	{
 		if self.is_live {
