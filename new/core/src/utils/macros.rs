@@ -7,6 +7,15 @@ macro_rules! str {
 
 pub(crate) use str;
 
+#[macro_export]
+macro_rules! a_str {
+	($t:expr) => {
+		|| String::from($t)
+	};
+}
+
+pub(crate) use a_str;
+
 
 #[macro_export]
 macro_rules! dir {

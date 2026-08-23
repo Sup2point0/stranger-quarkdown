@@ -41,11 +41,12 @@ impl std::fmt::Display for ParseError
 {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
 	{
-		match self {
-			ParseError::FatalEnd { when: cause }
+		match self
+		{
+			Self::FatalEnd { when: cause }
 				=> write!(f, "unexpected end of input while {cause}!"),
 			
-			ParseError::UnexpectedInput { when: origin, expected, actual } =>
+			Self::UnexpectedInput { when: origin, expected, actual } =>
 				write!(f, "while {origin}: expected {expected}, but found {actual}"),
 			
 			_ => write!(f, "leaked internal error!")
