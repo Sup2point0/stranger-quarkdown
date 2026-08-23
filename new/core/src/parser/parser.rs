@@ -3,6 +3,7 @@ use std::{
 	fs::File,
 	io::{ BufRead, BufReader, Read },
 	iter,
+	assert_matches,
 };
 
 use super::*;
@@ -46,7 +47,7 @@ pub struct CharmParser<'l, Source: Read = File>
 	_index: usize,
 
 	/* NOTE:
-		Storing a `Chars` iterator over `_chunk_buffer` caused lifetime issues =(
+		Storing a `Chars` iterator over `_chunk_buffer` origind lifetime issues =(
 		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
 	*/
 
@@ -85,9 +86,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		match self._parse()
 		{
 			Ok(r) => Some(r),
-			
-			Err(ParseError::NoMatch) | Err(ParseError::NotLive) => None,
-			
+			Err(ParseError::NO_MATCH) => None,
 			Err(e) => {
 				log::err(e);
 				None
@@ -122,7 +121,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Parse the `# Heading` element and extract the cleaned heading text.
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
-		self.eat("#")?;
+		self.eat("# ", err_msg!("Expected `# ` to start heading"))?;
 		self.eat_spaces();
 
 		Ok(self._chunk[self._index..].iter().collect())
@@ -141,8 +140,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Look for `<!-- #SQUARK live!`, and if found, set `.is_live: true`.
 	fn parse_squark_live(&mut self) -> ParseResult
 	{
-		self.eat("<!--")?;
-		self.eat_whitespace(); self.eat("#")?;
+		self.try_eat("<!--")?;
+		self.eat_whitespace(); self.try_eat("#")?;
 		self.eat_spaces(); self.eat_caseless("SQUARK")?;
 		self.eat_spaces(); self.eat_caseless("live!")?;
 
@@ -175,6 +174,16 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(flags)
 	}
 
+	/// Parse the fields in the charm squark and return a hashmap of the data.
+	/// 
+	/// ```ts
+	/// <!-- #SQUARK live!
+	/// | field = value
+	///   ^^^^^   ^^^^^
+	/// | fields = value / value / value
+	///   ^^^^^^   ^^^^^   ^^^^^   ^^^^^
+	/// -->
+	/// ```
 	fn parse_fields(&mut self) -> ParseResult<HashMap<String, SquarkValue>>
 	{
 		let mut data = HashMap::new();
@@ -185,7 +194,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			match self.current() {
 				// done
 				Some('-') => {
-					self.eat("-->")?;
+					self.eat("-->", err_msg!("Expected `-->` to terminate charm squark's comment"))?;
 					break;
 				},
 
@@ -193,8 +202,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				Some('|') => (),
 
 				// bad
-				Some(_) => Err(ParseError::MissingInput {
-					expected: "`|` to start field in charm squark",
+				Some(_) => Err(ParseError::UnexpectedInput {
+					expected: str!("`|` to start field in charm squark"),
 					actual: self.preview(),
 				})?,
 
@@ -208,18 +217,35 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(data)
 	}
 
+	/// Parse a single field and return its key and value.
+	/// 
+	/// ```ts
+	/// <!-- #SQUARK live!
+	/// | field = value
+	/// | field = value
+	///   ^^^^^   ^^^^^
+	/// | field = value
+	/// -->
+	/// ```
 	fn parse_field(&mut self) -> ParseResult<(String, SquarkValue)>
 	{
+		// self.eat("|", "")?;
+
 		unimplemented!()
 	}
 
-	fn err(&self, cause: impl FnOnce() -> String) -> ParseError
+	/// Return the appropriate `Err(ParseError)` for an unexpected end of file.
+	/// 
+	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
+	/// 
+	/// If not, then Squarkdown can just ignore the file.
+	fn err_eof(&self, origin: impl Fn() -> String) -> ParseResult
 	{
-		if self.is_live {
-			ParseError::FatalEnd { cause: cause() }
+		Err(if self.is_live {
+			ParseError::FatalEnd { origin: origin() }
 		} else {
-			ParseError::NotLive
-		}
+			ParseError::NO_MATCH
+		})
 	}
 }
 
@@ -247,12 +273,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 
 	/// Read the next line of the source text into memory.
-	fn next_line(&mut self, cause: impl FnOnce() -> String) -> ParseResult
+	fn next_line(&mut self, origin: impl Fn() -> String) -> ParseResult
 	{
 		self._chunk_buffer.clear();
 
 		match self._reader.read_line(&mut self._chunk_buffer) {
-			Ok(0) | Err(_) => return Err(self.err(cause)),
+			Ok(0) | Err(_) => return self.err_eof(origin),
 			Ok(_) => (),
 		}
 
@@ -270,10 +296,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Proceed to the next character in the source text.
 	/// 
 	/// If we're at the end of the current line, this reads in a new line.
-	fn advance(&mut self, cause: impl FnOnce() -> String) -> ParseResult
+	fn advance(&mut self, origin: impl Fn() -> String) -> ParseResult
 	{
 		if self.current() == None {
-			self.next_line(cause)
+			self.next_line(origin)
 		}
 		else {
 			self._index += 1;
@@ -281,28 +307,43 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 	}
 	
-	/// Consume exactly `target`.
-	fn eat(&mut self, target: &str) -> ParseResult
+	/// Consume exactly `target`, erroring on failure.
+	fn eat(&mut self, target: &str, origin: impl Fn() -> String) -> ParseResult
 	{
-		let mut chars = target.chars();
-
-		loop {
-			let Some(expected) = chars.next() else {
-				return Ok(());
-			};
-
-			let Some(found) = self.current() else {
-				return Err(ParseError::NoMatch);
-			};
-
-			if found != expected {
-				return Err(ParseError::NoMatch);
+		for expected in target.chars()
+		{
+			match self.current() {
+				Some(c) => {
+					if c != expected {
+						return Err(ParseError::UnexpectedInput {
+							expected: target.to_string(),
+							actual: self.preview(),
+						});
+					}
+				}
+				None => return self.err_eof(origin),
 			}
-			
-			self.advance(err_msg!("consuming {target}"))?;
+			self.advance(&origin)?;
 		}
+
+		Ok(())
 	}
 	
+	/// Attempt to consume exactly `target`, returning `NO_MATCH` on failure.
+	fn try_eat(&mut self, target: &str) -> ParseResult
+	{
+		for expected in target.chars()
+		{
+			if self.current() != Some(expected) {
+				return Err(ParseError::NO_MATCH);
+			}
+			self.advance(err_msg!())?;
+		}
+
+		Ok(())
+	}
+	
+	// FIXME split
 	/// Consume `target`, without considering casing for letters.
 	fn eat_caseless(&mut self, target: &str) -> ParseResult
 	{
@@ -315,11 +356,11 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			};
 
 			let Some(found) = self.current() else {
-				return Err(ParseError::NoMatch);
+				return Err(ParseError::NO_MATCH);
 			};
 
 			if found.to_ascii_lowercase() != expected {
-				return Err(ParseError::NoMatch);
+				return Err(ParseError::NO_MATCH);
 			}
 			
 			self.advance(err_msg!("Consuming {target}"))?;
@@ -386,7 +427,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 #[cfg(test)]
 mod test
 {
-	use std::io::Cursor;
+	use std::assert_matches;
+use std::io::Cursor;
 
 	use crate::parser::*;
 	use crate::utils::*;
@@ -448,7 +490,7 @@ mod test
 			"Don't Do It",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.parse_heading(), Err(ParseError::NoMatch) );
+			assert_matches!( parser.parse_heading(), Err(ParseError::UnexpectedInput{..}) );
 		});
 	}
 
@@ -584,21 +626,6 @@ mod test
 		});
 	}
 
-	#[test] fn test_eat_whitespace()
-	{
-		test_exact(&[
-			" ",
-			"  ",
-			"        ",
-			" stop",
-			" stop ",
-			"nothing",
-		],
-		|mut parser, case| {
-			assert_eq!( parser.eat(case), Ok(() ))
-		});
-	}
-
 	#[test] fn test_eat_caseless_matches()
 	{
 		test_exact(&[
@@ -621,7 +648,7 @@ mod test
 			"testing 123",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat(case), Ok(()) );
+			assert_eq!( parser.eat(case, err_msg!()), Ok(()) );
 		});
 	}
 
@@ -634,7 +661,7 @@ mod test
 			"testing 123",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.eat("FAIL"), Err(ParseError::NoMatch) );
+			assert_matches!( parser.eat("FAIL", err_msg!()), Err(ParseError::UnexpectedInput{..}) );
 		});
 	}
 
