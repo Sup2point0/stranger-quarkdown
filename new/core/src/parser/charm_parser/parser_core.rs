@@ -190,7 +190,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		let mut chars = vec![];
 
 		while let Some(c) = self.current()
-			&& matches!(c, 'a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')
+			&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
 		{
 			chars.push(c);
 			let _ = self.advance(err_msg!("parsing an identifier"));
