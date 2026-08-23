@@ -5,10 +5,10 @@
 
 
 #[macro_export]
-macro_rules! err_msg
+macro_rules! when
 {
 	() => {
-		|| String::from("INTERNAL INVARIANT BROKEN")
+		|| String::from("INTERNAL INVARIANT HAS BEEN BROKEN")
 	};
 
 	($msg:expr $(, $args:expr)* $(,)?) => {
@@ -16,7 +16,7 @@ macro_rules! err_msg
 	}
 }
 
-pub(super) use err_msg;
+pub(super) use when;
 
 
 #[cfg(test)]

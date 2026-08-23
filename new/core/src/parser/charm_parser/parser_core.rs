@@ -45,16 +45,16 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Read the next line of the source text into memory.
 	/// 
 	/// Errors if the parser has already reached the end of the source, or if reading from the buffer fails.
-	pub(super) fn next_line(&mut self, origin: impl Fn() -> String) -> ParseResult
+	pub(super) fn next_line(&mut self, when: impl Fn() -> String) -> ParseResult
 	{
 		if self.is_eof {
-			return self.err_eof(origin);
+			return self.err_eof(when);
 		}
 
 		self._line_buffer.clear();
 
 		match self._reader.read_line(&mut self._line_buffer) {
-			Err(_) => return self.err_eof(origin),
+			Err(_) => return self.err_eof(when),
 			Ok(0) => self.is_eof = true,
 			Ok(_) => (),
 		}
@@ -74,34 +74,38 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Proceed to the next character in the source text, and read in a new line afterwards if necessary.
 	/// 
 	/// If this function is called when `self.is_eof: true`, this returns an end-of-input error.
-	pub(super) fn advance(&mut self, origin: impl Fn() -> String) -> ParseResult
+	pub(super) fn advance(&mut self, when: impl Fn() -> String) -> ParseResult
 	{
 		self._index += 1;
 
 		if self.is_past_end_of_line() {
-			self.next_line(origin)
+			self.next_line(when)
 		} else {
 			Ok(())
 		}
 	}
 	
 	/// Consume exactly `target`, erroring on failure.
-	pub(super) fn eat(&mut self, target: &str, origin: impl Fn() -> String) -> ParseResult
+	pub(super) fn eat(&mut self,
+		target: &str,
+		to: impl Fn() -> String,
+		when: impl Fn() -> String,
+	) -> ParseResult
 	{
 		for expected in target.chars()
 		{
 			match self.current() {
 				Some(c) if c != expected => {
 					return Err(ParseError::UnexpectedInput {
-						origin: origin(),
-						expected: target.to_string(),
+						when: when(),
+						expected: format!("{} {}", target, to()),
 						actual: self.preview(),
 					});
 				}
-				None => return self.err_eof(origin),
+				None => return self.err_eof(when),
 				_ => (),
 			}
-			self.advance(&origin)?;
+			self.advance(&when)?;
 		}
 
 		Ok(())
@@ -118,14 +122,18 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				self._index = init;
 				return Err(ParseError::NO_MATCH);
 			}
-			self.advance(err_msg!())?;
+			self.advance(when!())?;
 		}
 
 		Ok(())
 	}
 	
 	/// Consume `target` disregarding casing, erroring on failure.
-	pub(super) fn eat_caseless(&mut self, target: &str, origin: impl Fn() -> String) -> ParseResult
+	pub(super) fn eat_caseless(&mut self,
+		target: &str,
+		to: impl Fn() -> String,
+		when: impl Fn() -> String,
+	) -> ParseResult
 	{
 		for mut expected in target.chars()
 		{
@@ -134,16 +142,16 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			match self.current() {
 				Some(c) if c.to_ascii_lowercase() != expected => {
 					return Err(ParseError::UnexpectedInput {
-						origin: origin(),
-						expected: target.to_string(),
+						when: when(),
+						expected: format!("{} {}", target, to()),
 						actual: self.preview(),
 					});
 				}
-				None => return self.err_eof(origin),
+				None => return self.err_eof(when),
 				_ => (),
 			};
 			
-			self.advance(&origin)?;
+			self.advance(&when)?;
 		}
 
 		Ok(())
@@ -159,7 +167,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
 				return Err(ParseError::NO_MATCH);
 			}
-			self.advance(err_msg!())?;
+			self.advance(when!())?;
 		}
 
 		Ok(())
@@ -171,7 +179,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		let mut did_consume = false;
 
 		while self.current() == Some(' ') {
-			let _ = self.advance(err_msg!());  // safe due to loop check
+			let _ = self.advance(when!());  // safe due to loop check
 			did_consume = true;
 		}
 
@@ -186,7 +194,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		while let Some(c) = self.current()
 			&& matches!(c, ' ' | '\t' | '\n')
 		{
-			let _ = self.advance(err_msg!());  // safe due to loop check
+			let _ = self.advance(when!());  // safe due to loop check
 			did_consume = true;
 		}
 
@@ -202,7 +210,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
 		{
 			chars.push(c);
-			let _ = self.advance(err_msg!("parsing an identifier"));
+			let _ = self.advance(when!("parsing an identifier"));
 		}
 
 		Ok(chars.into_iter().collect())
@@ -225,14 +233,14 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('2') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('2') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
 	}
 	
 	#[test] fn advance_and_current_multi_line()
@@ -241,15 +249,15 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('2') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('2') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
 	}
 
 	#[test] fn advance_and_peek_single_line()
@@ -258,14 +266,14 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('3') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('3') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
 	}
 
 	#[test] fn advance_and_peek_multi_line()
@@ -274,15 +282,15 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
 	}
 
 	#[test] fn preview()
@@ -307,7 +315,7 @@ mod test
 		|mut parser, _expected| {
 			for line in _expected {
 				assert_eq!( parser._line, line.chars().collect::<Vec<_>>() );
-				let _ = parser.next_line(err_msg!());
+				let _ = parser.next_line(when!());
 			}
 		});
 	}
@@ -321,7 +329,7 @@ mod test
 			"testing 123",
 		],
 		|mut parser, _case| {
-			assert_matches!( parser.eat("FAIL", err_msg!()), Err(ParseError::UnexpectedInput{..}) );
+			assert_matches!( parser.eat("FAIL", when!(), when!()), Err(ParseError::UnexpectedInput{..}) );
 		});
 	}
 
@@ -334,7 +342,7 @@ mod test
 			"testing 123",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat(case, err_msg!()), Ok(()) );
+			assert_eq!( parser.eat(case, when!(), when!()), Ok(()) );
 		});
 	}
 
@@ -347,7 +355,7 @@ mod test
 			"tEsTiNg 123",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase(), err_msg!()), Ok(()) );
+			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase(), when!(), when!()), Ok(()) );
 		});
 	}
 
@@ -407,7 +415,7 @@ mod test
 			assert_eq!( parser.eat_whitespace(), true );
 
 			if parser.current() != Some('s') {
-				assert_eq!( parser.advance(err_msg!()), Ok(()) );
+				assert_eq!( parser.advance(when!()), Ok(()) );
 				assert_eq!( parser.current(), Some('s') );
 			}
 		});

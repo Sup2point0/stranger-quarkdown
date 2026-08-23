@@ -75,7 +75,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			_line_buffer: String::new(),
 		};
 		
-		out.next_line(err_msg!("initialising parser"))?;
+		out.next_line(when!("initialising parser"))?;
 		
 		Ok(out)
 	}
@@ -121,7 +121,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Parse the `# Heading` element and extract the cleaned heading text.
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
-		self.eat("# ", err_msg!("parsing heading"))?;
+		self.eat("# ", when!("parsing heading"))?;
 		self.eat_spaces();
 
 		let heading = self._line[self._index..].iter().collect();
@@ -160,7 +160,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_flags(&mut self) -> ParseResult<Vec<String>>
 	{
-		let origin = err_msg!("parsing charm squark flags");
+		let origin = when!("parsing charm squark flags");
 
 		let mut flags = vec![];
 
@@ -176,7 +176,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			}
 			else {
 				self.errors.push(ParseError::MissingInput {
-					origin: origin(),
+					when: origin(),
 					expected: format!("{ident}!"),
 					actual: ident,
 				})
@@ -200,7 +200,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_fields(&mut self) -> ParseResult<HashMap<String, FieldValues>>
 	{
-		let origin = err_msg!("parsing squark charm fields");
+		let origin = when!("parsing squark charm fields");
 
 		let mut data = HashMap::new();
 
@@ -209,17 +209,14 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 			match self.current() {
 				// done
-				Some('-') => {
-					self.eat("-->", origin)?;
-					break;
-				},
+				Some('-') => break,
 
 				// another field
 				Some('|') => (),
 
 				// bad
 				Some(_) => Err(ParseError::UnexpectedInput {
-					origin: str!("parsing squark charm fields"),
+					when: str!("parsing squark charm fields"),
 					expected: str!("`|` to start field in charm squark"),
 					actual: self.preview(),
 				})?,
@@ -230,6 +227,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			let (key, value) = self.parse_field()?;
 			data.insert(key, value);
 		}
+		
+		self.eat("-->", origin)?;
 
 		Ok(data)
 	}
@@ -246,7 +245,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_field(&mut self) -> ParseResult<(String, FieldValues)>
 	{
-		let origin = err_msg!("parsing charm squark field");
+		let origin = when!("parsing charm squark field");
 
 		self.eat("|", origin)?;
 		self.eat_whitespace();
@@ -277,7 +276,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_values(&mut self) -> ParseResult<FieldValues>
 	{
-		let origin = err_msg!("parsing values in charm squark field");
+		let origin = when!("parsing values in charm squark field");
 
 		/// All values collected so far.
 		let mut values = tiny_vec!([String; 4]);
@@ -297,7 +296,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				'/' if can_terminate && utils::is_whitespace(self.peek()
 					.expect("safe from newline termination")) =>
 				{
-					let _ = self.advance(err_msg!());  // safe from if check
+					let _ = self.advance(when!());  // safe from if check
 					self.eat_whitespace();
 
 					let trimmed = utils::trim_end(value.clone());
@@ -349,7 +348,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	fn err_eof(&self, origin: impl Fn() -> String) -> ParseResult
 	{
 		Err(if self.is_live {
-			ParseError::FatalEnd { origin: origin() }
+			ParseError::FatalEnd { when: origin() }
 		} else {
 			ParseError::NO_MATCH
 		})

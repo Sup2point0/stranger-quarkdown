@@ -17,19 +17,19 @@ pub enum ParseError
 	/// The parser unexpectedly reached the end of its source.
 	FatalEnd {
 		/// What was the parser doing when it threw this error?
-		origin: String,
+		when: String,
 	},
 
 	/// The parser did not find input it expected (required).
 	MissingInput {
-		origin: String,
+		when: String,
 		expected: String,
 		actual: String,
 	},
 
 	/// Input did not match what was expected (required) by the context.
 	UnexpectedInput {
-		origin: String,
+		when: String,
 		expected: String,
 		actual: String,
 	},
@@ -42,11 +42,11 @@ impl std::fmt::Display for ParseError
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
 	{
 		match self {
-			ParseError::FatalEnd { origin: cause }
+			ParseError::FatalEnd { when: cause }
 				=> write!(f, "unexpected end of input while {cause}!"),
 			
-			ParseError::UnexpectedInput { origin, expected, actual } =>
-				write!(f, "expected {expected}, but found {actual}, while {origin}"),
+			ParseError::UnexpectedInput { when: origin, expected, actual } =>
+				write!(f, "while {origin}: expected {expected}, but found {actual}"),
 			
 			_ => write!(f, "leaked internal error!")
 		}
