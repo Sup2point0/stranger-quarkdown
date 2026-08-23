@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 #![allow(unused_doc_comments)]
 
 pub mod parser;

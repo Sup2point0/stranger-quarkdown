@@ -202,15 +202,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	{
 		let mut data = HashMap::new();
 
-		loop {
-			self.eat_whitespace();
+		self.eat_whitespace();
 
-			if let Some('-') = self.current() {
-				break;
-			}
-
+		while self.current() != Some('-') {
 			let (key, value) = self.parse_field()?;
 			data.insert(key, value);
+			self.eat_whitespace();
 		}
 		
 		self.eat("-->", to!("terminate squark charm"), when!("parsing squark charm fields"))?;
@@ -297,7 +294,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				'|' if can_terminate => break,
 
 				// `-->` terminates
-				'-' if can_terminate && let Ok(_) = self.try_eat("-->") => break,
+				'-' if can_terminate && self.preview().starts_with("-->") => break,
 
 				_ => {
 					can_terminate = utils::is_whitespace(c);
@@ -347,6 +344,7 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 	
+	use std::io::Cursor;
 	use std::assert_matches;
 
 	#[test] fn parse_heading_matches_single_line()
@@ -418,6 +416,30 @@ mod test
 				assert_eq!( found, *expected );
 			}
 		});
+	}
+
+	#[test] fn parse_fields_usual()
+	{
+		let cursor = Cursor::new("
+| field = value
+| fields = one / two / three
+-->
+		".trim());
+
+		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let data = parser.parse_fields().unwrap();
+
+		assert!( data.contains_key("field") );
+		let field = &mut data["field"].iter();
+		assert_eq!( field.next(), Some(&str!("value")) );
+		assert_eq!( field.next(), None );
+
+		assert!( data.contains_key("fields") );
+		let field = &mut data["fields"].iter();
+		assert_eq!( field.next(), Some(&str!("one")) );
+		assert_eq!( field.next(), Some(&str!("two")) );
+		assert_eq!( field.next(), Some(&str!("three")) );
+		assert_eq!( field.next(), None );
 	}
 
 	#[test] fn parse_field()
