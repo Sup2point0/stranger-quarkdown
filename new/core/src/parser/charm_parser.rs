@@ -2,13 +2,7 @@
 mod parser_core;
 
 
-use tinyvec::TinyVec;
-
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::{ BufRead, BufReader, Read };
-use std::iter;
-use std::assert_matches;
+use tinyvec::{ TinyVec, tiny_vec };
 
 use super::*;
 use crate::{
@@ -17,10 +11,14 @@ use crate::{
 	str,
 };
 
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::{ BufRead, BufReader, Read };
+use std::iter;
+use std::assert_matches;
 
-type Recoverable = ParseResult;
 
-type FieldValues = TinyVec<[String; 1]>;
+pub type FieldValues = TinyVec<[String; 4]>;
 
 
 /// A parser for the charm squark of a file.
@@ -265,7 +263,9 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		unimplemented!()
 	}
 
-	/// Parse a single value until either a ` / ` separator, or `|` delimiter at the start of a line is reached.
+	/// Parse 1 or more values in a charm squark field.
+	/// 
+	/// Stops when it reaches either either a `|` field separator or `-->` terminator.
 	/// 
 	/// ```ts
 	/// <!-- #SQUARK live!
@@ -276,11 +276,16 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// | field = value
 	/// -->
 	/// ```
-	fn parse_value(&mut self) -> ParseResult<String>
+	fn parse_values(&mut self) -> ParseResult<FieldValues>
 	{
-		let origin = err_msg!("parsing value in charm squark field");
+		let origin = err_msg!("parsing values in charm squark field");
 
-		let mut chars = vec![];
+		/// All values collected so far.
+		let mut values = tiny_vec!([String; 4]);
+
+		/// The current value being built.
+		let mut value = str!("");
+
 		let mut can_terminate = false;
 
 		self.eat_whitespace();
@@ -288,38 +293,44 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		while let Some(c) = self.current()
 		{
 			match c {
-				// `\s/ ` terminates
-				'/' if can_terminate && utils::is_whitespace(
-					self.peek().expect("parser lines should be newline terminated")
-				) => break,
+				// ` / ` flushes current value
+				'/' if can_terminate && self.eat_whitespace() => {
+					values.push(utils::trim_end(value.clone()));
+					value.clear();
+					can_terminate = false;
+					continue;
+				},
 
-				// ^`|` terminates
+				// `|` terminates
 				'|' if can_terminate => break,
 
 				// `-->` terminates
 				'-' if can_terminate && let Ok(_) = self.try_eat("-->") => break,
 
-				_ => (),
-			}
+				_ => {
+					can_terminate = utils::is_whitespace(c);
+					
+					if utils::is_whitespace(c) {
+						value.push(' ');
+					} else {
+						value.push(c);
+					}
 
-			can_terminate = utils::is_whitespace(c);
-			
-			if utils::is_whitespace(c) {
-				chars.push(' ');
-			} else {
-				chars.push(c);
-			}
-
-			// normalise multiple whitespace into one ' '
-			if can_terminate {
-				self.eat_whitespace();
-			} else {
-				self.advance(origin)?
+					// normalise multiple whitespace into one ' '
+					if can_terminate {
+						self.eat_whitespace();
+					} else {
+						self.advance(origin)?
+					}
+				},
 			}
 		}
+		
+		if !value.is_empty() {
+			values.push(utils::trim_end(value));
+		}
 
-		let value = chars.into_iter().collect::<String>();
-		Ok(utils::trim_end(value))
+		Ok(values)
 	}
 
 	/// Return the appropriate `Err(ParseError)` for an unexpected end of file.
@@ -343,6 +354,8 @@ mod test
 {
 	use std::assert_matches;
 	use std::io::Cursor;
+
+	use tinyvec::tiny_vec;
 
 	use crate::parser::*;
 	use crate::utils::*;
@@ -418,19 +431,19 @@ mod test
 		});
 	}
 
-	#[test] fn parse_value_usual()
+	#[test] fn parse_values_single_usual()
 	{
 		test_exact(&[
 			"success\n| field = value",
-			"success / value",
 			"success\n-->",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.parse_value(), Ok(str!("success")) );
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!("success")) );
 		});
 	}
 
-	#[test] fn parse_value_multi_line()
+	#[test] fn parse_values_single_multi_line()
 	{
 		test_exact(&[
 			"suc\ncess |",
@@ -439,11 +452,12 @@ mod test
 			"suc \n cess |",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.parse_value(), Ok(str!("suc cess")) );
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!("suc cess")) );
 		});
 	}
 
-	#[test] fn parse_value_weird()
+	#[test] fn parse_values_single_weird()
 	{
 		test_exact(&[
 			"success\n  | field = value",
@@ -451,7 +465,8 @@ mod test
 			"success \n  | field = value",
 		],
 		|mut parser, _case| {
-			assert_eq!( parser.parse_value(), Ok(str!("success")) );
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!("success")) );
 		});
 	}
 }
