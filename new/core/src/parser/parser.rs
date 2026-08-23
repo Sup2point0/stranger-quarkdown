@@ -12,9 +12,10 @@ use crate::{
 };
 
 
-/// A parser for the 'squark charm' header of a file.
+/// A parser for the charm squark of a file.
 pub struct CharmParser<'l, Source: Read = File>
 {
+	/// Settings to use when resolving e.g. filepaths.
 	config: &'l SquarkupConfig,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
@@ -47,6 +48,7 @@ pub struct CharmParser<'l, Source: Read = File>
 /// The public parser interface.
 impl<'l, Source: Read> CharmParser<'l, Source>
 {
+	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
 	pub fn init(file: Source, config: &'l SquarkupConfig) -> Result<Self, ParseError>
 	{
 		let mut out = Self {
@@ -103,6 +105,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(file_data)
 	}
 	
+	/// Parse the `# Heading` element and extract the cleaned heading text.
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
 		self.eat("#")?;
@@ -111,6 +114,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(self._chunk[self._index..].iter().collect())
 	}
 	
+	/// Parse the `<!-- #SQUARK live! ... -->` charm squark.
 	fn parse_charm_squark(&mut self) -> ParseResult<FileData>
 	{
 		self.parse_squark_live()?;
@@ -235,8 +239,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		let mut did_consume = false;
 
 		while self.current() == Some(' ') {
-			let r = self.advance();
-			debug_assert!(r.is_ok(), "guaranteed from `while` check");
+			let _ = self.advance();
 			did_consume = true;
 		}
 
@@ -257,8 +260,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			if let Some(c) = self.current()
 			&& matches!(c, ' ' | '\t' | '\n')
 			{
-				let r = self.advance();
-				debug_assert!(r.is_ok(), "guaranteed from `while` check");
+				let _ = self.advance();
 				did_consume = true;
 			}
 			else {
@@ -267,6 +269,21 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 
 		did_consume
+	}
+
+	/// Parse an identifier like `sup`, `sup-world`, `internal.flag`.
+	fn parse_ident(&mut self) -> ParseResult<String>
+	{
+		let mut chars = vec![];
+
+		while let Some(c) = self.current()
+			&& matches!(c, 'a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')
+		{
+			chars.push(c);
+			let _ = self.advance();
+		}
+
+		Ok(chars.into_iter().collect())
 	}
 }
 
@@ -337,6 +354,22 @@ mod test
 		],
 		|mut parser, _case| {
 			assert_eq!( parser.parse_heading(), Err(ParseError::NoMatch) );
+		});
+	}
+
+	#[test] fn test_parse_ident()
+	{
+		test_exact(&[
+			"identifier",
+			"camelCase",
+			"PascalCase",
+			"kebab-case",
+			"snake_case",
+			"dot.case",
+			"very-much_mixedCase",
+		],
+		|mut parser, case| {
+			assert_eq!( parser.parse_ident(), Ok(case.to_string()) );
 		});
 	}
 
