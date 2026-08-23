@@ -10,6 +10,7 @@ class Test_Repo_Config_ < Minitest::Test
 		assert !defaults.nil?
 		assert !defaults.empty?
 		assert_equal "site/", defaults["paths / site"]
+		assert_equal "content", defaults["paths / site"]
 	end
 
 	# NOTE: We rely on `load_repo_config!` in `__init__.rb` lmao, so it's super important this works before anything else!

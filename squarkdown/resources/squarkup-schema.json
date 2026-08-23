@@ -1,5 +1,5 @@
 {
-  "version":     "5.1.0",
+  "version":     "6.0.0",
   "title":       "Squarkup Configuration Schema",
   "description": "Squarkup configurations for a repository.",
 
@@ -58,9 +58,9 @@
     "out / file-name":
     {
       "title":       ".svx Filename",
-      "description": "Name of exported `.svx` files (without the `.svx` file extension).",
+      "description": "Name of exported `.svx` files (with the `.svx` file extension).",
       "type":        "string",
-      "default":     "~content"
+      "default":     "+page.svx"
     },
     
     "out / site-data":

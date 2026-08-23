@@ -2,7 +2,7 @@
 
 require "json"
 
-require_relative "../../squarkdown/utils/log"
+require_relative "../../squarkdown/utils/__include__"
 require_relative "helpers/render-table"
 
 

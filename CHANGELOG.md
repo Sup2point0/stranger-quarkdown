@@ -3,6 +3,11 @@
 
 ## v3.5.0 (Next)
 
+### Breaking
+- `squarkup.json`: `opts / on-no-dir` changed to `opts / on-file-exists`
+  - Available options are `kill`, `skip`, `overwrite`
+  - This is more relevant than the previous "on no directory" – it doesn’t really matter if the directory doesn’t exist, and for a fully generated site it never will.
+
 ### New
 - Huge internal restructuring to make configuration, runtime and processing more resilient
 - Improve error messages with hints

@@ -5,7 +5,7 @@ require_relative "utils/__include__"
 require_relative "core/__include__"
 
 
-## :: *Routes -> *RepoConfig -> ()
+## `:: *Routes -> *RepoConfig -> ()`
 # 
 # Run squarkup on a repository.
 def self.squarkup(routes:, repo_config:)
@@ -39,7 +39,7 @@ def self.squarkup(routes:, repo_config:)
 end
 
 
-## :: *Routes -> *RepoConfig -> Hash FileContent
+## `:: *Routes -> *RepoConfig -> Hash FileContent`
 def self.find_file_bases(routes:, repo_config:)
 
 	return {} if repo_config.bases.path.nil?
@@ -53,7 +53,7 @@ def self.find_file_bases(routes:, repo_config:)
 end
 
 
-## :: *Routes -> *RepoConfig -> [Pathname]
+## `:: *Routes -> *RepoConfig -> [Pathname]`
 def self.find_files(routes:, repo_config:)
 
 	log "locating files..."
@@ -71,7 +71,7 @@ def self.find_files(routes:, repo_config:)
 end
 
 
-## :: [Pathname] -> Hash FileContent -> *Routes -> *RepoConfig -> *mut SiteData -> ()
+## `:: [Pathname] -> Hash FileContent -> *Routes -> *RepoConfig -> *mut SiteData -> ()`
 def self.export_files(files, bases:, routes:, repo_config:, site_data:)
 
 	log "exporting files..."
