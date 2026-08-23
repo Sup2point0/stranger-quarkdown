@@ -103,7 +103,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self.eat("#")?;
 		self.eat_spaces()?;
 
-		Ok(self._chunk[self._index..].iter().collect())
+		let mut heading: String = self._chunk[self._index..].iter().collect();
+
+		let content = heading.trim_end();
+		heading.truncate(content.len());
+
+		Ok(heading)
 	}
 	
 	fn parse_charm(&mut self) -> ParseResult
@@ -133,6 +138,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Read the next line of the source text into memory.
 	fn next_line(&mut self) -> ParseResult
 	{
+		self._chunk_buffer.clear();
+
 		match self._reader.read_line(&mut self._chunk_buffer) {
 			Ok(0) => return Err(ParseError::EndOfFile),
 			Err(_) => return Err(self.err()),
@@ -200,7 +207,7 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 
-	fn parse_cases(cases: &[&str], test: impl Fn(CharmParser<Cursor<&&str>>, &str))
+	fn test_exact(cases: &[&'static str], test: impl Fn(CharmParser<Cursor<&&str>>, &str))
 	{
 		for case in cases {
 			let cursor = Cursor::new(case);
@@ -210,22 +217,44 @@ mod test
 		}
 	}
 
-	#[test] fn test_parse_heading_matches() {
-		parse_cases(&[
-			"#",
-			"# ",
-			"# Sup",
-			"# Suppety Sup",
+	fn test_expected(cases: &[(&'static str, &'static str)], test: impl Fn(CharmParser<Cursor<&&str>>, &str))
+	{
+		for (source, expected) in cases {
+			let cursor = Cursor::new(source);
+			let parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+
+			test(parser, expected)
+		}
+	}
+
+	#[test] fn test_parse_heading_matches_single_line() {
+		test_expected(&[
+			("#",             ""),
+			("# ",            ""),
+			("# Sup",         "Sup"),
+			("# Suppety Sup", "Suppety Sup"),
 		],
-		|mut parser, case| {
+		|mut parser, expected| {
 			let r = parser.parse_heading();
-			assert_eq!(r, Ok(case.chars().skip(2).collect()));
+			assert_eq!(r, Ok(str!(expected)));
+		});
+	}
+
+	#[test] fn test_parse_heading_matches_multi_line() {
+		test_expected(&[
+			("#\nDECOY",             ""),
+			("# \nDECOY",            ""),
+			("# Sup\nDECOY",         "Sup"),
+			("# Suppety Sup\nDECOY", "Suppety Sup"),
+		],
+		|mut parser, expected| {
+			let r = parser.parse_heading();
+			assert_eq!(r, Ok(str!(expected)));
 		});
 	}
 
 	#[test] fn test_parse_heading_fails() {
-		parse_cases(&[
-			"",
+		test_exact(&[
 			" ",
 			"Sup",
 			"Don't Do It",
@@ -237,7 +266,7 @@ mod test
 	}
 
 	#[test] fn test_eat_spaces_matches() {
-		parse_cases(&[
+		test_exact(&[
 			" ",
 			"  ",
 			"        ",
@@ -252,7 +281,7 @@ mod test
 	}
 
 	#[test] fn test_eat_matches() {
-		parse_cases(&[
+		test_exact(&[
 			" ",
 			"test",
 			"testing testing",
@@ -265,7 +294,7 @@ mod test
 	}
 
 	#[test] fn test_eat_fails() {
-		parse_cases(&[
+		test_exact(&[
 			" ",
 			"test",
 			"testing testing",
