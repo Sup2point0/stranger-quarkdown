@@ -34,12 +34,15 @@ pub struct CharmParser<'l, Source: Read = File>
 	/// If so, this means the user intends for the file to be squarked up, and error checking should be stricter to catch mistakes on their end.
 	is_live: bool,
 
+	/// Have we reached the end of the source?
+	is_eof: bool,
+
 	// == INTERNALS == //
 	
 	/// The backing buffer that reads from the target file.
 	_reader: BufReader<Source>,
 
-	/// The current index in the current line the parser is pointing to.
+	/// The index in the current line the parser is pointing to.
 	_index: usize,
 
 	/* NOTE:
@@ -64,11 +67,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	{
 		let mut out = Self {
 			config,
+			is_live: false,
+			is_eof: false,
 			_reader: BufReader::new(file),
 			_index: 0,
 			_line: vec![],
 			_line_buffer: String::new(),
-			is_live: false,
 		};
 		
 		out.next_line(err_msg!("initialising parser"))?;
@@ -258,7 +262,7 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 
-	#[test] fn test_parse_heading_matches_single_line()
+	#[test] fn parse_heading_matches_single_line()
 	{
 		test_expected(&[
 			("# ",            ""),
@@ -270,7 +274,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_parse_heading_matches_multi_line()
+	#[test] fn parse_heading_matches_multi_line()
 	{
 		test_expected(&[
 			("# \nDECOY",            ""),
@@ -282,7 +286,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_parse_heading_fails()
+	#[test] fn parse_heading_fails()
 	{
 		test_exact(&[
 			" ",
@@ -294,7 +298,7 @@ mod test
 		});
 	}
 
-	#[test] fn test_parse_flags_matches()
+	#[test] fn parse_flags_matches()
 	{
 		test_expected(&[
 			("live!", vec![str!("live")]),
@@ -310,7 +314,7 @@ mod test
 		});
 	}
 	
-	#[test] fn test_parse_flags_fails()
+	#[test] fn parse_flags_fails()
 	{
 		test_expected(&[
 			("live! ignore", vec![str!("live")]),

@@ -16,7 +16,9 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self._index >= self._line.len()
 	}
 
-	/// The current character in the source the parser is pointing to, or `None` if it is out of bounds.
+	/// The character in the source the parser is currently pointing to.
+	/// 
+	/// This returns `None` iff the parser has reached the end of its source and is out of bounds.
 	pub(super) fn current(&self) -> Option<char>
 	{
 		self._line.get(self._index).copied()
@@ -24,19 +26,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 	/// Peek the next character in the line immediately after the current character.
 	/// 
-	/// Edge cases:
-	/// 
-	/// - `Some('\n')` if at the last character of a line
-	/// - `None` if past the last character of a line
+	/// Returns `None` if the parser is at the end of a line (since loading in the next line would require flushing the buffer).
 	pub(super) fn peek(&self) -> Option<char>
 	{
-		let next = self._line.get(self._index + 1);
-
-		if next == None && self.current() != None {
-			return Some('\n')
-		} else {
-			return next.copied();
-		}
+		self._line.get(self._index + 1).copied()
 	}
 
 	/// Get a preview of the upcoming text (for error messages).
@@ -54,36 +47,38 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 
 	/// Read the next line of the source text into memory.
+	/// 
+	/// Errors if the parser has already reached the end of the source, or if reading from the buffer fails.
 	pub(super) fn next_line(&mut self, origin: impl Fn() -> String) -> ParseResult
 	{
+		if self.is_eof {
+			return self.err_eof(origin);
+		}
+
 		self._line_buffer.clear();
 
 		match self._reader.read_line(&mut self._line_buffer) {
-			Ok(0) | Err(_) => return self.err_eof(origin),
+			Err(_) => return self.err_eof(origin),
+			Ok(0) => self.is_eof = true,
 			Ok(_) => (),
 		}
 
 		self._line = self._line_buffer.chars().collect();
-
-		if self._line.last() == Some(&'\n') {
-			self._line.pop();
-		}
-
 		self._index = 0;
 
 		Ok(())
 	}
 
-	/// Proceed to the next character in the source text.
+	/// Proceed to the next character in the source text, and read in a new line afterwards if necessary.
 	/// 
-	/// If we're at the end of the current line, this reads in a new line.
+	/// If this function is called when `self.is_eof: true`, this returns an end-of-input error.
 	pub(super) fn advance(&mut self, origin: impl Fn() -> String) -> ParseResult
 	{
+		self._index += 1;
+
 		if self.current() == None {
 			self.next_line(origin)
-		}
-		else {
-			self._index += 1;
+		} else {
 			Ok(())
 		}
 	}
@@ -110,12 +105,15 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(())
 	}
 	
-	/// Attempt to consume exactly `target`, returning `NO_MATCH` on failure.
+	/// Attempt to consume exactly `target`. On failure, backtrack and return `NO_MATCH`.
 	pub(super) fn try_eat(&mut self, target: &str) -> Recoverable
 	{
+		let init = self._index;
+
 		for expected in target.chars()
 		{
 			if self.current() != Some(expected) {
+				self._index = init;
 				return Err(ParseError::NO_MATCH);
 			}
 			self.advance(err_msg!())?;
@@ -183,22 +181,11 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	{
 		let mut did_consume = false;
 
-		loop {
-			if self.current() == None {
-				let r = self.advance(err_msg!());
-				if r.is_err() { break; }
-				did_consume = true;
-			}
-			
-			if let Some(c) = self.current()
-			&& matches!(c, ' ' | '\t')
-			{
-				let _ = self.advance(err_msg!());  // safe due to loop check
-				did_consume = true;
-			}
-			else {
-				break;
-			}
+		while let Some(c) = self.current()
+			&& matches!(c, ' ' | '\t' | '\n')
+		{
+			let _ = self.advance(err_msg!());  // safe due to loop check
+			did_consume = true;
 		}
 
 		did_consume
@@ -236,12 +223,13 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('1') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('2') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('3') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('4') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('5') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('2') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), None );
+		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
 	}
 	
 	#[test] fn advance_and_current_multi_line()
@@ -250,13 +238,14 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('1') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('2') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('3') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('4') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), Some('5') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.current(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('2') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('3') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('4') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.current(), None );
+		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
 	}
 
 	#[test] fn advance_and_peek_single_line()
@@ -265,12 +254,13 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('2') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('3') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('4') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('5') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('\n') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('3') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
 	}
 
 	#[test] fn advance_and_peek_multi_line()
@@ -279,13 +269,14 @@ mod test
 		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('2') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('\n') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('4') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('5') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), Some('\n') );
-		assert!( parser.advance(err_msg!()).is_ok() ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('4') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), Some('5') );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Ok(()) ); assert_eq!( parser.peek(), None );
+		assert_eq!( parser.advance(err_msg!()), Err(ParseError::NO_MATCH) );
 	}
 
 	#[test] fn preview()
@@ -304,7 +295,7 @@ mod test
 		test_expected(&[
 			(
 				"# Sup\n<!-- #SQUARK live! -->\n\nSup, World!\n",
-				["# Sup", "<!-- #SQUARK live! -->", "", "Sup, World!"],
+				["# Sup\n", "<!-- #SQUARK live! -->\n", "\n", "Sup, World!\n"],
 			)
 		],
 		|mut parser, _expected| {
