@@ -27,6 +27,9 @@ macro_rules! err_msg
 }
 
 
+type Recoverable = ParseResult;
+
+
 /// A parser for the charm squark of a file.
 pub struct CharmParser<'l, Source: Read = File>
 {
@@ -313,15 +316,15 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		for expected in target.chars()
 		{
 			match self.current() {
-				Some(c) => {
-					if c != expected {
-						return Err(ParseError::UnexpectedInput {
-							expected: target.to_string(),
-							actual: self.preview(),
-						});
-					}
+				Some(c) if c != expected => {
+					return Err(ParseError::UnexpectedInput {
+						origin: origin(),
+						expected: target.to_string(),
+						actual: self.preview(),
+					});
 				}
 				None => return self.err_eof(origin),
+				_ => (),
 			}
 			self.advance(&origin)?;
 		}
@@ -330,7 +333,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 	
 	/// Attempt to consume exactly `target`, returning `NO_MATCH` on failure.
-	fn try_eat(&mut self, target: &str) -> ParseResult
+	fn try_eat(&mut self, target: &str) -> Recoverable
 	{
 		for expected in target.chars()
 		{
@@ -343,28 +346,45 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(())
 	}
 	
-	// FIXME split
-	/// Consume `target`, without considering casing for letters.
-	fn eat_caseless(&mut self, target: &str) -> ParseResult
+	/// Consume `target` disregarding casing, erroring on failure.
+	fn eat_caseless(&mut self, target: &str, origin: impl Fn() -> String) -> ParseResult
 	{
-		let normalised = target.to_ascii_lowercase();
-		let mut chars = normalised.chars();
+		for mut expected in target.chars()
+		{
+			expected.make_ascii_lowercase();
 
-		loop {
-			let Some(expected) = chars.next() else {
-				return Ok(());
+			match self.current() {
+				Some(c) if c.to_ascii_lowercase() != expected => {
+					return Err(ParseError::UnexpectedInput {
+						origin: origin(),
+						expected: target.to_string(),
+						actual: self.preview(),
+					});
+				}
+				None => return self.err_eof(origin),
+				_ => (),
 			};
+			
+			self.advance(&origin)?;
+		}
 
-			let Some(found) = self.current() else {
-				return Err(ParseError::NO_MATCH);
-			};
+		Ok(())
+	}
 
-			if found.to_ascii_lowercase() != expected {
+	/// Attempt to consume `target` disregarding casing, returning `NO_MATCH` on failure.
+	fn try_eat_caseless(&mut self, target: &str) -> Recoverable
+	{
+		for mut expected in target.chars()
+		{
+			expected.make_ascii_lowercase();
+
+			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
 				return Err(ParseError::NO_MATCH);
 			}
-			
-			self.advance(err_msg!("Consuming {target}"))?;
+			self.advance(err_msg!())?;
 		}
+
+		Ok(())
 	}
 	
 	/// Consume 0 or more space characters. Returns `true` if any characters were consumed.
