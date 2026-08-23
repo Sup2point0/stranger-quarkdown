@@ -296,9 +296,13 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				{
 					let _ = self.advance(err_msg!());  // safe from if check
 					self.eat_whitespace();
-					values.push(utils::trim_end(value.clone()));
+
+					let trimmed = utils::trim_end(value.clone());
+					if !trimmed.is_empty() {
+						values.push(trimmed);
+					}
+
 					value.clear();
-					can_terminate = false;
 					continue;
 				},
 
@@ -429,7 +433,7 @@ mod test
 		});
 	}
 
-	#[test] fn parse_values_single_usual()
+	#[test] fn parse_values_one_usual()
 	{
 		test_exact(&[
 			"success\n| field = value",
@@ -442,7 +446,7 @@ mod test
 		});
 	}
 
-	#[test] fn parse_values_multi_usual()
+	#[test] fn parse_values_many_usual()
 	{
 		test_exact(&[
 			"one / two / three\n| field = value",
@@ -457,7 +461,7 @@ mod test
 		});
 	}
 
-	#[test] fn parse_values_single_multi_line()
+	#[test] fn parse_values_one_multi_line()
 	{
 		test_exact(&[
 			"suc\ncess |",
@@ -472,7 +476,26 @@ mod test
 		});
 	}
 
-	#[test] fn parse_values_single_weird()
+	#[test] fn parse_values_many_multi_line()
+	{
+		test_exact(&[
+			"one\n / two\n / three |",
+			"one\n/ two\n/ three |",
+			"one / \ntwo / \nthree |",
+			"one /\ntwo /\nthree |",
+			"one\n / \ntwo\n / \nthree |",
+			"one\n/\ntwo\n/\nthree |",
+		],
+		|mut parser, _case| {
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!("one")) );
+			assert_eq!( values.next(), Some(str!("two")) );
+			assert_eq!( values.next(), Some(str!("three")) );
+			assert_eq!( values.next(), None );
+		});
+	}
+
+	#[test] fn parse_values_one_weird()
 	{
 		test_exact(&[
 			"success\n  | field = value",
@@ -482,6 +505,35 @@ mod test
 		|mut parser, _case| {
 			let mut values = parser.parse_values().unwrap().into_iter();
 			assert_eq!( values.next(), Some(str!("success")) );
+			assert_eq!( values.next(), None );
+		});
+	}
+
+	#[test] fn parse_values_one_bad()
+	{
+		test_expected(&[
+			("not/good |", "not/good"),
+			("not /good |", "not /good"),
+			("not/ good |", "not/ good"),
+		],
+		|mut parser, expected| {
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!(*expected)) );
+			assert_eq!( values.next(), None );
+		});
+	}
+
+	#[test] fn parse_values_many_weird()
+	{
+		test_exact(&[
+			"one / two |",
+			"one / / two |",
+			"one / /\n/ two |",
+		],
+		|mut parser, _case| {
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!("one")) );
+			assert_eq!( values.next(), Some(str!("two")) );
 			assert_eq!( values.next(), None );
 		});
 	}
