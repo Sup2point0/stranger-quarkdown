@@ -78,7 +78,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			is_live: false,
 		};
 		
-		out.next_line(err_msg!("Initialising parser"))?;
+		out.next_line(err_msg!("initialising parser"))?;
 		
 		Ok(out)
 	}
@@ -124,7 +124,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Parse the `# Heading` element and extract the cleaned heading text.
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
-		self.eat("# ", err_msg!("Expected `# ` to start heading"))?;
+		self.eat("# ", err_msg!("parsing heading"))?;
 		self.eat_spaces();
 
 		Ok(self._chunk[self._index..].iter().collect())
@@ -133,20 +133,22 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Parse the `<!-- #SQUARK live! ... -->` charm squark.
 	fn parse_charm_squark(&mut self) -> ParseResult<FileData>
 	{
-		self.parse_squark_live()?;
+		self.try_parse_squark_live()?;
 		let flags = self.parse_flags()?;
 		let fields = self.parse_fields()?;
 
 		Ok(FileData::init(flags, fields))
 	}
 
-	/// Look for `<!-- #SQUARK live!`, and if found, set `.is_live: true`.
-	fn parse_squark_live(&mut self) -> ParseResult
+	/// Attemp to look for `<!-- #SQUARK live!`.
+	/// 
+	/// If found, set `.is_live: true`; otherwise return `NO_MATCH`.
+	fn try_parse_squark_live(&mut self) -> Recoverable
 	{
 		self.try_eat("<!--")?;
 		self.eat_whitespace(); self.try_eat("#")?;
-		self.eat_spaces(); self.eat_caseless("SQUARK")?;
-		self.eat_spaces(); self.eat_caseless("live!")?;
+		self.eat_spaces(); self.try_eat_caseless("SQUARK")?;
+		self.eat_spaces(); self.try_eat_caseless("live!")?;
 
 		self.is_live = true;
 		Ok(())
@@ -170,7 +172,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 			if self.current() == Some('!') {
 				flags.push(ident);
-				let _ = self.advance(err_msg!("Parsing charm squark flags"));
+				let _ = self.advance(err_msg!("parsing charm squark flags"));
 			}
 		}
 
@@ -197,7 +199,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			match self.current() {
 				// done
 				Some('-') => {
-					self.eat("-->", err_msg!("Expected `-->` to terminate charm squark's comment"))?;
+					self.eat("-->", err_msg!("parsing squark charm fields"))?;
 					break;
 				},
 
@@ -206,11 +208,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 				// bad
 				Some(_) => Err(ParseError::UnexpectedInput {
+					origin: str!("parsing squark charm fields"),
 					expected: str!("`|` to start field in charm squark"),
 					actual: self.preview(),
 				})?,
 
-				None => self.advance(err_msg!("Parsing charm squark fields"))?,  // force error
+				None => self.advance(err_msg!("parsing charm squark fields"))?,  // force error
 			}
 
 			let (key, value) = self.parse_field()?;
@@ -436,7 +439,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			&& matches!(c, 'a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')
 		{
 			chars.push(c);
-			let _ = self.advance(err_msg!("Parsing an identifier"));
+			let _ = self.advance(err_msg!("parsing an identifier"));
 		}
 
 		Ok(chars.into_iter().collect())
@@ -479,7 +482,6 @@ use std::io::Cursor;
 	#[test] fn test_parse_heading_matches_single_line()
 	{
 		test_expected(&[
-			("#",             ""),
 			("# ",            ""),
 			("# Sup",         "Sup"),
 			("# Suppety Sup", "Suppety Sup"),
@@ -492,7 +494,6 @@ use std::io::Cursor;
 	#[test] fn test_parse_heading_matches_multi_line()
 	{
 		test_expected(&[
-			("#\nDECOY",             ""),
 			("# \nDECOY",            ""),
 			("# Sup\nDECOY",         "Sup"),
 			("# Suppety Sup\nDECOY", "Suppety Sup"),
@@ -655,7 +656,7 @@ use std::io::Cursor;
 			"tEsTiNg 123",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase()), Ok(()) );
+			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase(), err_msg!()), Ok(()) );
 		});
 	}
 

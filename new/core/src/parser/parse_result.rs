@@ -19,6 +19,7 @@ pub enum ParseError
 
 	/// Input did not match what was expected (required) by the context.
 	UnexpectedInput {
+		origin: String,
 		expected: String,
 		actual: String,
 	}
@@ -32,12 +33,12 @@ impl std::fmt::Display for ParseError
 	{
 		match self {
 			ParseError::FatalEnd { origin: cause }
-				=> write!(f, "Unexpected end of input while {cause}!"),
+				=> write!(f, "unexpected end of input while {cause}!"),
 			
-			ParseError::UnexpectedInput { expected, actual } =>
-				write!(f, "Expected {expected}, but found {actual}"),
+			ParseError::UnexpectedInput { origin, expected, actual } =>
+				write!(f, "expected {expected}, but found {actual}, while {origin}"),
 			
-			_ => write!(f, "Leaked internal error!")
+			_ => write!(f, "leaked internal error!")
 		}
 	}
 }
