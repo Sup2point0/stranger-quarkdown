@@ -12,7 +12,7 @@ use std::assert_matches;
 
 use super::*;
 use crate::{
-	log,
+	log, utils,
 	FileData, SquarkupConfig,
 	str,
 };
@@ -124,7 +124,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self.eat("# ", err_msg!("parsing heading"))?;
 		self.eat_spaces();
 
-		Ok(self._line[self._index..].iter().collect())
+		let heading = self._line[self._index..].iter().collect();
+		Ok(utils::trim_end(heading))
 	}
 	
 	/// Parse the `<!-- #SQUARK live! ... -->` charm squark.
