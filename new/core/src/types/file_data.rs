@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use crate::parser::FieldValues;
 
-use tinyvec::TinyVec;
+use std::collections::HashMap;
 
 
 pub struct FileData
@@ -14,7 +14,7 @@ impl FileData
 {
 	pub fn init(
 		flags: Vec<String>,
-		fields: HashMap<String, TinyVec<[String; 1]>>,
+		fields: HashMap<String, FieldValues>,
 	) -> Self
 	{
 		unimplemented!()

@@ -13,9 +13,7 @@ use crate::{
 
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{ BufRead, BufReader, Read };
-use std::iter;
-use std::assert_matches;
+use std::io::{ BufReader, Read };
 
 
 pub type FieldValues = TinyVec<[String; 4]>;
@@ -352,13 +350,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 #[cfg(test)]
 mod test
 {
-	use std::assert_matches;
-	use std::io::Cursor;
-
-	use tinyvec::tiny_vec;
-
 	use crate::parser::*;
 	use crate::utils::*;
+	
+	use std::assert_matches;
 
 	#[test] fn parse_heading_matches_single_line()
 	{

@@ -1,5 +1,8 @@
 pub type ParseResult<T = ()> = Result<T, ParseError>;
 
+/// Indicates that a function only errors with [`ParseError::NO_MATCH`].
+pub type Recoverable = ParseResult;
+
 
 /// An error encountered while parsing the charm squark.
 /// 

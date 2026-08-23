@@ -1,7 +1,7 @@
-use std::io::Cursor;
+#[cfg(test)] use std::io::Cursor;
 
-use super::*;
-use crate::utils::*;
+#[cfg(test)] use super::*;
+#[cfg(test)] use crate::utils::*;
 
 
 #[macro_export]
