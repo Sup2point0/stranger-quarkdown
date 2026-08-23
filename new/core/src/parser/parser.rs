@@ -6,7 +6,7 @@ use std::{
 };
 
 use super::{ BufferedParser, ParseResult, ParseError };
-use crate::{ SquarkupConfig, FileData };
+use crate::{ log, SquarkupConfig, FileData };
 
 
 /// A parser for the 'squark charm' header of a file.
@@ -34,7 +34,7 @@ pub struct CharmParser<'l>
 
 impl<'l> CharmParser<'l>
 {
-	pub fn init(file: File, config: &SquarkupConfig) -> Self
+	pub fn init(file: File, config: &'l SquarkupConfig) -> Self
 	{
 		let mut out = Self {
 			config,
@@ -43,9 +43,9 @@ impl<'l> CharmParser<'l>
 			_reader: BufReader::new(file),
 			_chunk: String::new(),
 			_chars: "".chars(),
-		}
+		};
 		
-		out.load_line();
+		out.next_line();
 		
 		out
 	}
@@ -56,9 +56,9 @@ impl<'l> CharmParser<'l>
 		match self._parse() {
 			Ok(r) => Some(r),
 			Err(ParseError::NoMatch) => None,
-			Err(ParseError(e)) => {
-				Log.err(e.to_string());
-				None,
+			Err(e) => {
+				log::err(e);
+				None
 			},
 		}
 	}
@@ -69,25 +69,27 @@ impl<'l> CharmParser<'l>
 		
 		let mut heading = None;
 		
-		if self.current == '#' {
+		if self.current == Some('#') {
 			heading = Some(self.parse_heading()?);
 		}
 		
 		self.parse_charm()?;
 		
 		Ok(FileData {
+			dest: "TODO".to_string(),
 			heading,
 		})
 	}
 	
-	fn parse_heading(&mut self)
+	fn parse_heading(&mut self) -> ParseResult<String>
 	{
-		self.eat("#")
+		self.eat("#".chars());
+		unimplemented!()
 	}
 	
 	fn parse_charm(&mut self) -> ParseResult
 	{
-		
+		unimplemented!()
 	}
 }
 
@@ -99,15 +101,17 @@ impl<'l> BufferedParser for CharmParser<'l>
 		self._reader.read_line(&mut self._chunk)?;
 		self._chars = self._chunk.chars();
 		self.current = self._chars.next();
+
+		Ok(())
 	}
 
 	/// Proceed to the next character in the source text.
 	fn advance(&mut self) -> ParseResult
 	{
-		self.current = self.chars.next();
+		self.current = self._chars.next();
 		
 		if self.current == None {
-			self.next_line();
+			self.next_line()?;
 		}
 		
 		Err(if self.is_live {
@@ -117,19 +121,25 @@ impl<'l> BufferedParser for CharmParser<'l>
 		})?
 	}
 	
-	fn eat(&mut self, chars: impl Iterator<item = char>) -> ParseResult
+	fn eat(&mut self, mut chars: impl Iterator<Item = char>) -> ParseResult
 	{
+		// TODO
+
 		loop {
-			let Some(required) = chars.next() else { return };
+			let Some(required) = chars.next() else {
+				return Ok(())
+			};
 			
-			this.advance();
+			self.advance();
 		}
 	}
 	
 	fn eat_spaces(&mut self) -> ParseResult
 	{
-		while this.current == ' ' {
-			this.advance()?;
+		while self.current == Some(' ') {
+			self.advance()?;
 		}
+
+		Ok(())
 	}
 }
