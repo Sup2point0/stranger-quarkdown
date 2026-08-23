@@ -1,10 +1,18 @@
-use super::BufferedParser;
+use std::{
+	fs::File,
+	io::BufReader, io::BufRead,
+	iter,
+	str::Chars,
+};
+
+use super::{ BufferedParser, ParseResult, ParseError };
+use crate::{ SquarkupConfig, FileData };
 
 
 /// A parser for the 'squark charm' header of a file.
-struct CharmParser
+pub struct CharmParser<'l>
 {
-	config: &SquarkupConfig,
+	config: &'l SquarkupConfig,
 	
 	/// The current character the parser is pointing to.
 	current: Option<char>,
@@ -15,34 +23,35 @@ struct CharmParser
 	is_live: bool,
 	
 	/// The backing buffer that reads from the target file.
-	_reader: BufReader,
+	_reader: BufReader<File>,
 	
 	/// The currently in-memory chunk to process.
 	_chunk: String,
 	
 	/// An iterator over the characters of the current chunk.
-	_chars: Iterator<char>,
+	_chars: Chars<'l>,
 }
 
-impl CharmParser
+impl<'l> CharmParser<'l>
 {
 	pub fn init(file: File, config: &SquarkupConfig) -> Self
 	{
-		let mut self = Self {
+		let mut out = Self {
 			config,
 			current: None,
+			is_live: false,
 			_reader: BufReader::new(file),
 			_chunk: String::new(),
-			_char: Iterator::empty(),
+			_chars: "".chars(),
 		}
 		
-		self.load_line();
+		out.load_line();
 		
-		self
+		out
 	}
 	
 	/// Run the parser to completion, extracting the metadata from the squark charm (if present) of the target file.
-	pub fn parse(&mut self) -> Option<FileHeader>
+	pub fn parse(&mut self) -> Option<FileData>
 	{
 		match self._parse() {
 			Ok(r) => Some(r),
@@ -54,7 +63,7 @@ impl CharmParser
 		}
 	}
 	
-	fn _parse(&mut self) -> Result<FileHeader>
+	fn _parse(&mut self) -> Result<FileData, ParseError>
 	{
 		self.eat_spaces()?;
 		
@@ -66,30 +75,30 @@ impl CharmParser
 		
 		self.parse_charm()?;
 		
-		FileHeader {
+		Ok(FileData {
 			heading,
-		}
+		})
 	}
 	
-	fn parse_heading()
+	fn parse_heading(&mut self)
 	{
-		this.eat("#")
+		self.eat("#")
 	}
 	
-	fn parse_charm() -> ParseResult
+	fn parse_charm(&mut self) -> ParseResult
 	{
 		
 	}
 }
 
-impl BufferedParser for CharmParser
+impl<'l> BufferedParser for CharmParser<'l>
 {
 	/// Read the next line of the source text into memory.
 	fn next_line(&mut self) -> ParseResult
 	{
-		self.reader.read_line(&mut self.chunk)?;
-		self.chars = self.chunk.chars();
-		self.current = self.chars().next();
+		self._reader.read_line(&mut self._chunk)?;
+		self._chars = self._chunk.chars();
+		self.current = self._chars.next();
 	}
 
 	/// Proceed to the next character in the source text.
@@ -101,7 +110,7 @@ impl BufferedParser for CharmParser
 			self.next_line();
 		}
 		
-		Err(if this.is_live {
+		Err(if self.is_live {
 			ParseError::FatalEnd
 		} else {
 			ParseError::NoMatch
