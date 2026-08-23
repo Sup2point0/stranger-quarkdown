@@ -1,8 +1,7 @@
-use std::fs::File;
+use std::io::Cursor;
 
 use squarkup::parser::CharmParser;
-
-use crate::shared::*;
+use squarkup::utils::*;
 
 
 #[test] fn test_basic()
