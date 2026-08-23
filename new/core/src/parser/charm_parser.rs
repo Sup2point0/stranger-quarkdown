@@ -244,21 +244,20 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_field(&mut self) -> ParseResult<(String, FieldValues)>
 	{
-		let ctx = err_msg!("parsing charm squark field");
+		let origin = err_msg!("parsing charm squark field");
 
-		self.eat("|", ctx)?;
+		self.eat("|", origin)?;
+		self.eat_whitespace();
+
 		let key = self.parse_ident()?;
+
 		self.eat_whitespace();
-		self.eat("=", ctx)?;
+		self.eat("=", origin)?;
 		self.eat_whitespace();
 
-		loop {
-			unimplemented!()
-		}
+		let values = self.parse_values()?;
 
-		// (key, _)
-
-		unimplemented!()
+		Ok((key, values))
 	}
 
 	/// Parse 1 or more values in a charm squark field.
@@ -292,7 +291,11 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		{
 			match c {
 				// ` / ` flushes current value
-				'/' if can_terminate && self.eat_whitespace() => {
+				'/' if can_terminate && utils::is_whitespace(self.peek()
+					.expect("safe from newline termination")) =>
+				{
+					let _ = self.advance(err_msg!());  // safe from if check
+					self.eat_whitespace();
 					values.push(utils::trim_end(value.clone()));
 					value.clear();
 					can_terminate = false;
@@ -435,6 +438,22 @@ mod test
 		|mut parser, _case| {
 			let mut values = parser.parse_values().unwrap().into_iter();
 			assert_eq!( values.next(), Some(str!("success")) );
+			assert_eq!( values.next(), None );
+		});
+	}
+
+	#[test] fn parse_values_multi_usual()
+	{
+		test_exact(&[
+			"one / two / three\n| field = value",
+			"one / two / three\n-->",
+		],
+		|mut parser, _case| {
+			let mut values = parser.parse_values().unwrap().into_iter();
+			assert_eq!( values.next(), Some(str!("one")) );
+			assert_eq!( values.next(), Some(str!("two")) );
+			assert_eq!( values.next(), Some(str!("three")) );
+			assert_eq!( values.next(), None );
 		});
 	}
 
@@ -449,6 +468,7 @@ mod test
 		|mut parser, _case| {
 			let mut values = parser.parse_values().unwrap().into_iter();
 			assert_eq!( values.next(), Some(str!("suc cess")) );
+			assert_eq!( values.next(), None );
 		});
 	}
 
@@ -462,6 +482,7 @@ mod test
 		|mut parser, _case| {
 			let mut values = parser.parse_values().unwrap().into_iter();
 			assert_eq!( values.next(), Some(str!("success")) );
+			assert_eq!( values.next(), None );
 		});
 	}
 }
