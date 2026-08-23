@@ -45,7 +45,7 @@ pub struct CharmParser<'l, Source: Read = File>
 	_index: usize,
 
 	/* NOTE:
-		Storing a `Chars` iterator over `_line_buffer` origind lifetime issues =(
+		Storing a `Chars` iterator over `_line_buffer` whend lifetime issues =(
 		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
 	*/
 
@@ -121,7 +121,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Parse the `# Heading` element and extract the cleaned heading text.
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
-		self.eat("# ", when!("parsing heading"))?;
+		self.eat("# ", to!("start page heading"), when!("parsing heading"))?;
 		self.eat_spaces();
 
 		let heading = self._line[self._index..].iter().collect();
@@ -160,7 +160,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_flags(&mut self) -> ParseResult<Vec<String>>
 	{
-		let origin = when!("parsing charm squark flags");
+		let when = when!("parsing charm squark flags");
 
 		let mut flags = vec![];
 
@@ -176,13 +176,13 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			}
 			else {
 				self.errors.push(ParseError::MissingInput {
-					when: origin(),
+					when: when(),
 					expected: format!("{ident}!"),
 					actual: ident,
 				})
 			}
 			
-			self.advance(origin)?;
+			self.advance(when)?;
 		}
 
 		Ok(flags)
@@ -200,35 +200,20 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_fields(&mut self) -> ParseResult<HashMap<String, FieldValues>>
 	{
-		let origin = when!("parsing squark charm fields");
-
 		let mut data = HashMap::new();
 
 		loop {
 			self.eat_whitespace();
 
-			match self.current() {
-				// done
-				Some('-') => break,
-
-				// another field
-				Some('|') => (),
-
-				// bad
-				Some(_) => Err(ParseError::UnexpectedInput {
-					when: str!("parsing squark charm fields"),
-					expected: str!("`|` to start field in charm squark"),
-					actual: self.preview(),
-				})?,
-
-				None => self.advance(origin)?,  // force error
+			if let Some('-') = self.current() {
+				break;
 			}
 
 			let (key, value) = self.parse_field()?;
 			data.insert(key, value);
 		}
 		
-		self.eat("-->", origin)?;
+		self.eat("-->", to!("terminate squark charm"), when!("parsing squark charm fields"))?;
 
 		Ok(data)
 	}
@@ -245,15 +230,15 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_field(&mut self) -> ParseResult<(String, FieldValues)>
 	{
-		let origin = when!("parsing charm squark field");
+		let when = when!("parsing charm squark field");
 
-		self.eat("|", origin)?;
+		self.eat("|", to!("start field in charm squark"), when)?;
 		self.eat_whitespace();
 
 		let key = self.parse_ident()?;
 
 		self.eat_whitespace();
-		self.eat("=", origin)?;
+		self.eat("=", when!("after field identifier"), when)?;
 		self.eat_whitespace();
 
 		let values = self.parse_values()?;
@@ -276,7 +261,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_values(&mut self) -> ParseResult<FieldValues>
 	{
-		let origin = when!("parsing values in charm squark field");
+		let when = when!("parsing values in charm squark field");
 
 		/// All values collected so far.
 		let mut values = tiny_vec!([String; 4]);
@@ -327,7 +312,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 					if can_terminate {
 						self.eat_whitespace();
 					} else {
-						self.advance(origin)?
+						self.advance(when)?
 					}
 				},
 			}
@@ -345,10 +330,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
 	/// 
 	/// If not, then Squarkdown can just ignore the file.
-	fn err_eof(&self, origin: impl Fn() -> String) -> ParseResult
+	fn err_eof(&self, when: impl Fn() -> String) -> ParseResult
 	{
 		Err(if self.is_live {
-			ParseError::FatalEnd { when: origin() }
+			ParseError::FatalEnd { when: when() }
 		} else {
 			ParseError::NO_MATCH
 		})

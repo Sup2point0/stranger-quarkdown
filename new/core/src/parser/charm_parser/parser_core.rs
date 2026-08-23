@@ -98,7 +98,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				Some(c) if c != expected => {
 					return Err(ParseError::UnexpectedInput {
 						when: when(),
-						expected: format!("{} {}", target, to()),
+						expected: format!("{} to {}", target, to()),
 						actual: self.preview(),
 					});
 				}
