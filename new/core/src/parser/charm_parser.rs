@@ -53,7 +53,7 @@ pub struct CharmParser<'l, Source: Read = File>
 		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
 	*/
 
-	/// Individual characters of the currently in-memory line to process.
+	/// Individual characters of the currently in-memory line to process. Guaranteed to be terminated by a `\n` newline.
 	_line: Vec<char>,
 	
 	/// The currently in-memory line to process.
@@ -248,9 +248,75 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_field(&mut self) -> ParseResult<(String, FieldValues)>
 	{
-		// self.eat("|", "")?;
+		let ctx = err_msg!("parsing charm squark field");
+
+		self.eat("|", ctx)?;
+		let key = self.parse_ident()?;
+		self.eat_whitespace();
+		self.eat("=", ctx)?;
+		self.eat_whitespace();
+
+		loop {
+			unimplemented!()
+		}
+
+		// (key, _)
 
 		unimplemented!()
+	}
+
+	/// Parse a single value until either a ` / ` separator, or `|` delimiter at the start of a line is reached.
+	/// 
+	/// ```ts
+	/// <!-- #SQUARK live!
+	/// | field =
+	///     / value1
+	///     / value2
+	///       ^^^^^^
+	/// | field = value
+	/// -->
+	/// ```
+	fn parse_value(&mut self) -> ParseResult<String>
+	{
+		let origin = err_msg!("parsing value in charm squark field");
+
+		let mut chars = vec![];
+		let mut can_terminate = false;
+
+		self.eat_whitespace();
+
+		while let Some(c) = self.current()
+		{
+			match c {
+				// `\s/ ` terminates
+				'/' if can_terminate && utils::is_whitespace(
+					self.peek().expect("parser lines should be newline terminated")
+				) => break,
+
+				// ^`|` terminates
+				'|' if can_terminate => break,
+
+				// `-->` terminates
+				'-' if can_terminate && let Ok(_) = self.try_eat("-->") => break,
+
+				'\n' => {
+					can_terminate = true;
+					
+					// normalise newlines into spaces
+					self.eat_whitespace();
+					chars.push(' ');
+				},
+
+				_ => {
+					chars.push(c);
+					can_terminate = utils::is_whitespace(c);
+					self.advance(origin)?;
+				}
+			}
+		}
+
+		let value = chars.into_iter().collect::<String>();
+		Ok(utils::trim_end(value))
 	}
 
 	/// Return the appropriate `Err(ParseError)` for an unexpected end of file.
@@ -333,12 +399,12 @@ mod test
 	#[test] fn parse_flags_fails()
 	{
 		test_expected(&[
-			("live! ignore\n", vec![str!("live")]),
-			("live!\nignore\n", vec![str!("live")]),
-			("live! \nignore\n", vec![str!("live")]),
-			("live!\n ignore\n", vec![str!("live")]),
-			("one! ignore two!\n", vec![str!("one"), str!("two")]),
-			("kebab-case! ignore-me snake_case! ignore_me\n", vec![str!("kebab-case"), str!("snake_case")]),
+			("live! ignore", vec![str!("live")]),
+			("live!\nignore", vec![str!("live")]),
+			("live! \nignore", vec![str!("live")]),
+			("live!\n ignore", vec![str!("live")]),
+			("one! ignore two!", vec![str!("one"), str!("two")]),
+			("kebab-case! ignore-me snake_case! ignore_me", vec![str!("kebab-case"), str!("snake_case")]),
 		],
 		|mut parser, expected_flags| {
 			let flags = parser.parse_flags().unwrap();
@@ -346,6 +412,43 @@ mod test
 			for (found, expected) in flags.into_iter().zip(expected_flags) {
 				assert_eq!( found, *expected );
 			}
+		});
+	}
+
+	#[test] fn parse_value_usual()
+	{
+		test_exact(&[
+			"success\n| field = value",
+			"success / value",
+			"success\n-->",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.parse_value(), Ok(str!("success")) );
+		});
+	}
+
+	#[test] fn parse_value_multi_line()
+	{
+		test_exact(&[
+			"suc\ncess |",
+			"suc\n cess |",
+			"suc \ncess |",
+			"suc \n cess |",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.parse_value(), Ok(str!("suc cess")) );
+		});
+	}
+
+	#[test] fn parse_value_weird()
+	{
+		test_exact(&[
+			"success\n  | field = value",
+			"success \n| field = value",
+			"success \n  | field = value",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.parse_value(), Ok(str!("success")) );
 		});
 	}
 }

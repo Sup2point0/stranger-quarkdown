@@ -82,7 +82,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	{
 		self._index += 1;
 
-		if self.current() == None {
+		if self.is_past_end_of_line() {
 			self.next_line(origin)
 		} else {
 			Ok(())
