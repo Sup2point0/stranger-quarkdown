@@ -1,15 +1,29 @@
 use std::{
+	collections::HashMap,
 	fs::File,
-	io::{ BufReader, BufRead, Read },
+	io::{ BufRead, BufReader, Read },
 	iter,
-	str::Chars,
 };
 
 use super::*;
 use crate::{
 	log,
-	SquarkupConfig, FileData,
+	FileData, SquarkupConfig,
+	types::CharmField,
+	str,
 };
+
+
+macro_rules! err_msg
+{
+	() => {
+		|| String::from("INTERNAL INVARIANT BROKEN")
+	};
+
+	($msg:expr $(, $args:expr)* $(,)?) => {
+		|| format!($msg, $($args)*)
+	}
+}
 
 
 /// A parser for the charm squark of a file.
@@ -60,7 +74,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			is_live: false,
 		};
 		
-		out.next_line()?;
+		out.next_line(err_msg!("Initialising parser"))?;
 		
 		Ok(out)
 	}
@@ -118,8 +132,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	fn parse_charm_squark(&mut self) -> ParseResult<FileData>
 	{
 		self.parse_squark_live()?;
+		let flags = self.parse_flags()?;
+		let fields = self.parse_fields()?;
 
-		unimplemented!()
+		Ok(FileData::init(flags, fields))
 	}
 
 	/// Look for `<!-- #SQUARK live!`, and if found set `.is_live: true`.
@@ -146,7 +162,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 			if self.current() == Some('!') {
 				flags.push(ident);
-				let _ = self.advance();
+				let _ = self.advance(err_msg!("Parsing charm squark flags"));
 			}
 		}
 
@@ -154,9 +170,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 
 	fn err(&self) -> ParseError
+	fn err(&self, cause: impl FnOnce() -> String) -> ParseError
 	{
 		if self.is_live {
-			ParseError::FatalEnd
+			ParseError::FatalEnd { cause: cause() }
 		} else {
 			ParseError::NotLive
 		}
@@ -173,12 +190,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 
 	/// Read the next line of the source text into memory.
-	fn next_line(&mut self) -> ParseResult
+	fn next_line(&mut self, cause: impl FnOnce() -> String) -> ParseResult
 	{
 		self._chunk_buffer.clear();
 
 		match self._reader.read_line(&mut self._chunk_buffer) {
-			Ok(0) | Err(_) => return Err(self.err()),
+			Ok(0) | Err(_) => return Err(self.err(cause)),
 			Ok(_) => (),
 		}
 
@@ -196,10 +213,10 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Proceed to the next character in the source text.
 	/// 
 	/// If we're at the end of the current line, this reads in a new line.
-	fn advance(&mut self) -> ParseResult
+	fn advance(&mut self, cause: impl FnOnce() -> String) -> ParseResult
 	{
 		if self.current() == None {
-			self.next_line()
+			self.next_line(cause)
 		}
 		else {
 			self._index += 1;
@@ -225,7 +242,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				return Err(ParseError::NoMatch);
 			}
 			
-			self.advance()?;
+			self.advance(err_msg!("consuming {target}"))?;
 		}
 	}
 	
@@ -248,7 +265,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				return Err(ParseError::NoMatch);
 			}
 			
-			self.advance()?;
+			self.advance(err_msg!("Consuming {target}"))?;
 		}
 	}
 	
@@ -258,7 +275,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		let mut did_consume = false;
 
 		while self.current() == Some(' ') {
-			let _ = self.advance();
+			// safe due to loop check
+			let _ = self.advance(err_msg!());
 			did_consume = true;
 		}
 
@@ -272,14 +290,15 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 		loop {
 			if self.current() == None {
-				let r = self.advance();
+				let r = self.advance(err_msg!());
 				if r.is_err() { break; }
 			}
 			
 			if let Some(c) = self.current()
 			&& matches!(c, ' ' | '\t' | '\n')
 			{
-				let _ = self.advance();
+				// safe due to loop check
+				let _ = self.advance(err_msg!());
 				did_consume = true;
 			}
 			else {
@@ -299,7 +318,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			&& matches!(c, 'a'..'z' | 'A'..'Z' | '0'..'9' | '-' | '_' | '.')
 		{
 			chars.push(c);
-			let _ = self.advance();
+			let _ = self.advance(err_msg!("Parsing an identifier"));
 		}
 
 		Ok(chars.into_iter().collect())
@@ -463,7 +482,7 @@ mod test
 			assert_eq!( parser.eat_whitespace(), true );
 
 			if parser.current() != Some('s') {
-				assert_eq!( parser.advance(), Ok(()) );
+				assert_eq!( parser.advance(err_msg!()), Ok(()) );
 				assert_eq!( parser.current(), Some('s') );
 			}
 		});
@@ -573,7 +592,7 @@ mod test
 		|mut parser, _expected| {
 			for chunk in _expected {
 				assert_eq!( parser._chunk, chunk.chars().collect::<Vec<_>>() );
-				let _ = parser.next_line();
+				let _ = parser.next_line(err_msg!());
 			}
 		});
 	}
