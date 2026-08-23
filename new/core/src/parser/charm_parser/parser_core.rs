@@ -171,8 +171,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		let mut did_consume = false;
 
 		while self.current() == Some(' ') {
-			// safe due to loop check
-			let _ = self.advance(err_msg!());
+			let _ = self.advance(err_msg!());  // safe due to loop check
 			did_consume = true;
 		}
 
@@ -188,13 +187,13 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			if self.current() == None {
 				let r = self.advance(err_msg!());
 				if r.is_err() { break; }
+				did_consume = true;
 			}
 			
 			if let Some(c) = self.current()
-			&& matches!(c, ' ' | '\t' | '\n')
+			&& matches!(c, ' ' | '\t')
 			{
-				// safe due to loop check
-				let _ = self.advance(err_msg!());
+				let _ = self.advance(err_msg!());  // safe due to loop check
 				did_consume = true;
 			}
 			else {
