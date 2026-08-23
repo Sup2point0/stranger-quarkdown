@@ -397,6 +397,19 @@ mod test
 		});
 	}
 
+	#[test] fn test_eat_caseless_matches()
+	{
+		test_exact(&[
+			" ",
+			"Test",
+			"Testing TESTING",
+			"tEsTiNg 123",
+		],
+		|mut parser, case| {
+			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase()), Ok(()) );
+		});
+	}
+
 	#[test] fn test_eat_matches()
 	{
 		test_exact(&[
