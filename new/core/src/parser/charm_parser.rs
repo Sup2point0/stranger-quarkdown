@@ -200,6 +200,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// ```
 	fn parse_fields(&mut self) -> ParseResult<HashMap<String, FieldValues>>
 	{
+		let origin = err_msg!("parsing squark charm fields");
+
 		let mut data = HashMap::new();
 
 		loop {
@@ -208,7 +210,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			match self.current() {
 				// done
 				Some('-') => {
-					self.eat("-->", err_msg!("parsing squark charm fields"))?;
+					self.eat("-->", origin)?;
 					break;
 				},
 
@@ -222,7 +224,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 					actual: self.preview(),
 				})?,
 
-				None => self.advance(err_msg!("parsing charm squark fields"))?,  // force error
+				None => self.advance(origin)?,  // force error
 			}
 
 			let (key, value) = self.parse_field()?;
@@ -283,7 +285,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		/// The current value being built.
 		let mut value = str!("");
 
-		let mut can_terminate = false;
+		/* NOTE: Start on `true`, so leading `/ ` is ignored */
+		let mut can_terminate = true;
 
 		self.eat_whitespace();
 
@@ -429,6 +432,23 @@ mod test
 
 			for (found, expected) in flags.into_iter().zip(expected_flags) {
 				assert_eq!( found, *expected );
+			}
+		});
+	}
+
+	#[test] fn parse_field()
+	{
+		test_expected(&[
+			("| field = value", ("field", vec!["value"])),
+			("| field = one / two", ("field", vec!["one", "two"])),
+			("| field = / one / two", ("field", vec!["one", "two"])),
+		],
+		|mut parser, (key, targets)| {
+			let (field, values) = parser.parse_field().unwrap();
+			assert_eq!( field, *key );
+
+			for (left, right) in values.into_iter().zip(targets) {
+				assert_eq!( left, *right );
 			}
 		});
 	}
