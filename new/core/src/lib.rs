@@ -1,9 +1,10 @@
 #![allow(unused_imports)]
 
-mod parser;
+pub mod parser;
 
-mod types;
+pub mod types;
 pub mod log;
+pub mod utils;
 
 pub use types::{
 	SquarkupConfig,

@@ -6,7 +6,7 @@ pub struct SquarkupConfig
 	pub paths: PathsConfig,
 }
 
-struct PathsConfig
+pub struct PathsConfig
 {
 	pub repo: PathBuf,
 	pub site: PathBuf,
