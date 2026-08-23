@@ -2,24 +2,25 @@
 mod parser_core;
 
 
-use std::{
-	collections::HashMap,
-	fs::File,
-	io::{ BufRead, BufReader, Read },
-	iter,
-	assert_matches,
-};
+use tinyvec::TinyVec;
+
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::{ BufRead, BufReader, Read };
+use std::iter;
+use std::assert_matches;
 
 use super::*;
 use crate::{
 	log,
 	FileData, SquarkupConfig,
-	types::SquarkValue,
 	str,
 };
 
 
 type Recoverable = ParseResult;
+
+type FieldValues = TinyVec<[String; 1]>;
 
 
 /// A parser for the charm squark of a file.
@@ -181,7 +182,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	///   ^^^^^^   ^^^^^   ^^^^^   ^^^^^
 	/// -->
 	/// ```
-	fn parse_fields(&mut self) -> ParseResult<HashMap<String, SquarkValue>>
+	fn parse_fields(&mut self) -> ParseResult<HashMap<String, FieldValues>>
 	{
 		let mut data = HashMap::new();
 
@@ -219,13 +220,13 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// 
 	/// ```ts
 	/// <!-- #SQUARK live!
-	/// | field = value
-	/// | field = value
-	///   ^^^^^   ^^^^^
-	/// | field = value
+	/// | field1 = value
+	/// | field2 = value1 / value2
+	///   ^^^^^^   ^^^^^^   ^^^^^^
+	/// | field3 = value1 / value2 / value3
 	/// -->
 	/// ```
-	fn parse_field(&mut self) -> ParseResult<(String, SquarkValue)>
+	fn parse_field(&mut self) -> ParseResult<(String, FieldValues)>
 	{
 		// self.eat("|", "")?;
 

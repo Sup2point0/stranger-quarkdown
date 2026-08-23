@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::SquarkValue;
+use tinyvec::TinyVec;
 
 
 pub struct FileData
@@ -12,7 +12,10 @@ pub struct FileData
 
 impl FileData
 {
-	pub fn init(flags: Vec<String>, fields: HashMap<String, SquarkValue>) -> Self
+	pub fn init(
+		flags: Vec<String>,
+		fields: HashMap<String, TinyVec<[String; 1]>>,
+	) -> Self
 	{
 		unimplemented!()
 	}
