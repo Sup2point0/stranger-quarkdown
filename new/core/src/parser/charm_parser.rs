@@ -6,17 +6,13 @@ use tinyvec::{ TinyVec, tiny_vec };
 
 use super::*;
 use crate::{
-	log, utils,
-	FileData, SquarkupConfig,
-	str,
+	types::*, log, utils,
+	str, strings,
 };
 
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{ BufReader, Read };
-
-
-pub type FieldValues = TinyVec<[String; 4]>;
 
 
 /// A parser for the charm squark of a file.
@@ -80,15 +76,19 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok(out)
 	}
 	
-	/// Run the parser to completion, extracting the metadata from the squark charm (if present) of the target file.
+	/// Run the parser to completion, extracting the metadata from the charm squark (if present) of the target file.
 	pub fn parse(&mut self) -> Option<FileData>
 	{
 		match self._parse()
 		{
-			Ok(r) => Some(r),
+			Ok(Ok(file_data)) => Some(file_data),
+			Ok(Err(file_error)) => {
+				log::err(file_error);
+				None
+			},
 			Err(ParseError::NO_MATCH) => None,
-			Err(e) => {
-				log::err(e);
+			Err(parse_error) => {
+				log::err(parse_error);
 				None
 			},
 		}
@@ -98,9 +98,9 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 /// Parser internals specialised to Squarkdown-Flavoured Markdown.
 impl<'l, Source: Read> CharmParser<'l, Source>
 {
-	fn _parse(&mut self) -> Result<FileData, ParseError>
+	fn _parse(&mut self) -> ParseResult<Result<FileData, FileError>>
 	{
-		self.eat_spaces();
+		self.eat_whitespace();
 		
 		let mut heading = None;
 		if self.current() == Some('#') {
@@ -109,13 +109,16 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 		self.eat_whitespace();
 
-		let mut file_data = self.parse_charm_squark()?;
+		let (flags, fields) = self.parse_charm_squark()?;
 
-		if file_data.heading == None {
-			file_data.heading = heading;
-		}
-		
-		Ok(file_data)
+		Ok(
+			FileData::init(flags, fields, self.config).map(|mut f| {
+				if f.heading == None {
+					f.heading = heading;
+				}
+				return f;
+			})
+		)
 	}
 	
 	/// Parse the `# Heading` element and extract the cleaned heading text.
@@ -129,13 +132,14 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 	
 	/// Parse the `<!-- #SQUARK live! ... -->` charm squark.
-	fn parse_charm_squark(&mut self) -> ParseResult<FileData>
+	fn parse_charm_squark(&mut self) -> ParseResult<(Strings, HashMap<String, Strings>)>
 	{
 		self.try_parse_squark_live()?;
 		let flags = self.parse_flags()?;
+		self.eat_whitespace();
 		let fields = self.parse_fields()?;
 
-		Ok(FileData::init(flags, fields))
+		Ok((flags, fields))
 	}
 
 	/// Attemp to look for `<!-- #SQUARK live!`.
@@ -158,11 +162,11 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// <!-- #SQUARK live! feat! dev! -->
 	///                    ^^^^  ^^^
 	/// ```
-	fn parse_flags(&mut self) -> ParseResult<Vec<String>>
+	fn parse_flags(&mut self) -> ParseResult<Strings>
 	{
 		let when = when!("parsing charm squark flags");
 
-		let mut flags = vec![];
+		let mut flags = strings!();
 
 		self.eat_spaces();
 
@@ -198,7 +202,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	///   ^^^^^^   ^^^^^   ^^^^^   ^^^^^
 	/// -->
 	/// ```
-	fn parse_fields(&mut self) -> ParseResult<HashMap<String, FieldValues>>
+	fn parse_fields(&mut self) -> ParseResult<HashMap<String, Strings>>
 	{
 		let mut data = HashMap::new();
 
@@ -210,7 +214,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			self.eat_whitespace();
 		}
 		
-		self.eat("-->", to!("terminate squark charm"), when!("parsing squark charm fields"))?;
+		self.eat("-->", to!("terminate charm squark"), when!("parsing charm squark fields"))?;
 
 		Ok(data)
 	}
@@ -225,7 +229,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// | field3 = value1 / value2 / value3
 	/// -->
 	/// ```
-	fn parse_field(&mut self) -> ParseResult<(String, FieldValues)>
+	fn parse_field(&mut self) -> ParseResult<(String, Strings)>
 	{
 		let when = when!("parsing charm squark field");
 
@@ -256,12 +260,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// | field = value
 	/// -->
 	/// ```
-	fn parse_values(&mut self) -> ParseResult<FieldValues>
+	fn parse_values(&mut self) -> ParseResult<Strings>
 	{
 		let when = when!("parsing values in charm squark field");
 
 		/// All values collected so far.
-		let mut values = tiny_vec!([String; 4]);
+		let mut values = strings!();
 
 		/// The current value being built.
 		let mut value = str!("");
@@ -383,6 +387,15 @@ mod test
 		});
 	}
 
+	#[test] fn parse_charm_squark_no_data()
+	{
+		let source = Cursor::new("<!-- #SQUARK live! -->");
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+
+		let file_data = parser.parse_charm_squark().unwrap();
+
+	}
+
 	#[test] fn parse_flags_matches()
 	{
 		test_expected(&[
@@ -420,22 +433,22 @@ mod test
 
 	#[test] fn parse_fields_usual()
 	{
-		let cursor = Cursor::new("
+		let source = Cursor::new("
 | field = value
 | fields = one / two / three
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
-		let data = parser.parse_fields().unwrap();
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+		let fields = parser.parse_fields().unwrap();
 
-		assert!( data.contains_key("field") );
-		let field = &mut data["field"].iter();
+		assert!( fields.contains_key("field") );
+		let field = &mut fields["field"].iter();
 		assert_eq!( field.next(), Some(&str!("value")) );
 		assert_eq!( field.next(), None );
 
-		assert!( data.contains_key("fields") );
-		let field = &mut data["fields"].iter();
+		assert!( fields.contains_key("fields") );
+		let field = &mut fields["fields"].iter();
 		assert_eq!( field.next(), Some(&str!("one")) );
 		assert_eq!( field.next(), Some(&str!("two")) );
 		assert_eq!( field.next(), Some(&str!("three")) );

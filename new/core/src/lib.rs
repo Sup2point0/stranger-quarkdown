@@ -9,6 +9,6 @@ pub mod log;
 pub mod utils;
 
 pub use types::{
-	SquarkupConfig,
-	FileData,
+	SquarkupConfig, FileData,
+	Strings,
 };
