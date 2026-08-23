@@ -82,36 +82,33 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 {
 	fn _parse(&mut self) -> Result<FileData, ParseError>
 	{
-		self.eat_spaces()?;
+		self.eat_spaces();
 		
 		let mut heading = None;
-		
 		if self.current() == Some('#') {
 			heading = Some(self.parse_heading()?);
 		}
+
+		self.eat_whitespace();
+
+		let mut file_data = self.parse_charm_squark()?;
+
+		if file_data.heading == None {
+			file_data.heading = heading;
+		}
 		
-		self.parse_charm()?;
-		
-		Ok(FileData {
-			dest: "TODO".to_string(),
-			heading,
-		})
+		Ok(file_data)
 	}
 	
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
 		self.eat("#")?;
-		self.eat_spaces()?;
+		self.eat_spaces();
 
-		let mut heading: String = self._chunk[self._index..].iter().collect();
-
-		let content = heading.trim_end();
-		heading.truncate(content.len());
-
-		Ok(heading)
+		Ok(self._chunk[self._index..].iter().collect())
 	}
 	
-	fn parse_charm(&mut self) -> ParseResult
+	fn parse_charm_squark(&mut self) -> ParseResult<FileData>
 	{
 		unimplemented!()
 	}
@@ -147,12 +144,19 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 
 		self._chunk = self._chunk_buffer.chars().collect();
+
+		if self._chunk.last() == Some(&'\n') {
+			self._chunk.pop();
+		}
+
 		self._index = 0;
 
 		Ok(())
 	}
 
 	/// Proceed to the next character in the source text.
+	/// 
+	/// If we're at the end of the current line, this reads in a new line.
 	fn advance(&mut self) -> ParseResult
 	{
 		if self.current() == None {
@@ -186,15 +190,44 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		}
 	}
 	
-	/// Consume 0 or more space characters.
-	fn eat_spaces(&mut self) -> ParseResult
+	/// Consume 0 or more space characters. Returns `true` if any characters were consumed.
+	fn eat_spaces(&mut self) -> bool
 	{
+		let mut did_consume = false;
+
 		while self.current() == Some(' ') {
 			let r = self.advance();
-			debug_assert!(r.is_ok());
+			debug_assert!(r.is_ok(), "guaranteed from `while` check");
+			did_consume = true;
 		}
 
-		Ok(())
+		did_consume
+	}
+
+	/// Consume 0 more whitespace characters, including tabs and newlines. Returns `true` if any characters were consumed.
+	fn eat_whitespace(&mut self) -> bool
+	{
+		let mut did_consume = false;
+
+		loop {
+			if self.current() == None {
+				let r = self.advance();
+				if r.is_err() { break; }
+			}
+			
+			if let Some(c) = self.current()
+			&& matches!(c, ' ' | '\t' | '\n')
+			{
+				let r = self.advance();
+				debug_assert!(r.is_ok(), "guaranteed from `while` check");
+				did_consume = true;
+			}
+			else {
+				break;
+			}
+		}
+
+		did_consume
 	}
 }
 
@@ -217,7 +250,10 @@ mod test
 		}
 	}
 
-	fn test_expected(cases: &[(&'static str, &'static str)], test: impl Fn(CharmParser<Cursor<&&str>>, &str))
+	fn test_expected<X>(
+		cases: &[(&'static str, X)],
+		test: impl Fn(CharmParser<Cursor<&&str>>, &X),
+	)
 	{
 		for (source, expected) in cases {
 			let cursor = Cursor::new(source);
@@ -227,7 +263,8 @@ mod test
 		}
 	}
 
-	#[test] fn test_parse_heading_matches_single_line() {
+	#[test] fn test_parse_heading_matches_single_line()
+	{
 		test_expected(&[
 			("#",             ""),
 			("# ",            ""),
@@ -235,12 +272,12 @@ mod test
 			("# Suppety Sup", "Suppety Sup"),
 		],
 		|mut parser, expected| {
-			let r = parser.parse_heading();
-			assert_eq!(r, Ok(str!(expected)));
+			assert_eq!( parser.parse_heading(), Ok(str!(*expected)) );
 		});
 	}
 
-	#[test] fn test_parse_heading_matches_multi_line() {
+	#[test] fn test_parse_heading_matches_multi_line()
+	{
 		test_expected(&[
 			("#\nDECOY",             ""),
 			("# \nDECOY",            ""),
@@ -248,24 +285,105 @@ mod test
 			("# Suppety Sup\nDECOY", "Suppety Sup"),
 		],
 		|mut parser, expected| {
-			let r = parser.parse_heading();
-			assert_eq!(r, Ok(str!(expected)));
+			assert_eq!( parser.parse_heading(), Ok(str!(*expected)) );
 		});
 	}
 
-	#[test] fn test_parse_heading_fails() {
+	#[test] fn test_parse_heading_fails()
+	{
 		test_exact(&[
 			" ",
 			"Sup",
 			"Don't Do It",
 		],
 		|mut parser, _case| {
-			let r = parser.parse_heading();
-			assert_eq!(r, Err(ParseError::NoMatch))
+			assert_eq!( parser.parse_heading(), Err(ParseError::NoMatch) );
 		});
 	}
 
-	#[test] fn test_eat_spaces_matches() {
+	#[test] fn test_eat_whitespace_matches()
+	{
+		test_exact(&[
+			" ",
+			"  ",
+			"        ",
+			" \n",
+			"\n ",
+			" \n ",
+			" \n \n\n",
+			"\t",
+			" \n\t ",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_whitespace(), true );
+			assert_eq!( parser.current(), None );
+		});
+	}
+
+	#[test] fn test_eat_whitespace_stops()
+	{
+		test_exact(&[
+			" stop",
+			"  stop",
+			"        stop",
+			" \nstop",
+			"\n stop",
+			" \n stop",
+			" \n \n\nstop",
+			"\tstop",
+			" \n\t stop",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_whitespace(), true );
+
+			if parser.current() != Some('s') {
+				assert_eq!( parser.advance(), Ok(()) );
+				assert_eq!( parser.current(), Some('s') );
+			}
+		});
+	}
+
+	#[test] fn test_eat_spaces_matches()
+	{
+		test_exact(&[
+			" ",
+			"  ",
+			"        ",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_spaces(), true );
+			assert_eq!( parser.current(), None );
+		});
+	}
+
+	#[test] fn test_eat_spaces_stops()
+	{
+		test_exact(&[
+			" stop",
+			" stop ",
+			"  stop ",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_spaces(), true );
+			assert_eq!( parser.current(), Some('s') );
+		});
+	}
+
+	#[test] fn test_eat_spaces_fails()
+	{
+		test_exact(&[
+			"nothing",
+			"nothing ",
+			"n othing ",
+		],
+		|mut parser, _case| {
+			assert_eq!( parser.eat_spaces(), false );
+			assert_eq!( parser.current(), Some('n') );
+		});
+	}
+
+	#[test] fn test_eat_whitespace()
+	{
 		test_exact(&[
 			" ",
 			"  ",
@@ -275,12 +393,12 @@ mod test
 			"nothing",
 		],
 		|mut parser, case| {
-			let r = parser.eat(case);
-			assert_eq!(r, Ok(()));
+			assert_eq!( parser.eat(case), Ok(() ))
 		});
 	}
 
-	#[test] fn test_eat_matches() {
+	#[test] fn test_eat_matches()
+	{
 		test_exact(&[
 			" ",
 			"test",
@@ -288,12 +406,12 @@ mod test
 			"testing 123",
 		],
 		|mut parser, case| {
-			let r = parser.eat(case);
-			assert_eq!(r, Ok(()));
+			assert_eq!( parser.eat(case), Ok(()) );
 		});
 	}
 
-	#[test] fn test_eat_fails() {
+	#[test] fn test_eat_fails()
+	{
 		test_exact(&[
 			" ",
 			"test",
@@ -301,8 +419,23 @@ mod test
 			"testing 123",
 		],
 		|mut parser, _case| {
-			let r = parser.eat("FAIL");
-			assert_eq!(r, Err(ParseError::NoMatch));
+			assert_eq!( parser.eat("FAIL"), Err(ParseError::NoMatch) );
+		});
+	}
+
+	#[test] fn test_next_line()
+	{
+		test_expected(&[
+			(
+				"# Sup\n<!-- #SQUARK live! -->\n\nSup, World!\n",
+				["# Sup", "<!-- #SQUARK live! -->", "", "Sup, World!"],
+			)
+		],
+		|mut parser, _expected| {
+			for chunk in _expected {
+				assert_eq!( parser._chunk, chunk.chars().collect::<Vec<_>>() );
+				let _ = parser.next_line();
+			}
 		});
 	}
 }
