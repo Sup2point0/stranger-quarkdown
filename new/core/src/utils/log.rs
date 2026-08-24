@@ -5,13 +5,6 @@ use super::colours::*;
 use std::fmt::Display;
 
 
-/// Log Squarkdown's initial message on startup.
-#[macro_export]
-macro_rules! started {
-	() => { log_started() };
-}
-pub use started;
-
 /// Log an action that Squarkdown is about to perform, to set up expectations.
 #[macro_export] macro_rules! is {
 	($var:ident)   => { $crate::utils::log::log_is(format!("{}", $var)) };
@@ -36,14 +29,6 @@ pub use started;
 	($($args:tt)*) => { $crate::utils::log::log_bad(format!($($args)*)) };
 } pub use bad;
 
-
-fn log_started()
-{
-	// FIXME
-	println!("{PINK}Squarkdown v{}", "4.0");
-	println!("{GREY}----------------");
-	log_is("squarking up...");
-}
 
 pub fn log_is(msg: impl Display)   { println!("  {}› {}{}", GREY, YELLOW, msg); }
 pub fn log_info(msg: impl Display) { println!("  {}› {}",   GREY, msg); }

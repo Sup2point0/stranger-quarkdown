@@ -9,16 +9,43 @@ use squarkdown::{
 use std::fs::File;
 
 
-fn main() -> Result<(), Box<dyn std::error::Error>>
+fn main() -> Result<(), ()>
 {
-	let project_root = resolver::resolve_project_root();
+	println!("{PINK}Squarkdown v{}", "4.0");
+	println!("{GREY}—————————————————————");
+	log::is!("squarking up...");
+
+	match squarkup()
+	{
+		Ok(_) => {
+			log::ok!("squarkup finished!");
+			println!("{GREY}—————————————————————");
+			Ok(())
+		},
+		Err(e) => {
+			log::bad!(e);
+			Err(())
+		},
+	}
+}
+
+/// Run squarkup on the user's project.
+/// 
+/// Returns:
+/// 
+/// - `Ok(true)` if squarkup was attempted and was successful
+/// - `Err(msg)` if squarkup was attempted but failed
+/// - `Ok(false)` if no squarkup was attempted
+fn squarkup() -> Result<bool, String>
+{
+	let project_root = resolver::resolve_project_root()?;
 	let config = resolver::load_config(project_root);
 	
 	let files = resolver::find_files(&config);
 	
 	if files.is_empty() {
 		log::bad!("No files found to squarkup, exiting!");
-		return Ok(());
+		return Ok(false);
 	} else {
 		log::ok!("Found ")
 	}
@@ -44,5 +71,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
 		renderer.render(&config)?;
 	}
 	
-	Ok(())
+	Ok(true)
 }
