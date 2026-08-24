@@ -1,5 +1,6 @@
 use crate::{
 	SquarkupConfig, SquarkResult, SquarkError,
+	utils::log,
 	utils::colours::*,
 	utils::macros::*,
 };
@@ -16,14 +17,21 @@ enum Extension { TOML, JSON }
 /// Find, read, load and validate the user's squarkup configuration, either in `squarkup.toml` or `squarkup.json`.
 pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 {
+	log::is!("resolving config...");
+
 	let (filepath, ext) = find_config(&root)?;
+	log::ok!("found your squarkup config: {BLUE}{}", filepath.display());
 
 	let mut config = SquarkupConfig::init_defaults(root.clone());
 
 	match ext {
 		Extension::TOML => {
+			log::info!("reading config...");
 			let data = read_toml_config(filepath)?;
+			log::info!("read successful");
+			log::info!("validating config...");
 			config.set_from_toml(data)?;
+			log::ok!("config looks good, all set!");
 		},
 		Extension::JSON => {
 			unimplemented!()
@@ -46,7 +54,7 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 
 	Err(SquarkError::Unrecoverable {
 		msg: str!("could not find your squarkup configuration file"),
-		hint: format!("make sure you have either a {WHITE}.squarkdown/{RED} folder, or a {WHITE}squarkup.toml{RED} or {WHITE}squarkup.json{RED} file, in the root of your project"),
+		hint: format!("make sure you have either a {WHITE}.squarkdown/{GREEN} folder, or a {WHITE}squarkup.toml{GREEN} or {WHITE}squarkup.json{GREEN} file, in the root of your project"),
 		debug: vec![format!(
 			"looked in {WHITE}{}{GREY} and {WHITE}{}",
 			root.display(),

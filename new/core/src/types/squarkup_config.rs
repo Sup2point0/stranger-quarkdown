@@ -95,15 +95,17 @@ impl SquarkupConfig
 	{
 		let mut errs = vec![];
 
+		// TODO finish implementing fields
+
 		if let Some(paths) = data.get("paths")
 		{
 			match paths.get("site") {
 				Some(toml::Value::String(dir)) => {
-					let path = self.paths.root.join(dir);
+					let path = self.paths.root.join(dir.trim_start_matches("/"));
 					if !path.exists() {
 						errs.push(SquarkError::Unrecoverable {
 							msg: str!("the directory you specified for your SvelteKit site doesn't exist!"),
-							hint: format!("{YELLOW}paths.site{WHITE} is relative from the root directory of your project"),
+							hint: format!("{WHITE}paths.site{GREEN} is relative from the root directory of your project"),
 							debug: vec![format!("{} is not a valid directory", path.display())],
 						});
 					}
@@ -112,7 +114,7 @@ impl SquarkupConfig
 				Some(v) => {
 					errs.push(SquarkError::Unrecoverable {
 						msg: format!("you provided a {} for {YELLOW}paths.site{RED}", v.type_str()),
-						hint: format!("{YELLOW}paths.site{WHITE} must be a string"),
+						hint: format!("{WHITE}paths.site{GREEN} must be a string"),
 						debug: vec![],
 					});
 				},
