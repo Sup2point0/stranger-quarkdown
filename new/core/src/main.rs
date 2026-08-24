@@ -12,18 +12,20 @@ use std::fs::File;
 fn main() -> Result<(), ()>
 {
 	println!("{PINK}Squarkdown v{}", "4.0");
-	println!("{GREY}—————————————————————");
+	println!("{GREY}─────────────────────");
 	log::is!("squarking up...");
 
 	match squarkup()
 	{
 		Ok(_) => {
-			log::ok!("squarkup finished!");
-			println!("{GREY}—————————————————————");
+			println!("{GREY}─────────────────────");
+			println!("{PINK}squarkup finished!");
 			Ok(())
 		},
 		Err(e) => {
 			log::bad!(e);
+			println!("{GREY}─────────────────────");
+			println!("{RED}squarkup failed!");
 			Err(())
 		},
 	}
@@ -36,9 +38,11 @@ fn main() -> Result<(), ()>
 /// - `Ok(true)` if squarkup was attempted and was successful
 /// - `Err(msg)` if squarkup was attempted but failed
 /// - `Ok(false)` if no squarkup was attempted
-fn squarkup() -> Result<bool, String>
+fn squarkup() -> Result<bool, Box<dyn std::error::Error>>
 {
 	let project_root = resolver::resolve_project_root()?;
+	log::ok!("found your project: {BLUE}{}", project_root.display());
+
 	let config = resolver::load_config(project_root);
 	
 	let files = resolver::find_files(&config);

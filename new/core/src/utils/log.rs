@@ -30,8 +30,8 @@ use std::fmt::Display;
 } pub use bad;
 
 
-pub fn log_is(msg: impl Display)   { println!("  {}› {}{}", GREY, YELLOW, msg); }
-pub fn log_info(msg: impl Display) { println!("  {}› {}",   GREY, msg); }
-pub fn log_ok(msg: impl Display)   { println!("  {}✓ {}",   BLUE, msg); }
-pub fn log_bad(msg: impl Display)  { println!("  {}× {}",   RED, msg); }
-pub fn log_hint(msg: impl Display) { println!("  {}= {}",   GREEN, msg); }
+pub fn log_is(msg:   impl Display) { println!(" {}› {}{}", GREY, YELLOW, msg); }
+pub fn log_info(msg: impl Display) { println!(" {}› {}",   GREY, msg); }
+pub fn log_ok(msg:   impl Display) { println!(" {}✓ {}",   CYAN, msg); }
+pub fn log_bad(msg:  impl Display) { println!(" {}× {}",   RED, msg); }
+pub fn log_hint(msg: impl Display) { println!(" {}= {}",   GREEN, msg); }
