@@ -4,8 +4,8 @@ macro_rules! str {
 		String::from($t)
 	};
 }
-
 pub(crate) use str;
+
 
 #[macro_export]
 macro_rules! a_str {
@@ -13,8 +13,20 @@ macro_rules! a_str {
 		|| String::from($t)
 	};
 }
-
 pub(crate) use a_str;
+
+
+#[macro_export]
+macro_rules! strings
+{
+	() => {
+		tiny_vec!([String; 4])
+	};
+	($value:expr $(, $rest:expr)* $(,)?) => {
+		tiny_vec!([String; 4] => str!($value) $(, str!($rest))*)
+	};
+}
+pub(crate) use strings;
 
 
 #[macro_export]
@@ -23,5 +35,4 @@ macro_rules! dir {
 		$base$(.join($part))*
 	};
 }
-
 pub(crate) use dir;
