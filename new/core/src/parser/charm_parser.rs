@@ -77,12 +77,12 @@ impl<Source: Read> CharmParser<Source>
 	/// Run the parser to completion, extracting the heading and charm squark of the source.
 	/// 
 	/// If the file is active (has `#SQUARK live!`), this extracts the metadata from the charm squark and returns `Some(FileData)`. Otherwise, it returns `None` for an inactive file.
-	pub fn parse(&mut self, config: &SquarkupConfig) -> Result<Option<FileData>, Box<dyn Error>>
+	pub fn parse(&mut self, config: &SquarkupConfig) -> Result<Option<PageData>, Box<dyn Error>>
 	{
 		match self._parse(config)
 		{
 			// happy
-			Ok(Ok(file_data))           => Ok(Some(file_data)),
+			Ok(Ok(page_data))           => Ok(Some(page_data)),
 			Err(ParseFailure::NO_MATCH) => Ok(None),
 
 			// error
@@ -95,7 +95,7 @@ impl<Source: Read> CharmParser<Source>
 /// Parser internals specialised to Squarkdown-Flavoured Markdown.
 impl<Source: Read> CharmParser<Source>
 {
-	fn _parse(&mut self, config: &SquarkupConfig) -> ParseResult<Result<FileData, FileError>>
+	fn _parse(&mut self, config: &SquarkupConfig) -> ParseResult<Result<PageData, CharmError>>
 	{
 		self.eat_whitespace();
 		
@@ -110,7 +110,7 @@ impl<Source: Read> CharmParser<Source>
 
 		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
 
-		Ok(FileData::init(flags, fields, config))
+		Ok(PageData::init(flags, fields, config))
 	}
 	
 	/// Parse the `# Heading` element, extracting the cleaned heading text.

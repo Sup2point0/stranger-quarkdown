@@ -24,9 +24,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
 	for filepath in files {
 		let mut parser = CharmParser::init(File::open(filepath)?)?;
 		
-		if let Some(file_data) = parser.parse(&config) {
+		if let Some(page_data) = parser.parse(&config)? {
 			log::ok!("found active file: {BLUE}{filepath}");
-			site_data.set(filepath, file_data);
+			site_data.set(filepath, page_data);
 		}
 	}
 	

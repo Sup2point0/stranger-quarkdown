@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Clone, Debug, Error, PartialEq, Eq)]
-pub enum FileError
+pub enum CharmError
 {
 	#[error("missing field: {field}")]
 	MissingField {

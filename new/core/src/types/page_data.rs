@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct FileData
+pub struct PageData
 {
 	// TODO link to source file
 	
@@ -32,16 +32,16 @@ pub struct FileData
 	pub other: HashMap<String, Strings>,
 }
 
-impl FileData
+impl PageData
 {
 	pub fn init(
 		flags: Strings,
 		mut fields: HashMap<String, Strings>,
 		config: &SquarkupConfig,
-	) -> Result<Self, FileError>
+	) -> Result<Self, CharmError>
 	{
 		let dest = Self::take1(&mut fields, "destination", "dest")
-			.ok_or_else(|| FileError::MissingField { field: str!("dest") })?;
+			.ok_or_else(|| CharmError::MissingField { field: str!("dest") })?;
 		
 		let heading      = Self::take1(&mut fields, "heading", "head");
 		let title        = Self::take1(&mut fields, "title", "title").or_else(|| heading.clone());
@@ -58,19 +58,21 @@ impl FileData
 		let mut cleanse = vec![];
 
 		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or(vec![]) {
-			let Ok(value) = raw.clone().try_into() else {
-				let err = FileError::InvalidValue {
-					field: str!("cleanse"),
-					value: raw,
-				};
+			match raw.clone().try_into()
+			{
+				Ok(value) => cleanse.push(value),
+				Err(_) => {
+					let err = CharmError::InvalidValue {
+						field: str!("cleanse"),
+						value: raw,
+					};
 
-				match config.errors.on_error {
-					ErrorAction::KILL => return Err(err),
-					ErrorAction::WARN => { log::bad!(err); continue; },
+					match config.errors.on_error {
+						ErrorAction::KILL => return Err(err),
+						ErrorAction::WARN => { log::bad!(err); continue; },
+					}
 				}
 			};
-
-			cleanse.push(value);
 		}
 
 		Ok(Self {
