@@ -15,7 +15,7 @@ pub struct SquarkupConfig
 pub struct PathsConfig
 {
 	/// The root directory of the user's project, from which squarkup begins.
-	pub repo: PathBuf,
+	pub root: PathBuf,
 
 	/// The directory containing the user's SvelteKit site.
 	pub site: PathBuf,

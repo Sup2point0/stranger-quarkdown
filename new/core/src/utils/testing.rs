@@ -15,7 +15,7 @@ lazy_static!
 	pub static ref TEST_CONFIG: SquarkupConfig = SquarkupConfig
 	{
 		paths: PathsConfig {
-			repo: dir!(TESTS / "test-project"),
+			root: dir!(TESTS / "test-project"),
 			site: dir!(TESTS / "test-project/test-site"),
 			dest: dir!(TESTS / "test-project/test-site/src/routes/test-gen"),
 			sources: vec![str!("content")],
