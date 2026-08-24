@@ -174,7 +174,18 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		while let Some(c) = self.current()
 			&& c != '\n'
 		{
-			let ident = self.parse_ident(when)?;
+			let ident = match self.parse_ident(when) {
+				Ok(ident) => ident,
+
+				/* NOTE:
+					This means we've seen a `-` which starts the terminating `-->`.
+
+					Or the user genuinely used an illegal identifier... maybe we can handle that properly in future
+				*/
+				Err(ParseFailure::IllegalInput{..}) => break,
+
+				Err(e) => return Err(e),
+			};
 
 			if self.current() == Some('!') {
 				flags.push(ident);
@@ -182,7 +193,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			else {
 				self.errors.push(ParseFailure::MissingInput {
 					when: when(),
-					expected: format!("{ident}!"),
+					expected: format!("{ident}! (flags must end in !)"),
 					actual: ident,
 				});
 			}
