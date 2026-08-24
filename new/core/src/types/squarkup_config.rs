@@ -30,6 +30,7 @@ pub struct PathsConfig
 	pub dest: PathBuf,
 	
 	pub sources: Vec<String>,
+	pub include: Vec<String>,
 	pub exclude: Vec<String>,
 }
 
@@ -82,6 +83,7 @@ impl SquarkupConfig
 				site: root.clone(),
 				dest: root.join("src/routes/"),
 				sources: vec![],
+				include: vec![str!("\\.md$"), str!("\\.svx$")],
 				exclude: vec![],
 			},
 			errors: Default::default(),
