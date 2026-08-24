@@ -3,7 +3,12 @@ pub enum FileError
 {
 	MissingField {
 		field: String,
-	}
+	},
+
+	InvalidValue {
+		field: String,
+		value: String,
+	},
 }
 
 impl std::error::Error for FileError {}
@@ -14,7 +19,8 @@ impl std::fmt::Display for FileError
 	{
 		match self
 		{
-			Self::MissingField { field } => write!(f, "missing field: {field}")
+			Self::MissingField { field } => write!(f, "missing field: {field}"),
+			Self::InvalidValue { field, value } => write!(f, "invalid value: {value}, for field: {field}"),
 		}
 	}
 }
