@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::fmt::Display;
 
 
@@ -17,15 +19,19 @@ const CYAN:   &str = "\033[96m";
 macro_rules! started {
 	() => { log_started() };
 }
+pub(crate) use started;
 
 /// Log an error, failure or issue the user should be aware of.
-#[macro_export]
 macro_rules! bad
 {
+	($msg:expr) => {
+		$crate::utils::log::log_bad(format!("{}", $msg))
+	};
 	($msg:literal $(, $args:expr)* $(,)?) => {
-		log_err(format!($msg, $(, $args)*))
+		log_bad(format!($msg, $(, $args)*))
 	};
 }
+pub(crate) use bad;
 
 
 fn log_started()
@@ -36,8 +42,8 @@ fn log_started()
 	log_state("squarking up...");
 }
 
-fn log_state(msg: impl Display) { println!("  {}› {}{}", GREY, YELLOW, msg); }
-fn log_info(msg: impl Display)  { println!("  {}› {}",   GREY, msg); }
-fn log_good(msg: impl Display)  { println!("  {}✓ {}",   BLUE, msg); }
-fn log_bad(msg: impl Display)   { println!("  {}× {}",   RED, msg); }
-fn log_hint(msg: impl Display)  { println!("  {}= {}",   GREEN, msg); }
+pub(crate) fn log_state(msg: impl Display) { println!("  {}› {}{}", GREY, YELLOW, msg); }
+pub(crate) fn log_info(msg: impl Display)  { println!("  {}› {}",   GREY, msg); }
+pub(crate) fn log_good(msg: impl Display)  { println!("  {}✓ {}",   BLUE, msg); }
+pub(crate) fn log_bad(msg: impl Display)   { println!("  {}× {}",   RED, msg); }
+pub(crate) fn log_hint(msg: impl Display)  { println!("  {}= {}",   GREEN, msg); }
