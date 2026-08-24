@@ -96,7 +96,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		{
 			match self.current() {
 				Some(c) if c != expected => {
-					return Err(ParseError::UnexpectedInput {
+					return Err(ParseFailure::UnexpectedInput {
 						when: when(),
 						expected: format!("{} to {}", target, to()),
 						actual: self.preview(),
@@ -120,7 +120,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		{
 			if self.current() != Some(expected) {
 				self._index = init;
-				return Err(ParseError::NO_MATCH);
+				return Err(ParseFailure::NO_MATCH);
 			}
 			self.advance(when!())?;
 		}
@@ -141,7 +141,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 			match self.current() {
 				Some(c) if c.to_ascii_lowercase() != expected => {
-					return Err(ParseError::UnexpectedInput {
+					return Err(ParseFailure::UnexpectedInput {
 						when: when(),
 						expected: format!("{} {}", target, to()),
 						actual: self.preview(),
@@ -165,7 +165,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 			expected.make_ascii_lowercase();
 
 			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
-				return Err(ParseError::NO_MATCH);
+				return Err(ParseFailure::NO_MATCH);
 			}
 			self.advance(when!())?;
 		}
@@ -240,7 +240,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 	
 	#[test] fn advance_and_current_multi_line()
@@ -257,7 +257,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 
 	#[test] fn advance_and_peek_single_line()
@@ -273,7 +273,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 
 	#[test] fn advance_and_peek_multi_line()
@@ -290,7 +290,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(when!()), Err(ParseError::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 
 	#[test] fn preview()
@@ -329,7 +329,7 @@ mod test
 			"testing 123",
 		],
 		|mut parser, _case| {
-			assert_matches!( parser.eat("FAIL", when!(), when!()), Err(ParseError::UnexpectedInput{..}) );
+			assert_matches!( parser.eat("FAIL", when!(), when!()), Err(ParseFailure::UnexpectedInput{..}) );
 		});
 	}
 

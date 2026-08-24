@@ -1,18 +1,21 @@
-pub type ParseResult<T = ()> = Result<T, ParseError>;
+pub type ParseResult<T = ()> = Result<T, ParseFailure>;
 
 /// Indicates that a function only errors with [`ParseError::NO_MATCH`].
 pub type Recoverable = ParseResult;
 
 
-/// An error encountered while parsing the charm squark.
+/// A possible error that should be propagated.
 /// 
-/// All except `NO_MATCH` are critical and will terminate the parser.
+/// `NO_MATCH` and `DONE` are non-critical status indicators for short-circuiting. The rest are critical errors that terminate the parser.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum ParseError
+pub enum ParseFailure
 {
 	/// A speculative parse was unsuccessful, so the parser should fallback to something else.
 	#[allow(non_camel_case_types)]
 	NO_MATCH,
+
+	/// The parser finished parsing what it needed to, and can safely exit.
+	DONE,
 
 	/// The parser unexpectedly reached the end of its source.
 	FatalEnd {
@@ -35,9 +38,9 @@ pub enum ParseError
 	},
 }
 
-impl std::error::Error for ParseError {}
+impl std::error::Error for ParseFailure {}
 
-impl std::fmt::Display for ParseError
+impl std::fmt::Display for ParseFailure
 {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
 	{

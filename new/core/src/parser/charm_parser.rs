@@ -22,7 +22,7 @@ pub struct CharmParser<'l, Source: Read = File>
 	config: &'l SquarkupConfig,
 
 	/// Non-crashing errors to report to the user.
-	errors: Vec<ParseError>,
+	errors: Vec<ParseFailure>,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
 	///
@@ -58,7 +58,7 @@ pub struct CharmParser<'l, Source: Read = File>
 impl<'l, Source: Read> CharmParser<'l, Source>
 {
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
-	pub fn init(file: Source, config: &'l SquarkupConfig) -> Result<Self, ParseError>
+	pub fn init(file: Source, config: &'l SquarkupConfig) -> Result<Self, ParseFailure>
 	{
 		let mut out = Self {
 			config,
@@ -86,7 +86,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				log::err(file_error);
 				None
 			},
-			Err(ParseError::NO_MATCH) => None,
+			Err(ParseFailure::NO_MATCH) => None,
 			Err(parse_error) => {
 				log::err(parse_error);
 				None
@@ -142,7 +142,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		Ok((flags, fields))
 	}
 
-	/// Attemp to look for `<!-- #SQUARK live!`.
+	/// Attempt to look for `<!-- #SQUARK live!`.
 	/// 
 	/// If found, set `.is_live: true`; otherwise return `NO_MATCH`.
 	fn try_parse_squark_live(&mut self) -> Recoverable
@@ -150,6 +150,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self.try_eat("<!--")?;
 		self.eat_whitespace(); self.try_eat("#")?;
 		self.eat_spaces(); self.try_eat_caseless("SQUARK")?;
+		// TODO notify if live! not found
 		self.eat_spaces(); self.try_eat_caseless("live!")?;
 
 		self.is_live = true;
@@ -179,7 +180,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 				flags.push(ident);
 			}
 			else {
-				self.errors.push(ParseError::MissingInput {
+				self.errors.push(ParseFailure::MissingInput {
 					when: when(),
 					expected: format!("{ident}!"),
 					actual: ident,
@@ -334,9 +335,9 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	fn err_eof(&self, when: impl Fn() -> String) -> ParseResult
 	{
 		Err(if self.is_live {
-			ParseError::FatalEnd { when: when() }
+			ParseFailure::FatalEnd { when: when() }
 		} else {
-			ParseError::NO_MATCH
+			ParseFailure::NO_MATCH
 		})
 	}
 }
@@ -345,6 +346,8 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 #[cfg(test)]
 mod test
 {
+	use tinyvec::tiny_vec;
+
 	use crate::parser::*;
 	use crate::utils::*;
 	
@@ -383,7 +386,7 @@ mod test
 			"Don't Do It",
 		],
 		|mut parser, _case| {
-			assert_matches!( parser.parse_heading(), Err(ParseError::UnexpectedInput{..}) );
+			assert_matches!( parser.parse_heading(), Err(ParseFailure::UnexpectedInput{..}) );
 		});
 	}
 
