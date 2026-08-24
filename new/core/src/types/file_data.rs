@@ -9,6 +9,8 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct FileData
 {
+	// TODO link to source file
+	
 	pub flags: Strings,
 	pub dest: String,
 

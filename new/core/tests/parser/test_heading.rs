@@ -1,7 +1,7 @@
 use std::io::Cursor;
 
-use squarkup::parser::CharmParser;
-use squarkup::utils::testing::*;
+use squarkdown::CharmParser;
+use squarkdown::utils::testing::*;
 
 use crate::macros::*;
 // ## Heading
