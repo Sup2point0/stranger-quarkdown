@@ -71,41 +71,59 @@ pub enum FileAction
 
 impl SquarkupConfig
 {
-	pub fn try_from_toml(data: toml::Table, root: PathBuf) -> SquarkResult<Self>
+	/// Construct a `SquarkupConfig` with defaults applied and *resolved* against `root`.
+	/// 
+	/// We can't implement `Default` because paths depend on the project `root`, which is only available at runtime!
+	pub fn init_defaults(root: PathBuf) -> Self
 	{
-		// let site_raw = (|| {
-		// 	let paths = data.get("paths")?;
-		// 	let raw = paths.get("site")?;
-		// 	let site = raw.as_str()?;
-		// 	let full = root.join(site.to_string())
-		// 	Some(full)
-		// })().unwrap_or(root);
-
-		let mut errs = vec![];
-
-		let out = Self {
+		Self {
 			paths: PathsConfig {
 				root: root.clone(),
-				site: match &data["paths"]["site"] {
-					toml::Value::String(str) => root.clone().join(str),
-					v => {
-						errs.push(SquarkError::Recoverable {
-							msg: format!("{WHITE}paths.site{RED} must be a string, but you gave: {v}"),
-						});
-						root.clone()
-					},
-				},
-				dest: PathBuf::new(),
+				site: root.clone(),
+				dest: root.join("src/routes/"),
 				sources: vec![],
 				exclude: vec![],
 			},
 			errors: Default::default(),
-		};
+		}
+	}
+
+	/// Load the settings specified in TOML `data` into the config, and validate their values.
+	/// 
+	/// Returns `Err(SquarkError::ManyRecoverable)` only if nonzero errors are encountered.
+	pub fn set_from_toml(&mut self, data: toml::Table) -> SquarkResult
+	{
+		let mut errs = vec![];
+
+		if let Some(paths) = data.get("paths")
+		{
+			match paths.get("site") {
+				Some(toml::Value::String(dir)) => {
+					let path = self.paths.root.join(dir);
+					if !path.exists() {
+						errs.push(SquarkError::Unrecoverable {
+							msg: str!("the directory you specified for your SvelteKit site doesn't exist!"),
+							hint: format!("{YELLOW}paths.site{WHITE} is relative from the root directory of your project"),
+							debug: vec![format!("{} is not a valid directory", path.display())],
+						});
+					}
+					self.paths.site = path;
+				},
+				Some(v) => {
+					errs.push(SquarkError::Unrecoverable {
+						msg: format!("you provided a {} for {YELLOW}paths.site{RED}", v.type_str()),
+						hint: format!("{YELLOW}paths.site{WHITE} must be a string"),
+						debug: vec![],
+					});
+				},
+				None => todo!(),
+			}
+		}
 
 		if errs.is_empty() {
-			Ok(out)
+			Ok(())
 		} else {
-			Err(SquarkError::ManyRecoverable { errors: errs })
+			Err(SquarkError::ManyRecoverable { errs })
 		}
 	}
 }
