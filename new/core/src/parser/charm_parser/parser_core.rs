@@ -160,11 +160,14 @@ impl<Source: Read> CharmParser<Source>
 	/// Attempt to consume `target` disregarding casing, returning `NO_MATCH` on failure.
 	pub(super) fn try_eat_caseless(&mut self, target: &str) -> Recoverable
 	{
+		let init = self._index;
+
 		for mut expected in target.chars()
 		{
 			expected.make_ascii_lowercase();
 
 			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
+				self._index = init;
 				return Err(ParseFailure::NO_MATCH);
 			}
 			self.advance(when!())?;
