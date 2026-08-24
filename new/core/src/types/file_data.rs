@@ -58,13 +58,19 @@ impl FileData
 		let mut cleanse = vec![];
 
 		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or(vec![]) {
-			match raw.try_into() {
-				Ok(value) => cleanse.push(value),
-				Err(e) => match config.errors.on_error {
-					ErrorAction::KILL => return Err(e),
-					ErrorAction::WARN => log::bad!(e),
+			let Ok(value) = raw.clone().try_into() else {
+				let err = FileError::InvalidValue {
+					field: str!("cleanse"),
+					value: raw,
+				};
+
+				match config.errors.on_error {
+					ErrorAction::KILL => return Err(err),
+					ErrorAction::WARN => { log::bad!(err); continue; },
 				}
-			}
+			};
+
+			cleanse.push(value);
 		}
 
 		Ok(Self {

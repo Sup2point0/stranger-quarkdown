@@ -8,11 +8,11 @@ use super::*;
 use crate::{
 	types::*,
 	utils,
-	utils::log,
 	utils::macros::*,
 };
 
 use std::collections::HashMap;
+use std::error::Error;
 use std::fs::File;
 use std::io::{ BufReader, Read };
 
@@ -74,21 +74,20 @@ impl<Source: Read> CharmParser<Source>
 		Ok(out)
 	}
 	
-	/// Run the parser to completion, extracting the metadata from the charm squark (if present) of the target file.
-	pub fn parse(&mut self, config: &SquarkupConfig) -> Option<FileData>
+	/// Run the parser to completion, extracting the heading and charm squark of the source.
+	/// 
+	/// If the file is active (has `#SQUARK live!`), this extracts the metadata from the charm squark and returns `Some(FileData)`. Otherwise, it returns `None` for an inactive file.
+	pub fn parse(&mut self, config: &SquarkupConfig) -> Result<Option<FileData>, Box<dyn Error>>
 	{
 		match self._parse(config)
 		{
-			Ok(Ok(file_data)) => Some(file_data),
-			Ok(Err(file_error)) => {
-				log::bad!(file_error);
-				None
-			},
-			Err(ParseFailure::NO_MATCH) => None,
-			Err(parse_error) => {
-				log::bad!(parse_error);
-				None
-			},
+			// happy
+			Ok(Ok(file_data))           => Ok(Some(file_data)),
+			Err(ParseFailure::NO_MATCH) => Ok(None),
+
+			// error
+			Ok(Err(file_error)) => Err(Box::new(file_error)),
+			Err(parse_error)    => Err(Box::new(parse_error)),
 		}
 	}
 }
