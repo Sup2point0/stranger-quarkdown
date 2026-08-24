@@ -28,6 +28,14 @@ pub use dir;
 
 
 #[macro_export]
+macro_rules! err
+{
+	() => { |e| $crate::errors::SquarkError::External(Box::new(e)) }
+}
+pub use err;
+
+
+#[macro_export]
 macro_rules! all
 {
 	($obj:expr =>
@@ -36,8 +44,8 @@ macro_rules! all
 	) =>
 	{
 		{
-			let __temp = $obj;
-			$( __temp.$method( $($args),* ) )&&*
+			let obj = $obj;
+			$( obj.$method( $($args),* ) )&&*
 		}
 	}
 }

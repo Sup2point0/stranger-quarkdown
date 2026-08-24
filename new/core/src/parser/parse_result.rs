@@ -1,6 +1,6 @@
 pub type ParseResult<T = ()> = Result<T, ParseFailure>;
 
-/// Indicates that a function only errors with [`ParseError::NO_MATCH`].
+/// Indicates that a function only errors with [`ParseFailure::NO_MATCH`].
 pub type Recoverable = ParseResult;
 
 

@@ -1,7 +1,10 @@
-use anyhow::anyhow;
 use enum_stringify::EnumStringify;
 
-use crate::utils::macros::*;
+use crate::{
+	SquarkResult, SquarkError,
+	utils::colours::*,
+	utils::macros::*,
+};
 
 use std::path::PathBuf;
 
@@ -68,7 +71,7 @@ pub enum FileAction
 
 impl SquarkupConfig
 {
-	fn try_from_toml(data: toml::Table, root: PathBuf) -> Result<Self, Vec<anyhow::Error>>
+	pub fn try_from_toml(data: toml::Table, root: PathBuf) -> SquarkResult<Self>
 	{
 		// let site_raw = (|| {
 		// 	let paths = data.get("paths")?;
@@ -78,15 +81,17 @@ impl SquarkupConfig
 		// 	Some(full)
 		// })().unwrap_or(root);
 
-		let mut errors = vec![];
+		let mut errs = vec![];
 
 		let out = Self {
 			paths: PathsConfig {
 				root: root.clone(),
 				site: match &data["paths"]["site"] {
 					toml::Value::String(str) => root.clone().join(str),
-					_ => {
-						errors.push(anyhow!(""));
+					v => {
+						errs.push(SquarkError::Recoverable {
+							msg: format!("{WHITE}paths.site{RED} must be a string, but you gave: {v}"),
+						});
 						root.clone()
 					},
 				},
@@ -97,10 +102,10 @@ impl SquarkupConfig
 			errors: Default::default(),
 		};
 
-		if errors.is_empty() {
+		if errs.is_empty() {
 			Ok(out)
 		} else {
-			Err(errors)
+			Err(SquarkError::ManyRecoverable { errors: errs })
 		}
 	}
 }
