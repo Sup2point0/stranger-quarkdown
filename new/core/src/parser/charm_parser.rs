@@ -174,7 +174,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		while let Some(c) = self.current()
 			&& c != '\n'
 		{
-			let ident = self.parse_ident()?;
+			let ident = self.parse_ident(when)?;
 
 			if self.current() == Some('!') {
 				flags.push(ident);
@@ -184,7 +184,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 					when: when(),
 					expected: format!("{ident}!"),
 					actual: ident,
-				})
+				});
 			}
 			
 			self.advance(when)?;
@@ -237,7 +237,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self.eat("|", to!("start field in charm squark"), when)?;
 		self.eat_whitespace();
 
-		let key = self.parse_ident()?;
+		let key = self.parse_ident(when)?;
 
 		self.eat_whitespace();
 		self.eat("=", when!("after field identifier"), when)?;

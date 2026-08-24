@@ -28,7 +28,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		self._line.get(self._index + 1).copied()
 	}
 
-	/// Get a preview of the upcoming text (for error messages).
+	/// Get a preview of the upcoming text.
 	pub(super) fn preview(&self) -> String
 	{
 		const PREVIEW_CHARS: usize = 20;
@@ -202,9 +202,19 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	}
 
 	/// Parse an identifier like `sup`, `sup-world`, `internal.flag`.
-	pub(super) fn parse_ident(&mut self) -> ParseResult<String>
+	/// 
+	/// Identifiers cannot start with `-`.
+	pub(super) fn parse_ident(&mut self, when: impl Fn() -> String) -> ParseResult<String>
 	{
 		let mut chars = vec![];
+
+		if let Some('-') = self.current() {
+			return Err(ParseFailure::IllegalInput {
+				when: when(),
+				because: str!("identifiers cannot start with `-`"),
+				found: self.preview(),
+			});
+		}
 
 		while let Some(c) = self.current()
 			&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
@@ -452,7 +462,7 @@ mod test
 			"very-much_mixedCase",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.parse_ident(), Ok(case.to_string()) );
+			assert_eq!( parser.parse_ident(when!()), Ok(case.to_string()) );
 		});
 	}
 }
