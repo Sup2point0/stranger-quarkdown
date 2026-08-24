@@ -20,6 +20,10 @@ lazy_static!
 			dest: dir!(TESTS / "test-project/test-site/src/routes/test-gen"),
 			sources: vec![str!("content")],
 			exclude: vec![str!("ignored")],
+		},
+		errors: ErrorConfig {
+			on_error: ErrorAction::KILL,
+			on_file_exists: FileAction::OVERWRITE,
 		}
 	};
 }
