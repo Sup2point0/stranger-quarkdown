@@ -1,3 +1,6 @@
+use time::Date;
+use time::macros::format_description;
+
 use crate::{
 	types::*,
 	utils::log,
@@ -23,9 +26,8 @@ pub struct PageData
 
 	pub tags: Vec<String>,
 
-	// FIXME dates
-	pub release_date: Option<String>,
-	pub last_updated: Option<String>,
+	pub release_date: Option<Date>,
+	pub last_updated: Option<Date>,
 
 	pub cleanse: Vec<CleanseOperation>,
 
@@ -52,8 +54,11 @@ impl PageData
 
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
 
-		let release_date = Self::take1(&mut fields, "release-date", "date");
-		let last_updated = Self::take1(&mut fields, "last-updated", "update");
+		let release_date = Self::take1(&mut fields, "release-date", "date")
+			.map(|raw| Self::try_parse_date(&raw)).flatten();
+
+		let last_updated = Self::take1(&mut fields, "last-updated", "update")
+			.map(|raw| Self::try_parse_date(&raw)).flatten();
 
 		let mut cleanse = vec![];
 
@@ -99,5 +104,12 @@ impl PageData
 		fields.remove(short)
 			.or_else(|| fields.remove(long))?
 			.into_iter().next()
+	}
+
+	fn try_parse_date(date: &str) -> Option<Date>
+	{
+		Date::parse(&date, &format_description!("[year] [month repr:long] [day]"))
+			.or_else(|_| Date::parse(&date, &format_description!("[year] [month repr:short] [day]")))
+			.ok()
 	}
 }
