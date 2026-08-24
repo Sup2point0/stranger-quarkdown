@@ -9,7 +9,7 @@ use crate::types::*;
 
 lazy_static!
 {
-	pub static ref TESTS: PathBuf = std::env::current_dir().unwrap();
+	pub static ref TESTS: PathBuf = std::env::current_dir().unwrap().join("tests");
 	
 	/// A testing squarkup config used for unit tests.
 	pub static ref TEST_CONFIG: SquarkupConfig = SquarkupConfig

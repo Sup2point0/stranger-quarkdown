@@ -18,18 +18,19 @@ pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 {
 	let (filepath, ext) = find_config(&root)?;
 
-	let config = SquarkupConfig::init_defaults(root.clone());
+	let mut config = SquarkupConfig::init_defaults(root.clone());
 
 	match ext {
 		Extension::TOML => {
 			let data = read_toml_config(filepath)?;
-			config.set_from_toml(data, root)
+			config.set_from_toml(data)?;
 		},
 		Extension::JSON => {
 			unimplemented!()
 		},
-		_ => unreachable!("`find_config()` should fail if the extension is not .toml or .json"),
 	}
+
+	Ok(config)
 }
 
 /// Find the location of the user's squarkup configuration, in `(.squarkdown/)?squarkup.(toml|json)`.

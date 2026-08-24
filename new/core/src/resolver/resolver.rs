@@ -35,4 +35,6 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 }
 
 
-pub fn find_files(config: &SquarkupConfig) -> Vec<PathBuf> { unimplemented!() }
+pub fn find_files(config: &SquarkupConfig) -> SquarkResult<Vec<PathBuf>> {
+	unimplemented!()
+}

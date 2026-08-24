@@ -24,6 +24,8 @@ impl<Source: Read, Target: Write> Renderer<Source, Target>
 	
 	pub fn render(&mut self, config: &SquarkupConfig) -> RenderResult
 	{
-		unimplemented!()
+		// TODO
+		println!("rendering...");
+		Ok(())
 	}
 }

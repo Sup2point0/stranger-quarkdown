@@ -1,5 +1,6 @@
 use squarkdown::*;
 use squarkdown::utils::log;
+use squarkdown::utils::colours::*;
 
 use std::fs::File;
 
