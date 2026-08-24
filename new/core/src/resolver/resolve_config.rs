@@ -21,13 +21,15 @@ pub fn resolve_config(root: PathBuf) -> ResolutionResult<SquarkupConfig>
 /// Find the location of the user's squarkup configuration, in `(.squarkdown/)?squarkup.(toml|json)`.
 fn find_config(root: &Path) -> ResolutionResult<PathBuf>
 {
-	let Some(out) = find_config_from(&dir!(root / ".squarkdown/")) else {
-		let Some(out) = find_config_from(root) else {
-			return Err(ResolutionError::NoConfig);
-		};
+	if let Some(out) = find_config_from(&dir!(root / ".squarkdown/")) {
+		return Ok(out);
+	}
+
+	if let Some(out) = find_config_from(root) {
 		return Ok(out);
 	};
-	return Ok(out);
+
+	Err(ResolutionError::NoConfig)
 }
 
 fn find_config_from(folder: &Path) -> Option<PathBuf>
