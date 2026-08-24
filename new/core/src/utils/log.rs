@@ -3,16 +3,16 @@
 use std::fmt::Display;
 
 
-const WHITE: &str = "\033[0m";
-const GREY:  &str = "\033[90m";
-const BLACK: &str = "\033[30m";
+const WHITE: &str = "\x1b[0m";
+const GREY:  &str = "\x1b[90m";
+const BLACK: &str = "\x1b[30m";
 
-const RED:    &str = "\033[31m";
-const GREEN:  &str = "\033[92m";
-const YELLOW: &str = "\033[93m";
-const BLUE:   &str = "\033[94m";
-const PINK:   &str = "\033[95m";
-const CYAN:   &str = "\033[96m";
+const RED:    &str = "\x1b[31m";
+const GREEN:  &str = "\x1b[92m";
+const YELLOW: &str = "\x1b[93m";
+const BLUE:   &str = "\x1b[94m";
+const PINK:   &str = "\x1b[95m";
+const CYAN:   &str = "\x1b[96m";
 
 
 /// Log Squarkdown's initial message on startup.
