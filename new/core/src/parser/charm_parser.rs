@@ -351,6 +351,7 @@ mod test
 	use crate::parser::*;
 	use crate::utils::*;
 	
+	use std::collections::HashMap;
 	use std::io::Cursor;
 	use std::assert_matches;
 
@@ -395,8 +396,107 @@ mod test
 		let source = Cursor::new("<!-- #SQUARK live! -->");
 		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
 
-		let file_data = parser.parse_charm_squark().unwrap();
+		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
+		assert_eq!( flags, strings!() );
+	}
+
+	#[test] fn parse_charm_squark_one_field()
+	{
+		let source = Cursor::new("
+<!-- #SQUARK live!
+| dest = test
+-->
+		".trim());
+
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+		let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+		assert_eq!( flags, strings![] );
+
+		assert_eq!( fields, HashMap::from([
+			(str!("dest"), strings!["test"]),
+		]))
+	}
+
+	#[test] fn parse_charm_squark_one_field_many_flags()
+	{
+		let source = Cursor::new("
+<!-- #SQUARK live! feat! dev!
+| dest = test
+-->
+		".trim());
+
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+		let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+		assert_eq!( flags, strings!["feat", "dev"] );
+
+		assert_eq!( fields, HashMap::from([
+			(str!("dest"), strings!["test"]),
+		]))
+	}
+
+	#[test] fn parse_charm_squark_many_fields()
+	{
+		let source = Cursor::new("
+<!-- #SQUARK live!
+| dest = test
+| head = tests
+| title = testing
+-->
+		".trim());
+
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+		let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+		assert_eq!( flags, strings![] );
+		
+		assert_eq!( fields, HashMap::from([
+			(str!("dest"), strings!["test"]),
+			(str!("head"), strings!["tests"]),
+			(str!("title"), strings!["testing"]),
+		]))
+	}
+
+	#[test] fn parse_charm_squark_many_fields_values()
+	{
+		let source = Cursor::new("
+<!-- #SQUARK live!
+| dest = test
+| tags = prot / deut / trit
+-->
+		".trim());
+
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+		let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+		assert_eq!( flags, strings![] );
+		
+		assert_eq!( fields, HashMap::from([
+			(str!("dest"), strings!["test"]),
+			(str!("tags"), strings!["prot", "deut", "trit"]),
+		]))
+	}
+
+	#[test] fn parse_charm_squark_many_flags_fields_values()
+	{
+		let source = Cursor::new("
+<!-- #SQUARK live! feat! dev!
+| dest = test
+| tags = prot / deut / trit
+-->
+		".trim());
+
+		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
+		let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+		assert_eq!( flags, strings!["feat", "dev"] );
+		
+		assert_eq!( fields, HashMap::from([
+			(str!("dest"), strings!["test"]),
+			(str!("tags"), strings!["prot", "deut", "trit"]),
+		]))
 	}
 
 	#[test] fn parse_flags_matches()
