@@ -28,9 +28,8 @@ impl FileData
 		config: &SquarkupConfig,
 	) -> Result<Self, FileError>
 	{
-		let Some(dest) = fields.get("dest") else {
-			return Err(FileError::MissingField { field: str!("dest") });
-		};
+		let dest = Self::get(&fields, "dest")
+			.ok_or_else(|| FileError::MissingField { field: str!("dest") })?;
 		
 		// TODO check fallbacks
 		let heading     = Self::get(&fields, "heading");
