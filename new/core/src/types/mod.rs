@@ -1,4 +1,4 @@
-mod config; pub use config::*;
+mod squarkup_config; pub use squarkup_config::*;
 mod page_data; pub use page_data::*;
 mod charm_error; pub use charm_error::*;
 mod cleanse; pub use cleanse::*;
