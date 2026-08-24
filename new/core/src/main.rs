@@ -2,6 +2,8 @@ use squarkdown::{
 	resolver,
 	SiteData, CharmParser, Renderer,
 	utils::log,
+	utils::colours::*,
+	utils::macros::*,
 };
 
 use std::fs::File;
@@ -17,24 +19,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
 	if files.is_empty() {
 		log::bad!("No files found to squarkup, exiting!");
 		return Ok(());
+	} else {
+		log::ok!("Found ")
 	}
 	
-	let site_data = SiteData::new();
+	let mut site_data = SiteData::new();
 	
 	for filepath in files {
-		let file = File::open(filepath)?;
-		let mut parser = CharmParser::init(file, Some(filepath))?;
+		let file = File::open(filepath.clone())?;
+		let mut parser = CharmParser::init(file, Some(filepath.clone()))?;
 		
 		if let Some(page_data) = parser.parse(&config)? {
-			log::ok!("found active file: {BLUE}{filepath}");
+			log::info!("found active file: {BLUE}{filepath:?}");
 			site_data.add_page(filepath, page_data);
 		}
 	}
 	
 	for page in site_data.pages.values() {
-		let renderer = Renderer::init(File::open(page.filepath));
-		
-		renderer.render()?;
+		let dest = dir!(config.paths.root / &page.destination);
+		let source = File::open(page.filepath.clone())?;
+		let target = File::create(dest)?;
+
+		let mut renderer = Renderer::init(source, target);
+		renderer.render(&config)?;
 	}
 	
 	Ok(())
