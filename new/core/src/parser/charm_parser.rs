@@ -123,20 +123,22 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		)
 	}
 	
-	/// Parse the `# Heading` element and extract the cleaned heading text.
+	/// Parse the `# Heading` element, extracting the cleaned heading text.
 	fn parse_heading(&mut self) -> ParseResult<String>
 	{
 		self.eat("# ", to!("start page heading"), when!("parsing heading"))?;
 		self.eat_spaces();
 
 		let heading = self._line[self._index..].iter().collect();
+		self.next_line(when!())?;  // safe cuz not live
 		Ok(utils::trim_end(heading))
 	}
 	
-	/// Parse the `<!-- #SQUARK live! ... -->` charm squark.
+	/// Parse the `<!-- #SQUARK live! ... -->` charm squark, extracting the flags and fields.
 	fn parse_charm_squark(&mut self) -> ParseResult<(Strings, HashMap<String, Strings>)>
 	{
 		self.try_parse_squark_live()?;
+		self.eat_spaces();
 		let flags = self.parse_flags()?;
 		self.eat_whitespace();
 		let fields = self.parse_fields()?;
@@ -170,8 +172,6 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		let when = when!("parsing charm squark flags");
 
 		let mut flags = strings!();
-
-		self.eat_spaces();
 
 		while let Some(c) = self.current()
 			&& c != '\n'
@@ -405,7 +405,7 @@ mod test
 		});
 	}
 
-	#[test] fn parse_charm_squark_no_data()
+	#[test] fn parse_charm_squark_no_fields()
 	{
 		let source = Cursor::new("<!-- #SQUARK live! -->");
 		let mut parser = CharmParser::init(source, &TEST_CONFIG).unwrap();
