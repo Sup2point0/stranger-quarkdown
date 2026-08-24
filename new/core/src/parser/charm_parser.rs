@@ -2,11 +2,13 @@
 mod parser_core;
 
 
-use tinyvec::{ TinyVec, tiny_vec };
+use tinyvec::tiny_vec;
 
 use super::*;
 use crate::{
-	types::*, log, utils,
+	types::*,
+	utils,
+	utils::log,
 	utils::macros::*,
 };
 
@@ -83,12 +85,12 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 		{
 			Ok(Ok(file_data)) => Some(file_data),
 			Ok(Err(file_error)) => {
-				log::err(file_error);
+				log::bad!(file_error);
 				None
 			},
 			Err(ParseFailure::NO_MATCH) => None,
 			Err(parse_error) => {
-				log::err(parse_error);
+				log::bad!(parse_error);
 				None
 			},
 		}
@@ -411,6 +413,7 @@ mod test
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!() );
+		assert_eq!( fields, HashMap::new() );
 	}
 
 	#[test] fn parse_charm_squark_one_field()
