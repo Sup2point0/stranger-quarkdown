@@ -14,9 +14,6 @@ pub enum ParseFailure
 	#[allow(non_camel_case_types)]
 	NO_MATCH,
 
-	/// The parser finished parsing what it needed to, and can safely exit.
-	DONE,
-
 	/// The parser unexpectedly reached the end of its source.
 	FatalEnd {
 		/// What was the parser doing when it threw this error?
@@ -36,6 +33,12 @@ pub enum ParseFailure
 		expected: String,
 		actual: String,
 	},
+
+	IllegalInput {
+		when: String,
+		because: String,
+		found: String,
+	}
 }
 
 impl std::error::Error for ParseFailure {}
