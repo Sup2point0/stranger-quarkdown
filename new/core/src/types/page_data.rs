@@ -7,7 +7,7 @@ use crate::{
 use std::collections::HashMap;
 
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
 pub struct PageData
 {
 	// TODO link to source file

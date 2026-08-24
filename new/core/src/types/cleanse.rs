@@ -1,10 +1,8 @@
 use crate::utils::macros::*;
 
-use enum_stringify::EnumStringify;
 
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-#[derive(EnumStringify)] #[enum_stringify(case = "flat")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, enum_stringify::EnumStringify)]
+#[enum_stringify(case = "flat")]
 pub enum CleanseOperation
 {
 	/// Replace non-tag `<>` with `&lt;`, `&gt;` for HTML safety.

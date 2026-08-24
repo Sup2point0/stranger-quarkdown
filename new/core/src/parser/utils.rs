@@ -33,7 +33,7 @@ pub(super) fn test_exact(
 {
 	for case in cases {
 		let cursor = Cursor::new(case);
-		let parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let parser = CharmParser::init(cursor).unwrap();
 
 		test(parser, case)
 	}
@@ -47,7 +47,7 @@ pub(super) fn test_expected<X>(
 {
 	for (source, expected) in cases {
 		let cursor = Cursor::new(source);
-		let parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let parser = CharmParser::init(cursor).unwrap();
 
 		test(parser, expected)
 	}

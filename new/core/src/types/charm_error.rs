@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+/// An error encountered while processing the charm squark and initialising `PageData`.
 #[derive(Clone, Debug, Error, PartialEq, Eq)]
 pub enum CharmError
 {
