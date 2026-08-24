@@ -1,5 +1,6 @@
 use crate::{
 	types::*,
+	utils::log,
 	utils::macros::*,
 };
 
@@ -26,7 +27,7 @@ pub struct FileData
 	pub release_date: Option<String>,
 	pub last_updated: Option<String>,
 
-	pub cleanse: Vec<CleanseOperations>,
+	pub cleanse: Vec<CleanseOperation>,
 
 	pub other: HashMap<String, Strings>,
 }
@@ -54,8 +55,17 @@ impl FileData
 		let release_date = Self::take1(&mut fields, "release-date", "date");
 		let last_updated = Self::take1(&mut fields, "last-updated", "update");
 
-		let cleanse      = Self::take(&mut fields, "cleanse", "clean").unwrap_or(vec![])
-			.into_iter().map(|s| s.try_into()).collect::<Result<_, _>>()?;
+		let mut cleanse = vec![];
+
+		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or(vec![]) {
+			match raw.try_into() {
+				Ok(value) => cleanse.push(value),
+				Err(e) => match config.errors.on_error {
+					ErrorAction::KILL => return Err(e),
+					ErrorAction::WARN => log::bad!(e),
+				}
+			}
+		}
 
 		Ok(Self {
 			flags,

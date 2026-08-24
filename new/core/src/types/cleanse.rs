@@ -3,7 +3,7 @@ use crate::utils::macros::*;
 
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum CleanseOperations
+pub enum CleanseOperation
 {
 	/// Replace non-tag `<>` with `&lt;`, `&gt;` for HTML safety.
 	ANGLES,
@@ -19,7 +19,7 @@ pub enum CleanseOperations
 	LINE_BREAKS,
 }
 
-impl TryFrom<String> for CleanseOperations
+impl TryFrom<String> for CleanseOperation
 {
 	type Error = FileError;
 
