@@ -1,5 +1,6 @@
 use super::ResolutionError;
 use crate::SquarkupConfig;
+use crate::utils::macros::*;
 
 use std::path::PathBuf;
 
@@ -9,10 +10,23 @@ use std::path::PathBuf;
 /// This is defined to be the closest directory that contains a `.squarkdown/` folder.
 pub fn resolve_project_root() -> Result<PathBuf, ResolutionError>
 {
-	let cwd = std::env::current_dir().or(Err(ResolutionError::NoSquarkdown))?;
+	let Ok(cwd) = std::env::current_dir() else {
+		return Err(ResolutionError::ReadError { target: str!("current working directory") });
+	};
 
 	for dir in cwd.ancestors() {
-		if dir.join(".squarkdown").exists() {
+		let candidate = dir.join(".squarkdown");
+		if candidate.exists() && candidate.is_dir() {
+			return Ok(dir.to_owned());
+		}
+		
+		let candidate = dir.join("squarkup.toml");
+		if candidate.exists() && candidate.is_file() {
+			return Ok(dir.to_owned());
+		}
+		
+		let candidate = dir.join("squarkup.json");
+		if candidate.exists() && candidate.is_file() {
 			return Ok(dir.to_owned());
 		}
 	}
@@ -21,5 +35,4 @@ pub fn resolve_project_root() -> Result<PathBuf, ResolutionError>
 }
 
 
-pub fn load_config(root: PathBuf) -> SquarkupConfig { unimplemented!() }
 pub fn find_files(config: &SquarkupConfig) -> Vec<PathBuf> { unimplemented!() }
