@@ -14,6 +14,7 @@ macro_rules! when {
 }
 pub(super) use when;
 
+/// Lazily produce an error message for the parser's error path.
 macro_rules! to {
 	() => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
 
