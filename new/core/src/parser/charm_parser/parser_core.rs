@@ -4,7 +4,7 @@ use super::*;
 
 
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
-impl<'l, Source: Read> CharmParser<'l, Source>
+impl<Source: Read> CharmParser<Source>
 {
 	/// Is the parser currently pointing outside the bounds of the current chunk?
 	pub(super) fn is_past_end_of_line(&self) -> bool
@@ -206,6 +206,7 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 	/// Identifiers cannot start with `-`.
 	pub(super) fn parse_ident(&mut self, when: impl Fn() -> String) -> ParseResult<String>
 	{
+		// FIXME require at least 1 character
 		let mut chars = vec![];
 
 		if let Some('-') = self.current() {
@@ -235,12 +236,11 @@ mod test
 	use std::io::Cursor;
 
 	use crate::parser::*;
-	use crate::utils::*;
 
 	#[test] fn advance_and_current_single_line()
 	{
 		let cursor = Cursor::new("012345");
-		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let mut parser = CharmParser::init(cursor).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
@@ -256,7 +256,7 @@ mod test
 	#[test] fn advance_and_current_multi_line()
 	{
 		let cursor = Cursor::new("012\n345");
-		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let mut parser = CharmParser::init(cursor).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
@@ -273,7 +273,7 @@ mod test
 	#[test] fn advance_and_peek_single_line()
 	{
 		let cursor = Cursor::new("012345");
-		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let mut parser = CharmParser::init(cursor).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
@@ -289,7 +289,7 @@ mod test
 	#[test] fn advance_and_peek_multi_line()
 	{
 		let cursor = Cursor::new("012\n345");
-		let mut parser = CharmParser::init(cursor, &TEST_CONFIG).unwrap();
+		let mut parser = CharmParser::init(cursor).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
