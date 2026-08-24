@@ -44,25 +44,29 @@ fn squarkup() -> SquarkResult<bool>
 	let config = resolver::resolve_config(project_root)?;
 	log::ok!("found your site: {BLUE}{}", config.paths.site.display());
 	
-	let files = resolver::find_files(&config)?;
-	
-	if files.is_empty() {
-		log::bad!("No files found to squarkup, exiting!");
-		return Ok(false);
-	} else {
-		log::ok!("Found ")
-	}
-	
 	let mut site_data = SiteData::new();
+
+	let found_active_file = false;
 	
-	for filepath in files {
+	for filepath in resolver::find_files(&config) {
+		let filepath = filepath.unwrap();
+		
 		let file = File::open(&filepath).map_err(err!())?;
+		found_active_file = true;
+		log::info!("found file: {}", filepath.display());
+
 		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
 		
 		if let Some(page_data) = parser.parse(&config).unwrap() {
 			log::info!("found active file: {BLUE}{filepath:?}");
 			site_data.add_page(filepath, page_data);
 		}
+	}
+	
+	if found_active_files.is_empty() {
+		log::bad!("No files found to squarkup, exiting!");
+		return Ok(false);
+	} else {
 	}
 	
 	for page in site_data.pages.values() {

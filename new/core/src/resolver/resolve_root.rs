@@ -33,8 +33,3 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 		debug: checked.into_iter().map(|d| format!("checked {}", d.display())).collect(),
 	})
 }
-
-
-pub fn find_files(config: &SquarkupConfig) -> SquarkResult<Vec<PathBuf>> {
-	unimplemented!()
-}
