@@ -8,12 +8,14 @@ use crate::{
 };
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
 pub struct PageData
 {
-	// TODO link to source file
+	/// Location of the original `.md` file this page represents.
+	pub filepath: PathBuf,
 	
 	pub flags: Strings,
 	pub destination: String,
@@ -37,6 +39,7 @@ pub struct PageData
 impl PageData
 {
 	pub fn init(
+		filepath: PathBuf,
 		flags: Strings,
 		mut fields: HashMap<String, Strings>,
 		config: &SquarkupConfig,
@@ -81,6 +84,7 @@ impl PageData
 		}
 
 		Ok(Self {
+			filepath,
 			flags,
 			destination: dest.to_string(),
 			title, description,

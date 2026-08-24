@@ -1,4 +1,4 @@
-/// Core parser functionality not relevant to Squarkdown is split off into `parser_core`.
+/// Core parser functionality not specific to Squarkdown is split off for modularity ;)
 mod parser_core;
 
 
@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::io::{ BufReader, Read };
+use std::path::PathBuf;
 
 
 /// A parser for the charm squark of a file.
@@ -31,10 +32,11 @@ pub struct CharmParser<Source: Read = File>
 	/// Have we reached the end of the source?
 	is_eof: bool,
 
-	// == INTERNALS == //
-	
 	/// The backing buffer that reads from the target file.
 	_reader: BufReader<Source>,
+
+	/// The location of the target file.
+	_filepath: Option<PathBuf>,
 
 	/// The index in the current line the parser is pointing to.
 	_index: usize,
@@ -57,13 +59,14 @@ pub struct CharmParser<Source: Read = File>
 impl<Source: Read> CharmParser<Source>
 {
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
-	pub fn init(file: Source) -> Result<Self, ParseFailure>
+	pub fn init(file: Source, filepath: Option<PathBuf>) -> Result<Self, ParseFailure>
 	{
 		let mut out = Self {
 			errors: vec![],
 			is_live: false,
 			is_eof: false,
 			_reader: BufReader::new(file),
+			_filepath: filepath,
 			_index: 0,
 			_line: vec![],
 			_line_buffer: String::new(),
@@ -99,18 +102,16 @@ impl<Source: Read> CharmParser<Source>
 	{
 		self.eat_whitespace();
 		
-		let mut heading = None;
-		if self.current() == Some('#') {
-			heading = Some(self.parse_heading()?);
-		}
+		let heading = if self.current() == Some('#') { Some(self.parse_heading()?) } else { None };
 
 		self.eat_whitespace();
 
 		let (flags, mut fields) = self.parse_charm_squark()?;
-
 		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
 
-		Ok(PageData::init(flags, fields, config))
+		let filepath = self._filepath.take().unwrap_or_else(|| PathBuf::new());
+
+		Ok(PageData::init(filepath, flags, fields, config))
 	}
 	
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
@@ -345,6 +346,8 @@ impl<Source: Read> CharmParser<Source>
 }
 
 
+// == UNIT TESTS == //
+
 #[cfg(test)]
 mod test
 {
@@ -367,7 +370,7 @@ mod test
 	-->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let file_data = parser.parse(&TEST_CONFIG).unwrap().unwrap();
 
 		assert_eq!( file_data.heading, Some(str!("Test")) );
@@ -413,7 +416,7 @@ mod test
 	#[test] fn parse_charm_squark_no_fields()
 	{
 		let source = Cursor::new("<!-- #SQUARK live! -->");
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
@@ -429,7 +432,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -447,7 +450,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!["feat", "dev"] );
@@ -467,7 +470,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -488,7 +491,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -508,7 +511,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!["feat", "dev"] );
@@ -562,7 +565,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source).unwrap();
+		let mut parser = CharmParser::init(source, None).unwrap();
 		let fields = parser.parse_fields().unwrap();
 
 		assert!( fields.contains_key("field") );

@@ -243,7 +243,7 @@ mod test
 	#[test] fn advance_and_current_single_line()
 	{
 		let cursor = Cursor::new("012345");
-		let mut parser = CharmParser::init(cursor).unwrap();
+		let mut parser = CharmParser::init(cursor, None).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
@@ -259,7 +259,7 @@ mod test
 	#[test] fn advance_and_current_multi_line()
 	{
 		let cursor = Cursor::new("012\n345");
-		let mut parser = CharmParser::init(cursor).unwrap();
+		let mut parser = CharmParser::init(cursor, None).unwrap();
 
 		assert_eq!( parser.current(), Some('0') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('1') );
@@ -276,7 +276,7 @@ mod test
 	#[test] fn advance_and_peek_single_line()
 	{
 		let cursor = Cursor::new("012345");
-		let mut parser = CharmParser::init(cursor).unwrap();
+		let mut parser = CharmParser::init(cursor, None).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );
@@ -292,7 +292,7 @@ mod test
 	#[test] fn advance_and_peek_multi_line()
 	{
 		let cursor = Cursor::new("012\n345");
-		let mut parser = CharmParser::init(cursor).unwrap();
+		let mut parser = CharmParser::init(cursor, None).unwrap();
 
 		assert_eq!( parser.peek(), Some('1') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('2') );

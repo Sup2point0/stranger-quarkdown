@@ -22,16 +22,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
 	let site_data = SiteData::new();
 	
 	for filepath in files {
-		let mut parser = CharmParser::init(File::open(filepath)?)?;
+		let file = File::open(filepath)?;
+		let mut parser = CharmParser::init(file, Some(filepath))?;
 		
 		if let Some(page_data) = parser.parse(&config)? {
 			log::ok!("found active file: {BLUE}{filepath}");
-			site_data.set(filepath, page_data);
+			site_data.add_page(filepath, page_data);
 		}
 	}
 	
-	for file in &site_data.files {
-		let renderer = Renderer::init(File::open(file.source));
+	for page in site_data.pages.values() {
+		let renderer = Renderer::init(File::open(page.filepath));
 		
 		renderer.render()?;
 	}
