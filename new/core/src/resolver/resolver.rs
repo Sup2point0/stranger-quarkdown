@@ -15,18 +15,13 @@ pub fn resolve_project_root() -> Result<PathBuf, ResolutionError>
 	};
 
 	for dir in cwd.ancestors() {
-		let candidate = dir.join(".squarkdown");
-		if candidate.exists() && candidate.is_dir() {
+		if all!(dir.join(".squarkdown") => .exists(), .is_dir()) {
 			return Ok(dir.to_owned());
 		}
-		
-		let candidate = dir.join("squarkup.toml");
-		if candidate.exists() && candidate.is_file() {
+		if all!(dir.join("squarkup.toml") => .exists(), .is_file()) {
 			return Ok(dir.to_owned());
 		}
-		
-		let candidate = dir.join("squarkup.json");
-		if candidate.exists() && candidate.is_file() {
+		if all!(dir.join("squarkup.json") => .exists(), .is_file()) {
 			return Ok(dir.to_owned());
 		}
 	}

@@ -1,8 +1,6 @@
 #[macro_export]
 macro_rules! str {
-	($t:expr) => {
-		String::from($t)
-	};
+	($t:expr) => { String::from($t) };
 }
 pub use str;
 
@@ -13,8 +11,8 @@ macro_rules! strings
 	() => {
 		tiny_vec!([String; 4])
 	};
-	($value:expr $(, $rest:expr)* $(,)?) => {
-		tiny_vec!([String; 4] => str!($value) $(, str!($rest))*)
+	($($values:expr),* $(,)?) => {
+		tiny_vec!( [String; 4] => $(str!($values)),* )
 	};
 }
 pub use strings;
@@ -24,6 +22,23 @@ pub use strings;
 macro_rules! dir
 {
 	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };
-	($base:ident $(. $field:ident)* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
+	($base:ident $($field:ident).* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
 }
 pub use dir;
+
+
+#[macro_export]
+macro_rules! all
+{
+	($obj:expr =>
+		$( . $method:ident ( $($args:expr),* $(,)? ) ),*
+		$(,)?
+	) =>
+	{
+		{
+			let __temp = $obj;
+			$( __temp.$method( $($args),* ) )&&*
+		}
+	}
+}
+pub use all;
