@@ -111,16 +111,11 @@ impl<'l, Source: Read> CharmParser<'l, Source>
 
 		self.eat_whitespace();
 
-		let (flags, fields) = self.parse_charm_squark()?;
+		let (flags, mut fields) = self.parse_charm_squark()?;
 
-		Ok(
-			FileData::init(flags, fields, self.config).map(|mut f| {
-				if f.heading == None {
-					f.heading = heading;
-				}
-				return f;
-			})
-		)
+		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
+
+		Ok(FileData::init(flags, fields, self.config))
 	}
 	
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
