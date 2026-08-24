@@ -1,11 +1,13 @@
+#[macro_export]
 macro_rules! str {
 	($t:expr) => {
 		String::from($t)
 	};
 }
-pub(crate) use str;
+pub use str;
 
 
+#[macro_export]
 macro_rules! strings
 {
 	() => {
@@ -15,12 +17,13 @@ macro_rules! strings
 		tiny_vec!([String; 4] => str!($value) $(, str!($rest))*)
 	};
 }
-pub(crate) use strings;
+pub use strings;
 
 
-macro_rules! dir {
-	($base:ident $(/ $part:expr)*) => {
-		$base$(.join($part))*
-	};
+#[macro_export]
+macro_rules! dir
+{
+	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };
+	($base:ident $(. $field:ident)* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
 }
-pub(crate) use dir;
+pub use dir;
