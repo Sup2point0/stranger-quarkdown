@@ -7,7 +7,7 @@ use tinyvec::{ TinyVec, tiny_vec };
 use super::*;
 use crate::{
 	types::*, log, utils,
-	str, strings,
+	utils::macros::*,
 };
 
 use std::collections::HashMap;
@@ -361,6 +361,7 @@ mod test
 
 	use crate::parser::*;
 	use crate::utils::*;
+	use crate::utils::macros::*;
 	
 	use std::collections::HashMap;
 	use std::io::Cursor;

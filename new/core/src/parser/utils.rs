@@ -5,7 +5,6 @@
 
 
 /// Lazily produce an error message for the parser's error path.
-#[macro_export]
 macro_rules! when {
 	() => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
 
@@ -13,8 +12,8 @@ macro_rules! when {
 		|| format!($msg, $($args)*)
 	}
 }
+pub(super) use when;
 
-#[macro_export]
 macro_rules! to {
 	() => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
 
@@ -22,13 +21,14 @@ macro_rules! to {
 		|| format!($msg, $($args)*)
 	}
 }
-
-pub(super) use when;
 pub(super) use to;
 
 
 #[cfg(test)]
-pub(super) fn test_exact(cases: &[&'static str], test: impl Fn(CharmParser<Cursor<&&str>>, &str))
+pub(super) fn test_exact(
+	cases: &[&'static str],
+	test: impl Fn(CharmParser<Cursor<&&str>>, &str),
+)
 {
 	for case in cases {
 		let cursor = Cursor::new(case);
