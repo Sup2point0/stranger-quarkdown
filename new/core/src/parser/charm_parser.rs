@@ -351,11 +351,28 @@ mod test
 	use tinyvec::tiny_vec;
 
 	use crate::parser::*;
+	use crate::utils::testing::*;
 	use crate::utils::macros::*;
 	
 	use std::collections::HashMap;
 	use std::io::Cursor;
 	use std::assert_matches;
+	
+	#[test] fn parse_basic()
+	{
+		let source = Cursor::new("
+	# Test
+	<!-- #SQUARK live!
+	| dest = test
+	-->
+		".trim());
+
+		let mut parser = CharmParser::init(source).unwrap();
+		let file_data = parser.parse(&TEST_CONFIG).unwrap().unwrap();
+
+		assert_eq!( file_data.heading, Some(str!("Test")) );
+		assert_eq!( file_data.destination, str!("test") );
+	}
 
 	#[test] fn parse_heading_matches_single_line()
 	{
