@@ -1,5 +1,6 @@
 #[macro_export]
 macro_rules! str {
+	()        => { String::new() };
 	($t:expr) => { String::from($t) };
 }
 pub use str;

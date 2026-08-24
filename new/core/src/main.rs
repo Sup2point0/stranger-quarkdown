@@ -1,10 +1,5 @@
-use squarkdown::{
-	resolver,
-	SiteData, CharmParser, Renderer,
-	utils::log,
-	utils::colours::*,
-	utils::macros::*,
-};
+use squarkdown::*;
+use squarkdown::utils::log;
 
 use std::fs::File;
 
@@ -67,7 +62,7 @@ fn squarkup() -> Result<bool, Box<dyn std::error::Error>>
 	}
 	
 	for page in site_data.pages.values() {
-		let dest = dir!(config.paths.root / &page.destination);
+		let dest = config.paths.root.join(&page.destination);
 		let source = File::open(&page.filepath)?;
 		let target = File::create(dest)?;
 

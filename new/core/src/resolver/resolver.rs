@@ -1,6 +1,5 @@
-use super::ResolutionError;
-use crate::SquarkupConfig;
-use crate::utils::macros::*;
+use crate::*;
+use crate::utils::colours::*;
 
 use std::path::PathBuf;
 
@@ -8,11 +7,11 @@ use std::path::PathBuf;
 /// Find the root directory of the user's project to squarkup.
 /// 
 /// This is defined to be the closest directory that contains a `.squarkdown/` folder.
-pub fn resolve_project_root() -> Result<PathBuf, ResolutionError>
+pub fn resolve_project_root() -> SquarkResult<PathBuf>
 {
-	let Ok(cwd) = std::env::current_dir() else {
-		return Err(ResolutionError::ReadError { target: str!("current working directory") });
-	};
+	let mut checked = vec![];
+
+	let cwd = std::env::current_dir().map_err(err!())?;
 
 	for dir in cwd.ancestors() {
 		if all!(dir.join(".squarkdown") => .exists(), .is_dir()) {
@@ -24,9 +23,15 @@ pub fn resolve_project_root() -> Result<PathBuf, ResolutionError>
 		if all!(dir.join("squarkup.json") => .exists(), .is_file()) {
 			return Ok(dir.to_owned());
 		}
+
+		checked.push(dir);
 	}
 
-	Err(ResolutionError::NoSquarkdown)
+	Err(SquarkError::Unrecoverable {
+		msg: str!("could not find the root of your project"),
+		hint: format!("make sure you have either a {WHITE}.squarkdown/{RED} folder, or a {WHITE}squarkup.toml{RED} or {WHITE}squarkup.json{RED} file, in the root of your project"),
+		debug: checked.into_iter().map(|d| format!("checked {}", d.display())).collect(),
+	})
 }
 
 
