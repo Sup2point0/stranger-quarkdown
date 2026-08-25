@@ -1,10 +1,12 @@
-use std::path::PathBuf;
-
 use lazy_static::lazy_static;
 
 use super::macros::*;
+use crate::{
+	config::*,
+};
 
-use crate::types::*;
+use std::path::PathBuf;
+
 
 
 lazy_static!
@@ -23,6 +25,7 @@ lazy_static!
 			include_patterns: vec![],
 			exclude: vec![str!("ignored"), str!(r#"/_*\.md"#)],
 			exclude_patterns: vec![],
+			default_exclude: true,
 		},
 		errors: ErrorConfig {
 			on_error: ErrorAction::KILL,

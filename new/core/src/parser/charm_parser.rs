@@ -2,6 +2,7 @@ use tinyvec::tiny_vec;
 
 use super::*;
 use crate::{
+	SquarkupConfig,
 	types::*,
 	utils,
 	utils::macros::*,

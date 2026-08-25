@@ -2,9 +2,11 @@ use time::Date;
 use time::macros::format_description;
 
 use crate::{
+	SquarkupConfig,
+	config::*,
 	types::*,
-	utils::log,
-	utils::macros::*,
+	log,
+	macros::*,
 };
 
 use std::collections::HashMap;
@@ -38,6 +40,7 @@ pub struct PageData
 
 impl PageData
 {
+	// TODO prefer SquarkError
 	pub fn init(
 		filepath: PathBuf,
 		flags: Strings,

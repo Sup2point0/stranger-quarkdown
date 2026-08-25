@@ -13,8 +13,13 @@ use std::path::PathBuf;
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
-	pub paths: PathsConfig,
+	pub paths:  PathsConfig,
 	pub errors: ErrorConfig,
+	pub out:    OutConfig,
+	pub bases:  BasesConfig,
+	pub styles: StylesConfig,
+	pub assets: AssetsConfig,
+	pub fonts:  FontsConfig,
 }
 
 #[derive(Clone, Debug)]
