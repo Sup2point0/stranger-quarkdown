@@ -7,22 +7,23 @@ use crate::{
 use std::path::PathBuf;
 
 
-/// The user's squarkup configuration, loaded from `.squarkdown/squarkup.json`.
+/// The user's complete squarkup configuration, loaded from `.squarkdown/squarkup.json`.
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
 	pub paths:  PathsConfig,
-	pub errors: ErrorConfig,
 	pub out:    OutConfig,
+	pub data:   DataConfig,
 	pub bases:  BasesConfig,
 	pub styles: StylesConfig,
 	pub assets: AssetsConfig,
 	pub fonts:  FontsConfig,
+	pub errors: ErrorConfig,
 }
 
+
 #[derive(Clone, Debug)]
-pub struct PathsConfig
-{
+pub struct PathsConfig {
 	/// The root directory of the user's project, from which squarkup begins.
 	pub root: PathBuf,
 
@@ -49,9 +50,54 @@ pub struct PathsConfig
 	pub default_exclude: bool,
 }
 
+
+#[derive(Clone, Debug)]
+pub struct OutConfig {
+	// TODO migrate dest to this
+	folder: PathBuf,
+
+	/// The file name for exported files, including the (expected) `.svx` extension.
+	file: String,
+}
+
+
+#[derive(Clone, Debug)]
+pub struct DataConfig {
+	/// Where to export site data, including the (expected) `.json` extension.
+	path: PathBuf,
+}
+
+
+#[derive(Clone, Debug)]
+pub struct BasesConfig {
+	folder: PathBuf,
+	page_js: PathBuf,
+}
+
+
+#[derive(Clone, Debug)]
+pub struct StylesConfig {
+	folder: PathBuf,
+	base_file: PathBuf,
+}
+
+
+#[derive(Clone, Debug)]
+pub struct AssetsConfig {
+	folder: PathBuf,
+	site_assets_folder: PathBuf,
+	extensions: Vec<String>,
+}
+
+
+#[derive(Clone, Debug)]
+pub struct FontsConfig {
+	queries: Vec<String>,
+}
+
+
 #[derive(Clone, Debug, Default)]
-pub struct ErrorConfig
-{
+pub struct ErrorConfig {
 	/// What to do when a non-fatal error is encountered (e.g. parsing a file failed).
 	pub on_error: ErrorAction,
 
@@ -61,8 +107,7 @@ pub struct ErrorConfig
 
 #[derive(EnumStringify)] #[enum_stringify(case = "flat")]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub enum ErrorAction
-{
+pub enum ErrorAction {
 	/// Log the error, recover and continue.
 	#[default] WARN,
 
@@ -72,8 +117,7 @@ pub enum ErrorAction
 
 #[derive(EnumStringify)] #[enum_stringify(case = "flat")]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum FileAction
-{
+pub enum FileAction {
 	/// Overwrite the existing file.
 	#[default] OVERWRITE,
 
