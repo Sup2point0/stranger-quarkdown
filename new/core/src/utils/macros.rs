@@ -31,7 +31,7 @@ pub use dir;
 #[macro_export]
 macro_rules! err
 {
-	() => { |e| $crate::errors::SquarkError::External(Box::new(e)) }
+	() => { |e| $crate::errors::SquarkError::external(e) }
 }
 pub use err;
 

@@ -93,5 +93,7 @@ fn read_toml_config(filepath: PathBuf) -> SquarkResult<toml::Table>
 		let data = content.parse::<toml::Table>()?;
 		Ok(data)
 	})
-	().map_err(|e| SquarkError::External(e))
+	().map_err(|err| SquarkError::External {
+		err, msg: format!("failed to read your {WHITE}squarkup.toml")
+	})
 }

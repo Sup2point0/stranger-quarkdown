@@ -27,14 +27,17 @@ pub enum SquarkError
 	/// Multiple errors, aggregated from an atomic operation.
 	/// 
 	/// Handling depends on `config.errors.on_error`.
-	#[error("many errors")]
+	#[error("multiple fatal errors")]
 	Multiple {
 		errs: Vec<SquarkError>,
 	},
 
 	/// A fatal error that crashes Squarkdown, caused by external factors such as a file read failure.
-	#[error("{0}")]
-	External(Box<dyn std::error::Error>),  // TODO add message
+	#[error("{msg}")]
+	External {
+		err: Box<dyn std::error::Error>,
+		msg: String,
+	},
 }
 
 impl SquarkError
@@ -51,6 +54,9 @@ impl SquarkError
 
 	pub fn external(e: impl std::error::Error + 'static) -> Self
 	{
-		Self::External(Box::new(e))
+		Self::External {
+			err: Box::new(e),
+			msg: str!("unexpected external error")
+		}
 	}
 }

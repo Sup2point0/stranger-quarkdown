@@ -100,6 +100,10 @@ fn print_error(err: SquarkError)
 				print_error(err);
 			}
 		},
-		SquarkError::External(e) => log::bad!(e),
+		SquarkError::External { err, msg } => {
+			log::bad!(msg);
+			log::line();
+			println!("{RED}{err}");
+		},
 	}
 }
