@@ -12,17 +12,11 @@ pub enum SquarkError
 	#[error("{msg}")]
 	Recoverable {
 		msg: String,
+		hint: String,
+		debug: Vec<String>,
 	},
 
-	/// Multiple non-fatal errors, aggregated from an atomic operation.
-	/// 
-	/// Handling depends on `config.errors.on_error`.
-	#[error("many errors")]
-	ManyRecoverable {
-		errs: Vec<SquarkError>,
-	},
-
-	/// A fatal error that crashes Squarkdown.
+	/// A fatal error that crashes Squarkdown, irrespective of `config.errors.on_error`.
 	#[error("{msg}")]
 	Unrecoverable {
 		msg: String,
@@ -30,9 +24,17 @@ pub enum SquarkError
 		debug: Vec<String>,
 	},
 
+	/// Multiple errors, aggregated from an atomic operation.
+	/// 
+	/// Handling depends on `config.errors.on_error`.
+	#[error("many errors")]
+	Multiple {
+		errs: Vec<SquarkError>,
+	},
+
 	/// A fatal error that crashes Squarkdown, caused by external factors such as a file read failure.
 	#[error("{0}")]
-	External(Box<dyn std::error::Error>),
+	External(Box<dyn std::error::Error>),  // TODO add message
 }
 
 impl SquarkError

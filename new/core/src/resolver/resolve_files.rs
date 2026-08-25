@@ -40,16 +40,16 @@ fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bo
 	let path = entry.path();
 	let path_str = path.to_slash().expect("path should not contain non-Unicode characters");
 
-	if !config.paths.exclude_patterns.is_empty() {
-		for pattern in &config.paths.exclude_patterns {
+	if !config.paths.exclude.is_empty() {
+		for pattern in &config.paths.exclude {
 			if pattern.is_match(&path_str) {
 				return false;
 			}
 		}
 	}
 
-	if path.is_file() && !config.paths.include_patterns.is_empty() {
-		for pattern in &config.paths.include_patterns {
+	if path.is_file() && !config.paths.include.is_empty() {
+		for pattern in &config.paths.include {
 			if pattern.is_match(&path_str) {
 				return true;
 			}

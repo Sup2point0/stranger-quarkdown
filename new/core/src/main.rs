@@ -71,8 +71,6 @@ fn squarkup() -> SquarkResult<bool>
 		return Ok(false);
 	}
 
-	dbg!(&site_data);
-	
 	// for page in site_data.pages.values() {
 	// 	let dest = config.paths.root.join(&page.destination);
 	// 	let source = File::open(&page.filepath).map_err(err!())?;
@@ -88,19 +86,19 @@ fn squarkup() -> SquarkResult<bool>
 fn print_error(err: SquarkError)
 {
 	match err {
-		SquarkError::Recoverable { msg } => log::bad!(msg),
-		SquarkError::ManyRecoverable { errs } => {
-			for (i, err) in errs.into_iter().enumerate() {
-				if i != 0 { log::line(); }
-				print_error(err);
-			}
-		},
-		SquarkError::Unrecoverable { msg, hint, debug } => {
+		SquarkError::Recoverable { msg, hint, debug }
+		| SquarkError::Unrecoverable { msg, hint, debug } => {
 			log::bad!(msg);
 			for each in debug {
 				log::info!(each);
 			}
 			log::hint!(hint);
+		},
+		SquarkError::Multiple { errs } => {
+			for (i, err) in errs.into_iter().enumerate() {
+				if i != 0 { log::line(); }
+				print_error(err);
+			}
 		},
 		SquarkError::External(e) => log::bad!(e),
 	}

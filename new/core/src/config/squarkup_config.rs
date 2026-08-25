@@ -33,18 +33,11 @@ pub struct PathsConfig {
 	/// Source directories from which to start searching for Markdown files.
 	pub sources: Vec<PathBuf>,
 
-	/// Only files whose full path matches against any of these patterns will be squarked up.
-	pub include: Vec<String>,
-	/// Cache of `.include` compiled to RegEx patterns.
-	pub include_patterns: Vec<regex::Regex>,
+	/// Only files whose full path matches against any of these RegEx patterns will be squarked up.
+	pub include: Vec<regex::Regex>,
 
-	/// Files whose full path matches against any of these patterns will *not* be squarked up.
-	pub exclude: Vec<String>,
-	/// Cache of `.exclude` compiled to RegEx patterns.
-	pub exclude_patterns: Vec<regex::Regex>,
-
-	/// Include a default set of sensible exclude patterns, like `.git/` and `node_modules/`?
-	pub default_exclude: bool,
+	/// Files whose full path matches against any of these RegEx patterns will *not* be squarked up.
+	pub exclude: Vec<regex::Regex>,
 }
 
 
