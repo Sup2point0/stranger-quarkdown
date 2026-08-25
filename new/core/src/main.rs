@@ -3,6 +3,7 @@ use squarkdown::utils::log;
 use squarkdown::utils::colours::*;
 
 use std::fs::File;
+use std::time::Instant;
 
 
 fn main() -> Result<(), ()>
@@ -12,11 +13,14 @@ fn main() -> Result<(), ()>
 	log::line();
 	log::is!("squarking up...");
 
+	let t_init = Instant::now();
+
 	match squarkup()
 	{
 		Ok(_) => {
+			let t = t_init.elapsed();
 			log::line();
-			println!("{PINK}squarkup finished!");
+			println!("{PINK}squarkup finished! {GREY}{:.2?} ms", t.as_secs_f64() * 1000.0);
 			Ok(())
 		},
 		Err(e) => {
@@ -66,15 +70,17 @@ fn squarkup() -> SquarkResult<bool>
 		log::bad!("No files found to squarkup, exiting!");
 		return Ok(false);
 	}
-	
-	for page in site_data.pages.values() {
-		let dest = config.paths.root.join(&page.destination);
-		let source = File::open(&page.filepath).map_err(err!())?;
-		let target = File::create(dest).map_err(err!())?;
 
-		let mut renderer = Renderer::init(source, target);
-		renderer.render(&config);  // FIXME
-	}
+	dbg!(&site_data);
+	
+	// for page in site_data.pages.values() {
+	// 	let dest = config.paths.root.join(&page.destination);
+	// 	let source = File::open(&page.filepath).map_err(err!())?;
+	// 	let target = File::create(dest).map_err(err!())?;
+
+	// 	let mut renderer = Renderer::init(source, target);
+	// 	renderer.render(&config);  // FIXME
+	// }
 	
 	Ok(true)
 }
