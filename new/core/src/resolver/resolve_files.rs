@@ -1,8 +1,6 @@
 use crate::{
-	types::{ SquarkupConfig, ErrorAction },
-	errors::{ SquarkResult, SquarkError },
-	utils::log,
-	utils::macros::*,
+	SquarkupConfig, SquarkResult,
+	macros::*,
 };
 
 use std::path::PathBuf;
@@ -10,33 +8,13 @@ use std::path::PathBuf;
 
 /// Find all candidate files for squarkup in the user's project repo, as specified by their `paths.sources`, `paths.include` and `paths.exclude`.
 /// 
-/// The entire function `Err`s if `config.source`, `.include` or `.exclude` have invalid entries. Each individual iterator entry may `Err` if reading fails.
+/// The entire function `Err`s if `config.include` or `.exclude` have invalid entries that fail to compile. Each individual iterator entry may `Err` if reading the directory fails.
 pub fn find_files(config: &mut SquarkupConfig)
 	-> SquarkResult<impl Iterator<Item = SquarkResult<PathBuf>>>
 {
 	// TODO root-only
 
-	if !config.paths.include.is_empty() {
-		let mut errs = vec![];
-
-		for pattern in &config.paths.include {
-			match regex::Regex::new(&pattern) {
-				Ok(compiled) => config.paths.include_patterns.push(compiled),
-				Err(e) => errs.push(SquarkError::external(e)),
-			}
-		}
-
-		if !errs.is_empty() {
-			match config.errors.on_error {
-				ErrorAction::WARN => {
-					for err in errs {
-						log::bad!(err)
-					}
-				},
-				ErrorAction::KILL => return Err(SquarkError::ManyRecoverable { errs }),
-			}
-		}
-	}
+	config.compile_patterns();
 
 	Ok(
 		config.paths.sources.iter()

@@ -2,8 +2,9 @@ use enum_stringify::EnumStringify;
 
 use crate::{
 	SquarkResult, SquarkError,
-	utils::colours::*,
-	utils::macros::*,
+	log,
+	colours::*,
+	macros::*,
 };
 
 use std::path::PathBuf;
@@ -132,6 +133,38 @@ impl SquarkupConfig
 					});
 				},
 				None => todo!(),
+			}
+		}
+
+		if errs.is_empty() {
+			Ok(())
+		} else {
+			Err(SquarkError::ManyRecoverable { errs })
+		}
+	}
+
+	/// Compile the user's `.include` and `.exclude` entries into RegEx patterns and cache them to `.(in|ex)clude_patterns`.
+	/// 
+	/// Fails with `SquarkError::ManyRecoverable` if nonzero patterns fail to compile.
+	pub fn compile_patterns(&mut self) -> SquarkResult
+	{
+		let mut errs = vec![];
+
+		if !self.paths.include.is_empty() {
+			for pattern in &self.paths.include {
+				match regex::Regex::new(&pattern) {
+					Ok(compiled) => self.paths.include_patterns.push(compiled),
+					Err(e)       => errs.push(SquarkError::external(e)),
+				}
+			}
+		}
+		
+		if !self.paths.exclude.is_empty() {
+			for pattern in &self.paths.exclude {
+				match regex::Regex::new(&pattern) {
+					Ok(compiled) => self.paths.exclude_patterns.push(compiled),
+					Err(e)       => errs.push(SquarkError::external(e)),
+				}
 			}
 		}
 

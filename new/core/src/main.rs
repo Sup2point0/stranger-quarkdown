@@ -48,9 +48,9 @@ fn squarkup() -> SquarkResult<bool>
 
 	let found_active_file = false;
 	
-	for filepath in resolver::find_files(&config) {
+	for filepath in resolver::find_files(&mut config) {
 		let filepath = filepath.unwrap();
-		
+
 		let file = File::open(&filepath).map_err(err!())?;
 		found_active_file = true;
 		log::info!("found file: {}", filepath.display());
