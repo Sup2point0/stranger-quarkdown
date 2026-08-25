@@ -2,10 +2,10 @@ use tinyvec::tiny_vec;
 
 use super::*;
 use crate::{
-	SquarkupConfig,
-	types::*,
+	SquarkupConfig, PageData,
+	types::{ Strings, CharmError },
 	utils,
-	utils::macros::*,
+	macros::*,
 };
 
 use std::collections::HashMap;
@@ -18,6 +18,9 @@ use std::path::PathBuf;
 /// A parser for the charm squark of a file.
 pub struct CharmParser<Source: Read = File>
 {
+	/// Have we reached the end of the source?
+	pub(super) is_done: bool,
+
 	/// Non-crashing errors to report to the user.
 	pub(super) errors: Vec<ParseFailure>,
 	
@@ -25,9 +28,6 @@ pub struct CharmParser<Source: Read = File>
 	///
 	/// If so, this means the user intends for the file to be squarked up, and error checking should be stricter to catch mistakes on their end.
 	pub(super) is_live: bool,
-
-	/// Have we reached the end of the source?
-	pub(super) is_eof: bool,
 
 	/// The backing buffer that reads from the target file.
 	pub(super) _reader: BufReader<Source>,
@@ -59,9 +59,9 @@ impl<Source: Read> CharmParser<Source>
 	pub fn init(file: Source, filepath: Option<PathBuf>) -> Result<Self, ParseFailure>
 	{
 		let mut out = Self {
+			is_done: false,
 			errors: vec![],
 			is_live: false,
-			is_eof: false,
 			_reader: BufReader::new(file),
 			_filepath: filepath,
 			_index: 0,

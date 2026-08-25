@@ -51,7 +51,7 @@ impl<Source: Read> CharmParser<Source>
 	/// Errors if the parser has already reached the end of the source, or if reading from the buffer fails.
 	pub(super) fn next_line(&mut self, when: impl Fn() -> String) -> ParseResult
 	{
-		if self.is_eof {
+		if self.is_done {
 			return self.err_eof(when);
 		}
 
@@ -59,7 +59,7 @@ impl<Source: Read> CharmParser<Source>
 
 		match self._reader.read_line(&mut self._line_buffer) {
 			Err(_) => return self.err_eof(when),
-			Ok(0) => self.is_eof = true,
+			Ok(0) => self.is_done = true,
 			Ok(_) => (),
 		}
 
