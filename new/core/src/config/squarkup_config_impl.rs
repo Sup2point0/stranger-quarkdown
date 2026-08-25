@@ -95,56 +95,37 @@ impl SquarkupConfig
 		// ...then apply the user's non-defaults on top of it
 		if let Some(paths) = data.get("paths")
 		{
-			if let Some(values) = Self::get_string_array(&paths, "paths", "sources", "(filepaths relative to your project root", &mut errs) {
-				for value in values {
-					if let Some(dir) = Self::require_string_entry(value, "paths", "sources", "(filepaths relative to your project root)", &mut errs) {
-						let path = out.paths.root.join(dir.trim_start_matches("/"));
+			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root", &mut errs, |dir, errs| {
+				let path = out.paths.root.join(dir.trim_start_matches("/"));
 
-						if path.exists() {
-							out.paths.sources.push(path);
-						}
-						else {
-							errs.push(SquarkError::Unrecoverable {
-								msg: slash!("a source folder you specified does not exist: {}", path),
-								hint: format!("{WHITE}paths.sources{GREEN} folders are relative from your project root"),
-								debug: vec![],
-							});
-						}
-					}
+				if path.exists() {
+					out.paths.sources.push(path);
 				}
-			}
-
-			if let Some(values) = Self::get_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs) {
-				for value in values {
-					if let Some(pattern) = Self::require_string_entry(value, "paths", "include", "(RegEx patterns)", &mut errs) {
-						match regex::Regex::new(&pattern) {
-							Ok(compiled) => out.paths.exclude.push(compiled),
-							Err(e)       => errs.push(SquarkError::external(e)),
-						}
-					}
+				else {
+					errs.push(SquarkError::Unrecoverable {
+						msg: slash!("a source folder you specified does not exist: {}", path),
+						hint: format!("{YELLOW}paths.sources{GREEN} folders are relative from your project root"),
+						debug: vec![],
+					});
 				}
-			}
+			});
 
-			if let Some(values) = Self::get_string_array(&paths, "paths", "exclude", "(RegEx patterns)", &mut errs) {
-				for value in values {
-					if let Some(pattern) = Self::require_string_entry(value, "paths", "exclude", "(RegEx patterns)", &mut errs) {
-						match regex::Regex::new(&pattern) {
-							Ok(compiled) => out.paths.exclude.push(compiled),
-							Err(e)       => errs.push(SquarkError::external(e)),
-						}
-					}
+			Self::for_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
+				match regex::Regex::new(&pattern) {
+					Ok(compiled) => out.paths.exclude.push(compiled),
+					Err(e)       => errs.push(SquarkError::external(e)),
 				}
-			}
+			});
 
-			match paths.get("default-exclude") {
-				Some(toml::Value::Boolean(false)) => { out.paths.exclude.clear(); }
-				Some(toml::Value::Boolean(true)) => (),
-				Some(v) => errs.push(SquarkError::Recoverable {
-					msg: format!("you provided an invalid {YELLOW}paths.default-exclude{RED} of type {}", v.type_str()),
-					hint: format!("{WHITE}paths.default-exclude{GREEN} must be a Boolean"),
-					debug: vec![format!("you provided {v}")]
-				}),
-				None => (),
+			Self::for_string_array(&paths, "paths", "exclude", "(RegEx patterns)", &mut errs, |pattern, errs| {
+				match regex::Regex::new(&pattern) {
+					Ok(compiled) => out.paths.exclude.push(compiled),
+					Err(e)       => errs.push(SquarkError::external(e)),
+				}
+			});
+
+			if let Some(true) = Self::error_if_not_bool(data, "paths", "default-exclude", "", &mut errs) {
+				out.paths.exclude.clear();
 			}
 		}
 
@@ -156,48 +137,88 @@ impl SquarkupConfig
 	}
 }
 
+/// All the validation logic!
 impl SquarkupConfig
 {
-	/// Validate that `data.field` is an array.
+	fn for_string_array<'d>(
+		data: &'d toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+		errs: &mut Vec<SquarkError>,
+		mut callback: impl FnMut(&String, &mut Vec<SquarkError>),
+	)
+	{
+		match Self::get_string_array(data, category, field, hint)
+		{
+			Ok(None) => (),
+			Ok(Some(values)) => for value in values {
+				match Self::require_string_entry(value, category, field, hint) {
+					Ok(value) => callback(value, errs),
+					Err(e) => errs.push(e),
+				}
+			},
+			Err(e) => errs.push(e),
+		}
+	}
+
+	/// Validate that `data[field]` is an array.
 	fn get_string_array<'d>(
 		data: &'d toml::Value,
 		category: &'static str,
 		field: &'static str,
 		hint: &'static str,
-		errs: &mut Vec<SquarkError>,
-	) -> Option<&'d Vec<toml::Value>>
+	) -> SquarkResult<Option<&'d Vec<toml::Value>>>
 	{
 		match data.get(field)
 		{
-			Some(toml::Value::Array(values)) => Some(values),
-			Some(v) => {
-				errs.push(SquarkError::Recoverable {
-					msg: format!("invalid setting for {YELLOW}{category}.{field}{RED}"),
-					hint: format!("{YELLOW}{category}.{field}{GREEN} must be an array of strings {GREY}{hint}"),
-					debug: vec![format!("you provided {GREY_LIGHT}{v}{GREY}, which has type: {GREY_LIGHT}{}{GREY}", v.type_str())],
-				});
-				None
-			},
-			None => None,
+			Some(toml::Value::Array(values)) => Ok(Some(values)),
+			None => Ok(None),
+
+			Some(v) => Err(SquarkError::Recoverable {
+				msg: format!("invalid setting for {YELLOW}{category}.{field}{RED}"),
+				hint: format!("{YELLOW}{category}.{field}{GREEN} must be an array of strings {GREY}{hint}"),
+				debug: vec![format!("you provided {GREY_LIGHT}{v}{GREY}, which has type: {GREY_LIGHT}{}{GREY}", v.type_str())],
+			}),
 		}
 	}
 
-	/// Validate that `data.field` is a string in an array.
+	/// Validate that `data` is a string in an array, for `category.field`.
 	fn require_string_entry<'d>(
 		data: &'d toml::Value,
 		category: &'static str,
 		field: &'static str,
 		hint: &'static str,
-		errs: &mut Vec<SquarkError>,
-	) -> Option<&'d String>
+	) -> SquarkResult<&'d String>
 	{
 		match data
 		{
-			toml::Value::String(value) => Some(value),
-			v => {
+			toml::Value::String(value) => Ok(value),
+			v => Err(SquarkError::Recoverable {
+				msg: format!("invalid setting for an entry of {YELLOW}{category}.{field}{RED}"),
+				hint: format!("{YELLOW}{category}.{field}{GREEN} entries must be strings {GREY}{hint}"),
+				debug: vec![format!("you provided {GREY_LIGHT}{v}{GREY}, which has type: {GREY_LIGHT}{}{GREY}", v.type_str())],
+			}),
+		}
+	}
+
+	/// Validate that `data[field]` is a boolean, for `category.field`.
+	fn error_if_not_bool<'d>(
+		data: &'d toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+		errs: &mut Vec<SquarkError>,
+	) -> Option<bool>
+	{
+		match data.get(field)
+		{
+			Some(toml::Value::Boolean(value)) => Some(*value),
+			None => None,
+			Some(v) => {
 				errs.push(SquarkError::Recoverable {
 					msg: format!("invalid setting for an entry of {YELLOW}{category}.{field}{RED}"),
-					hint: format!("{YELLOW}{category}.{field}{GREEN} entries must be strings {GREY}{hint}"),
+					hint: format!("{YELLOW}{category}.{field}{GREEN} must be a boolean {GREY}{hint}"),
 					debug: vec![format!("you provided {GREY_LIGHT}{v}{GREY}, which has type: {GREY_LIGHT}{}{GREY}", v.type_str())],
 				});
 				None
