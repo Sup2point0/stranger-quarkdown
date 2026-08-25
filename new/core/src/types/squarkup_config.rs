@@ -29,9 +29,18 @@ pub struct PathsConfig
 	/// Where in the site all `dest` fields are relative to.
 	pub dest: PathBuf,
 	
+	/// Source directories from which to start searching for Markdown files.
 	pub sources: Vec<String>,
+
+	/// Only files whose full path matches against any of these patterns will be squarked up.
 	pub include: Vec<String>,
+	/// Cache of `.include` compiled to RegEx patterns.
+	pub include_patterns: Vec<regex::Regex>,
+
+	/// Files whose full path matches against any of these patterns will *not* be squarked up.
 	pub exclude: Vec<String>,
+	/// Cache of `.exclude` compiled to RegEx patterns.
+	pub exclude_patterns: Vec<regex::Regex>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -84,7 +93,9 @@ impl SquarkupConfig
 				dest: root.join("src/routes/"),
 				sources: vec![],
 				include: vec![str!("\\.md$"), str!("\\.svx$")],
+				include_patterns: vec![],
 				exclude: vec![],
+				exclude_patterns: vec![],
 			},
 			errors: Default::default(),
 		}
