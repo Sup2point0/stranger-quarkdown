@@ -29,9 +29,6 @@ pub struct PathsConfig {
 
 	/// The directory containing the user's SvelteKit site.
 	pub site: PathBuf,
-
-	/// Where in the site all `dest` fields are relative to.
-	pub dest: PathBuf,
 	
 	/// Source directories from which to start searching for Markdown files.
 	pub sources: Vec<PathBuf>,
@@ -54,49 +51,53 @@ pub struct PathsConfig {
 #[derive(Clone, Debug)]
 pub struct OutConfig {
 	// TODO migrate dest to this
-	folder: PathBuf,
+	
+	/// Where to export files relative to, relative to `.paths.site`.
+	/// 
+	/// `dest` paths in files are relative to this folder.
+	pub folder: PathBuf,
 
 	/// The file name for exported files, including the (expected) `.svx` extension.
-	file: String,
+	pub file: String,
 }
 
 
 #[derive(Clone, Debug)]
 pub struct DataConfig {
 	/// Where to export site data, including the (expected) `.json` extension.
-	path: PathBuf,
+	pub path: PathBuf,
 }
 
 
 #[derive(Clone, Debug)]
 pub struct BasesConfig {
-	folder: PathBuf,
-	page_js: PathBuf,
+	pub folder: Option<PathBuf>,
+	pub page_js: Option<PathBuf>,
 }
 
 
 #[derive(Clone, Debug)]
 pub struct StylesConfig {
-	folder: PathBuf,
-	base_file: PathBuf,
+	pub folder: Option<PathBuf>,
+	pub base_file: Option<PathBuf>,
 }
 
 
 #[derive(Clone, Debug)]
 pub struct AssetsConfig {
-	folder: PathBuf,
-	site_assets_folder: PathBuf,
-	extensions: Vec<String>,
+	pub folder: Option<PathBuf>,
+	pub site_assets_folder: Option<PathBuf>,
+	pub extensions: Vec<String>,
 }
 
 
 #[derive(Clone, Debug)]
 pub struct FontsConfig {
-	queries: Vec<String>,
+	pub queries: Vec<String>,
 }
 
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ErrorConfig {
 	/// What to do when a non-fatal error is encountered (e.g. parsing a file failed).
 	pub on_error: ErrorAction,
@@ -106,20 +107,20 @@ pub struct ErrorConfig {
 }
 
 #[derive(EnumStringify)] #[enum_stringify(case = "flat")]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ErrorAction {
 	/// Log the error, recover and continue.
-	#[default] WARN,
+	WARN,
 
 	/// Crash Squarkdown and exit.
 	KILL,
 }
 
 #[derive(EnumStringify)] #[enum_stringify(case = "flat")]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileAction {
 	/// Overwrite the existing file.
-	#[default] OVERWRITE,
+	OVERWRITE,
 
 	/// Return an error, handled according to `config.errors.on_error`.
 	ERROR,
