@@ -1,5 +1,6 @@
-use super::*;
-use crate::SquarkupConfig;
+use crate::{
+	SquarkupConfig, SquarkResult,
+};
 
 use std::fs::File;
 use std::io::{ BufReader, BufWriter, Read, Write };
@@ -22,7 +23,7 @@ impl<Source: Read, Target: Write> Renderer<Source, Target>
 		}
 	}
 	
-	pub fn render(&mut self, config: &SquarkupConfig) -> RenderResult
+	pub fn render(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		// TODO
 		println!("rendering...");

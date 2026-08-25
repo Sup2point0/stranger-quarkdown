@@ -1,4 +1,7 @@
-use crate::utils::macros::*;
+use crate::{
+	colours::*,
+	macros::*,
+};
 
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 
@@ -9,7 +12,7 @@ pub enum SquarkError
 	/// A non-fatal error.
 	/// 
 	/// Handling depends on `config.errors.on_error`.
-	#[error("{msg}")]
+	#[error("{RED}{msg}")]
 	Recoverable {
 		msg: String,
 		hint: String,
