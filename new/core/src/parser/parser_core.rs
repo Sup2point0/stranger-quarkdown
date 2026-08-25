@@ -1,6 +1,10 @@
+use super::*;
+use crate::{
+	macros::*,
+};
+
 use std::io::{ BufRead, Read };
 
-use super::*;
 
 
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
