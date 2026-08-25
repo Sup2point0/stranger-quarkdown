@@ -57,7 +57,7 @@ fn squarkup() -> SquarkResult<bool>
 		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
 		
 		if let Some(page_data) = parser.parse(&config).unwrap() {
-			log::info!(slash!("found active file: {BLUE}{}", filepath));
+			log::info!(slash!("found active file: {GREY_LIGHT}{}", filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()));
 			site_data.add_page(filepath, page_data);
 		}
 	}

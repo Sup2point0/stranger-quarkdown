@@ -21,8 +21,6 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 			// skip ignored folders and files
 			.filter_entry(|e| should_include_path(e, config))
 
-			.map(|e| dbg!(e))
-
 			// yield `SquarkError::External` errors, not walkdir errors
 			.map(|e| e.map_err(err!()))
 
