@@ -48,7 +48,7 @@ fn squarkup() -> SquarkResult<bool>
 	let mut site_data = SiteData::new();
 	let mut found_active_file = false;
 	
-	for filepath in resolver::find_files(&config) {
+	for filepath in resolver::resolve_files(&config) {
 		let filepath = filepath.unwrap();
 
 		let file = File::open(&filepath).map_err(err!())?;

@@ -6,18 +6,12 @@ use crate::{
 use std::path::PathBuf;
 
 
-/// Find all candidate files for squarkup in the user's project repo, as specified by their `paths.sources`, `paths.include` and `paths.exclude`.
-/// 
-/// The entire function `Err`s if `config.include` or `.exclude` have invalid entries that fail to compile. Each individual iterator entry may `Err` if reading the directory fails.
-pub fn find_files(config: &mut SquarkupConfig)
-	-> SquarkResult<impl Iterator<Item = SquarkResult<PathBuf>>>
+/// Find all candidate files for squarkup in the user's project repo, as specified by their `config.paths.sources`, `.include_patterns` and `.exclude_patterns`.
+pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<PathBuf>>
 {
 	// TODO root-only
 
-	config.compile_patterns();
-
-	Ok(
-		config.paths.sources.iter()
+	config.paths.sources.iter()
 		.flat_map(|source|
 			walkdir::WalkDir::new(&config.paths.root.join(source))
 				.into_iter()
@@ -25,19 +19,26 @@ pub fn find_files(config: &mut SquarkupConfig)
 				.map(|e| e.map_err(err!()))
 				.map(|e| e.map(|entry| entry.path().to_path_buf()))
 		)
-	)
 }
 
+/// Should `entry` be squarked up (file) or searched (folder), according to the user's squarkup `config`?
 fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 {
 	// TODO symlinks?
 
 	let path = entry.path();
+	dbg!(path);
 	let path_str = path.to_str().unwrap();
 
-	// TODO exclude
+	if !config.paths.exclude_patterns.is_empty() {
+		for pattern in &config.paths.exclude_patterns {
+			if pattern.is_match(&path_str) {
+				return false;
+			}
+		}
+	}
 
-	if path.is_file() && !config.paths.include.is_empty() {
+	if path.is_file() && !config.paths.include_patterns.is_empty() {
 		for pattern in &config.paths.include_patterns {
 			if pattern.is_match(&path_str) {
 				return true;
