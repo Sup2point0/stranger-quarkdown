@@ -61,27 +61,29 @@ impl SquarkupConfig
 	/// Returns `Err(SquarkError::ManyRecoverable)` only if nonzero errors are encountered.
 	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
+		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with *user-friendly*, *aggregated* error messages (rather than just a schema violation) we have to handroll it all ourselves */
 		let mut errs = vec![];
+
+		let mut site = root.to_path_buf();
 
 		/* NOTE: Read `paths.site` first because *defaults* depend on it */
 		// TODO cleanup using `error_if_not_string()`
-		let site = if let Some(paths) = data.get("paths")
+		if let Some(paths) = data.get("paths")
 		{
-			match paths.get("site") {
-				Some(toml::Value::String(dir)) => Self::if_exists(root, dir, "for your SvelteKit site", fmt!("{W}paths.site{G} is relative to your project root"))?,
-				Some(v) => return Err(SquarkError::Unrecoverable {
-					msg: fmt!("you provided an invalid {Y}paths.site{R} of type {}", v.type_str()),
-					hint: fmt!("{W}paths.site{G} must be a string {GREY}(folder relative to root)"),
-					debug: vec![],
-				}),
-				None => root.to_path_buf(),
+			if let Some(dir) = Self::require_string(paths, "paths", "site", "(filepath relative to your project root)")? {
+				site = Self::if_folder_exists(
+					root, dir, "for your SvelteKit site",
+					fmt!("{W}paths.site{G} is relative to your project root")
+				)?;
 			}
-		} else { root.to_path_buf() };
+		}
 
 		// start with defaults...
 		let mut s = Self::init_defaults(root, &site);
 
 		// ...then apply the user's non-defaults on top of it
+
+		// PathsConfig
 		if let Some(paths) = data.get("paths")
 		{
 			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root", &mut errs, |dir, errs| {
@@ -124,9 +126,23 @@ impl SquarkupConfig
 			}
 		}
 
+		// OutConfig
+		if let Some(out) = data.get("out")
+		{
+			match Self::require_string(&out, "out", "folder", "(folder relative to your site folder)") {
+				Ok(Some(dir)) => match Self::if_folder_exists(
+					&site, dir,
+					"for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder")
+				) {
+					Ok(path) => s.out.folder = path,
+					Err(e) => errs.push(e),
+				},
+				Err(e) => errs.push(e),
+				Ok(None) => (),
 			}
 		}
 
+		/* NOTE: We're treating an invalid config as fatal, so `errors.on_error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything *destructive*, tho) */
 		if errs.is_empty() {
 			Ok(s)
 		} else {
@@ -194,6 +210,7 @@ impl SquarkupConfig
 		match data
 		{
 			toml::Value::String(value) => Ok(value),
+
 			v => Err(SquarkError::Recoverable {
 				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
 				hint: fmt!("{Y}{category}.{field}{G} entries must be strings {GREY}{hint}"),
@@ -205,28 +222,25 @@ impl SquarkupConfig
 	}
 
 	/// Validate that `data[field]` is a string, for `category.field`.
-	fn error_if_not_string<'d>(
+	fn require_string<'d>(
 		data: &'d toml::Value,
 		category: &'static str,
 		field: &'static str,
 		hint: &'static str,
-		errs: &mut Vec<SquarkError>,
-	) -> Option<&'d String>
+	) -> SquarkResult<Option<&'d String>>
 	{
 		match data.get(field)
 		{
-			Some(toml::Value::String(value)) => Some(value),
-			None => None,
-			Some(v) => {
-				errs.push(SquarkError::Recoverable {
-					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-					hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
-					debug: vec![
-						fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-					],
-				});
-				None
-			},
+			Some(toml::Value::String(value)) => Ok(Some(value)),
+			None => Ok(None),
+
+			Some(v) => Err(SquarkError::Recoverable {
+				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
+				hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
+				debug: vec![
+					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+				],
+			}),
 		}
 	}
 
@@ -256,7 +270,8 @@ impl SquarkupConfig
 		}
 	}
 
-	fn if_exists(
+	/// Validate that `root / dir` exists, and is a folder.
+	fn if_folder_exists(
 		root: &Path,
 		dir: &str,
 		for_location: &'static str,
