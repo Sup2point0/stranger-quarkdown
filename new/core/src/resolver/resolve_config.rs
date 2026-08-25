@@ -1,8 +1,10 @@
+use path_slash::PathBufExt;
+
 use crate::{
 	SquarkupConfig, SquarkResult, SquarkError,
-	utils::log,
-	utils::colours::*,
-	utils::macros::*,
+	log,
+	colours::*,
+	macros::*,
 };
 
 use std::error::Error;
@@ -14,13 +16,18 @@ use std::path::{ PathBuf, Path };
 enum Extension { TOML, JSON }
 
 
-/// Find, read, load and validate the user's squarkup configuration, either in `squarkup.toml` or `squarkup.json`.
+/// Find, read, load, validate and initialise the user's squarkup configuration, either from `squarkup.toml` or `squarkup.json`.
 pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 {
 	log::is!("resolving config...");
 
 	let (filepath, ext) = find_config(&root)?;
-	log::ok!("found your squarkup config: {BLUE}{}", filepath.display());
+
+	if let Some(normalised) = filepath.to_slash() {
+		log::ok!("found your squarkup config: {BLUE}{normalised}");
+	} else {
+		log::ok!("found your squarkup config: {BLUE}{}", filepath.display())
+	}
 
 	let mut config = SquarkupConfig::init_defaults(root.clone());
 
@@ -31,12 +38,14 @@ pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 			log::info!("read successful");
 			log::info!("validating config...");
 			config.set_from_toml(data)?;
-			log::ok!("config looks good, all set!");
 		},
 		Extension::JSON => {
 			unimplemented!()
 		},
 	}
+
+	config.compile_patterns()?;
+	log::ok!("config looks good, all set!");
 
 	Ok(config)
 }
