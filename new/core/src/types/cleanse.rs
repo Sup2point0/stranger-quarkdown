@@ -16,6 +16,5 @@ pub enum CleanseOperation
 	COMMENTS,
 
 	/// Remove `\n<br>\n` large line breaks.
-	#[allow(non_camel_case_types)]
 	LINE_BREAKS,
 }

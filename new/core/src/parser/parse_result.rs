@@ -7,11 +7,11 @@ pub type Recoverable = ParseResult;
 /// A possible error that should be propagated.
 /// 
 /// `NO_MATCH` and `DONE` are non-critical status indicators for short-circuiting. The rest are critical errors that terminate the parser.
+#[allow(non_camel_case_types)]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ParseFailure
 {
 	/// A speculative parse was unsuccessful, so the parser should fallback to something else.
-	#[allow(non_camel_case_types)]
 	NO_MATCH,
 
 	/// The parser unexpectedly reached the end of its source.

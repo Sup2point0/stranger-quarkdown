@@ -1,4 +1,5 @@
 #![allow(unused_doc_comments)]
+#![allow(non_camel_case_types)]
 
 pub mod config;
 pub mod resolver;
