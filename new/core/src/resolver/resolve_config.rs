@@ -1,5 +1,3 @@
-use path_slash::PathBufExt;
-
 use crate::{
 	SquarkupConfig, SquarkResult, SquarkError,
 	log,
@@ -22,12 +20,7 @@ pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 	log::is!("resolving config...");
 
 	let (filepath, ext) = find_config(&root)?;
-
-	if let Some(normalised) = filepath.to_slash() {
-		log::ok!("found your squarkup config: {BLUE}{normalised}");
-	} else {
-		log::ok!("found your squarkup config: {BLUE}{}", filepath.display())
-	}
+	log::found!("found your squarkup config: {BLUE}{}", filepath);
 
 	let mut config = SquarkupConfig::init_defaults(root.clone());
 

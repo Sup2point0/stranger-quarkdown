@@ -2,7 +2,6 @@ use enum_stringify::EnumStringify;
 
 use crate::{
 	SquarkResult, SquarkError,
-	log,
 	colours::*,
 	macros::*,
 };
