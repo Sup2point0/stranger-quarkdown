@@ -69,18 +69,18 @@ impl<Source: Read, Target: Write>
 	{
 		match self._writer.write(content.as_bytes())
 		{
-			Ok(n) => Ok(()),
 			Ok(0) => Err(SquarkError::Unrecoverable {
-				msg: str!(slash!("could not write to {}", &self.filepath.expect("renderer should know where it's rendering to"))),
+				msg: str!(slash!("could not write to {}", self.filepath.clone().expect("renderer should know where it's rendering to").to_path_buf())),
 				hint: str!("this may mean the file was deleted, moved or locked mid-write"),
 				debug: vec![
 					fmt!("tried to write `{content}`"),
 				],
 			}),
+			Ok(..) => Ok(()),
 			// TODO retry on interruption
 			Err(e) => Err(SquarkError::External {
 				err: bx!(e),
-				msg: str!(slash!("could not write to {}", &self.filepath.expect("renderer should know where it's rendering to"))),
+				msg: str!(slash!("could not write to {}", self.filepath.clone().expect("renderer should know where it's rendering to").to_path_buf())),
 			}),
 		}
 	}

@@ -62,7 +62,7 @@ impl<Source: Read, Target: Write>
 		}
 	}
 
-	fn render(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	pub fn render(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		self.filepath = Some(config.out.folder.join(&page.destination));
 
@@ -70,7 +70,7 @@ impl<Source: Read, Target: Write>
 			self.render_next_chunk(page, config)?;
 		}
 
-		self._writer.flush().map_err(err!());
+		self._writer.flush().map_err(err!())?;
 
 		if !self.ctx.is_empty() {
 			Err(SquarkError::Recoverable {
