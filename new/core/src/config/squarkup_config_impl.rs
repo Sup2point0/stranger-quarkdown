@@ -81,8 +81,8 @@ impl SquarkupConfig
 		{
 			Self::check_is_table(paths, "paths", fmt!("try setting {W}```\n\n\t[paths]\n\tsite = \"/your-site/\"\n\n```"))?;
 
-			if let Some(dir) = Self::require_string(paths, "paths", "site", "(filepath relative to your project root)")? {
-				site = Self::if_folder_exists(
+			if let Some(dir) = Self::get_string(paths, "paths", "site", "(filepath relative to your project root)")? {
+				site = Self::get_folder_path(
 					root, dir, "for your SvelteKit site",
 					fmt!("{W}paths.site{G} is relative to your project root")
 				)?;
@@ -132,7 +132,7 @@ impl SquarkupConfig
 				}
 			});
 
-			if let Some(true) = Self::error_if_not_bool(&paths, "paths", "default-exclude", "", &mut errs) {
+			if let Some(true) = Self::get_bool(&paths, "paths", "default-exclude", "", &mut errs) {
 				s.paths.exclude.clear();
 			}
 		}
@@ -140,8 +140,8 @@ impl SquarkupConfig
 		// OutConfig
 		if let Some(out) = data.get("out")
 		{
-			match Self::require_string(&out, "out", "folder", "(folder relative to your site folder)") {
-				Ok(Some(dir)) => match Self::if_folder_exists(
+			match Self::get_string(&out, "out", "folder", "(folder relative to your site folder)") {
+				Ok(Some(dir)) => match Self::get_folder_path(
 					&site, dir,
 					"for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder")
 				) {
@@ -178,6 +178,88 @@ impl SquarkupConfig
 					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}{GREY}", data.type_str()),
 				],
 			})
+		}
+	}
+
+	/// Validate that `data[field]` is a string, for `category.field`.
+	fn get_string<'d>(
+		data: &'d toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+	) -> SquarkResult<Option<&'d String>>
+	{
+		match data.get(field)
+		{
+			Some(toml::Value::String(value)) => Ok(Some(value)),
+			None => Ok(None),
+
+			Some(v) => Err(SquarkError::Unrecoverable {
+				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
+				hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
+				debug: vec![
+					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+				],
+			}),
+		}
+	}
+
+	/// Validate that `data[field]` is a boolean, for `category.field`.
+	fn get_bool(
+		data: &toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+		errs: &mut Vec<SquarkError>,
+	) -> Option<bool>
+	{
+		match data.get(field)
+		{
+			Some(toml::Value::Boolean(value)) => Some(*value),
+			None => None,
+			Some(v) => {
+				errs.push(SquarkError::Unrecoverable {
+					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
+					hint: fmt!("{Y}{category}.{field}{G} must be a boolean {GREY}{hint}"),
+					debug: vec![
+						fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+					],
+				});
+				None
+			},
+		}
+	}
+
+	/// Validate that `root / dir` exists, and is a folder.
+	fn get_folder_path(
+		root: &Path,
+		dir: &str,
+		for_location: &'static str,
+		hint: String,
+	) -> SquarkResult<PathBuf>
+	{
+		let path = root.join(dir.trim_start_matches(|c| matches!(c, '/' | '\\')));
+
+		if !path.exists() {
+			Err(SquarkError::Unrecoverable {
+				msg: fmt!("the directory you specified {for_location} doesn't exist!"),
+				hint,
+				debug: vec![
+					slash!("`{}` is not a valid directory", path),
+				],
+			})
+		}
+		else if !path.is_dir() {
+			Err(SquarkError::Unrecoverable {
+				msg: fmt!("the directory you specified {for_location} is not a folder"),
+				hint: str!(),
+				debug: vec![
+					slash!("`{}` is not a folder", path),
+				],
+			})
+		}
+		else {
+			Ok(path)
 		}
 	}
 
@@ -245,79 +327,6 @@ impl SquarkupConfig
 					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 				],
 			}),
-		}
-	}
-
-	/// Validate that `data[field]` is a string, for `category.field`.
-	fn require_string<'d>(
-		data: &'d toml::Value,
-		category: &'static str,
-		field: &'static str,
-		hint: &'static str,
-	) -> SquarkResult<Option<&'d String>>
-	{
-		match data.get(field)
-		{
-			Some(toml::Value::String(value)) => Ok(Some(value)),
-			None => Ok(None),
-
-			Some(v) => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-				hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
-				debug: vec![
-					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-				],
-			}),
-		}
-	}
-
-	/// Validate that `data[field]` is a boolean, for `category.field`.
-	fn error_if_not_bool(
-		data: &toml::Value,
-		category: &'static str,
-		field: &'static str,
-		hint: &'static str,
-		errs: &mut Vec<SquarkError>,
-	) -> Option<bool>
-	{
-		match data.get(field)
-		{
-			Some(toml::Value::Boolean(value)) => Some(*value),
-			None => None,
-			Some(v) => {
-				errs.push(SquarkError::Unrecoverable {
-					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-					hint: fmt!("{Y}{category}.{field}{G} must be a boolean {GREY}{hint}"),
-					debug: vec![
-						fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-					],
-				});
-				None
-			},
-		}
-	}
-
-	/// Validate that `root / dir` exists, and is a folder.
-	fn if_folder_exists(
-		root: &Path,
-		dir: &str,
-		for_location: &'static str,
-		hint: String,
-	) -> SquarkResult<PathBuf>
-	{
-		let path = root.join(dir.trim_start_matches(|c| matches!(c, '/' | '\\')));
-
-		if path.exists() {
-			Ok(path)
-		}
-		else {
-			Err(SquarkError::Unrecoverable {
-				msg: fmt!("the directory you specified {for_location} doesn't exist!"),
-				hint,
-				debug: vec![
-					slash!("`{}` is not a valid directory", path),
-				],
-			})
 		}
 	}
 }
