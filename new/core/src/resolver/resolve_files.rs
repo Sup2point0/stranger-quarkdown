@@ -1,3 +1,5 @@
+use path_slash::PathExt;
+
 use crate::{
 	SquarkupConfig, SquarkResult,
 	macros::*,
@@ -19,6 +21,8 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 			// skip ignored folders and files
 			.filter_entry(|e| should_include_path(e, config))
 
+			.map(|e| dbg!(e))
+
 			// yield `SquarkError::External` errors, not walkdir errors
 			.map(|e| e.map_err(err!()))
 
@@ -36,8 +40,7 @@ fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bo
 	// TODO symlinks?
 
 	let path = entry.path();
-	dbg!(path);
-	let path_str = path.to_str().unwrap();
+	let path_str = path.to_slash().expect("path should not contain non-Unicode characters");
 
 	if !config.paths.exclude_patterns.is_empty() {
 		for pattern in &config.paths.exclude_patterns {
