@@ -41,6 +41,9 @@ pub struct PathsConfig
 	pub exclude: Vec<String>,
 	/// Cache of `.exclude` compiled to RegEx patterns.
 	pub exclude_patterns: Vec<regex::Regex>,
+
+	/// Include a default set of sensible exclude patterns, like `.git/` and `node_modules/`?
+	pub default_exclude: bool,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -86,16 +89,25 @@ impl SquarkupConfig
 	/// We can't implement `Default` because paths depend on the project `root`, which is only available at runtime!
 	pub fn init_defaults(root: PathBuf) -> Self
 	{
+		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
 			paths: PathsConfig {
 				root: root.clone(),
 				site: root.clone(),
 				dest: root.join("src/routes/"),
 				sources: vec![root.clone()],
-				include: vec![str!("\\.md$"), str!("\\.svx$")],
+				include: vec![
+					str!(r"\.md$"),
+					str!(r"\.svx$"),
+				],
 				include_patterns: vec![],
-				exclude: vec![],
+				exclude: vec![
+					str!(r"/\.git/"),
+					str!(r"/node_modules/"),
+					str!(r"/.svelte-kit/"),
+				],
 				exclude_patterns: vec![],
+				default_exclude: true,
 			},
 			errors: Default::default(),
 		}
