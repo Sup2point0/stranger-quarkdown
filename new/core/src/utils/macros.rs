@@ -5,51 +5,25 @@ macro_rules! str {
 } pub use str;
 
 #[macro_export]
+macro_rules! fmt {
+	($($args:tt)*) => { format!($($args)*) };
+} pub use fmt;
+
+#[macro_export]
 macro_rules! bx {
 	()        => { Box::new() };
 	($t:expr) => { Box::new($t) };
 } pub use bx;
 
 #[macro_export]
-macro_rules! fmt {
-	($($args:tt)*) => { format!($($args)*) };
-} pub use fmt;
-
-
-#[macro_export]
-macro_rules! strings
-{
-	() => {
-		tiny_vec!([String; 4])
-	};
-	($($values:expr),* $(,)?) => {
-		tiny_vec!( [String; 4] => $(str!($values)),* )
-	};
-}
-pub use strings;
-
-
-#[macro_export]
-macro_rules! dir
-{
+macro_rules! dir {
 	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };
 	($base:ident $($field:ident).* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
-}
-pub use dir;
-
-
-#[macro_export]
-macro_rules! err
-{
-	() => { |e| $crate::errors::SquarkError::external(e) }
-}
-pub use err;
-
+} pub use dir;
 
 /// Format a string with a single path argument, normalising `\` in the path to `/`.
 #[macro_export]
-macro_rules! slash
-{
+macro_rules! slash {
 	($msg:literal, $path:expr) => {
 		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
 			fmt!($msg, normalised)
@@ -57,9 +31,41 @@ macro_rules! slash
 			fmt!($msg, $path.display())
 		}
 	};
-}
-pub use slash;
+} pub use slash;
 
+#[macro_export]
+macro_rules! strings {
+	() => {
+		tiny_vec!([String; 4])
+	};
+	($($values:expr),* $(,)?) => {
+		tiny_vec!( [String; 4] => $(str!($values)),* )
+	};
+} pub use strings;
+
+
+
+#[macro_export]
+macro_rules! err {
+	() => { |e| $crate::errors::SquarkError::external(e) }
+} pub use err;
+
+
+/// Scope `?` try fallbacks to a local scope, instead of the entire containing function.
+#[macro_export]
+macro_rules! catch
+{
+	($errs:ident => $eval:block) => {
+		match (|| -> SquarkResult<_> { $eval })() {
+			Ok(r) => Some(r),
+			Err(e) => {
+				$errs.push(e);
+				None
+			},
+		}
+	};
+}
+pub use catch;
 
 #[macro_export]
 macro_rules! all

@@ -81,11 +81,9 @@ impl SquarkupConfig
 		{
 			Self::check_is_table(paths, "paths", fmt!("try setting {W}```\n\n\t[paths]\n\tsite = \"/your-site/\"\n\n```"))?;
 
-			if let Some(dir) = Self::get_string(paths, "paths", "site", "(filepath relative to your project root)")? {
-				site = Self::get_folder_path(
-					root, dir, "for your SvelteKit site",
-					fmt!("{W}paths.site{G} is relative to your project root")
-				)?;
+			if let Some(value) = paths.get("site") {
+				let dir = Self::try_get_string(value, "paths.site", "(filepath relative to your project root)")?;
+				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", fmt!("{W}paths.site{G} is relative to your project root"))?;
 			}
 		}
 
@@ -97,19 +95,14 @@ impl SquarkupConfig
 		// PathsConfig
 		if let Some(paths) = data.get("paths")
 		{
-			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root", &mut errs, |dir, errs| {
-				let path = s.paths.root.join(dir.trim_start_matches("/"));
-
-				if path.exists() {
-					s.paths.sources.push(path);
-				}
-				else {
-					errs.push(SquarkError::Unrecoverable {
-						msg: slash!("a source folder you specified does not exist: {}", path),
-						hint: fmt!("{Y}paths.sources{G} folders are relative from your project root"),
-						debug: vec![],
-					});
-				}
+			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
+				catch!(errs => {
+					s.paths.sources.push(Self::try_resolve_folder(
+						root, dir, "a source folder you specified",
+						fmt!("{Y}paths.sources{G} folders are relative from your project root"),
+					)?);
+					Ok(())
+				});
 			});
 
 			Self::for_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
@@ -140,17 +133,12 @@ impl SquarkupConfig
 		// OutConfig
 		if let Some(out) = data.get("out")
 		{
-			match Self::get_string(&out, "out", "folder", "(folder relative to your site folder)") {
-				Ok(Some(dir)) => match Self::get_folder_path(
-					&site, dir,
-					"for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder")
-				) {
-					Ok(path) => s.out.folder = path,
-					Err(e) => errs.push(e),
-				},
-				Err(e) => errs.push(e),
-				Ok(None) => (),
-			}
+			catch!(errs => {
+				let raw = Self::try_get_string(&out, "out.folder", "(folder relative to your site folder)")?;
+				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
+				s.out.folder = dir;
+				Ok(())
+			});
 
 			// TODO file
 		}
@@ -168,34 +156,44 @@ impl SquarkupConfig
 		// ErrorConfig
 		if let Some(errors) = data.get("errors")
 		{
-			match Self::get_string(errors, "errors", "on-error", "(an error handling strategy)") {
-				Ok(Some(value)) => match ErrorAction::try_from(value.as_str()) {
-					Ok(opt) => s.errors.on_error = opt,
-					Err(..) => errs.push(SquarkError::Unrecoverable {
-						msg: fmt!("unknown setting for {Y}errors.on-error"),
-						hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
-						debug: vec![
-							fmt!("you provided \"{value}\""),
-						],
-					}),
-				},
-				Ok(None) => (),
-				Err(e) => errs.push(e),
+			Self::check_is_table(errors, "errors", fmt!("write your config like this: {W}```\n\n\t[errors]\n\non-error = \"kill\"\n\n```"))?;
+
+			if let Some(value) = errors.get("on-error")
+			{
+				catch!(errs => {
+					let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
+
+					match ErrorAction::try_from(raw.as_str())
+					{
+						Ok(opt) => Ok(s.errors.on_error = opt),
+						Err(..) => Err(SquarkError::Unrecoverable {
+							msg: fmt!("unknown setting for {Y}errors.on-error"),
+							hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
+							debug: vec![
+								fmt!("you provided \"{value}\""),
+							],
+						}),
+					}
+				});
 			}
 			
-			match Self::get_string(errors, "errors", "on-file-exists", "(a file conflict strategy)") {
-				Ok(Some(value)) => match FileAction::try_from(value.as_str()) {
-					Ok(opt) => s.errors.on_file_exists = opt,
-					Err(..) => errs.push(SquarkError::Unrecoverable {
-						msg: fmt!("unknown setting for {Y}errors.on-file-exists"),
-						hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
-						debug: vec![
-							fmt!("you provided \"{value}\""),
-						],
-					}),
-				},
-				Ok(None) => (),
-				Err(e) => errs.push(e),
+			if let Some(value) = errors.get("on-file-exists")
+			{
+				catch!(errs => {
+					let raw = Self::try_get_string(value, "errors.on-file-exists", "(a file conflict handling strategy)")?;
+
+					match FileAction::try_from(raw.as_str())
+					{
+						Ok(opt) => Ok(s.errors.on_file_exists = opt),
+						Err(..) => Err(SquarkError::Unrecoverable {
+							msg: fmt!("unknown setting for {Y}errors.on-file-exists"),
+							hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
+							debug: vec![
+								fmt!("you provided \"{value}\""),
+							],
+						}),
+					}
+				});
 			}
 		}
 
@@ -211,14 +209,14 @@ impl SquarkupConfig
 impl SquarkupConfig
 {
 	/// Validate that `data` is a TOML table.
-	fn check_is_table(data: &toml::Value, field: &str, hint: String) -> SquarkResult
+	fn check_is_table(data: &toml::Value, setting: &str, hint: String) -> SquarkResult
 	{
 		if matches!(data, toml::Value::Table(..)) {
 			Ok(())
 		}
 		else {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("{Y}{field}{R} must be a table, not a field"),
+				msg: fmt!("{Y}{setting}{R} must be a table, not a field"),
 				hint,
 				debug: vec![
 					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}{GREY}", data.type_str()),
@@ -227,22 +225,19 @@ impl SquarkupConfig
 		}
 	}
 
-	/// Validate that `data[field]` is a string, for `category.field`.
-	fn get_string<'d>(
-		data: &'d toml::Value,
-		category: &'static str,
-		field: &'static str,
+	/// Try to extract the string from `data`.
+	fn try_get_string<'d>(
+		value: &'d toml::Value,
+		setting: &str,
 		hint: &'static str,
-	) -> SquarkResult<Option<&'d String>>
+	) -> SquarkResult<&'d String>
 	{
-		match data.get(field)
-		{
-			Some(toml::Value::String(value)) => Ok(Some(value)),
-			None => Ok(None),
+		match value {
+			toml::Value::String(v) => Ok(v),
 
-			Some(v) => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-				hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
+			v => Err(SquarkError::Unrecoverable {
+				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
+				hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
 				debug: vec![
 					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 				],
@@ -277,10 +272,10 @@ impl SquarkupConfig
 	}
 
 	/// Validate that `root / dir` exists, and is a folder.
-	fn get_folder_path(
+	fn try_resolve_folder(
 		root: &Path,
 		dir: &str,
-		for_location: &'static str,
+		location: &'static str,
 		hint: String,
 	) -> SquarkResult<PathBuf>
 	{
@@ -288,7 +283,7 @@ impl SquarkupConfig
 
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("the directory you specified {for_location} doesn't exist!"),
+				msg: fmt!("{location} doesn't exist!"),
 				hint,
 				debug: vec![
 					slash!("`{}` is not a valid directory", path),
@@ -297,7 +292,7 @@ impl SquarkupConfig
 		}
 		else if !path.is_dir() {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("the directory you specified {for_location} is not a folder"),
+				msg: fmt!("{location} is not a folder"),
 				hint: str!(),
 				debug: vec![
 					slash!("`{}` is not a folder", path),
