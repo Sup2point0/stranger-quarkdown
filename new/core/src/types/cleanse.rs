@@ -1,7 +1,7 @@
 use crate::utils::macros::*;
 
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, enum_stringify::EnumStringify)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, enum_stringify::EnumStringify)]
 #[enum_stringify(case = "flat")]
 pub enum CleanseOperation
 {

@@ -33,6 +33,7 @@ pub struct PageData
 	pub release_date: Option<Date>,
 	pub last_updated: Option<Date>,
 
+	#[serde(skip_serializing)]
 	pub cleanse: Vec<CleanseOperation>,
 
 	pub other: HashMap<String, Strings>,
