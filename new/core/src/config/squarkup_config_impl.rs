@@ -73,7 +73,7 @@ impl SquarkupConfig
 					if !path.exists() {
 						return Err(SquarkError::Unrecoverable {
 							msg: str!("the directory you specified for your SvelteKit site doesn't exist!"),
-							hint: format!("{W}paths.site{G} is relative from your project root"),
+							hint: fmt!("{W}paths.site{G} is relative from your project root"),
 							debug: vec![slash!("{GREY1}{}{GREY} is not a valid directory", path)],
 						});
 					}
@@ -81,8 +81,8 @@ impl SquarkupConfig
 					path
 				},
 				Some(v) => return Err(SquarkError::Unrecoverable {
-					msg: format!("you provided an invalid {Y}paths.site{R} of type {}", v.type_str()),
-					hint: format!("{W}paths.site{G} must be a string {GREY}(folder relative to root)"),
+					msg: fmt!("you provided an invalid {Y}paths.site{R} of type {}", v.type_str()),
+					hint: fmt!("{W}paths.site{G} must be a string {GREY}(folder relative to root)"),
 					debug: vec![],
 				}),
 				None => root.to_path_buf(),
@@ -104,7 +104,7 @@ impl SquarkupConfig
 				else {
 					errs.push(SquarkError::Unrecoverable {
 						msg: slash!("a source folder you specified does not exist: {}", path),
-						hint: format!("{Y}paths.sources{G} folders are relative from your project root"),
+						hint: fmt!("{Y}paths.sources{G} folders are relative from your project root"),
 						debug: vec![],
 					});
 				}
@@ -182,10 +182,10 @@ impl SquarkupConfig
 			None => Ok(None),
 
 			Some(v) => Err(SquarkError::Recoverable {
-				msg: format!("invalid setting for {Y}{category}.{field}{R}"),
-				hint: format!("{Y}{category}.{field}{G} must be an array of strings {GREY}{hint}"),
+				msg: fmt!("invalid setting for {Y}{category}.{field}{R}"),
+				hint: fmt!("{Y}{category}.{field}{G} must be an array of strings {GREY}{hint}"),
 				debug: vec![
-					format!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 				],
 			}),
 		}
@@ -203,10 +203,10 @@ impl SquarkupConfig
 		{
 			toml::Value::String(value) => Ok(value),
 			v => Err(SquarkError::Recoverable {
-				msg: format!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-				hint: format!("{Y}{category}.{field}{G} entries must be strings {GREY}{hint}"),
+				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
+				hint: fmt!("{Y}{category}.{field}{G} entries must be strings {GREY}{hint}"),
 				debug: vec![
-					format!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 				],
 			}),
 		}
@@ -227,10 +227,10 @@ impl SquarkupConfig
 			None => None,
 			Some(v) => {
 				errs.push(SquarkError::Recoverable {
-					msg: format!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-					hint: format!("{Y}{category}.{field}{G} must be a boolean {GREY}{hint}"),
+					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
+					hint: fmt!("{Y}{category}.{field}{G} must be a boolean {GREY}{hint}"),
 					debug: vec![
-						format!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+						fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 					],
 				});
 				None

@@ -182,7 +182,7 @@ impl<Source: Read> CharmParser<Source>
 			else {
 				self.errors.push(ParseFailure::MissingInput {
 					when: when(),
-					expected: format!("{ident}! (flags must end in !)"),
+					expected: fmt!("{ident}! (flags must end in !)"),
 					actual: ident,
 				});
 			}

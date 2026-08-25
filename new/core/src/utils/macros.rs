@@ -52,9 +52,9 @@ macro_rules! slash
 {
 	($msg:literal, $path:expr) => {
 		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
-			format!($msg, normalised)
+			fmt!($msg, normalised)
 		} else {
-			format!($msg, $path.display())
+			fmt!($msg, $path.display())
 		}
 	};
 }

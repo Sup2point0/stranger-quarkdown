@@ -102,7 +102,7 @@ impl<Source: Read> CharmParser<Source>
 				Some(c) if c != expected => {
 					return Err(ParseFailure::UnexpectedInput {
 						when: when(),
-						expected: format!("{} to {}", target, to()),
+						expected: fmt!("{} to {}", target, to()),
 						actual: self.preview(),
 					});
 				}
@@ -147,7 +147,7 @@ impl<Source: Read> CharmParser<Source>
 				Some(c) if c.to_ascii_lowercase() != expected => {
 					return Err(ParseFailure::UnexpectedInput {
 						when: when(),
-						expected: format!("{} {}", target, to()),
+						expected: fmt!("{} {}", target, to()),
 						actual: self.preview(),
 					});
 				}

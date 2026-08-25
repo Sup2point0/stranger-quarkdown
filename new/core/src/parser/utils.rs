@@ -9,7 +9,7 @@ macro_rules! when {
 	() => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
 
 	($msg:expr $(, $args:expr)* $(,)?) => {
-		|| format!($msg, $($args)*)
+		|| fmt!($msg, $($args)*)
 	}
 }
 pub(super) use when;
@@ -19,7 +19,7 @@ macro_rules! to {
 	() => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
 
 	($msg:expr $(, $args:expr)* $(,)?) => {
-		|| format!($msg, $($args)*)
+		|| fmt!($msg, $($args)*)
 	}
 }
 pub(super) use to;
