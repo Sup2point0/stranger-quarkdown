@@ -124,7 +124,7 @@ impl SquarkupConfig
 				}
 			});
 
-			if let Some(true) = Self::error_if_not_bool(data, "paths", "default-exclude", "", &mut errs) {
+			if let Some(true) = Self::error_if_not_bool(&paths, "paths", "default-exclude", "", &mut errs) {
 				out.paths.exclude.clear();
 			}
 		}
