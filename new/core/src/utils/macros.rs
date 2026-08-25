@@ -2,8 +2,18 @@
 macro_rules! str {
 	()        => { String::new() };
 	($t:expr) => { String::from($t) };
-}
-pub use str;
+} pub use str;
+
+#[macro_export]
+macro_rules! bx {
+	()        => { Box::new() };
+	($t:expr) => { Box::new($t) };
+} pub use bx;
+
+#[macro_export]
+macro_rules! fmt {
+	($($args:tt)*) => { format!($($args)*) };
+} pub use fmt;
 
 
 #[macro_export]

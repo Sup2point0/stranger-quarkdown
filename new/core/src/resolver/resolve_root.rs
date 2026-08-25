@@ -29,7 +29,7 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 
 	Err(SquarkError::Unrecoverable {
 		msg: str!("could not find the root of your project"),
-		hint: format!("make sure you have either a {WHITE}.squarkdown/{GREEN} folder, or a {WHITE}squarkup.toml{GREEN} or {WHITE}squarkup.json{GREEN} file, in the root of your project"),
+		hint: format!("make sure you have either a {W}.squarkdown/{G} folder, or a {W}squarkup.toml{G} or {W}squarkup.json{G} file, in the root of your project"),
 		debug: checked.into_iter().map(|d| format!("checked {}", d.display())).collect(),
 	})
 }

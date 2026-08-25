@@ -12,7 +12,7 @@ pub enum SquarkError
 	/// A non-fatal error.
 	/// 
 	/// Handling depends on `config.errors.on_error`.
-	#[error("{RED}{msg}")]
+	#[error("{R}{msg}")]
 	Recoverable {
 		msg: String,
 		hint: String,
@@ -20,7 +20,7 @@ pub enum SquarkError
 	},
 
 	/// A fatal error that crashes Squarkdown, irrespective of `config.errors.on_error`.
-	#[error("{msg}")]
+	#[error("{R}{msg}")]
 	Unrecoverable {
 		msg: String,
 		hint: String,
@@ -30,13 +30,13 @@ pub enum SquarkError
 	/// Multiple errors, aggregated from an atomic operation.
 	/// 
 	/// Handling depends on `config.errors.on_error`.
-	#[error("multiple fatal errors")]
+	#[error("{R}multiple fatal errors")]
 	Multiple {
 		errs: Vec<SquarkError>,
 	},
 
 	/// A fatal error that crashes Squarkdown, caused by external factors such as a file read failure.
-	#[error("{msg}")]
+	#[error("{R}{msg}")]
 	External {
 		err: Box<dyn std::error::Error>,
 		msg: String,
@@ -58,8 +58,8 @@ impl SquarkError
 	pub fn external(e: impl std::error::Error + 'static) -> Self
 	{
 		Self::External {
-			err: Box::new(e),
-			msg: str!("unexpected external error")
+			err: bx!(e),
+			msg: str!("unexpected external error"),
 		}
 	}
 }

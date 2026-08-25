@@ -9,7 +9,7 @@ use std::time::Instant;
 fn main() -> Result<(), ()>
 {
 	println!();
-	println!("{PINK}Squarkdown v{}", "4.0");
+	println!("{P}Squarkdown v{}", "4.0");
 	log::line();
 	log::is!("squarking up...");
 
@@ -20,14 +20,14 @@ fn main() -> Result<(), ()>
 		Ok(_) => {
 			let t = t_init.elapsed();
 			log::line();
-			println!("{PINK}squarkup finished! {GREY}{:.2?} ms", t.as_secs_f64() * 1000.0);
+			println!("{P}squarkup finished! {GREY}{:.2?} ms", t.as_secs_f64() * 1000.0);
 			Ok(())
 		},
 		Err(e) => {
 			log::line();
 			print_error(e);
 			log::line();
-			println!("{RED}squarkup failed!");
+			println!("{R}squarkup failed!");
 			println!();
 			Err(())
 		},
@@ -44,10 +44,10 @@ fn main() -> Result<(), ()>
 fn squarkup() -> SquarkResult<bool>
 {
 	let project_root = resolver::resolve_project_root()?;
-	log::ok!(slash!("found your project: {BLUE}{}", project_root));
+	log::ok!(slash!("found your project: {B}{}", project_root));
 
 	let config = resolver::resolve_config(project_root)?;
-	log::ok!(slash!("found your site: {BLUE}{}", config.paths.site));
+	log::ok!(slash!("found your site: {B}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();
 	let mut found_active_file = false;
@@ -61,7 +61,7 @@ fn squarkup() -> SquarkResult<bool>
 		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
 		
 		if let Some(page_data) = parser.parse(&config).unwrap() {
-			log::info!(slash!("found active file: {GREY_LIGHT}{}", filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()));
+			log::info!(slash!("found active file: {GREY1}{}", filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()));
 			site_data.add_page(filepath, page_data);
 		}
 	}
@@ -103,7 +103,7 @@ fn print_error(err: SquarkError)
 		SquarkError::External { err, msg } => {
 			log::bad!(msg);
 			log::line();
-			println!("{RED}{err}");
+			println!("{R}{err}");
 		},
 	}
 }

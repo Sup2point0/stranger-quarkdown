@@ -20,7 +20,7 @@ pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 	log::is!("resolving config...");
 
 	let (filepath, ext) = find_config(&root)?;
-	log::ok!(slash!("found your squarkup config: {BLUE}{}", filepath));
+	log::ok!(slash!("found your squarkup config: {B}{}", filepath));
 
 	let config = match ext {
 		Extension::TOML => {
@@ -53,9 +53,9 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 
 	Err(SquarkError::Unrecoverable {
 		msg: str!("could not find your squarkup configuration file"),
-		hint: format!("make sure you have either a {WHITE}.squarkdown/{GREEN} folder, or a {WHITE}squarkup.toml{GREEN} or {WHITE}squarkup.json{GREEN} file, in the root of your project"),
+		hint: format!("make sure you have either a {W}.squarkdown/{G} folder, or a {W}squarkup.toml{G} or {W}squarkup.json{G} file, in the root of your project"),
 		debug: vec![format!(
-			"looked in {WHITE}{}{GREY} and {WHITE}{}",
+			"looked in {W}{}{GREY} and {W}{}",
 			root.display(),
 			dir!(root / ".squarkdown/").display(),
 		)],
@@ -94,6 +94,6 @@ fn read_toml_config(filepath: PathBuf) -> SquarkResult<toml::Table>
 		Ok(data)
 	})
 	().map_err(|err| SquarkError::External {
-		err, msg: format!("failed to read your {WHITE}squarkup.toml")
+		err, msg: format!("failed to read your {W}squarkup.toml"),
 	})
 }

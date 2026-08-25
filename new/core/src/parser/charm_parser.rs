@@ -86,8 +86,8 @@ impl<Source: Read> CharmParser<Source>
 			Err(ParseFailure::NO_MATCH) => Ok(None),
 
 			// error
-			Ok(Err(file_error)) => Err(Box::new(file_error)),
-			Err(parse_error)    => Err(Box::new(parse_error)),
+			Ok(Err(file_error)) => Err(bx!(file_error)),
+			Err(parse_error)    => Err(bx!(parse_error)),
 		}
 	}
 }
