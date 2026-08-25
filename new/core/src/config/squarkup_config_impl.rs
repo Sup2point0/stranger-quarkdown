@@ -62,14 +62,25 @@ impl SquarkupConfig
 	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
 		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with *user-friendly*, *aggregated* error messages (rather than just a schema violation) we have to handroll it all ourselves */
+
+		/* NOTE:
+			We're treating an invalid config as fatal, so `errors.on_error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything *destructive*, tho)
+			
+			However, better than repeatedly failing with fatal errors is to report all of them at once, so *if possible*, we'll still process the entire config and aggregate any errors we encounter in `errs`, only returning `Err()` once we reach the end.
+		*/
 		let mut errs = vec![];
 
+		/* NOTE:
+			We first separately read `paths.site` because many *defaults* depend on it, so we need it before calling `::init_defaults()`.
+			
+			Since this may invalidate the relevance fatal errors later on (i.e. they might all be fixed by fixing `paths.site`), if this fails we'll immediately bail.
+		*/
 		let mut site = root.to_path_buf();
 
-		/* NOTE: Read `paths.site` first because *defaults* depend on it */
-		// TODO cleanup using `error_if_not_string()`
 		if let Some(paths) = data.get("paths")
 		{
+			Self::check_is_table(paths, "paths", fmt!("try setting {W}```\n\n\t[paths]\n\tsite = \"/your-site/\"\n\n```"))?;
+
 			if let Some(dir) = Self::require_string(paths, "paths", "site", "(filepath relative to your project root)")? {
 				site = Self::if_folder_exists(
 					root, dir, "for your SvelteKit site",
@@ -78,7 +89,7 @@ impl SquarkupConfig
 			}
 		}
 
-		// start with defaults...
+		// now start with defaults...
 		let mut s = Self::init_defaults(root, &site);
 
 		// ...then apply the user's non-defaults on top of it
@@ -142,7 +153,6 @@ impl SquarkupConfig
 			}
 		}
 
-		/* NOTE: We're treating an invalid config as fatal, so `errors.on_error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything *destructive*, tho) */
 		if errs.is_empty() {
 			Ok(s)
 		} else {
@@ -154,6 +164,23 @@ impl SquarkupConfig
 /// All the validation logic!
 impl SquarkupConfig
 {
+	/// Validate that `data` is a TOML table.
+	fn check_is_table(data: &toml::Value, field: &str, hint: String) -> SquarkResult
+	{
+		if matches!(data, toml::Value::Table(..)) {
+			Ok(())
+		}
+		else {
+			Err(SquarkError::Unrecoverable {
+				msg: fmt!("{Y}{field}{R} must be a table, not a field"),
+				hint,
+				debug: vec![
+					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}{GREY}", data.type_str()),
+				],
+			})
+		}
+	}
+
 	fn for_string_array<'d>(
 		data: &'d toml::Value,
 		category: &'static str,
@@ -189,7 +216,7 @@ impl SquarkupConfig
 			Some(toml::Value::Array(values)) => Ok(Some(values)),
 			None => Ok(None),
 
-			Some(v) => Err(SquarkError::Recoverable {
+			Some(v) => Err(SquarkError::Unrecoverable {
 				msg: fmt!("invalid setting for {Y}{category}.{field}{R}"),
 				hint: fmt!("{Y}{category}.{field}{G} must be an array of strings {GREY}{hint}"),
 				debug: vec![
@@ -211,7 +238,7 @@ impl SquarkupConfig
 		{
 			toml::Value::String(value) => Ok(value),
 
-			v => Err(SquarkError::Recoverable {
+			v => Err(SquarkError::Unrecoverable {
 				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
 				hint: fmt!("{Y}{category}.{field}{G} entries must be strings {GREY}{hint}"),
 				debug: vec![
@@ -234,7 +261,7 @@ impl SquarkupConfig
 			Some(toml::Value::String(value)) => Ok(Some(value)),
 			None => Ok(None),
 
-			Some(v) => Err(SquarkError::Recoverable {
+			Some(v) => Err(SquarkError::Unrecoverable {
 				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
 				hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
 				debug: vec![
@@ -258,7 +285,7 @@ impl SquarkupConfig
 			Some(toml::Value::Boolean(value)) => Some(*value),
 			None => None,
 			Some(v) => {
-				errs.push(SquarkError::Recoverable {
+				errs.push(SquarkError::Unrecoverable {
 					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
 					hint: fmt!("{Y}{category}.{field}{G} must be a boolean {GREY}{hint}"),
 					debug: vec![
