@@ -151,6 +151,52 @@ impl SquarkupConfig
 				Err(e) => errs.push(e),
 				Ok(None) => (),
 			}
+
+			// TODO file
+		}
+
+		// DataConfig
+
+		// BasesConfig
+
+		// StylesConfig
+
+		// AssetsConfig
+
+		// FontsConfig
+
+		// ErrorConfig
+		if let Some(errors) = data.get("errors")
+		{
+			match Self::get_string(errors, "errors", "on-error", "(an error handling strategy)") {
+				Ok(Some(value)) => match ErrorAction::try_from(value.as_str()) {
+					Ok(opt) => s.errors.on_error = opt,
+					Err(..) => errs.push(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.on-error"),
+						hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
+						debug: vec![
+							fmt!("you provided \"{value}\""),
+						],
+					}),
+				},
+				Ok(None) => (),
+				Err(e) => errs.push(e),
+			}
+			
+			match Self::get_string(errors, "errors", "on-file-exists", "(a file conflict strategy)") {
+				Ok(Some(value)) => match FileAction::try_from(value.as_str()) {
+					Ok(opt) => s.errors.on_file_exists = opt,
+					Err(..) => errs.push(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.on-file-exists"),
+						hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
+						debug: vec![
+							fmt!("you provided \"{value}\""),
+						],
+					}),
+				},
+				Ok(None) => (),
+				Err(e) => errs.push(e),
+			}
 		}
 
 		if errs.is_empty() {

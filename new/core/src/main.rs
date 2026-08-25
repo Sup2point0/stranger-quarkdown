@@ -11,7 +11,6 @@ fn main() -> Result<(), ()>
 	println!();
 	println!("{P}Squarkdown v{}", "4.0");
 	log::line();
-	log::is!("squarking up...");
 
 	let t_init = Instant::now();
 	let status = squarkup();
@@ -50,25 +49,26 @@ fn squarkup() -> SquarkResult<bool>
 	log::ok!(slash!("found your site: {B}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();
-	let mut found_active_file = false;
+	let mut active_files = 0;
+	log::is!("squarking up...");
 	
 	for filepath in resolver::resolve_files(&config) {
 		let filepath = filepath.unwrap();
-
 		let file = File::open(&filepath).map_err(err!())?;
-		found_active_file = true;
-
 		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
 		
 		if let Some(page_data) = parser.parse(&config).unwrap() {
 			log::info!(slash!("found active file: {GREY1}{}", filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()));
+			active_files += 1;
 			site_data.add_page(filepath, page_data);
 		}
 	}
 	
-	if !found_active_file {
-		log::bad!("No files found to squarkup, exiting!");
+	if active_files == 0 {
+		log::bad!("no files found to squarkup, exiting!");
 		return Ok(false);
+	} else {
+		log::ok!("squarked up {active_files} files");
 	}
 
 	// for page in site_data.pages.values() {
