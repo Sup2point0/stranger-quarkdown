@@ -1,6 +1,7 @@
 use super::*;
 use crate::{
 	SquarkupConfig, PageData, SquarkResult, SquarkError,
+	macros::*,
 };
 
 use std::fs::File;
@@ -14,6 +15,12 @@ macro_rules! ctx {
 
 pub struct Renderer<Source: Read = File, Target: Write = File>
 {
+	/* NOTE:
+		The renderer architecture is very similar to `CharmParser`, because `Renderer` is technically a parser+emitter in one lmao
+		
+		Not really worth extracting into common shared functionality, more hassle than it's worth without structural traits in Rust =(
+	*/
+
 	/// Have we reached the end of the source?
 	pub(super) is_done: bool,
 
@@ -24,6 +31,12 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 	pub(super) _reader: BufReader<Source>,
 	
 	pub(super) _writer: BufWriter<Target>,
+
+	pub(super) _index: usize,
+
+	pub(super) _line: Vec<char>,
+
+	pub(super) _line_buffer: String,
 }
 
 impl<Source: Read, Target: Write>
@@ -38,6 +51,9 @@ impl<Source: Read, Target: Write>
 			ctx: vec![],
 			_reader: BufReader::new(source),
 			_writer: BufWriter::new(target),
+			_index: 0,
+			_line: vec![],
+			_line_buffer: str!(),
 		}
 	}
 
@@ -52,14 +68,13 @@ impl<Source: Read, Target: Write>
 
 	fn render_next_chunk(&mut self, page_data: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
-		match (self.current(), self.peek()) {
-			// ('<', '!') if self.try_eat("<!--") => {
-			// 	self.push_ctx(Ctx::COMMENT);
-				
-			// },
-			// ('-', '-') if ctx!(self) == Ctx::COMMENT && self.try_eat("-->") => {
-			// 	self.ctx.pop();
-			// },
+		if self.try_eat("<!--")? {
+			self.ctx.push(Ctx::COMMENT);
 		}
+		else if self.try_eat("-->")? {
+			self.ctx.pop();
+		}
+
+		Ok(())
 	}
 }
