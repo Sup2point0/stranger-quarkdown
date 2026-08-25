@@ -7,7 +7,7 @@ use crate::{
 	macros::*,
 };
 
-use std::path::{ Path, PathBuf };
+use std::path::{ Path };
 
 
 impl SquarkupConfig
@@ -95,84 +95,45 @@ impl SquarkupConfig
 		// ...then apply the user's non-defaults on top of it
 		if let Some(paths) = data.get("paths")
 		{
-			match paths.get("sources") {
-				Some(toml::Value::Array(values)) => for value in values {
-					match value {
-						toml::Value::String(dir) => {
-							let path = out.paths.root.join(dir.trim_start_matches("/"));
+			if let Some(values) = Self::get_string_array(&paths, "paths", "sources", "(filepaths relative to your project root", &mut errs) {
+				for value in values {
+					if let Some(dir) = Self::require_string_entry(value, "paths", "sources", "(filepaths relative to your project root)", &mut errs) {
+						let path = out.paths.root.join(dir.trim_start_matches("/"));
 
-							if path.exists() {
-								out.paths.sources.push(path);
-							}
-							else {
-								errs.push(SquarkError::Unrecoverable {
-									msg: slash!("a source folder you specified does not exist: {}", path),
-									hint: format!("{WHITE}paths.sources{GREEN} folders are relative from your project root"),
-									debug: vec![],
-								});
-							}
-						},
-						v => errs.push(SquarkError::Unrecoverable {
-							msg: format!("you provided an invalid {YELLOW}paths.sources{RED} entry of type {}", v.type_str()),
-							hint: format!("{WHITE}paths.sources{GREEN} entries must be strings {GREY}(filepaths relative to your project root)"),
-							debug: vec![],
-						}),
+						if path.exists() {
+							out.paths.sources.push(path);
+						}
+						else {
+							errs.push(SquarkError::Unrecoverable {
+								msg: slash!("a source folder you specified does not exist: {}", path),
+								hint: format!("{WHITE}paths.sources{GREEN} folders are relative from your project root"),
+								debug: vec![],
+							});
+						}
 					}
-				},
-				Some(v) => errs.push(SquarkError::Unrecoverable {
-					msg: format!("you provided an invalid {YELLOW}paths.sources{RED} of type {}", v.type_str()),
-					hint: format!("{WHITE}paths.sources{GREEN} must be an array of strings {GREY}(filepaths relative to your project root)"),
-					debug: vec![],
-				}),
-				None => (),
+				}
 			}
 
-			match paths.get("include") {
-				Some(toml::Value::Array(values)) => for value in values {
-					match value {
-						toml::Value::String(pattern) => {
-							match regex::Regex::new(&pattern) {
-								Ok(compiled) => out.paths.include.push(compiled),
-								Err(e)       => errs.push(SquarkError::external(e)),
-							}
-						},
-						v => errs.push(SquarkError::Unrecoverable {
-							msg: format!("you provided an invalid {YELLOW}paths.include{RED} entry of type {}", v.type_str()),
-							hint: format!("{WHITE}paths.include{GREEN} entries must be strings {GREY}(RegEx patterns)"),
-							debug: vec![format!("{values:?}")],
-						}),
+			if let Some(values) = Self::get_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs) {
+				for value in values {
+					if let Some(pattern) = Self::require_string_entry(value, "paths", "include", "(RegEx patterns)", &mut errs) {
+						match regex::Regex::new(&pattern) {
+							Ok(compiled) => out.paths.exclude.push(compiled),
+							Err(e)       => errs.push(SquarkError::external(e)),
+						}
 					}
-				},
-				Some(v) => errs.push(SquarkError::Unrecoverable {
-					msg: format!("you provided an invalid {YELLOW}paths.include{RED} of type {}", v.type_str()),
-					hint: format!("{WHITE}paths.include{GREEN} must be an array of strings {GREY}(RegEx patterns)"),
-					debug: vec![],
-				}),
-				None => (),
+				}
 			}
 
-			match paths.get("exclude") {
-				Some(toml::Value::Array(values)) => for value in values {
-					match value {
-						toml::Value::String(pattern) => {
-							match regex::Regex::new(&pattern) {
-								Ok(compiled) => out.paths.exclude.push(compiled),
-								Err(e)       => errs.push(SquarkError::external(e)),
-							}
-						},
-						v => errs.push(SquarkError::Recoverable {
-							msg: format!("you provided an invalid {YELLOW}paths.exclude{RED} entry of type {}", v.type_str()),
-							hint: format!("{WHITE}paths.exclude{GREEN} entries must be strings {GREY}(RegEx patterns)"),
-							debug: vec![format!("{values:?}")],
-						}),
+			if let Some(values) = Self::get_string_array(&paths, "paths", "exclude", "(RegEx patterns)", &mut errs) {
+				for value in values {
+					if let Some(pattern) = Self::require_string_entry(value, "paths", "exclude", "(RegEx patterns)", &mut errs) {
+						match regex::Regex::new(&pattern) {
+							Ok(compiled) => out.paths.exclude.push(compiled),
+							Err(e)       => errs.push(SquarkError::external(e)),
+						}
 					}
-				},
-				Some(v) => errs.push(SquarkError::Recoverable {
-					msg: format!("you provided an invalid {YELLOW}paths.exclude{RED} of type {}", v.type_str()),
-					hint: format!("{WHITE}paths.exclude{GREEN} must be an array of strings {GREY}(RegEx patterns)"),
-					debug: vec![],
-				}),
-				None => (),
+				}
 			}
 
 			match paths.get("default-exclude") {
@@ -191,6 +152,56 @@ impl SquarkupConfig
 			Ok(out)
 		} else {
 			Err(SquarkError::Multiple { errs })
+		}
+	}
+}
+
+impl SquarkupConfig
+{
+	/// Validate that `data.field` is an array.
+	fn get_string_array<'d>(
+		data: &'d toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+		errs: &mut Vec<SquarkError>,
+	) -> Option<&'d Vec<toml::Value>>
+	{
+		match data.get(field)
+		{
+			Some(toml::Value::Array(values)) => Some(values),
+			Some(v) => {
+				errs.push(SquarkError::Recoverable {
+					msg: format!("invalid setting for {YELLOW}{category}.{field}{RED}"),
+					hint: format!("{YELLOW}{category}.{field}{GREEN} must be an array of strings {GREY}{hint}"),
+					debug: vec![format!("you provided {GREY_LIGHT}{v}{GREY}, which has type: {GREY_LIGHT}{}{GREY}", v.type_str())],
+				});
+				None
+			},
+			None => None,
+		}
+	}
+
+	/// Validate that `data.field` is a string in an array.
+	fn require_string_entry<'d>(
+		data: &'d toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+		errs: &mut Vec<SquarkError>,
+	) -> Option<&'d String>
+	{
+		match data
+		{
+			toml::Value::String(value) => Some(value),
+			v => {
+				errs.push(SquarkError::Recoverable {
+					msg: format!("invalid setting for an entry of {YELLOW}{category}.{field}{RED}"),
+					hint: format!("{YELLOW}{category}.{field}{GREEN} entries must be strings {GREY}{hint}"),
+					debug: vec![format!("you provided {GREY_LIGHT}{v}{GREY}, which has type: {GREY_LIGHT}{}{GREY}", v.type_str())],
+				});
+				None
+			},
 		}
 	}
 }
