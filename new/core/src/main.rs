@@ -14,20 +14,20 @@ fn main() -> Result<(), ()>
 	log::is!("squarking up...");
 
 	let t_init = Instant::now();
+	let status = squarkup();
+	let t = t_init.elapsed();
+	log::line();
 
-	match squarkup()
+	match status
 	{
 		Ok(_) => {
-			let t = t_init.elapsed();
-			log::line();
 			println!("{P}squarkup finished! {GREY}{:.2?} ms", t.as_secs_f64() * 1000.0);
 			Ok(())
 		},
 		Err(e) => {
-			log::line();
 			print_error(e);
 			log::line();
-			println!("{R}squarkup failed!");
+			println!("{R}squarkup failed! {GREY}{:.2?} ms", t.as_secs_f64() * 1000.0);
 			println!();
 			Err(())
 		},
