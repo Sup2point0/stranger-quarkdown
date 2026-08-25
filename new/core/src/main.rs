@@ -92,7 +92,9 @@ fn print_error(err: SquarkError)
 			for each in debug {
 				log::info!(each);
 			}
-			log::hint!(hint);
+			if !hint.is_empty() {
+				log::hint!(hint);
+			}
 		},
 		SquarkError::Multiple { errs } => {
 			for (i, err) in errs.into_iter().enumerate() {
