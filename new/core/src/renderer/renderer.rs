@@ -4,8 +4,9 @@ use crate::{
 	macros::*,
 };
 
-use std::fs::File;
+use std::fs::{ File };
 use std::io::{ BufReader, BufWriter, Read, Write };
+use std::path::{ PathBuf };
 
 
 macro_rules! ctx {
@@ -27,6 +28,9 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 	pub(super) errors: Vec<SquarkError>,
 
 	pub(super) ctx: Vec<Ctx>,
+
+	/// The location of the target file.
+	pub(super) filepath: Option<PathBuf>,
 
 	pub(super) _reader: BufReader<Source>,
 	
@@ -51,28 +55,48 @@ impl<Source: Read, Target: Write>
 			ctx: vec![],
 			_reader: BufReader::new(source),
 			_writer: BufWriter::new(target),
+			filepath: None,
 			_index: 0,
 			_line: vec![],
 			_line_buffer: str!(),
 		}
 	}
 
-	fn render(&mut self, page_data: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
+		self.filepath = Some(config.out.folder.join(&page.destination));
+
 		while !self.is_done {
-			self.render_next_chunk(page_data, config)?;
+			self.render_next_chunk(page, config)?;
 		}
-		
-		Ok(())
+
+		self._writer.flush().map_err(err!());
+
+		if !self.ctx.is_empty() {
+			Err(SquarkError::Recoverable {
+				msg: str!("unterminated renderer context"),
+				hint: str!("this means you have an unclosed comment, bracket, code block, etc. somewhere"),
+				debug: vec![],
+			})
+		} else {
+			Ok(())
+		}
 	}
 
-	fn render_next_chunk(&mut self, page_data: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render_next_chunk(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
 			self.ctx.push(Ctx::COMMENT);
 		}
 		else if self.try_eat("-->")? {
 			self.ctx.pop();
+		}
+		else if let Some(c) = self.current() {
+			self.emit(&c.to_string())?;
+			self.advance()?;
+		}
+		else {
+			return Err(todo!());
 		}
 
 		Ok(())
