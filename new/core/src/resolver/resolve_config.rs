@@ -22,20 +22,18 @@ pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 	let (filepath, ext) = find_config(&root)?;
 	log::ok!(slash!("found your squarkup config: {BLUE}{}", filepath));
 
-	let mut config = SquarkupConfig::init_defaults(root.clone());
-
-	match ext {
+	let mut config = match ext {
 		Extension::TOML => {
 			log::info!("reading config...");
 			let data = read_toml_config(filepath)?;
-			log::info!("read successful");
+			log::info!("read successful!");
 			log::info!("validating config...");
-			config.set_from_toml(data)?;
+			SquarkupConfig::try_from_toml(data, &root)
 		},
 		Extension::JSON => {
 			unimplemented!()
 		},
-	}
+	}?;
 
 	config.compile_patterns()?;
 	log::ok!("config looks good, all set!");

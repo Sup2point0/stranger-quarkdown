@@ -5,7 +5,7 @@ use crate::{
 	macros::*,
 };
 
-use std::path::PathBuf;
+use std::path::{ Path, PathBuf };
 
 
 impl SquarkupConfig
@@ -13,15 +13,14 @@ impl SquarkupConfig
 	/// Construct a `SquarkupConfig` with defaults applied and *resolved* against `root`.
 	/// 
 	/// We can't implement `Default` because paths depend on the project `root`, which is only available at runtime!
-	pub fn init_defaults(root: PathBuf) -> Self
+	pub fn init_defaults(root: &Path, site: &Path) -> Self
 	{
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
 			paths: PathsConfig {
-				root: root.clone(),
-				site: root.clone(),
-				dest: root.join("src/routes/"),
-				sources: vec![root.clone()],
+				root: root.to_path_buf(),
+				site: site.to_path_buf(),
+				sources: vec![root.to_path_buf()],
 				include: vec![
 					str!(r"\.md$"),
 					str!(r"\.svx$"),
@@ -35,28 +34,48 @@ impl SquarkupConfig
 				exclude_patterns: vec![],
 				default_exclude: true,
 			},
-			errors: Default::default(),
+			out: OutConfig {
+				folder: dir!(site / "src/routes/"),
+				file: str!("+page.svx"),
+			},
+			data: DataConfig {
+				path: dir!(site / "src/site-data.json")
+			},
+			bases:  BasesConfig { folder: None, page_js: None },
+			styles: StylesConfig { folder: None, base_file: None },
+			assets: AssetsConfig { folder: None, site_assets_folder: None,
+				extensions: vec![
+					str!("png"),
+					str!("jpg"),
+					str!("jpeg"),
+					str!("webp"),
+					str!("svg"),
+				],
+			},
+			fonts:  FontsConfig { queries: vec![] },
+			errors: ErrorConfig { on_error: ErrorAction::WARN, on_file_exists: FileAction::OVERWRITE },
 		}
 	}
 
 	/// Load the settings specified in TOML `data` into the config, and validate their values.
 	/// 
 	/// Returns `Err(SquarkError::ManyRecoverable)` only if nonzero errors are encountered.
-	pub fn set_from_toml(&mut self, data: toml::Table) -> SquarkResult
+	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
 		let mut errs = vec![];
 
 		// TODO finish implementing fields
 
+		let mut site = None;
+		
 		if let Some(paths) = data.get("paths")
 		{
 			match paths.get("site") {
 				Some(toml::Value::String(dir)) => {
-					let path = self.paths.root.join(dir.trim_start_matches("/"));
+					let path = root.join(dir.trim_start_matches("/"));
 
 					if path.exists() {
-						self.paths.site = path;
-						self.paths.dest = self.paths.site.join("src/routes/");
+						site = Some(path);
 					}
 					else {
 						errs.push(SquarkError::Unrecoverable {
@@ -71,20 +90,23 @@ impl SquarkupConfig
 					hint: format!("{WHITE}paths.site{GREEN} must be a string (a filepath relative to root)"),
 					debug: vec![],
 				}),
-				None => todo!(),
+				None => (),
 			}
+		}
 
+		let mut out = Self::init_defaults(root, &site.unwrap_or_else(|| root.to_path_buf()));
+
+		if let Some(paths) = data.get("paths")
+		{
 			match paths.get("sources") {
 				Some(toml::Value::Array(values)) => {
-					self.paths.sources.clear();
-
 					for value in values {
 						match value {
 							toml::Value::String(dir) => {
-								let path = self.paths.root.join(dir.trim_start_matches("/"));
+								let path = out.paths.root.join(dir.trim_start_matches("/"));
 
 								if path.exists() {
-									self.paths.sources.push(path);
+									out.paths.sources.push(path);
 								}
 								else {
 									errs.push(SquarkError::Unrecoverable {
@@ -101,10 +123,6 @@ impl SquarkupConfig
 							}),
 						}
 					}
-
-					if self.paths.sources.is_empty() {
-						self.paths.sources = vec![self.paths.root.clone()];
-					}
 				},
 				Some(v) => errs.push(SquarkError::Unrecoverable {
 					msg: format!("you provided an invalid {YELLOW}paths.sources{RED} of type {}", v.type_str()),
@@ -116,7 +134,7 @@ impl SquarkupConfig
 		}
 
 		if errs.is_empty() {
-			Ok(())
+			Ok(out)
 		} else {
 			Err(SquarkError::ManyRecoverable { errs })
 		}
