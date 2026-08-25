@@ -11,14 +11,23 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 {
 	// TODO root-only
 
-	config.paths.sources.iter()
-		.flat_map(|source|
-			walkdir::WalkDir::new(&config.paths.root.join(source))
-				.into_iter()
-				.filter_entry(|e| should_include_path(e, config))
-				.map(|e| e.map_err(err!()))
-				.map(|e| e.map(|entry| entry.path().to_path_buf()))
-		)
+	// if only we had `yield` generators syntax...
+	config.paths.sources.iter().flat_map(|source|
+		walkdir::WalkDir::new(&config.paths.root.join(source))
+			.into_iter()
+
+			// skip ignored folders and files
+			.filter_entry(|e| should_include_path(e, config))
+
+			// yield `SquarkError::External` errors, not walkdir errors
+			.map(|e| e.map_err(err!()))
+
+			// don't yield folders, only yield files
+			.filter(|e| !e.as_ref().is_ok_and(|entry| entry.path().is_dir()))
+
+			// yield paths, not walkdir entries
+			.map(|e| e.map(|entry| entry.path().to_path_buf()))
+	)
 }
 
 /// Should `entry` be squarked up (file) or searched (folder), according to the user's squarkup `config`?
