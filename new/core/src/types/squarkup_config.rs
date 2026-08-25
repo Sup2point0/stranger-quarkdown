@@ -30,7 +30,7 @@ pub struct PathsConfig
 	pub dest: PathBuf,
 	
 	/// Source directories from which to start searching for Markdown files.
-	pub sources: Vec<String>,
+	pub sources: Vec<PathBuf>,
 
 	/// Only files whose full path matches against any of these patterns will be squarked up.
 	pub include: Vec<String>,
@@ -91,7 +91,7 @@ impl SquarkupConfig
 				root: root.clone(),
 				site: root.clone(),
 				dest: root.join("src/routes/"),
-				sources: vec![],
+				sources: vec![root.clone()],
 				include: vec![str!("\\.md$"), str!("\\.svx$")],
 				include_patterns: vec![],
 				exclude: vec![],
@@ -115,23 +115,65 @@ impl SquarkupConfig
 			match paths.get("site") {
 				Some(toml::Value::String(dir)) => {
 					let path = self.paths.root.join(dir.trim_start_matches("/"));
-					if !path.exists() {
+
+					if path.exists() {
+						self.paths.site = path;
+						self.paths.dest = self.paths.site.join("src/routes/");
+					}
+					else {
 						errs.push(SquarkError::Unrecoverable {
 							msg: str!("the directory you specified for your SvelteKit site doesn't exist!"),
 							hint: format!("{WHITE}paths.site{GREEN} is relative from the root directory of your project"),
-							debug: vec![format!("{} is not a valid directory", path.display())],
+							debug: vec![slash!("{} is not a valid directory", path)],
 						});
 					}
-					self.paths.site = path;
 				},
-				Some(v) => {
-					errs.push(SquarkError::Unrecoverable {
-						msg: format!("you provided a {} for {YELLOW}paths.site{RED}", v.type_str()),
-						hint: format!("{WHITE}paths.site{GREEN} must be a string"),
-						debug: vec![],
-					});
-				},
+				Some(v) => errs.push(SquarkError::Unrecoverable {
+					msg: format!("you provided an invalid {YELLOW}paths.site{RED} of type {}", v.type_str()),
+					hint: format!("{WHITE}paths.site{GREEN} must be a string (a filepath relative to root)"),
+					debug: vec![],
+				}),
 				None => todo!(),
+			}
+
+			match paths.get("sources") {
+				Some(toml::Value::Array(values)) => {
+					self.paths.sources.clear();
+
+					for value in values {
+						match value {
+							toml::Value::String(dir) => {
+								let path = self.paths.root.join(dir.trim_start_matches("/"));
+
+								if path.exists() {
+									self.paths.sources.push(path);
+								}
+								else {
+									errs.push(SquarkError::Unrecoverable {
+										msg: slash!("a source directory you specified does not exist: {}", path),
+										hint: format!("{WHITE}paths.sources{GREEN} are relative from your project root"),
+										debug: vec![],
+									});
+								}
+							},
+							v => errs.push(SquarkError::Unrecoverable {
+								msg: format!("you provided an invalid {YELLOW}paths.sources{RED} entry of type {}", v.type_str()),
+								hint: format!("{WHITE}paths.sources{GREEN} entries must be strings (filepaths relative to your project root)"),
+								debug: vec![],
+							}),
+						}
+					}
+
+					if self.paths.sources.is_empty() {
+						self.paths.sources = vec![self.paths.root.clone()];
+					}
+				},
+				Some(v) => errs.push(SquarkError::Unrecoverable {
+					msg: format!("you provided an invalid {YELLOW}paths.sources{RED} of type {}", v.type_str()),
+					hint: format!("{WHITE}paths.sources{GREEN} must be an array of strings (filepaths relative to your project root)"),
+					debug: vec![],
+				}),
+				None => (),
 			}
 		}
 
