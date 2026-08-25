@@ -43,6 +43,7 @@ pub enum SquarkError
 	},
 }
 
+/// Constructors
 impl SquarkError
 {
 	/// Construct a `SquarkError::Unrecoverable` with only a plain error message.
@@ -60,6 +61,22 @@ impl SquarkError
 		Self::External {
 			err: bx!(e),
 			msg: str!("unexpected external error"),
+		}
+	}
+}
+
+impl SquarkError
+{
+	pub fn is_fatal(&self) -> bool
+	{
+		match self
+		{
+			Self::Recoverable{..} => false,
+
+			Self::Unrecoverable{..}
+			| Self::External{..} => true,
+			
+			Self::Multiple{ errs } => errs.iter().any(|err| err.is_fatal()),
 		}
 	}
 }

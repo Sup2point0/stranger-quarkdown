@@ -1,6 +1,7 @@
 use squarkdown::*;
-use squarkdown::utils::log;
-use squarkdown::utils::colours::*;
+use squarkdown::config::*;
+use squarkdown::log;
+use squarkdown::colours::*;
 
 use std::fs::File;
 use std::time::Instant;
@@ -71,14 +72,32 @@ fn squarkup() -> SquarkResult<bool>
 		log::ok!("squarked up {active_files} files");
 	}
 
-	for page in site_data.pages.values() {
-		let dest = config.paths.root.join(&page.destination);
-		dbg!(dest.to_str());
-		let source = File::open(&page.filepath).map_err(err!())?;
-		let target = File::create(dest).map_err(err!())?;
+	let mut errs = vec![];
 
-		let mut renderer = Renderer::init(source, target);
-		renderer.render(&page, &config)?;
+	for page in site_data.pages.values() {
+		catch!(errs => {
+			let dest = config.paths.root.join(&page.destination);
+			dbg!(dest.to_str());
+			let source = File::open(&page.filepath).map_err(err!())?;
+			let target = File::create(dest).map_err(err!())?;
+
+			let mut renderer = Renderer::init(source, target);
+			renderer.render(&page, &config)?;
+			Ok(())
+		});
+
+		if !errs.is_empty() {
+			let err = SquarkError::Multiple { errs: errs.drain(..).collect() };
+			
+			if err.is_fatal() || config.errors.on_error == ErrorAction::KILL
+			{
+				return Err(err);
+			}
+
+			log::line();
+			print_error(err);
+			log::line();
+		}
 	}
 	
 	Ok(true)
