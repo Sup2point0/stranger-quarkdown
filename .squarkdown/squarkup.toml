@@ -1,0 +1,30 @@
+repo = "Squarkdown"
+
+[paths]
+site = "/site/"
+sources = [
+	"/",
+	"/docs/",
+	"/.squarkdown/content/",
+]
+dest = "/src/routes/(docs)/(dyna)/"
+
+[out]
+folder = "/src/routes/(docs)/(dyna)/"
+file = "+page.svx"
+
+[data]
+path = "/src/site.json"
+
+[styles]
+folder = "/src/styles/"
+base-file = "article.scss"
+
+[fonts]
+queries = [
+	"Sora:wght@100..800"
+]
+
+[errors]
+on-error = "kill"
+on-file-exists = "overwrite"
