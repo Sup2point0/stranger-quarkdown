@@ -46,4 +46,9 @@ impl SquarkError
 			debug: vec![],
 		}
 	}
+
+	pub fn external(e: impl std::error::Error + 'static) -> Self
+	{
+		Self::External(Box::new(e))
+	}
 }
