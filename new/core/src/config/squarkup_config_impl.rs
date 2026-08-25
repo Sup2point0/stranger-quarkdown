@@ -7,7 +7,7 @@ use crate::{
 	macros::*,
 };
 
-use std::path::{ Path };
+use std::path::{ Path, PathBuf };
 
 
 impl SquarkupConfig
@@ -64,22 +64,11 @@ impl SquarkupConfig
 		let mut errs = vec![];
 
 		/* NOTE: Read `paths.site` first because *defaults* depend on it */
+		// TODO cleanup using `error_if_not_string()`
 		let site = if let Some(paths) = data.get("paths")
 		{
 			match paths.get("site") {
-				Some(toml::Value::String(dir)) => {
-					let path = root.join(dir.trim_start_matches("/"));
-
-					if !path.exists() {
-						return Err(SquarkError::Unrecoverable {
-							msg: str!("the directory you specified for your SvelteKit site doesn't exist!"),
-							hint: fmt!("{W}paths.site{G} is relative from your project root"),
-							debug: vec![slash!("{GREY1}{}{GREY} is not a valid directory", path)],
-						});
-					}
-
-					path
-				},
+				Some(toml::Value::String(dir)) => Self::if_exists(root, dir, "for your SvelteKit site", fmt!("{W}paths.site{G} is relative to your project root"))?,
 				Some(v) => return Err(SquarkError::Unrecoverable {
 					msg: fmt!("you provided an invalid {Y}paths.site{R} of type {}", v.type_str()),
 					hint: fmt!("{W}paths.site{G} must be a string {GREY}(folder relative to root)"),
@@ -90,16 +79,16 @@ impl SquarkupConfig
 		} else { root.to_path_buf() };
 
 		// start with defaults...
-		let mut out = Self::init_defaults(root, &site);
+		let mut s = Self::init_defaults(root, &site);
 
 		// ...then apply the user's non-defaults on top of it
 		if let Some(paths) = data.get("paths")
 		{
 			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root", &mut errs, |dir, errs| {
-				let path = out.paths.root.join(dir.trim_start_matches("/"));
+				let path = s.paths.root.join(dir.trim_start_matches("/"));
 
 				if path.exists() {
-					out.paths.sources.push(path);
+					s.paths.sources.push(path);
 				}
 				else {
 					errs.push(SquarkError::Unrecoverable {
@@ -112,7 +101,7 @@ impl SquarkupConfig
 
 			Self::for_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
 				match regex::Regex::new(&pattern) {
-					Ok(compiled) => out.paths.include.push(compiled),
+					Ok(compiled) => s.paths.include.push(compiled),
 					Err(e) => errs.push(SquarkError::External {
 						err: bx!(e),
 						msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
@@ -122,7 +111,7 @@ impl SquarkupConfig
 
 			Self::for_string_array(&paths, "paths", "exclude", "(RegEx patterns)", &mut errs, |pattern, errs| {
 				match regex::Regex::new(&pattern) {
-					Ok(compiled) => out.paths.exclude.push(compiled),
+					Ok(compiled) => s.paths.exclude.push(compiled),
 					Err(e) => errs.push(SquarkError::External {
 						err: bx!(e),
 						msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
@@ -131,12 +120,15 @@ impl SquarkupConfig
 			});
 
 			if let Some(true) = Self::error_if_not_bool(&paths, "paths", "default-exclude", "", &mut errs) {
-				out.paths.exclude.clear();
+				s.paths.exclude.clear();
+			}
+		}
+
 			}
 		}
 
 		if errs.is_empty() {
-			Ok(out)
+			Ok(s)
 		} else {
 			Err(SquarkError::Multiple { errs })
 		}
@@ -212,9 +204,35 @@ impl SquarkupConfig
 		}
 	}
 
-	/// Validate that `data[field]` is a boolean, for `category.field`.
-	fn error_if_not_bool<'d>(
+	/// Validate that `data[field]` is a string, for `category.field`.
+	fn error_if_not_string<'d>(
 		data: &'d toml::Value,
+		category: &'static str,
+		field: &'static str,
+		hint: &'static str,
+		errs: &mut Vec<SquarkError>,
+	) -> Option<&'d String>
+	{
+		match data.get(field)
+		{
+			Some(toml::Value::String(value)) => Some(value),
+			None => None,
+			Some(v) => {
+				errs.push(SquarkError::Recoverable {
+					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
+					hint: fmt!("{Y}{category}.{field}{G} must be a string {GREY}{hint}"),
+					debug: vec![
+						fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+					],
+				});
+				None
+			},
+		}
+	}
+
+	/// Validate that `data[field]` is a boolean, for `category.field`.
+	fn error_if_not_bool(
+		data: &toml::Value,
 		category: &'static str,
 		field: &'static str,
 		hint: &'static str,
@@ -235,6 +253,29 @@ impl SquarkupConfig
 				});
 				None
 			},
+		}
+	}
+
+	fn if_exists(
+		root: &Path,
+		dir: &str,
+		for_location: &'static str,
+		hint: String,
+	) -> SquarkResult<PathBuf>
+	{
+		let path = root.join(dir.trim_start_matches(|c| matches!(c, '/' | '\\')));
+
+		if path.exists() {
+			Ok(path)
+		}
+		else {
+			Err(SquarkError::Unrecoverable {
+				msg: fmt!("the directory you specified {for_location} doesn't exist!"),
+				hint,
+				debug: vec![
+					slash!("`{}` is not a valid directory", path),
+				],
+			})
 		}
 	}
 }
