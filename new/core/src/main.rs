@@ -57,10 +57,10 @@ fn squarkup() -> SquarkResult<bool>
 		let file = File::open(&filepath).map_err(err!())?;
 		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
 		
-		if let Some(page_data) = parser.parse(&config).unwrap() {
+		if let Some(page) = parser.parse(&config).unwrap() {
 			log::info!(slash!("found active file: {GREY1}{}", filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()));
 			active_files += 1;
-			site_data.add_page(filepath, page_data);
+			site_data.add_page(filepath, page);
 		}
 	}
 	
@@ -71,14 +71,15 @@ fn squarkup() -> SquarkResult<bool>
 		log::ok!("squarked up {active_files} files");
 	}
 
-	// for page in site_data.pages.values() {
-	// 	let dest = config.paths.root.join(&page.destination);
-	// 	let source = File::open(&page.filepath).map_err(err!())?;
-	// 	let target = File::create(dest).map_err(err!())?;
+	for page in site_data.pages.values() {
+		let dest = config.paths.root.join(&page.destination);
+		dbg!(dest.to_str());
+		let source = File::open(&page.filepath).map_err(err!())?;
+		let target = File::create(dest).map_err(err!())?;
 
-	// 	let mut renderer = Renderer::init(source, target);
-	// 	renderer.render(&config);  // FIXME
-	// }
+		let mut renderer = Renderer::init(source, target);
+		renderer.render(&page, &config)?;
+	}
 	
 	Ok(true)
 }
