@@ -40,28 +40,6 @@ use std::fmt::Display;
 	($($args:tt)*) => { $crate::utils::log::log_hint(format!($($args)*)) };
 } pub use hint;
 
-/// Log an *important* path that has successfully been resolved, using `log::ok!()`.
-#[macro_export] macro_rules! found {
-	($msg:literal, $path:expr) => {
-		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
-			$crate::utils::log::log_ok(format!($msg, normalised))
-		} else {
-			$crate::utils::log::log_ok(format!($msg, $path.display()))
-		}
-	};
-} pub use found;
-
-/// Log a generic path that has successfully been resolved, using `log::info!()`.
-#[macro_export] macro_rules! info_path {
-	($msg:literal, $path:expr) => {
-		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
-			$crate::utils::log::log_info(format!($msg, normalised))
-		} else {
-			$crate::utils::log::log_info(format!($msg, $path.display()))
-		}
-	};
-} pub use info_path;
-
 
 pub fn line() { println!("{GREY}────────────────────────"); }
 

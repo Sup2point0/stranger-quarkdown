@@ -22,6 +22,7 @@ fn main() -> Result<(), ()>
 		Err(e) => {
 			log::line();
 			print_error(e);
+			log::line();
 			println!("{RED}squarkup failed!");
 			println!();
 			Err(())
@@ -39,10 +40,10 @@ fn main() -> Result<(), ()>
 fn squarkup() -> SquarkResult<bool>
 {
 	let project_root = resolver::resolve_project_root()?;
-	log::found!("found your project: {BLUE}{}", project_root);
+	log::ok!(slash!("found your project: {BLUE}{}", project_root));
 
 	let config = resolver::resolve_config(project_root)?;
-	log::found!("found your site: {BLUE}{}", config.paths.site);
+	log::ok!(slash!("found your site: {BLUE}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();
 	let mut found_active_file = false;
@@ -56,7 +57,7 @@ fn squarkup() -> SquarkResult<bool>
 		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
 		
 		if let Some(page_data) = parser.parse(&config).unwrap() {
-			log::info_path!("found active file: {BLUE}{}", filepath);
+			log::info!(slash!("found active file: {BLUE}{}", filepath));
 			site_data.add_page(filepath, page_data);
 		}
 	}
@@ -83,17 +84,17 @@ fn print_error(err: SquarkError)
 	match err {
 		SquarkError::Recoverable { msg } => log::bad!(msg),
 		SquarkError::ManyRecoverable { errs } => {
-			for err in errs {
+			for (i, err) in errs.into_iter().enumerate() {
+				if i != 0 { log::line(); }
 				print_error(err);
-				log::line();
 			}
 		},
 		SquarkError::Unrecoverable { msg, hint, debug } => {
 			log::bad!(msg);
-			log::hint!(hint);
 			for each in debug {
 				log::info!(each);
 			}
+			log::hint!(hint);
 		},
 		SquarkError::External(e) => log::bad!(e),
 	}

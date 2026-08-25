@@ -36,6 +36,21 @@ macro_rules! err
 pub use err;
 
 
+/// Format a string with a single path argument, normalising `\` in the path to `/`.
+#[macro_export]
+macro_rules! slash
+{
+	($msg:literal, $path:expr) => {
+		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
+			format!($msg, normalised)
+		} else {
+			format!($msg, $path.display())
+		}
+	};
+}
+pub use slash;
+
+
 #[macro_export]
 macro_rules! all
 {

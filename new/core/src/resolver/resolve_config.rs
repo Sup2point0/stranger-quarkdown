@@ -20,7 +20,7 @@ pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
 	log::is!("resolving config...");
 
 	let (filepath, ext) = find_config(&root)?;
-	log::found!("found your squarkup config: {BLUE}{}", filepath);
+	log::ok!(slash!("found your squarkup config: {BLUE}{}", filepath));
 
 	let mut config = SquarkupConfig::init_defaults(root.clone());
 
