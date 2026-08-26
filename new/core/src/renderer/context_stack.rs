@@ -4,6 +4,7 @@ pub enum Ctx {
 	CODE_INLINE,
 	CODE_BLOCK,
 	COMMENT,
+	LINK,
 	SQUARK_LEAVE,
 	SQUARK_SLASH,
 	SQUARK_ONLY,
@@ -47,8 +48,55 @@ impl ContextStack
 
 	pub fn force_pop(&mut self, ctx: Ctx)
 	{
-		if let Some(idx) = self.stack.iter().rev().position(|c| *c == ctx) {
-			self.stack.truncate(idx - 1);
+		if let Some(idx) = self.stack.iter().rposition(|c| *c == ctx) {
+			self.stack.truncate(idx);
 		}
+	}
+}
+
+
+#[cfg(test)]
+mod test
+{
+	use super::*;
+	
+	#[test] fn force_pop_easy()
+	{
+		let mut ctx = ContextStack::new();
+
+		ctx.push(Ctx::CODE_BLOCK);
+
+		ctx.push(Ctx::COMMENT);
+		ctx.push(Ctx::LINK);
+		ctx.force_pop(Ctx::COMMENT);
+		assert_eq!( ctx.current(), Ctx::CODE_BLOCK );
+	}
+
+	#[test] fn force_pop_medium()
+	{
+		let mut ctx = ContextStack::new();
+		ctx.push(Ctx::CODE_BLOCK);
+
+		ctx.push(Ctx::COMMENT);
+		ctx.push(Ctx::LINK);
+		ctx.push(Ctx::COMMENT);
+		ctx.force_pop(Ctx::COMMENT);
+		assert_eq!( ctx.current(), Ctx::LINK );
+		
+		ctx.force_pop(Ctx::COMMENT);
+		assert_eq!( ctx.current(), Ctx::CODE_BLOCK );
+	}
+
+	#[test] fn force_pop_hard()
+	{
+		let mut ctx = ContextStack::new();
+		ctx.push(Ctx::CODE_BLOCK);
+
+		ctx.push(Ctx::COMMENT);
+		ctx.push(Ctx::LINK);
+		ctx.push(Ctx::CODE_INLINE);
+
+		ctx.force_pop(Ctx::CODE_BLOCK);
+		assert_eq!( ctx.current(), Ctx::MARKDOWN );
 	}
 }
