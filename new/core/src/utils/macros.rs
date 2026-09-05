@@ -56,7 +56,7 @@ macro_rules! err {
 macro_rules! catch
 {
 	($errs:ident => $eval:block) => {
-		match (|| -> SquarkResult<_> { $eval })() {
+		match (|| -> SquarkResult<_> { $eval; Ok(()) })() {
 			Ok(r) => Some(r),
 			Err(e) => {
 				$errs.push(e);

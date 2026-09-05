@@ -101,7 +101,6 @@ impl SquarkupConfig
 						root, dir, "a source folder you specified",
 						fmt!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?);
-					Ok(())
 				});
 			});
 
@@ -137,7 +136,6 @@ impl SquarkupConfig
 				let raw = Self::try_get_string(&out, "out.folder", "(folder relative to your site folder)")?;
 				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
 				s.out.folder = dir;
-				Ok(())
 			});
 
 			// TODO file
