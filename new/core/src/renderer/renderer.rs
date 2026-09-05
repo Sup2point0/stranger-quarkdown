@@ -7,6 +7,7 @@ use crate::{
 use std::fs::{ File };
 use std::io::{ BufReader, BufWriter, Read, Write };
 use std::path::{ PathBuf };
+use std::debug_assert_matches;
 
 
 pub struct Renderer<Source: Read = File, Target: Write = File>
@@ -67,8 +68,6 @@ impl<Source: Read, Target: Write>
 
 		out.next_chunk()?;
 
-		dbg!(&out._chunk);
-
 		Ok(out)
 	}
 
@@ -93,6 +92,8 @@ impl<Source: Read, Target: Write>
 
 	fn render_next_chunk(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
+		debug_assert_matches!(self.current(), Some(..));
+
 		match self.ctx.last() {
 			Some(..) => unimplemented!(),
 			None => self.render_plain(page, config),
@@ -105,17 +106,16 @@ impl<Source: Read, Target: Write>
 {
 	fn render_plain(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
-		// if self.try_eat("<!--")? {
-		// 	self.ctx.push(Ctx::COMMENT);
-		// }
+		if self.try_eat("<!--")? {
+			self.ctx.push(Ctx::COMMENT);
+		}
 		// else if self.try_eat("-->")? {
 		// 	self.ctx.pop();
 		// }
-		// else {
-			let c = self.current();
+		else if let Some(c) = self.current() {
 			self.emit_char(c)?;
 			self.advance()?;
-		// }
+		}
 
 		Ok(())
 	}

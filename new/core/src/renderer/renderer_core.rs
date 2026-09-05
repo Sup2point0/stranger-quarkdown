@@ -21,9 +21,12 @@ impl<Source: Read, Target: Write>
 		self._index >= self._chunk.len()
 	}
 
-	pub(super) fn current(&self) -> char
+	/// The character in the source the renderer is currently pointing to.
+	/// 
+	/// This returns `None` iff the renderer has reached the end of its source and is out of bounds.
+	pub(super) fn current(&self) -> Option<char>
 	{
-		*self._chunk.get(self._index).expect("renderer's index should never be out of bounds while rendering")
+		self._chunk.get(self._index).copied()
 	}
 
 	pub(super) fn next_chunk(&mut self) -> SquarkResult
@@ -34,7 +37,7 @@ impl<Source: Read, Target: Write>
 		let mut t = 0;
 
 		for (i, c) in chunk.enumerate() {
-			t = i + 1;
+			t += 1;
 
 			match c {
 				Ok(c) => self._chunk[i] = c,
@@ -49,8 +52,7 @@ impl<Source: Read, Target: Write>
 			self.is_done = true;
 		}
 
-		dbg!(t);
-		self._chunk.truncate(t + 1);
+		self._chunk.truncate(t);
 		self._index = 0;
 
 		Ok(())
@@ -60,7 +62,7 @@ impl<Source: Read, Target: Write>
 	{
 		self._advance_()?;
 
-		if self.current() == '\\' {
+		if self.current() == Some('\\') {
 			self._advance_()?;
 			self._advance_()?;
 		}
@@ -86,7 +88,7 @@ impl<Source: Read, Target: Write>
 
 		for expected in target.chars()
 		{
-			if self.current() != expected {
+			if self.current() != Some(expected) {
 				self._index = init;
 				return Ok(false);
 			}
