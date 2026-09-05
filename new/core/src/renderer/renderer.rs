@@ -107,7 +107,7 @@ impl<Source: Read, Target: Write>
 	fn render_plain(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
-			self.ctx.push(Ctx::COMMENT);
+			// self.ctx.push(Ctx::COMMENT);
 		}
 		// else if self.try_eat("-->")? {
 		// 	self.ctx.pop();
@@ -132,6 +132,10 @@ mod test
 		test_exact(&[
 			"sup, world!",
 			"sup,\nworld!",
+			"sup,\nworld!\n",
+			"sup, \nworld!\n",
+			"sup,\n world!\n",
+			"sup, \n world!\n",
 		]);
 	}
 }

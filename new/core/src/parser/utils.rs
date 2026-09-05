@@ -1,9 +1,3 @@
-#[cfg(test)] use std::io::Cursor;
-
-#[cfg(test)] use super::*;
-#[cfg(test)] use crate::utils::*;
-
-
 /// Lazily produce an error message for the parser's error path.
 macro_rules! when {
 	() => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
@@ -23,6 +17,13 @@ macro_rules! to {
 	}
 }
 pub(super) use to;
+
+
+#[cfg(test)]
+use super::*;
+
+#[cfg(test)]
+use std::io::Cursor;
 
 
 #[cfg(test)]

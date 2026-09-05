@@ -3,6 +3,7 @@ use squarkdown::config::*;
 use squarkdown::log;
 use squarkdown::colours::*;
 
+use std::fs;
 use std::fs::File;
 use std::time::Instant;
 
@@ -52,51 +53,78 @@ fn squarkup() -> SquarkResult<bool>
 	let mut site_data = SiteData::new();
 	let mut active_files = 0;
 	log::is!("squarking up...");
+
+	let mut errs = vec![];
 	
 	for filepath in resolver::resolve_files(&config) {
-		let filepath = filepath.unwrap();
-		let file = File::open(&filepath).map_err(err!())?;
-		let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
+		catch!(errs => {
+			let filepath = filepath?;
+
+			let file = File::open(&filepath).map_err(err!())?;
+			let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
+			
+			if let Some(page) = parser.parse(&config).unwrap() {
+				active_files += 1;
+				site_data.add_page(filepath.clone(), page);
+				
+				log::info!(slash!(
+					"found active file: {GREY1}{}",
+					filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()
+				));
+			}
+		});
+	}
+
+	if !errs.is_empty() {
+		let err = SquarkError::Multiple { errs: errs.drain(..).collect() };
 		
-		if let Some(page) = parser.parse(&config).unwrap() {
-			log::info!(slash!("found active file: {GREY1}{}", filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()));
-			active_files += 1;
-			site_data.add_page(filepath, page);
+		if err.is_fatal() || config.errors.on_error == ErrorAction::KILL {
+			return Err(err);
 		}
+
+		log::line();
+		print_error(err);
+		log::line();
+
+		errs.clear();
 	}
 	
 	if active_files == 0 {
 		log::bad!("no files found to squarkup, exiting!");
 		return Ok(false);
 	} else {
-		log::ok!("squarked up {active_files} files");
+		log::ok!("found {active_files} active files to squarkup");
 	}
-
-	let mut errs = vec![];
 
 	for page in site_data.pages.values() {
 		catch!(errs => {
-			let dest = config.paths.root.join(&page.destination);
-			dbg!(dest.to_str());
+			let dest = config.out.folder.join(&page.destination).join(&config.out.file);
 			let source = File::open(&page.filepath).map_err(err!())?;
-			let target = File::create(dest).map_err(err!())?;
 
-			let mut renderer = Renderer::init(source, target);
+			if let Some(folder) = dest.parent() {
+				if !folder.exists() {
+					fs::create_dir_all(folder).map_err(err!())?;
+				}
+			}
+
+			let target = File::create(&dest).map_err(err!())?;
+
+			let mut renderer = Renderer::init(source, target, page.filepath.clone(), dest)?;
 			renderer.render(&page, &config)?;
-			Ok(())
 		});
 
 		if !errs.is_empty() {
 			let err = SquarkError::Multiple { errs: errs.drain(..).collect() };
 			
-			if err.is_fatal() || config.errors.on_error == ErrorAction::KILL
-			{
+			if err.is_fatal() || config.errors.on_error == ErrorAction::KILL {
 				return Err(err);
 			}
 
 			log::line();
 			print_error(err);
 			log::line();
+
+			errs.clear();
 		}
 	}
 	

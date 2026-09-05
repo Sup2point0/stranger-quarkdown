@@ -111,7 +111,7 @@ impl<Source: Read, Target: Write>
 		match self._writer.write(content.as_bytes())
 		{
 			Ok(0) => Err(SquarkError::Unrecoverable {
-				msg: str!(slash!("could not write to {}", self.source_filepath)),
+				msg: str!(slash!("could not write to {}", self.target_filepath)),
 				hint: str!("this may mean the file was deleted, moved or locked mid-write"),
 				debug: vec![
 					fmt!("tried to write `{content}`"),
@@ -121,7 +121,7 @@ impl<Source: Read, Target: Write>
 			// TODO retry on interruption
 			Err(e) => Err(SquarkError::External {
 				err: bx!(e),
-				msg: str!(slash!("could not write to {}", self.source_filepath)),
+				msg: str!(slash!("could not write to {}", self.target_filepath)),
 			}),
 		}
 	}

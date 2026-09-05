@@ -19,10 +19,10 @@ use std::path::PathBuf;
 pub struct CharmParser<Source: Read = File>
 {
 	/// Have we reached the end of the source?
-	pub(super) is_done: bool,
+	pub is_done: bool,
 
 	/// Non-crashing errors to report to the user.
-	pub(super) errors: Vec<ParseFailure>,
+	pub errors: Vec<ParseFailure>,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
 	///
@@ -43,7 +43,9 @@ pub struct CharmParser<Source: Read = File>
 		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
 	*/
 
-	/// Individual characters of the currently in-memory line to process. Guaranteed to be terminated by a `\n` newline.
+	/// Individual characters of the currently in-memory line to process.
+	/// 
+	/// Guaranteed to be terminated by a `\n` newline.
 	pub(super) _line: Vec<char>,
 	
 	/// The currently in-memory line to process.
