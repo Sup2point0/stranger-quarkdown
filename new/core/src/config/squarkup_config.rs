@@ -14,6 +14,7 @@ pub struct SquarkupConfig
 	pub paths:  PathsConfig,
 	pub out:    OutConfig,
 	pub data:   DataConfig,
+	pub format: FormatConfig,
 	pub bases:  BasesConfig,
 	pub styles: StylesConfig,
 	pub assets: AssetsConfig,
@@ -40,11 +41,8 @@ pub struct PathsConfig {
 	pub exclude: Vec<regex::Regex>,
 }
 
-
 #[derive(Clone, Debug)]
 pub struct OutConfig {
-	// TODO migrate dest to this
-	
 	/// Where to export files relative to, relative to `.paths.site`.
 	/// 
 	/// `dest` paths in files are relative to this folder.
@@ -54,13 +52,20 @@ pub struct OutConfig {
 	pub file: String,
 }
 
-
 #[derive(Clone, Debug)]
 pub struct DataConfig {
 	/// Where to export site data, including the (expected) `.json` extension.
 	pub path: PathBuf,
 }
 
+#[derive(Clone, Debug)]
+pub struct FormatConfig {
+	/// Strip `<!-- comments -->` from the rendered output?
+	pub strip_comments: bool,
+
+	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
+	pub externalise_links: bool,
+}
 
 #[derive(Clone, Debug)]
 pub struct BasesConfig {
@@ -68,13 +73,11 @@ pub struct BasesConfig {
 	pub page_js: Option<PathBuf>,
 }
 
-
 #[derive(Clone, Debug)]
 pub struct StylesConfig {
 	pub folder: Option<PathBuf>,
 	pub base_file: Option<PathBuf>,
 }
-
 
 #[derive(Clone, Debug)]
 pub struct AssetsConfig {
@@ -82,7 +85,6 @@ pub struct AssetsConfig {
 	pub site_assets_folder: Option<PathBuf>,
 	pub extensions: Vec<String>,
 }
-
 
 #[derive(Clone, Debug)]
 pub struct FontsConfig {

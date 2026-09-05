@@ -40,15 +40,12 @@ impl SquarkupConfig
 			data: DataConfig {
 				path: dir!(site / "src/site-data.json")
 			},
-			bases:  BasesConfig { folder: None, page_js: None },
+			format: FormatConfig { strip_comments: false, externalise_links: false },
+			bases:  BasesConfig  { folder: None, page_js: None },
 			styles: StylesConfig { folder: None, base_file: None },
 			assets: AssetsConfig { folder: None, site_assets_folder: None,
 				extensions: vec![
-					str!("png"),
-					str!("jpg"),
-					str!("jpeg"),
-					str!("webp"),
-					str!("svg"),
+					str!("png"), str!("jpg"), str!("jpeg"), str!("webp"), str!("svg"),
 				],
 			},
 			fonts:  FontsConfig { queries: vec![] },
@@ -124,9 +121,10 @@ impl SquarkupConfig
 				}
 			});
 
-			if let Some(true) = Self::get_bool(&paths, "paths", "default-exclude", "", &mut errs) {
-				s.paths.exclude.clear();
-			}
+			// FIXME??
+			// if let Some(true) = Self::get_bool(&paths, "paths", "default-exclude", "", &mut errs) {
+			// 	s.paths.exclude.clear();
+			// }
 		}
 
 		// OutConfig
@@ -149,6 +147,24 @@ impl SquarkupConfig
 		}
 
 		// DataConfig
+
+		// FormatConfig
+		if let Some(format) = data.get("format")
+		{
+			if let Some(value) = format.get("strip-comments") {
+				catch!(errs => {
+					let raw = Self::try_get_bool(value, "format.strip-comments")?;
+					s.format.strip_comments = raw.clone();
+				});
+			}
+			
+			if let Some(value) = format.get("externalise-links") {
+				catch!(errs => {
+					let raw = Self::try_get_bool(value, "format.externalise-links")?;
+					s.format.externalise_links = raw.clone();
+				});
+			}
+		}
 
 		// BasesConfig
 
@@ -230,7 +246,7 @@ impl SquarkupConfig
 		}
 	}
 
-	/// Try to extract the string from `data`.
+	/// Try to extract the string from `data` for `setting`.
 	fn try_get_string<'d>(
 		value: &'d toml::Value,
 		setting: &str,
@@ -250,29 +266,19 @@ impl SquarkupConfig
 		}
 	}
 
-	/// Validate that `data[field]` is a boolean, for `category.field`.
-	fn get_bool(
-		data: &toml::Value,
-		category: &'static str,
-		field: &'static str,
-		hint: &'static str,
-		errs: &mut Vec<SquarkError>,
-	) -> Option<bool>
+	/// Try to extract the boolean from `data` for `setting`.
+	fn try_get_bool(value: &toml::Value, setting: &str) -> SquarkResult<bool>
 	{
-		match data.get(field)
-		{
-			Some(toml::Value::Boolean(value)) => Some(*value),
-			None => None,
-			Some(v) => {
-				errs.push(SquarkError::Unrecoverable {
-					msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-					hint: fmt!("{Y}{category}.{field}{G} must be a boolean {GREY}{hint}"),
-					debug: vec![
-						fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-					],
-				});
-				None
-			},
+		match value {
+			toml::Value::Boolean(v) => Ok(*v),
+			
+			v => Err(SquarkError::Unrecoverable {
+				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
+				hint: fmt!("{Y}{setting}{G} must be a boolean"),
+				debug: vec![
+					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+				],
+			}),
 		}
 	}
 
