@@ -132,13 +132,20 @@ impl SquarkupConfig
 		// OutConfig
 		if let Some(out) = data.get("out")
 		{
-			catch!(errs => {
-				let raw = Self::try_get_string(&out, "out.folder", "(folder relative to your site folder)")?;
-				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
-				s.out.folder = dir;
-			});
+			if let Some(value) = out.get("folder") {
+				catch!(errs => {
+					let raw = Self::try_get_string(value, "out.folder", "(folder relative to your site folder)")?;
+					let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
+					s.out.folder = dir;
+				});
+			}
 
-			// TODO file
+			if let Some(value) = out.get("file") {
+				catch!(errs => {
+					let raw = Self::try_get_string(value, "out.file", "(filename including `.svx` extension)")?;
+					s.out.file = raw.clone();
+				});
+			}
 		}
 
 		// DataConfig
@@ -163,8 +170,8 @@ impl SquarkupConfig
 
 					match ErrorAction::try_from(raw.as_str())
 					{
-						Ok(opt) => Ok(s.errors.on_error = opt),
-						Err(..) => Err(SquarkError::Unrecoverable {
+						Ok(opt) => s.errors.on_error = opt,
+						Err(..) => return Err(SquarkError::Unrecoverable {
 							msg: fmt!("unknown setting for {Y}errors.on-error"),
 							hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
 							debug: vec![
@@ -182,8 +189,8 @@ impl SquarkupConfig
 
 					match FileAction::try_from(raw.as_str())
 					{
-						Ok(opt) => Ok(s.errors.on_file_exists = opt),
-						Err(..) => Err(SquarkError::Unrecoverable {
+						Ok(opt) => s.errors.on_file_exists = opt,
+						Err(..) => return Err(SquarkError::Unrecoverable {
 							msg: fmt!("unknown setting for {Y}errors.on-file-exists"),
 							hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
 							debug: vec![
@@ -281,7 +288,7 @@ impl SquarkupConfig
 
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("{location} doesn't exist!"),
+				msg: fmt!("the folder you specified {location} doesn't exist!"),
 				hint,
 				debug: vec![
 					slash!("`{}` is not a valid directory", path),

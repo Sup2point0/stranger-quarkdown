@@ -3,11 +3,10 @@ repo = "Squarkdown"
 [paths]
 site = "/site/"
 sources = [
-	"/",
+	# "/",
 	"/docs/",
 	"/.squarkdown/content/",
 ]
-dest = "/src/routes/(docs)/(dyna)/"
 
 [out]
 folder = "/src/routes/(docs)/(dyna)/"
