@@ -64,8 +64,7 @@ macro_rules! catch
 			},
 		}
 	};
-}
-pub use catch;
+} pub use catch;
 
 #[macro_export]
 macro_rules! all
@@ -80,5 +79,4 @@ macro_rules! all
 			$( obj.$method( $($args),* ) )&&*
 		}
 	}
-}
-pub use all;
+} pub use all;

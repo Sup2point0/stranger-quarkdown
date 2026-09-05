@@ -29,17 +29,17 @@ pub struct CharmParser<Source: Read = File>
 	/// If so, this means the user intends for the file to be squarked up, and error checking should be stricter to catch mistakes on their end.
 	pub(super) is_live: bool,
 
-	/// The backing buffer that reads from the target file.
+	/// The backing buffer that reads from the source file.
 	pub(super) _reader: BufReader<Source>,
 
-	/// The location of the target file.
+	/// The location of the source file.
 	pub(super) _filepath: Option<PathBuf>,
 
 	/// The index in the current line the parser is pointing to.
 	pub(super) _index: usize,
 
 	/* NOTE:
-		Storing a `Chars` iterator over `_line_buffer` whend lifetime issues =(
+		Storing a `Chars` iterator over `_line_buffer` ended up with lifetime issues =(
 		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
 	*/
 
