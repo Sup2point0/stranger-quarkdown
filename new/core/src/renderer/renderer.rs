@@ -18,6 +18,8 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 {
 	/* NOTE:
 		The renderer architecture is very similar to `CharmParser`, because `Renderer` is technically a parser+emitter in one lmao
+
+		However, the renderer reads in _chunks instead of _lines_, because unlike the parser, it handles arbitrary Markdown text that could be super short or super long.
 		
 		Not really worth extracting into common shared functionality, more hassle than it's worth without structural traits in Rust =(
 	*/
@@ -29,8 +31,11 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 
 	pub(super) ctx: Vec<Ctx>,
 
-	/// The location of the target file.
-	pub(super) filepath: Option<PathBuf>,
+	/// The location of the source file to read from.
+	pub(super) source_filepath: PathBuf,
+
+	/// The location of the target file to write to.
+	pub(super) target_filepath: PathBuf,
 
 	pub(super) _reader: BufReader<Source>,
 	
@@ -38,16 +43,16 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 
 	pub(super) _index: usize,
 
-	pub(super) _line: Vec<char>,
+	pub(super) _chunk: Vec<char>,
 
-	pub(super) _line_buffer: String,
+	pub(super) _chunk_buffer: Vec<u8>,
 }
 
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
 	/// Construct a renderer for rendering from `source` to `target`.
-	pub fn init(source: Source, target: Target) -> Self
+	pub fn init(source: Source, target: Target, source_filepath: PathBuf, target_filepath: PathBuf) -> Self
 	{
 		Self {
 			is_done: false,
@@ -55,17 +60,16 @@ impl<Source: Read, Target: Write>
 			ctx: vec![],
 			_reader: BufReader::new(source),
 			_writer: BufWriter::new(target),
-			filepath: None,
+			source_filepath,
+			target_filepath,
 			_index: 0,
-			_line: vec![],
-			_line_buffer: str!(),
+			_chunk: vec![],
+			_chunk_buffer: Vec::with_capacity(64),
 		}
 	}
 
 	pub fn render(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
-		self.filepath = Some(config.out.folder.join(&page.destination));
-
 		while !self.is_done {
 			self.render_next_chunk(page, config)?;
 		}
@@ -91,12 +95,10 @@ impl<Source: Read, Target: Write>
 		else if self.try_eat("-->")? {
 			self.ctx.pop();
 		}
-		else if let Some(c) = self.current() {
+		else {
+			let c = self.current();
 			self.emit(&c.to_string())?;
 			self.advance()?;
-		}
-		else {
-			return Err(todo!());
 		}
 
 		Ok(())

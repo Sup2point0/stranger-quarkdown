@@ -10,39 +10,29 @@ use std::io::{ Read, Write, BufRead };
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	pub(super) fn is_past_end_of_line(&self) -> bool
+	pub(super) fn has_exhausted_chunk(&self) -> bool
 	{
-		self._index >= self._line.len()
+		self._index >= self._chunk.len()
 	}
 
-	pub(super) fn current(&self) -> Option<char>
+	pub(super) fn current(&self) -> char
 	{
-		self._line.get(self._index).copied()
-	}
-	
-	pub(super) fn peek(&self) -> Option<char>
-	{
-		self._line.get(self._index + 1).copied()
+		*self._chunk.get(self._index).expect("renderer's index should never be out of bounds while rendering")
 	}
 
-	pub(super) fn preview(&self) -> &str {
-		todo!()
-	}
-
-	pub(super) fn next_line(&mut self) -> SquarkResult
+	pub(super) fn next_chunk(&mut self) -> SquarkResult
 	{
-		if self.is_done {
-			return Err(todo!());
-		}
+		debug_assert!(!self.is_done);
 
-		match self._reader.read_line(&mut self._line_buffer) {
-			Err(..) => return Err(todo!()),
+		self._chunk_buffer.clear();
+
+		match self._reader.read(&mut self._chunk_buffer) {
 			Ok(0) => self.is_done = true,
 			Ok(..) => (),
-		}
-
-		if self._line.last() != Some(&'\n') {
-			self._line.push('\n');
+			Err(err) => return Err(SquarkError::External {
+				err: bx!(err),
+				msg: str!(slash!("could not read from {}", self.source_filepath)),
+			}),
 		}
 
 		self._index = 0;
@@ -52,17 +42,42 @@ impl<Source: Read, Target: Write>
 
 	pub(super) fn advance(&mut self) -> SquarkResult
 	{
+		self._advance_()?;
+
+		if self.current() == '\\' {
+			self._advance_()?;
+			self._advance_()?;
+		}
+
+		Ok(())
+	}
+
+	fn _advance_(&mut self) -> SquarkResult
+	{
 		self._index += 1;
 
-		if self.is_past_end_of_line() {
-			self.next_line()
+		if self.has_exhausted_chunk() {
+			self.next_chunk()
 		} else {
 			Ok(())
 		}
 	}
 	
-	pub(super) fn try_eat(&mut self, sequence: &str) -> SquarkResult<bool> {
-		todo!()
+	/// Attempt to consume exactly `target`, returning `Ok(true)` if succesful.
+	pub(super) fn try_eat(&mut self, target: &str) -> SquarkResult<bool>
+	{
+		let init = self._index;
+
+		for expected in target.chars()
+		{
+			if self.current() != expected {
+				self._index = init;
+				return Ok(false);
+			}
+			self.advance()?;
+		}
+
+		Ok(true)
 	}
 
 	pub(super) fn emit(&mut self, content: &str) -> SquarkResult
@@ -70,7 +85,7 @@ impl<Source: Read, Target: Write>
 		match self._writer.write(content.as_bytes())
 		{
 			Ok(0) => Err(SquarkError::Unrecoverable {
-				msg: str!(slash!("could not write to {}", self.filepath.clone().expect("renderer should know where it's rendering to").to_path_buf())),
+				msg: str!(slash!("could not write to {}", self.source_filepath)),
 				hint: str!("this may mean the file was deleted, moved or locked mid-write"),
 				debug: vec![
 					fmt!("tried to write `{content}`"),
@@ -80,7 +95,7 @@ impl<Source: Read, Target: Write>
 			// TODO retry on interruption
 			Err(e) => Err(SquarkError::External {
 				err: bx!(e),
-				msg: str!(slash!("could not write to {}", self.filepath.clone().expect("renderer should know where it's rendering to").to_path_buf())),
+				msg: str!(slash!("could not write to {}", self.source_filepath)),
 			}),
 		}
 	}
