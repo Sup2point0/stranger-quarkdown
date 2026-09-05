@@ -96,9 +96,10 @@ impl<Source: Read, Target: Write>
 	{
 		debug_assert_matches!(self.current(), Some(..));
 
-		match self.ctx.current() {
+		match self.ctx.current()
+		{
 			Ctx::CODE_BLOCK => self.render_code_block(),
-			Ctx::COMMENT => self.render_comment(),
+			Ctx::COMMENT => self.render_comment(page, config),
 			Ctx::MARKDOWN => self.render_plain(),
 			_ => unimplemented!(),
 		}
@@ -140,13 +141,48 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
-	fn render_comment(&mut self) -> SquarkResult
+	fn render_comment(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("-->")? {
-			self.emit("-->")?;
 			self.ctx.pop(Ctx::COMMENT);
+
+			if !config.format.strip_comments {
+				self.emit("-->")?;
+			}
+			return Ok(());
 		}
-		else if let Some(c) = self.current() {
+
+		if self.try_eat_caseless("#SQUARK")? {
+			self.eat_whitespace()?;
+
+			if self.try_eat_caseless("leave")? {
+				if      self.try_eat("?")? { self.ctx.push(Ctx::SQUARK_LEAVE); }
+				else if self.try_eat(".")? { self.ctx.pop(Ctx::SQUARK_LEAVE); }
+				else {
+					todo!()
+				}
+			}
+			else if self.try_eat_caseless("slash?")? {
+				if      self.try_eat("?")? { self.ctx.push(Ctx::SQUARK_SLASH); }
+				else if self.try_eat(".")? { self.ctx.pop(Ctx::SQUARK_SLASH); }
+				else {
+					todo!()
+				}
+			}
+			else if self.try_eat_caseless("only?")? {
+				if      self.try_eat("?")? { self.ctx.push(Ctx::SQUARK_ONLY); }
+				else if self.try_eat(".")? { self.ctx.pop(Ctx::SQUARK_ONLY); }
+				else {
+					todo!()
+				}
+			}
+			else if !config.format.strip_comments {
+				self.emit("#SQUARK")?;
+			}
+			return Ok(());
+		}
+		
+		if let Some(c) = self.current() && !config.format.strip_comments {
 			self.emit_char(c)?;
 			self.advance()?;
 		}
@@ -178,5 +214,19 @@ mod test
 		test_exact(&[
 			"This is some code\n\n```\nprint(\"hello world\")\n```",
 		])
+	}
+
+	#[test] fn test_comment()
+	{
+		test_exact(&[
+			"Keep <!--this--> comment",
+			"Keep <!--this --> comment",
+			"Keep <!-- this--> comment",
+			"Keep <!-- this --> comment",
+			"Keep <!--this comment--> please",
+			"Keep <!--this comment --> please",
+			"Keep <!-- this comment--> please",
+			"Keep <!-- this comment --> please",
+		]);
 	}
 }

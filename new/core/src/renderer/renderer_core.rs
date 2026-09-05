@@ -98,6 +98,39 @@ impl<Source: Read, Target: Write>
 		Ok(true)
 	}
 
+	/// Attempt to consume `target` disregarding casing, returning `true` if successful.
+	pub(super) fn try_eat_caseless(&mut self, target: &str) -> SquarkResult<bool>
+	{
+		let init = self._index;
+
+		for expected in target.chars() {
+			if let Some(c) = self.current()
+				&& c.to_ascii_lowercase() != expected.to_ascii_lowercase()
+			{
+				self._index = init;
+				return Ok(false);
+			}
+
+			self.advance()?;
+		}
+
+		Ok(true)
+	}
+
+	pub(super) fn eat_whitespace(&mut self) -> SquarkResult<bool>
+	{
+		let mut did_consume = false;
+
+		while let Some(c) = self.current()
+			&& matches!(c, ' ' | '\t' | '\n')
+		{
+			self.advance()?;
+			did_consume = true;
+		}
+
+		Ok(did_consume)
+	}
+
 	pub(super) fn emit_char(&mut self, c: char) -> SquarkResult
 	{
 		let mut bytes = [0 as u8; 4];
