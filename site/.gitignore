@@ -1,5 +1,5 @@
 # squark
-~content.svx
++page.svx
 
 site.json
 scss-config.js
@@ -8,7 +8,7 @@ scss-config.js
 build/
 static/*
 !static/squarkup-schema/
-(dyna)/
+(dyna)/*
 
 # internal
 node_modules/
