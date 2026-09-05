@@ -1,3 +1,5 @@
+use utf8_chars::BufReadCharsExt;
+
 use super::*;
 use crate::{
 	SquarkResult, SquarkError,
@@ -5,6 +7,10 @@ use crate::{
 };
 
 use std::io::{ Read, Write, BufRead };
+
+
+/// The number of characters the renderer reads into a chunk at a time.
+pub(super) const CHUNK_SIZE: usize = 128;
 
 
 impl<Source: Read, Target: Write>
@@ -24,17 +30,27 @@ impl<Source: Read, Target: Write>
 	{
 		debug_assert!(!self.is_done);
 
-		self._chunk_buffer.clear();
+		let chunk = self._reader.chars().take(CHUNK_SIZE);
+		let mut t = 0;
 
-		match self._reader.read(&mut self._chunk_buffer) {
-			Ok(0) => self.is_done = true,
-			Ok(..) => (),
-			Err(err) => return Err(SquarkError::External {
-				err: bx!(err),
-				msg: str!(slash!("could not read from {}", self.source_filepath)),
-			}),
+		for (i, c) in chunk.enumerate() {
+			t = i + 1;
+
+			match c {
+				Ok(c) => self._chunk[i] = c,
+				Err(e) => return Err(SquarkError::External {
+					err: bx!(e),
+					msg: str!(slash!("could not read from {}", self.source_filepath)),
+				}),
+			}
 		}
 
+		if t == 0 {
+			self.is_done = true;
+		}
+
+		dbg!(t);
+		self._chunk.truncate(t + 1);
 		self._index = 0;
 
 		Ok(())
@@ -78,6 +94,14 @@ impl<Source: Read, Target: Write>
 		}
 
 		Ok(true)
+	}
+
+	pub(super) fn emit_char(&mut self, c: char) -> SquarkResult
+	{
+		let mut bytes = [0 as u8; 4];
+		let encoded = c.encode_utf8(&mut bytes);
+
+		self.emit(encoded)
 	}
 
 	pub(super) fn emit(&mut self, content: &str) -> SquarkResult

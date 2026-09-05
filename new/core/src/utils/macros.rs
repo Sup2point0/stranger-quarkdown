@@ -44,7 +44,7 @@ macro_rules! strings {
 } pub use strings;
 
 
-
+/// Lazily produce a `SquarkError::External`.
 #[macro_export]
 macro_rules! err {
 	() => { |e| $crate::errors::SquarkError::external(e) }
