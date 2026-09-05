@@ -25,7 +25,7 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 
 	pub errors: Vec<SquarkError>,
 
-	pub(super) ctx: Vec<Ctx>,
+	pub(super) ctx: ContextStack,
 
 	/// The location of the source file to read from.
 	pub(super) source_filepath: PathBuf,
@@ -57,7 +57,7 @@ impl<Source: Read, Target: Write>
 		let mut out = Self {
 			is_done: false,
 			errors: vec![],
-			ctx: vec![],
+			ctx: ContextStack::new(),
 			_reader: BufReader::new(source),
 			_writer: BufWriter::new(target),
 			source_filepath,
@@ -79,11 +79,13 @@ impl<Source: Read, Target: Write>
 
 		self._writer.flush().map_err(err!())?;
 
-		if !self.ctx.is_empty() {
+		if self.ctx.stack().len() > 0 {
 			Err(SquarkError::Recoverable {
 				msg: str!("unterminated renderer context"),
 				hint: str!("this means you have an unclosed comment, bracket, code block, etc. somewhere"),
-				debug: vec![],
+				debug: vec![
+					fmt!("context stack: {:?}", self.ctx.stack()),
+				],
 			})
 		} else {
 			Ok(())
@@ -94,9 +96,11 @@ impl<Source: Read, Target: Write>
 	{
 		debug_assert_matches!(self.current(), Some(..));
 
-		match self.ctx.last() {
-			Some(..) => unimplemented!(),
-			None => self.render_plain(page, config),
+		match self.ctx.current() {
+			Ctx::CODE_BLOCK => self.render_code_block(),
+			Ctx::COMMENT => self.render_comment(),
+			Ctx::MARKDOWN => self.render_plain(),
+			_ => unimplemented!(),
 		}
 	}
 }
@@ -104,14 +108,44 @@ impl<Source: Read, Target: Write>
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	fn render_plain(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render_plain(&mut self) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
-			// self.ctx.push(Ctx::COMMENT);
+			self.emit("<!--")?;
+			self.ctx.push(Ctx::COMMENT);
 		}
-		// else if self.try_eat("-->")? {
-		// 	self.ctx.pop();
-		// }
+		else if self.try_eat("```")? {
+			self.emit("```")?;
+			self.ctx.push(Ctx::CODE_BLOCK);
+		}
+		else if let Some(c) = self.current() {
+			self.emit_char(c)?;
+			self.advance()?;
+		}
+
+		Ok(())
+	}
+
+	fn render_code_block(&mut self) -> SquarkResult
+	{
+		if self.try_eat("```")? {
+			self.emit("```")?;
+			self.ctx.pop(Ctx::CODE_BLOCK);
+		}
+		else if let Some(c) = self.current() {
+			self.emit_char(c)?;
+			self.advance()?;
+		}
+
+		Ok(())
+	}
+
+	fn render_comment(&mut self) -> SquarkResult
+	{
+		if self.try_eat("-->")? {
+			self.emit("-->")?;
+			self.ctx.pop(Ctx::COMMENT);
+		}
 		else if let Some(c) = self.current() {
 			self.emit_char(c)?;
 			self.advance()?;
@@ -137,5 +171,12 @@ mod test
 			"sup,\n world!\n",
 			"sup, \n world!\n",
 		]);
+	}
+
+	#[test] fn render_code_block()
+	{
+		test_exact(&[
+			"This is some code\n\n```\nprint(\"hello world\")\n```",
+		])
 	}
 }

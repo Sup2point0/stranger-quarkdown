@@ -3,8 +3,8 @@ pub enum Ctx {
 	MARKDOWN,
 	CODE_INLINE,
 	CODE_BLOCK,
-	COMMENT,
 	LINK,
+	COMMENT,
 	SQUARK_LEAVE,
 	SQUARK_SLASH,
 	SQUARK_ONLY,
@@ -30,6 +30,11 @@ impl ContextStack
 /// Implementation
 impl ContextStack
 {
+	pub fn stack(&self) -> &[Ctx]
+	{
+		&self.stack
+	}
+
 	/// What's the current context?
 	pub fn current(&self) -> Ctx {
 		*self.stack.last().unwrap_or(&Ctx::MARKDOWN)
