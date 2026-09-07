@@ -171,7 +171,7 @@ impl<Source: Read, Target: Write>
 	/// Attempt to consume a ` <squark><?|.> -->` instance, pushing or popping the context stack as required.
 	/// 
 	/// `allow_open` must be enabled to consume `squark?`, and `allow_close` must be enabled to consume `squark.`. At least 1 of the 2 should be `true`.
-	pub(super) fn try_eat_paired_squark(&mut self,
+	pub(super) fn try_eat_twin_squark(&mut self,
 		squark: &str,
 		ctx: Ctx,
 		allow_open: bool,
@@ -196,7 +196,7 @@ impl<Source: Read, Target: Write>
 			// TODO colour
 			self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
-				hint: str!("paired squarks should end in `?` to open a section, or `.` to close it"),
+				hint: str!("twin squarks should end in `?` to open a section, or `.` to close it"),
 				debug: vec![
 					slash!("in file: {}", self.target_filepath),
 				],
