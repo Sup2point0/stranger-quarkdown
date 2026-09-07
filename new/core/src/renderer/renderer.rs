@@ -112,6 +112,7 @@ impl<Source: Read, Target: Write>
 		match self.ctx.current()
 		{
 			Ctx::MARKDOWN     => self.render_markdown(config),
+			Ctx::CODE_INLINE  => self.render_code_inline(),
 			Ctx::CODE_BLOCK   => self.render_code_block(),
 			Ctx::COMMENT      => self.render_comment(config),
 			Ctx::SQUARK_LEAVE => self.render_leave(config),
@@ -131,13 +132,16 @@ impl<Source: Read, Target: Write>
 			if config.format.preserve_comments {
 				self.emit("<!--")?;
 			}
-
 			return Ok(true);
 		}
 		else if self.try_eat("```")? {
 			self.emit("```")?;
 			self.ctx.push(Ctx::CODE_BLOCK);
-
+			return Ok(true);
+		}
+		else if self.try_eat("`")? {
+			self.emit_char('`')?;
+			self.ctx.push(Ctx::CODE_INLINE);
 			return Ok(true);
 		}
 		Ok(false)
@@ -156,6 +160,22 @@ impl<Source: Read, Target: Write>
 			if c == '\\' && let Some(c2) = self.current() {
 				self.emit_char(c2)?;
 				self.advance()?;
+			}
+		}
+		Ok(())
+	}
+
+	fn render_code_inline(&mut self) -> SquarkResult
+	{
+		if self.try_eat("```")? {
+			self.emit("```")?;
+		}
+		else if let Some(c) = self.current() {
+			self.emit_char(c)?;
+			self.advance()?;
+
+			if c == '`' || c == '\n' {
+				self.ctx.pop(Ctx::CODE_INLINE);
 			}
 		}
 		Ok(())
@@ -266,6 +286,28 @@ mod test {
 				"sup, \nworld!\n",
 				"sup,\n world!\n",
 				"sup, \n world!\n",
+			]);
+		}
+	}
+
+	mod code_inline {
+		use super::*;
+
+		#[test] fn easy() {
+			test_exact(&[
+				"this `is` code",
+				"this `is ` code",
+				"this ` is` code",
+				"this ` is ` code",
+			]);
+		}
+
+		#[test] fn medium() {
+			test_exact(&[
+				"`x` `y`",
+				"` x ` ` y `",
+				"`x y` `z`",
+				"`x`y`z`",
 			]);
 		}
 	}

@@ -29,6 +29,22 @@ impl<Source: Read, Target: Write>
 		self._window.get(self._index).copied()
 	}
 
+	/// Peek the character directly *after* the current character in the source.
+	/// 
+	/// This may trigger a chunk read from the buffer.
+	pub(super) fn peek(&mut self) -> Option<char>
+	{
+		if self.is_done {
+			None
+		}
+		else {
+			if self._index == self._window.len() - 1 {
+				let _ = self.next_chunk();
+			}
+			self._window.get(self._index + 1).copied()
+		}
+	}
+
 	pub(super) fn preview(&self) -> String
 	{
 		const PREVIEW_CHARS: usize = 10;
