@@ -161,13 +161,10 @@ impl<Source: Read, Target: Write>
 		else if self.try_eat_caseless("#SQUARK")? {
 			self.eat_whitespace()?;
 
-			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
+			let _ =
+				self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
 			|| self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, false)?
-			|| self.try_eat_paired_squark("only",  Ctx::SQUARK_ONLY,  true, false)?
-			{
-				self.eat_whitespace()?;
-				self.try_eat("-->")?;
-			}
+			|| self.try_eat_paired_squark("only",  Ctx::SQUARK_ONLY,  true, false)?;
 		}
 		else if let Some(c) = self.current() {
 			if config.format.preserve_comments {
@@ -183,13 +180,9 @@ impl<Source: Read, Target: Write>
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
 			
-			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {
-				self.eat_whitespace()?;
-
-				self.eat("-->",
-					to!("terminate squark"),
-					hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
-				)?;
+			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {}
+			else if config.format.preserve_comments {
+				self.emit("<!-- ")?;
 			}
 		}
 		else if let Some(c) = self.current() {
@@ -203,21 +196,8 @@ impl<Source: Read, Target: Write>
 	{
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
-
-			if self.try_eat_caseless("#SQUARK")? {
-				self.eat_whitespace()?;
-				
-				if self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)? {
-					self.eat_whitespace()?;
-
-					self.eat("-->",
-						to!("terminate squark"),
-						hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
-					)?;
-				}
-			}
-		}
-		else {
+			self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)?;
+		} else {
 			self.advance()?;
 		}
 		Ok(())

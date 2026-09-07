@@ -168,7 +168,7 @@ impl<Source: Read, Target: Write>
 		Ok(did_consume)
 	}
 
-	/// Attempt to consume a `<squark><?|.> -->` instance, pushing or popping the context stack as required.
+	/// Attempt to consume a `#SQUARK <squark><?|.> -->` instance, pushing or popping the context stack as required.
 	pub(super) fn try_eat_paired_squark(&mut self,
 		squark: &str,
 		ctx: Ctx,
@@ -176,26 +176,36 @@ impl<Source: Read, Target: Write>
 		allow_close: bool,
 	) -> SquarkResult<bool>
 	{
-		if self.try_eat_caseless(squark)? {
-			if allow_open && self.try_eat("?")? {
-				self.ctx.pop(Ctx::COMMENT);
-				self.ctx.push(ctx);
+		if self.try_eat_caseless("#SQUARK")? {
+			self.eat_whitespace()?;
+
+			if self.try_eat_caseless(squark)? {
+				if allow_open && self.try_eat("?")? {
+					self.ctx.pop(Ctx::COMMENT);
+					self.ctx.push(ctx);
+				}
+				else if allow_close && self.try_eat(".")? {
+					self.ctx.pop(ctx);
+					self.ctx.pop(Ctx::COMMENT);
+				}
+				else {
+					// TODO colour
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
+						hint: str!("paired squarks should end in `?` to open a section, or `.` to close it"),
+						debug: vec![
+							slash!("in file: {}", self.target_filepath),
+						],
+					});
+				}
+
+				self.eat("-->",
+					to!("terminate squark"),
+					hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
+				)?;
+
+				return Ok(true);
 			}
-			else if allow_close && self.try_eat(".")? {
-				self.ctx.pop(ctx);
-				self.ctx.pop(Ctx::COMMENT);
-			}
-			else {
-				// TODO colour
-				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
-					hint: str!("paired squarks should end in `?` to open a section, or `.` to close it"),
-					debug: vec![
-						slash!("in file: {}", self.target_filepath),
-					],
-				});
-			}
-			return Ok(true);
 		}
 		Ok(false)
 	}
