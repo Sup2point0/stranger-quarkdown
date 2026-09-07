@@ -55,7 +55,7 @@ impl SquarkupConfig
 
 	/// Construct a `SquarkupConfig` from TOML `data`, with values fully validated.
 	/// 
-	/// Returns `Err(SquarkError::ManyRecoverable)` only if nonzero errors are encountered.
+	/// Returns `Err(SquarkError::Multiple)` only if nonzero errors are encountered.
 	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
 		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with *user-friendly*, *aggregated* error messages (rather than just a schema violation) we have to handroll it all ourselves */

@@ -1,18 +1,14 @@
-#[cfg(test)]
 use super::*;
 
-#[cfg(test)]
 use crate::{
 	PageData,
 	utils::testing::*,
 	utils::macros::*,
 };
 
-#[cfg(test)]
 use std::io::Cursor;
 
 
-#[cfg(test)]
 pub(super) fn test_exact(cases: &[&str])
 {
 	for case in cases {
@@ -27,7 +23,6 @@ pub(super) fn test_exact(cases: &[&str])
 	}
 }
 
-#[cfg(test)]
 pub(super) fn test_expected(cases: &[(&str, &str)])
 {
 	for (case, expected) in cases {

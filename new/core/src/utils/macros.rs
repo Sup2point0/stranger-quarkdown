@@ -1,3 +1,5 @@
+// == STRINGS == //
+
 #[macro_export]
 macro_rules! str {
 	()        => { String::new() };
@@ -8,18 +10,6 @@ macro_rules! str {
 macro_rules! fmt {
 	($($args:tt)*) => { format!($($args)*) };
 } pub use fmt;
-
-#[macro_export]
-macro_rules! bx {
-	()        => { Box::new() };
-	($t:expr) => { Box::new($t) };
-} pub use bx;
-
-#[macro_export]
-macro_rules! dir {
-	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };
-	($base:ident $($field:ident).* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
-} pub use dir;
 
 /// Format a string with a single path argument, normalising `\` in the path to `/`.
 #[macro_export]
@@ -33,6 +23,42 @@ macro_rules! slash {
 	};
 } pub use slash;
 
+/// Lazily produce a string for an error path.
+#[macro_export]
+macro_rules! to {
+	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
+	($($args:tt)*) => { || format!($($args)*) };
+} pub use to;
+
+/// Lazily produce a string for an error path.
+#[macro_export]
+macro_rules! when {
+	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
+	($($args:tt)*) => { || format!($($args)*) };
+} pub use when;
+
+/// Lazily produce a string for an error path.
+#[macro_export]
+macro_rules! hints {
+	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
+	($($args:tt)*) => { || format!($($args)*) };
+} pub use hints;
+
+
+// == STRUCTS == //
+
+#[macro_export]
+macro_rules! bx {
+	()        => { Box::new() };
+	($t:expr) => { Box::new($t) };
+} pub use bx;
+
+#[macro_export]
+macro_rules! dir {
+	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };
+	($base:ident $($field:ident).* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
+} pub use dir;
+
 #[macro_export]
 macro_rules! strings {
 	() => {
@@ -43,6 +69,8 @@ macro_rules! strings {
 	};
 } pub use strings;
 
+
+// == ERRORS == //
 
 /// Lazily produce a `SquarkError::External`.
 #[macro_export]
