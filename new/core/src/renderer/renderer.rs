@@ -181,11 +181,10 @@ impl<Source: Read, Target: Write>
 	fn render_leave(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
+			self.eat_whitespace()?;
 			if config.format.preserve_comments {
 				self.emit("<!-- ")?;
 			}
-			
-			self.eat_whitespace()?;
 			
 			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {
 				self.eat_whitespace()?;
@@ -208,13 +207,12 @@ impl<Source: Read, Target: Write>
 	fn render_slash(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
+			self.eat_whitespace()?;
 			if config.format.preserve_comments {
 				self.emit("<!-- ")?;
 			}
 
-			self.eat_whitespace()?;
-
-			if self.try_eat_paired_squark("slash", Ctx::SQUARK_LEAVE, true, true)? {
+			if self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)? {
 				self.eat_whitespace()?;
 
 				self.eat("-->",

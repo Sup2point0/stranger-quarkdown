@@ -176,8 +176,6 @@ impl<Source: Read, Target: Write>
 		allow_close: bool,
 	) -> SquarkResult<bool>
 	{
-		self.eat_whitespace()?;
-
 		if self.try_eat_caseless(squark)? {
 			if      allow_open && self.try_eat("?")? { self.ctx.push(ctx); }
 			else if allow_close && self.try_eat(".")? { self.ctx.pop(ctx); }
@@ -191,10 +189,8 @@ impl<Source: Read, Target: Write>
 					],
 				});
 			}
-
 			return Ok(true);
 		}
-
 		Ok(false)
 	}
 }
