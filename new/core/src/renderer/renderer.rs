@@ -116,11 +116,12 @@ impl<Source: Read, Target: Write>
 			Ctx::COMMENT      => self.render_comment(config),
 			Ctx::SQUARK_LEAVE => self.render_leave(config),
 			Ctx::SQUARK_SLASH => self.render_slash(),
-			Ctx::SQUARK_ONLY  => self.render_only(),
+			Ctx::SQUARK_ONLY  => self.render_only(config),
 			_ => unimplemented!(),
 		}
 	}
 
+	/// Handle generic Markdown context openers, which may be shared between many different contexts.
 	fn render_plain(&mut self, config: &SquarkupConfig) -> SquarkResult<bool>
 	{
 		if self.try_eat("<!--")? {
@@ -238,16 +239,21 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
-	fn render_only(&mut self) -> SquarkResult
+	fn render_only(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
-		if self.try_eat("")? {
-			self.eat_whitespace()?;
-
+		if !self.render_plain(config)? {
 			if self.try_eat("#SQUARK")? {
-				self.try_open_close_squark("slash", Ctx::SQUARK_SLASH)?;
+				self.eat_whitespace()?;
+
+				if self.try_close_squark("only", Ctx::SQUARK_ONLY)? {}
+				else {
+					self.emit("#SQUARK")?;
+				}
 			}
-		} else {
-			self.advance()?;
+			else if let Some(c) = self.current() {
+				self.emit_char(c)?;
+				self.advance()?;
+			}
 		}
 		Ok(())
 	}
@@ -256,6 +262,8 @@ impl<Source: Read, Target: Write>
 
 #[cfg(test)]
 mod test {
+	use indoc::indoc;
+
 	use super::*;
 
 	mod plain {
@@ -412,18 +420,65 @@ y = x
 		#[test] fn standard() {
 			test_expected(&[
 				(
-"Don't
+"
+Don't
 <!-- #SQUARK leave? -->
 <!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
 <!-- #SQUARK leave. -->
-this",
+this
+",
 
-"Don't
+"
+Don't
 
 <!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
 
-this"
+this
+"
 				),
+			]);
+		}
+	}
+
+	mod only {
+		use super::*;
+
+		#[test] fn easy() {
+			test_expected(&[
+				(
+					"Please <!-- #SQUARK only? show #SQUARK only. --> me",
+					"Please show  me"
+				),
+			]);
+		}
+
+		#[test] fn medium() {
+			test_expected(&[
+				(
+					indoc! {"
+						Please
+
+						<!-- #SQUARK only?
+
+						show me!
+
+						     #SQUARK only. -->
+						"
+					},
+					indoc! {"
+						Please
+
+						show me!
+					"}
+				),
+			]);
+		}
+
+		#[test] fn awkward_whitespace() {
+			test_expected(&[
+				("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
+				("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
+				("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
 			]);
 		}
 	}
