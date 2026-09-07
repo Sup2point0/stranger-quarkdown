@@ -106,7 +106,7 @@ impl<Source: Read, Target: Write>
 			Ctx::CODE_BLOCK   => self.render_code_block(),
 			Ctx::COMMENT      => self.render_comment(config),
 			Ctx::SQUARK_LEAVE => self.render_leave(config),
-			Ctx::SQUARK_SLASH => self.render_slash(config),
+			Ctx::SQUARK_SLASH => self.render_slash(),
 			Ctx::SQUARK_ONLY  => todo!(), // self.render_only(),
 			_ => unimplemented!(),
 		}
@@ -158,13 +158,12 @@ impl<Source: Read, Target: Write>
 				self.emit("-->")?;
 			}
 		}
-		else if self.try_eat_caseless("#SQUARK")? {
-			self.eat_whitespace()?;
-
+		else if self.try_eat("#SQUARK")? {
 			let _ =
 				self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
 			|| self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, false)?
-			|| self.try_eat_paired_squark("only",  Ctx::SQUARK_ONLY,  true, false)?;
+			|| self.try_eat_paired_squark("only",  Ctx::SQUARK_ONLY,  true, false)?
+			;
 		}
 		else if let Some(c) = self.current() {
 			if config.format.preserve_comments {
@@ -179,8 +178,12 @@ impl<Source: Read, Target: Write>
 	{
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
-			
-			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {}
+
+			if self.try_eat("#SQUARK")? {
+				if !self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {
+					self.emit("<!-- #SQUARK ")?;
+				}
+			}
 			else if config.format.preserve_comments {
 				self.emit("<!-- ")?;
 			}
@@ -192,11 +195,14 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
-	fn render_slash(&mut self, config: &SquarkupConfig) -> SquarkResult
+	fn render_slash(&mut self) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
-			self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)?;
+
+			if self.try_eat("#SQUARK")? {
+				self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)?;
+			}
 		} else {
 			self.advance()?;
 		}
@@ -206,98 +212,125 @@ impl<Source: Read, Target: Write>
 
 
 #[cfg(test)]
-mod test
-{
+mod test {
 	use super::*;
-	
-	#[test] fn render_plain() {
-		test_exact(&[
-			"sup, world!",
-			"sup,\nworld!",
-			"sup,\nworld!\n",
-			"sup, \nworld!\n",
-			"sup,\n world!\n",
-			"sup, \n world!\n",
-		]);
+
+	mod plain {
+		use super::*;
+
+		#[test] fn easy() {
+			test_exact(&[
+				"sup, world!",
+				"sup,\nworld!",
+				"sup,\nworld!\n",
+				"sup, \nworld!\n",
+				"sup,\n world!\n",
+				"sup, \n world!\n",
+			]);
+		}
 	}
 
-	#[test] fn render_code_block_easy() {
-		test_exact(&[
-			"This is some code\n\n```\nprint(\"hello world\")\n```",
-		])
+	mod code_blocks {
+		use super::*;
+
+		#[test] fn easy() {
+			test_exact(&[
+				"This is some code\n\n```\nprint(\"hello world\")\n```",
+			])
+		}
+
+		#[test] fn medium() {
+			test_exact(&[
+	"
+	```md
+	<!-- #SQUARK slash? -->
+	sup
+	<!-- #SQUARK slash. -->
+	```
+	",
+			])
+		}
+
+		#[test] fn edge_cases() {
+			test_exact(&[
+				"```code```",
+				"```code\n```",
+				"``````",
+				"``` ```",
+				"```\n```",
+			])
+		}
 	}
 
-	#[test] fn render_code_block_medium() {
-		test_exact(&[
-"
-```md
-<!-- #SQUARK slash? -->
-sup
-<!-- #SQUARK slash. -->
-```
-",
-		])
+	mod comments {
+		use super::*;
+
+		#[test] fn easy() {
+			test_expected(
+				&vec![
+					"Strip <!--this--> comment",
+					"Strip <!--this --> comment",
+					"Strip <!-- this--> comment",
+					"Strip <!-- this --> comment",
+				]
+				.into_iter()
+				.map(|case| (case, "Strip  comment"))
+				.collect::<Vec<_>>()
+			);
+			
+			test_expected(
+				&vec![
+					"Strip <!--this comment--> please",
+					"Strip <!--this comment --> please",
+					"Strip <!-- this comment--> please",
+					"Strip <!-- this comment --> please",
+				]
+				.into_iter()
+				.map(|case| (case, "Strip  please"))
+				.collect::<Vec<_>>()
+			);
+			
+			test_expected(
+				&vec![
+					"Strip\n<!-- this comment -->\nplease",
+					"Strip\n<!--\nthis comment\n-->\nplease",
+					"Strip\n<!--\nthis\ncomment\n-->\nplease",
+				]
+				.into_iter()
+				.map(|case| (case, "Strip\n\nplease"))
+				.collect::<Vec<_>>()
+			);
+		}
 	}
 
-	#[test] fn render_code_block_edge() {
-		test_exact(&[
-			"```code```",
-			"```code\n```",
-			"``````",
-			"``` ```",
-			"```\n```",
-		])
+	mod slash {
+		use super::*;
+
+		#[test] fn easy() {
+			test_expected(&[
+				(
+					"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
+					"Remove  please",
+				),
+			]);
+		}
 	}
 
-	#[test] fn test_comment_strip() {
-		test_expected(
-			&vec![
-				"Strip <!--this--> comment",
-				"Strip <!--this --> comment",
-				"Strip <!-- this--> comment",
-				"Strip <!-- this --> comment",
-			]
-			.into_iter()
-			.map(|case| (case, "Strip  comment"))
-			.collect::<Vec<_>>()
-		);
-		
-		test_expected(
-			&vec![
-				"Strip <!--this comment--> please",
-				"Strip <!--this comment --> please",
-				"Strip <!-- this comment--> please",
-				"Strip <!-- this comment --> please",
-			]
-			.into_iter()
-			.map(|case| (case, "Strip  please"))
-			.collect::<Vec<_>>()
-		);
-		
-		test_expected(
-			&vec![
-				"Strip\n<!-- this comment -->\nplease",
-				"Strip\n<!--\nthis comment\n-->\nplease",
-				"Strip\n<!--\nthis\ncomment\n-->\nplease",
-			]
-			.into_iter()
-			.map(|case| (case, "Strip\n\nplease"))
-			.collect::<Vec<_>>()
-		);
-	}
+	mod leave {
+		use super::*;
 
-	#[test] fn test_slash() {
-		test_expected(&[
-			(
-				"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
-				"Remove  please",
-			),
-		]);
-	}
+		#[test] fn easy() {
+			test_expected(&[
+				(
+					"Don't <!-- #SQUARK leave? --> do <!-- #SQUARK leave. --> anything",
+					"Don't  do  anything",
+				),
+			]);
+		}
 
-	#[test] fn test_leave() {
-		test_expected(&[
-			(
+		#[test] fn standard() {
+			test_expected(&[
+				(
 "Don't
 <!-- #SQUARK leave? -->
 <!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
@@ -305,9 +338,12 @@ sup
 this",
 
 "Don't
+
 <!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+
 this"
-			),
-		]);
+				),
+			]);
+		}
 	}
 }
