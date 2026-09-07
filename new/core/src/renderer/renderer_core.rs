@@ -56,7 +56,7 @@ impl<Source: Read, Target: Write>
 				Ok(c) => self._chunk[i] = c,
 				Err(e) => return Err(SquarkError::External {
 					err: bx!(e),
-					msg: str!(slash!("could not read from {}", self.source_filepath)),
+					msg: str!(slash!("could not read from: {}", self.source_filepath)),
 				}),
 			}
 		}
@@ -75,9 +75,8 @@ impl<Source: Read, Target: Write>
 	{
 		self._advance_()?;
 
-		if self.current() == Some('\\') {
-			self._advance_()?;
-			self._advance_()?;
+		if self.current() == Some('\n') {
+			self.line_number += 1;
 		}
 
 		Ok(())
@@ -107,7 +106,7 @@ impl<Source: Read, Target: Write>
 					msg: fmt!("expected {target} to {}", to()),
 					hint: hint(),
 					debug: vec![
-						slash!("while rendering {}", self.target_filepath),
+						slash!("in {}:{}", self.source_filepath, self.line_number),
 					],
 				});
 			}
@@ -176,6 +175,7 @@ impl<Source: Read, Target: Write>
 		ctx: Ctx,
 		allow_open: bool,
 		allow_close: bool,
+		require_terminator: bool,
 	) -> SquarkResult<bool>
 	{
 		self.eat_whitespace()?;
@@ -198,7 +198,7 @@ impl<Source: Read, Target: Write>
 				msg: fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
 				hint: str!("twin squarks should end in `?` to open a section, or `.` to close it"),
 				debug: vec![
-					slash!("in file: {}", self.target_filepath),
+					slash!("in file: {}:{}", self.target_filepath, self.line_number),
 				],
 			});
 		}
@@ -250,7 +250,7 @@ impl<Source: Read, Target: Write>
 		match self._writer.write(content.as_bytes())
 		{
 			Ok(0) => Err(SquarkError::Unrecoverable {
-				msg: str!(slash!("could not write to {}", self.target_filepath)),
+				msg: str!(slash!("could not write to: {}", self.target_filepath)),
 				hint: str!("this may mean the file was deleted, moved or locked mid-write"),
 				debug: vec![
 					fmt!("tried to write `{content}`"),
@@ -260,7 +260,7 @@ impl<Source: Read, Target: Write>
 			// TODO retry on interruption
 			Err(e) => Err(SquarkError::External {
 				err: bx!(e),
-				msg: str!(slash!("could not write to {}", self.target_filepath)),
+				msg: str!(slash!("could not write to: {}", self.target_filepath)),
 			}),
 		}
 	}

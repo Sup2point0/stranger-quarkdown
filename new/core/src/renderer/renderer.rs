@@ -27,6 +27,8 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 
 	pub(super) ctx: ContextStack,
 
+	pub(super) line_number: usize,
+
 	/// The location of the source file to read from.
 	pub(super) source_filepath: PathBuf,
 
@@ -58,6 +60,7 @@ impl<Source: Read, Target: Write>
 			is_done: false,
 			errors: vec![],
 			ctx: ContextStack::new(),
+			line_number: 0,
 			_reader: BufReader::new(source),
 			_writer: BufWriter::new(target),
 			source_filepath,
@@ -102,35 +105,49 @@ impl<Source: Read, Target: Write>
 
 		match self.ctx.current()
 		{
-			Ctx::MARKDOWN     => self.render_plain(config),
+			Ctx::MARKDOWN     => self.render_markdown(config),
 			Ctx::CODE_BLOCK   => self.render_code_block(),
 			Ctx::COMMENT      => self.render_comment(config),
 			Ctx::SQUARK_LEAVE => self.render_leave(config),
 			Ctx::SQUARK_SLASH => self.render_slash(),
-			Ctx::SQUARK_ONLY  => todo!(), // self.render_only(),
+			Ctx::SQUARK_ONLY  => self.render_only(),
 			_ => unimplemented!(),
 		}
+	}
+
+	fn render_plain(&mut self, config: &SquarkupConfig) -> SquarkResult<bool>
+	{
+		if self.try_eat("<!--")? {
+			self.eat_whitespace()?;
+			self.ctx.push(Ctx::COMMENT);
+
+			if config.format.preserve_comments {
+				self.emit("<!--")?;
+			}
+
+			return Ok(true);
+		}
+		else if self.try_eat("```")? {
+			self.emit("```")?;
+			self.ctx.push(Ctx::CODE_BLOCK);
+
+			return Ok(true);
+		}
+		Ok(false)
 	}
 }
 
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	fn render_plain(&mut self, config: &SquarkupConfig) -> SquarkResult
+	fn render_markdown(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
-		if self.try_eat("<!--")? {
-			self.eat_whitespace()?;
-			self.ctx.push(Ctx::COMMENT);
-			if config.format.preserve_comments {
-				self.emit("<!--")?;
-			}
-		}
-		else if self.try_eat("```")? {
-			self.emit("```")?;
-			self.ctx.push(Ctx::CODE_BLOCK);
-		}
-		else if let Some(c) = self.current() {
+		if !self.render_plain(config)? && let Some(c) = self.current() {
 			self.emit_char(c)?;
+			
+			if c == '\\' {
+				self.advance()?;
+			}
 			self.advance()?;
 		}
 		Ok(())
@@ -255,13 +272,25 @@ mod test {
 
 		#[test] fn medium() {
 			test_exact(&[
-	"
-	```md
-	<!-- #SQUARK slash? -->
-	sup
-	<!-- #SQUARK slash. -->
-	```
-	",
+"
+```md
+<!-- #SQUARK slash? -->
+sup
+<!-- #SQUARK slash. -->
+```
+",
+			])
+		}
+
+		#[test] fn escaped() {
+			test_exact(&[
+"
+```md
+\\```math
+y = x
+\\```
+```
+",
 			])
 		}
 

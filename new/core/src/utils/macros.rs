@@ -21,6 +21,13 @@ macro_rules! slash {
 			fmt!($msg, $path.display())
 		}
 	};
+	($msg:literal, $path:expr, $($args:tt)*) => {
+		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
+			fmt!($msg, normalised, $($args)*)
+		} else {
+			fmt!($msg, $path.display(), $($args)*)
+		}
+	};
 } pub use slash;
 
 /// Lazily produce a string for an error path.
