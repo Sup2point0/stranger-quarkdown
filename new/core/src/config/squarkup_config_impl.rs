@@ -92,6 +92,8 @@ impl SquarkupConfig
 		// PathsConfig
 		if let Some(paths) = data.get("paths")
 		{
+			s.paths.sources.clear();
+
 			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
 				catch!(errs => {
 					s.paths.sources.push(Self::try_resolve_folder(
@@ -100,6 +102,10 @@ impl SquarkupConfig
 					)?);
 				});
 			});
+
+			if s.paths.sources.is_empty() {
+				s.paths.sources.push(root.to_path_buf());
+			}
 
 			Self::for_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
 				match regex::Regex::new(&pattern) {
