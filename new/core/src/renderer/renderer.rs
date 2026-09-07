@@ -445,10 +445,7 @@ this
 
 		#[test] fn easy() {
 			test_expected(&[
-				(
-					"Please <!-- #SQUARK only? show #SQUARK only. --> me",
-					"Please show  me"
-				),
+				("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show  me"),
 			]);
 		}
 
@@ -463,8 +460,7 @@ this
 						show me!
 
 						     #SQUARK only. -->
-						"
-					},
+					"},
 					indoc! {"
 						Please
 

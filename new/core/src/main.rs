@@ -52,7 +52,7 @@ fn squarkup() -> SquarkResult<bool>
 
 	let mut site_data = SiteData::new();
 	let mut active_files = 0;
-	log::is!("squarking up...");
+	log::is!("finding files to squarkup...");
 
 	let mut errs = vec![];
 	
@@ -96,9 +96,17 @@ fn squarkup() -> SquarkResult<bool>
 		log::ok!("found {active_files} active files to squarkup");
 	}
 
+	log::is!("rendering...");
+
 	for page in site_data.pages.values() {
 		catch!(errs => {
 			let dest = config.out.folder.join(&page.destination).join(&config.out.file);
+
+			log::info!(slash!(
+				"rendering to: {GREY1}{}",
+				dest.strip_prefix(&config.paths.root).unwrap().to_path_buf(),
+			));
+
 			let source = File::open(&page.filepath).map_err(err!())?;
 
 			if let Some(folder) = dest.parent() {
