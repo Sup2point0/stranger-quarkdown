@@ -10,7 +10,7 @@ use std::io::{ Read, Write };
 
 
 /// The number of characters the renderer reads into a chunk at a time.
-pub(super) const CHUNK_SIZE: usize = 128;
+pub(super) const CHUNK_SIZE: usize = 256;
 
 
 impl<Source: Read, Target: Write>
@@ -18,7 +18,7 @@ impl<Source: Read, Target: Write>
 {
 	pub(super) fn has_exhausted_chunk(&self) -> bool
 	{
-		self._index >= self._chunk.len()
+		self._index >= self._window.len()
 	}
 
 	/// The character in the source the renderer is currently pointing to.
@@ -26,15 +26,15 @@ impl<Source: Read, Target: Write>
 	/// This returns `None` iff the renderer has reached the end of its source and is out of bounds.
 	pub(super) fn current(&self) -> Option<char>
 	{
-		self._chunk.get(self._index).copied()
+		self._window.get(self._index).copied()
 	}
 
 	pub(super) fn preview(&self) -> String
 	{
 		const PREVIEW_CHARS: usize = 10;
 
-		let end = (self._index + PREVIEW_CHARS).min(self._chunk.len());
-		let chars = self._chunk.get(self._index..end);
+		let end = (self._index + PREVIEW_CHARS).min(self._window.len());
+		let chars = self._window.get(self._index..end);
 
 		match chars {
 			Some(c) => c.iter().collect(),
@@ -42,18 +42,27 @@ impl<Source: Read, Target: Write>
 		}
 	}
 
+	/// Chop off the part of the `._window` that has already been processed.
+	pub(super) fn cleanup_chunk(&mut self)
+	{
+		if self._index >= CHUNK_SIZE {
+			self._window.drain(..self._index);
+			self._index = 0;
+		}
+	}
+
+	/// Append the next chunk of source text into `._window`.
 	pub(super) fn next_chunk(&mut self) -> SquarkResult
 	{
 		debug_assert!(!self.is_done);
 
-		let chunk = self._reader.chars().take(CHUNK_SIZE);
 		let mut t = 0;
 
-		for (i, c) in chunk.enumerate() {
+		for c in self._reader.chars().take(CHUNK_SIZE) {
 			t += 1;
 
 			match c {
-				Ok(c) => self._chunk[i] = c,
+				Ok(c) => self._window.push(c),
 				Err(e) => return Err(SquarkError::External {
 					err: bx!(e),
 					msg: str!(slash!("could not read from: {}", self.source_filepath)),
@@ -65,9 +74,6 @@ impl<Source: Read, Target: Write>
 			self.is_done = true;
 		}
 
-		self._chunk.truncate(t);
-		self._index = 0;
-
 		Ok(())
 	}
 
@@ -77,6 +83,7 @@ impl<Source: Read, Target: Write>
 
 		if self.current() == Some('\n') {
 			self.line_number += 1;
+			// self.emit(&fmt!("{:?}", self.ctx.stack()))?;
 		}
 
 		Ok(())

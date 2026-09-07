@@ -15,7 +15,7 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 	/* NOTE:
 		The renderer architecture is very similar to `CharmParser`, because `Renderer` is technically a parser+emitter in one lmao
 
-		However, the renderer reads in _chunks_ instead of _lines_, because unlike the parser, it handles arbitrary Markdown text that could be super short or super long.
+		However, the renderer reads in _chunks_ instead of _lines_, because unlike the parser, it handles arbitrary Markdown text that could be super short or super long. Reading in chunks means memory usage doesn't explode if a file has one diabolically long line!
 		
 		Not really worth extracting into common shared functionality, more hassle than it's worth without structural traits in Rust =(
 	*/
@@ -39,10 +39,13 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 	
 	pub(super) _writer: BufWriter<Target>,
 
+	/// The index in the current chunk the renderer is pointing to.
 	pub(super) _index: usize,
 
 	/// The characters of the currently in-memory chunk to process.
-	pub(super) _chunk: Vec<char>,
+	/// 
+	/// As the renderer reads from the source file, we append characters to this buffer. When it's safe to do so, we chop off characters that have already been processed to keep the buffer short (avoiding huge memory usage).
+	pub(super) _window: Vec<char>,
 }
 
 impl<Source: Read, Target: Write>
@@ -66,7 +69,7 @@ impl<Source: Read, Target: Write>
 			source_filepath,
 			target_filepath,
 			_index: 0,
-			_chunk: vec![' '; CHUNK_SIZE],
+			_window: vec![],
 		};
 
 		out.next_chunk()?;
@@ -87,6 +90,7 @@ impl<Source: Read, Target: Write>
 				msg: str!("unterminated renderer context"),
 				hint: str!("this means you have an unclosed comment, bracket, code block, etc. somewhere"),
 				debug: vec![
+					slash!("in: {}", self.source_filepath),
 					fmt!("context stack: {:?}", self.ctx.stack()),
 				],
 			})
@@ -101,6 +105,8 @@ impl<Source: Read, Target: Write>
 {
 	fn render_next_chunk(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
+		self.cleanup_chunk();
+
 		debug_assert_matches!(self.current(), Some(..));
 
 		match self.ctx.current()
@@ -272,7 +278,13 @@ mod test {
 
 		#[test] fn easy() {
 			test_exact(&[
-				"This is some code\n\n```\nprint(\"hello world\")\n```",
+"
+This is some code
+
+```
+print(\"hello world\")
+```
+",
 			])
 		}
 
@@ -282,6 +294,26 @@ mod test {
 ```md
 <!-- #SQUARK slash? -->
 sup
+<!-- #SQUARK slash. -->
+```
+",
+			])
+		}
+
+		#[test] fn hard() {
+			test_exact(&[
+"
+```md
+<!-- #SQUARK slash? -->
+```
+
+sup
+
+```py
+sup
+```
+
+```
 <!-- #SQUARK slash. -->
 ```
 ",
