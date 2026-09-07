@@ -242,7 +242,10 @@ mod test
 	use std::assert_matches;
 	use std::io::Cursor;
 
-	use crate::parser::*;
+	use crate::{
+		parser::*,
+		utils::macros::*,
+	};
 
 	#[test] fn advance_and_current_single_line()
 	{
