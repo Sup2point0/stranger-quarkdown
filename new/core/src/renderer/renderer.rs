@@ -144,11 +144,12 @@ impl<Source: Read, Target: Write>
 	{
 		if !self.render_plain(config)? && let Some(c) = self.current() {
 			self.emit_char(c)?;
+			self.advance()?;
 			
-			if c == '\\' {
+			if c == '\\' && let Some(c2) = self.current() {
+				self.emit_char(c2)?;
 				self.advance()?;
 			}
-			self.advance()?;
 		}
 		Ok(())
 	}
@@ -162,6 +163,11 @@ impl<Source: Read, Target: Write>
 		else if let Some(c) = self.current() {
 			self.emit_char(c)?;
 			self.advance()?;
+			
+			if c == '\\' && let Some(c2) = self.current() {
+				self.emit_char(c2)?;
+				self.advance()?;
+			}
 		}
 		Ok(())
 	}
