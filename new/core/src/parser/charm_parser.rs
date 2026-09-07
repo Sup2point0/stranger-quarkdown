@@ -352,9 +352,11 @@ mod test
 {
 	use tinyvec::tiny_vec;
 
-	use crate::parser::*;
-	use crate::utils::testing::*;
-	use crate::utils::macros::*;
+	use crate::{
+		parser::*,
+		macros::*,
+		utils::testing::*,
+	};
 	
 	use std::collections::HashMap;
 	use std::io::Cursor;

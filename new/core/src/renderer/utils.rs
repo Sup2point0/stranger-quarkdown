@@ -2,8 +2,8 @@ use super::*;
 
 use crate::{
 	PageData,
+	macros::*,
 	utils::testing::*,
-	utils::macros::*,
 };
 
 use std::io::Cursor;

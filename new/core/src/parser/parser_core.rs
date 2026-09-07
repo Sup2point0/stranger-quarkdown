@@ -244,7 +244,7 @@ mod test
 
 	use crate::{
 		parser::*,
-		utils::macros::*,
+		macros::*,
 	};
 
 	#[test] fn advance_and_current_single_line()

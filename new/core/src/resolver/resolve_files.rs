@@ -2,6 +2,7 @@ use path_slash::PathExt;
 
 use crate::{
 	SquarkupConfig, SquarkResult,
+	log,
 	macros::*,
 };
 
@@ -14,7 +15,9 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 	// TODO root-only
 
 	// if only we had `yield` generators syntax...
-	config.paths.sources.iter().flat_map(|source|
+	config.paths.sources.iter().flat_map(|source| {
+		log::info!(slash!("searching from {}", *source));
+
 		walkdir::WalkDir::new(&config.paths.root.join(source))
 			.into_iter()
 
@@ -29,7 +32,7 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 
 			// yield paths, not walkdir entries
 			.map(|e| e.map(|entry| entry.path().to_path_buf()))
-	)
+	})
 }
 
 /// Should `entry` be squarked up (file) or searched (folder), according to the user's squarkup `config`?

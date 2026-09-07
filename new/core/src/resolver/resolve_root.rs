@@ -1,5 +1,5 @@
 use crate::*;
-use crate::utils::colours::*;
+use crate::colours::*;
 
 use std::path::PathBuf;
 
