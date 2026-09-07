@@ -177,8 +177,14 @@ impl<Source: Read, Target: Write>
 	) -> SquarkResult<bool>
 	{
 		if self.try_eat_caseless(squark)? {
-			if      allow_open && self.try_eat("?")? { self.ctx.push(ctx); }
-			else if allow_close && self.try_eat(".")? { self.ctx.pop(ctx); }
+			if allow_open && self.try_eat("?")? {
+				self.ctx.pop(Ctx::COMMENT);
+				self.ctx.push(ctx);
+			}
+			else if allow_close && self.try_eat(".")? {
+				self.ctx.pop(ctx);
+				self.ctx.pop(Ctx::COMMENT);
+			}
 			else {
 				// TODO colour
 				self.errors.push(SquarkError::Recoverable {

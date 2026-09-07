@@ -119,13 +119,11 @@ impl<Source: Read, Target: Write>
 	fn render_plain(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
+			self.eat_whitespace()?;
+			self.ctx.push(Ctx::COMMENT);
 			if config.format.preserve_comments {
 				self.emit("<!--")?;
-
-				self.eat_whitespace()?;
-
 			}
-			self.ctx.push(Ctx::COMMENT);
 		}
 		else if self.try_eat("```")? {
 			self.emit("```")?;
@@ -135,7 +133,6 @@ impl<Source: Read, Target: Write>
 			self.emit_char(c)?;
 			self.advance()?;
 		}
-
 		Ok(())
 	}
 
@@ -149,7 +146,6 @@ impl<Source: Read, Target: Write>
 			self.emit_char(c)?;
 			self.advance()?;
 		}
-
 		Ok(())
 	}
 
@@ -163,10 +159,15 @@ impl<Source: Read, Target: Write>
 			}
 		}
 		else if self.try_eat_caseless("#SQUARK")? {
-			let _ =
-				self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
+			self.eat_whitespace()?;
+
+			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
 			|| self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, false)?
-			|| self.try_eat_paired_squark("only", Ctx::SQUARK_ONLY, true, false)?;
+			|| self.try_eat_paired_squark("only",  Ctx::SQUARK_ONLY,  true, false)?
+			{
+				self.eat_whitespace()?;
+				self.try_eat("-->")?;
+			}
 		}
 		else if let Some(c) = self.current() {
 			if config.format.preserve_comments {
@@ -174,7 +175,6 @@ impl<Source: Read, Target: Write>
 			}
 			self.advance()?;
 		}
-
 		Ok(())
 	}
 
@@ -182,9 +182,6 @@ impl<Source: Read, Target: Write>
 	{
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
-			if config.format.preserve_comments {
-				self.emit("<!-- ")?;
-			}
 			
 			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {
 				self.eat_whitespace()?;
@@ -196,9 +193,7 @@ impl<Source: Read, Target: Write>
 			}
 		}
 		else if let Some(c) = self.current() {
-			if config.format.preserve_comments {
-				self.emit_char(c)?;
-			}
+			self.emit_char(c)?;
 			self.advance()?;
 		}
 		Ok(())
@@ -208,17 +203,18 @@ impl<Source: Read, Target: Write>
 	{
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
-			if config.format.preserve_comments {
-				self.emit("<!-- ")?;
-			}
 
-			if self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)? {
+			if self.try_eat_caseless("#SQUARK")? {
 				self.eat_whitespace()?;
+				
+				if self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, true)? {
+					self.eat_whitespace()?;
 
-				self.eat("-->",
-					to!("terminate squark"),
-					hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
-				)?;
+					self.eat("-->",
+						to!("terminate squark"),
+						hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
+					)?;
+				}
 			}
 		}
 		else {
@@ -234,8 +230,7 @@ mod test
 {
 	use super::*;
 	
-	#[test] fn render_plain()
-	{
+	#[test] fn render_plain() {
 		test_exact(&[
 			"sup, world!",
 			"sup,\nworld!",
@@ -246,15 +241,35 @@ mod test
 		]);
 	}
 
-	#[test] fn render_code_block()
-	{
+	#[test] fn render_code_block_easy() {
 		test_exact(&[
 			"This is some code\n\n```\nprint(\"hello world\")\n```",
 		])
 	}
 
-	#[test] fn test_comment_strip()
-	{
+	#[test] fn render_code_block_medium() {
+		test_exact(&[
+"
+```md
+<!-- #SQUARK slash? -->
+sup
+<!-- #SQUARK slash. -->
+```
+",
+		])
+	}
+
+	#[test] fn render_code_block_edge() {
+		test_exact(&[
+			"```code```",
+			"```code\n```",
+			"``````",
+			"``` ```",
+			"```\n```",
+		])
+	}
+
+	#[test] fn test_comment_strip() {
 		test_expected(
 			&vec![
 				"Strip <!--this--> comment",
@@ -291,8 +306,7 @@ mod test
 		);
 	}
 
-	#[test] fn test_slash()
-	{
+	#[test] fn test_slash() {
 		test_expected(&[
 			(
 				"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
@@ -301,17 +315,18 @@ mod test
 		]);
 	}
 
-	#[test] fn test_leave()
-	{
+	#[test] fn test_leave() {
 		test_expected(&[
 			(
-"Don't <!-- #SQUARK leave? -->
+"Don't
+<!-- #SQUARK leave? -->
 <!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
-<!-- #SQUARK leave. --> this",
+<!-- #SQUARK leave. -->
+this",
 
-"Don't 
+"Don't
 <!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
- this"
+this"
 			),
 		]);
 	}
