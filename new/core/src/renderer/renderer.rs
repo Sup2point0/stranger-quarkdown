@@ -91,16 +91,23 @@ impl<Source: Read, Target: Write>
 			Ok(())
 		}
 	}
+}
 
+impl<Source: Read, Target: Write>
+	Renderer<Source, Target>
+{
 	fn render_next_chunk(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		debug_assert_matches!(self.current(), Some(..));
 
 		match self.ctx.current()
 		{
-			Ctx::CODE_BLOCK => self.render_code_block(),
-			Ctx::COMMENT => self.render_comment(page, config),
-			Ctx::MARKDOWN => self.render_plain(),
+			Ctx::MARKDOWN     => self.render_plain(page, config),
+			Ctx::CODE_BLOCK   => self.render_code_block(),
+			Ctx::COMMENT      => self.render_comment(page, config),
+			Ctx::SQUARK_LEAVE => self.render_leave(page, config),
+			Ctx::SQUARK_SLASH => todo!(), // self.render_slash(),
+			Ctx::SQUARK_ONLY  => todo!(), // self.render_only(),
 			_ => unimplemented!(),
 		}
 	}
@@ -109,10 +116,15 @@ impl<Source: Read, Target: Write>
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	fn render_plain(&mut self) -> SquarkResult
+	fn render_plain(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
-			self.emit("<!--")?;
+			if config.format.preserve_comments {
+				self.emit("<!--")?;
+
+				self.eat_whitespace()?;
+
+			}
 			self.ctx.push(Ctx::COMMENT);
 		}
 		else if self.try_eat("```")? {
@@ -146,43 +158,35 @@ impl<Source: Read, Target: Write>
 		if self.try_eat("-->")? {
 			self.ctx.pop(Ctx::COMMENT);
 
-			if !config.format.strip_comments {
+			if config.format.preserve_comments {
 				self.emit("-->")?;
 			}
-			return Ok(());
+		}
+		else if self.try_eat_caseless("#SQUARK")? {
+			let _ =
+				self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
+			|| self.try_eat_paired_squark("slash", Ctx::SQUARK_SLASH, true, false)?
+			|| self.try_eat_paired_squark("only", Ctx::SQUARK_ONLY, true, false)?;
+		}
+		else if let Some(c) = self.current() {
+			if config.format.preserve_comments {
+				self.emit_char(c)?;
+			}
+			self.advance()?;
 		}
 
-		if self.try_eat_caseless("#SQUARK")? {
+		Ok(())
+	}
+
+	fn render_leave(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	{
+		if self.try_eat("<!--")? {
+			self.emit("<!-- ")?;
 			self.eat_whitespace()?;
 
-			if self.try_eat_caseless("leave")? {
-				if      self.try_eat("?")? { self.ctx.push(Ctx::SQUARK_LEAVE); }
-				else if self.try_eat(".")? { self.ctx.pop(Ctx::SQUARK_LEAVE); }
-				else {
-					todo!()
-				}
-			}
-			else if self.try_eat_caseless("slash?")? {
-				if      self.try_eat("?")? { self.ctx.push(Ctx::SQUARK_SLASH); }
-				else if self.try_eat(".")? { self.ctx.pop(Ctx::SQUARK_SLASH); }
-				else {
-					todo!()
-				}
-			}
-			else if self.try_eat_caseless("only?")? {
-				if      self.try_eat("?")? { self.ctx.push(Ctx::SQUARK_ONLY); }
-				else if self.try_eat(".")? { self.ctx.pop(Ctx::SQUARK_ONLY); }
-				else {
-					todo!()
-				}
-			}
-			else if !config.format.strip_comments {
-				self.emit("#SQUARK")?;
-			}
-			return Ok(());
+			self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, false, true)?;
 		}
-		
-		if let Some(c) = self.current() && !config.format.strip_comments {
+		else if let Some(c) = self.current() && config.format.preserve_comments {
 			self.emit_char(c)?;
 			self.advance()?;
 		}
@@ -216,17 +220,51 @@ mod test
 		])
 	}
 
-	#[test] fn test_comment()
+	#[test] fn test_comment_strip()
 	{
-		test_exact(&[
-			"Keep <!--this--> comment",
-			"Keep <!--this --> comment",
-			"Keep <!-- this--> comment",
-			"Keep <!-- this --> comment",
-			"Keep <!--this comment--> please",
-			"Keep <!--this comment --> please",
-			"Keep <!-- this comment--> please",
-			"Keep <!-- this comment --> please",
-		]);
+		test_expected(
+			&vec![
+				"Strip <!--this--> comment",
+				"Strip <!--this --> comment",
+				"Strip <!-- this--> comment",
+				"Strip <!-- this --> comment",
+			]
+			.into_iter()
+			.map(|case| (case, "Strip  comment"))
+			.collect::<Vec<_>>()
+		);
+		
+		test_expected(
+			&vec![
+				"Strip <!--this comment--> please",
+				"Strip <!--this comment --> please",
+				"Strip <!-- this comment--> please",
+				"Strip <!-- this comment --> please",
+			]
+			.into_iter()
+			.map(|case| (case, "Strip  please"))
+			.collect::<Vec<_>>()
+		);
+		
+		test_expected(
+			&vec![
+				"Strip\n<!-- this comment -->\nplease",
+				"Strip\n<!--\nthis comment\n-->\nplease",
+				"Strip\n<!--\nthis\ncomment\n-->\nplease",
+			]
+			.into_iter()
+			.map(|case| (case, "Strip\n\nplease"))
+			.collect::<Vec<_>>()
+		);
 	}
+
+	// #[test] fn test_slash()
+	// {
+	// 	test_expected(&[
+	// 		(
+	// 			"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
+	// 			"Remove  please",
+	// 		),
+	// 	]);
+	// }
 }

@@ -61,7 +61,7 @@ pub struct DataConfig {
 #[derive(Clone, Debug)]
 pub struct FormatConfig {
 	/// Strip `<!-- comments -->` from the rendered output?
-	pub strip_comments: bool,
+	pub preserve_comments: bool,
 
 	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 	pub externalise_links: bool,

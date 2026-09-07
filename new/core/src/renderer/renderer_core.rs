@@ -29,6 +29,19 @@ impl<Source: Read, Target: Write>
 		self._chunk.get(self._index).copied()
 	}
 
+	pub(super) fn preview(&self) -> String
+	{
+		const PREVIEW_CHARS: usize = 10;
+
+		let end = (self._index + PREVIEW_CHARS).min(self._chunk.len());
+		let chars = self._chunk.get(self._index..end);
+
+		match chars {
+			Some(c) => c.iter().collect(),
+			None => str!("⏎"),
+		}
+	}
+
 	pub(super) fn next_chunk(&mut self) -> SquarkResult
 	{
 		debug_assert!(!self.is_done);
@@ -117,6 +130,7 @@ impl<Source: Read, Target: Write>
 		Ok(true)
 	}
 
+	/// Consume 0 or more whitespace characters, which includes tabs and newlines.
 	pub(super) fn eat_whitespace(&mut self) -> SquarkResult<bool>
 	{
 		let mut did_consume = false;
@@ -131,6 +145,40 @@ impl<Source: Read, Target: Write>
 		Ok(did_consume)
 	}
 
+	/// Attempt to consume a `<squark><?|.> -->` instance, pushing or popping the context stack as required.
+	pub(super) fn try_eat_paired_squark(&mut self,
+		squark: &str,
+		ctx: Ctx,
+		allow_open: bool,
+		allow_close: bool,
+	) -> SquarkResult<bool>
+	{
+		self.eat_whitespace()?;
+
+		if self.try_eat_caseless(squark)? {
+			if      allow_open && self.try_eat("?")? { self.ctx.push(ctx); }
+			else if allow_close && self.try_eat(".")? { self.ctx.pop(ctx); }
+			else {
+				// TODO colour
+				self.errors.push(SquarkError::Recoverable {
+					msg: fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
+					hint: str!("paired squarks should end in `?` to open a section, or `.` to close it"),
+					debug: vec![
+						slash!("in file: {}", self.target_filepath),
+					],
+				});
+			}
+
+			return Ok(true);
+		}
+
+		Ok(false)
+	}
+}
+
+impl<Source: Read, Target: Write>
+	Renderer<Source, Target>
+{
 	pub(super) fn emit_char(&mut self, c: char) -> SquarkResult
 	{
 		let mut bytes = [0 as u8; 4];

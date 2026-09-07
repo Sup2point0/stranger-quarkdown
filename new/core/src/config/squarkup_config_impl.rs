@@ -40,7 +40,7 @@ impl SquarkupConfig
 			data: DataConfig {
 				path: dir!(site / "src/site-data.json")
 			},
-			format: FormatConfig { strip_comments: false, externalise_links: false },
+			format: FormatConfig { preserve_comments: false, externalise_links: false },
 			bases:  BasesConfig  { folder: None, page_js: None },
 			styles: StylesConfig { folder: None, base_file: None },
 			assets: AssetsConfig { folder: None, site_assets_folder: None,
@@ -151,10 +151,10 @@ impl SquarkupConfig
 		// FormatConfig
 		if let Some(format) = data.get("format")
 		{
-			if let Some(value) = format.get("strip-comments") {
+			if let Some(value) = format.get("preserve-comments") {
 				catch!(errs => {
-					let raw = Self::try_get_bool(value, "format.strip-comments")?;
-					s.format.strip_comments = raw.clone();
+					let raw = Self::try_get_bool(value, "format.preserve-comments")?;
+					s.format.preserve_comments = raw.clone();
 				});
 			}
 			
