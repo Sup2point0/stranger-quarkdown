@@ -206,12 +206,31 @@ impl<Source: Read, Target: Write>
 		// TODO allow excess input
 		self.eat_whitespace()?;
 
-		self.eat("-->",
-			to!("terminate squark"),
-			hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
-		)?;
+		if require_terminator {
+			self.eat("-->",
+				to!("terminate squark"),
+				hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
+			)?;
+
+			// FIXME emit --> when preserving comments
+		}
 
 		Ok(true)
+	}
+
+	pub(super) fn try_open_close_squark(&mut self,  squark: &str, ctx: Ctx) -> SquarkResult<bool>
+	{
+		self.try_eat_twin_squark(squark, ctx, true, true, true)
+	}
+
+	pub(super) fn try_open_squark(&mut self,  squark: &str, ctx: Ctx) -> SquarkResult<bool>
+	{
+		self.try_eat_twin_squark(squark, ctx, true, false, true)
+	}
+
+	pub(super) fn try_close_squark(&mut self,  squark: &str, ctx: Ctx) -> SquarkResult<bool>
+	{
+		self.try_eat_twin_squark(squark, ctx, false, true, true)
 	}
 }
 

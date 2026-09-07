@@ -160,9 +160,9 @@ impl<Source: Read, Target: Write>
 		}
 		else if self.try_eat("#SQUARK")? {
 			let _ =
-				self.try_eat_twin_squark("leave", Ctx::SQUARK_LEAVE, true, false)?
-			|| self.try_eat_twin_squark("slash", Ctx::SQUARK_SLASH, true, false)?
-			|| self.try_eat_twin_squark("only",  Ctx::SQUARK_ONLY,  true, false)?
+				self.try_open_squark("leave", Ctx::SQUARK_LEAVE)?
+			|| self.try_open_squark("slash", Ctx::SQUARK_SLASH)?
+			|| self.try_eat_twin_squark("only",  Ctx::SQUARK_ONLY, true, false, false)?
 			;
 		}
 		else if let Some(c) = self.current() {
@@ -180,7 +180,7 @@ impl<Source: Read, Target: Write>
 			self.eat_whitespace()?;
 
 			if self.try_eat("#SQUARK")? {
-				if !self.try_eat_twin_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {
+				if !self.try_open_close_squark("leave", Ctx::SQUARK_LEAVE)? {
 					self.emit("<!-- #SQUARK ")?;
 				}
 			}
@@ -201,7 +201,21 @@ impl<Source: Read, Target: Write>
 			self.eat_whitespace()?;
 
 			if self.try_eat("#SQUARK")? {
-				self.try_eat_twin_squark("slash", Ctx::SQUARK_SLASH, true, true)?;
+				self.try_open_close_squark("slash", Ctx::SQUARK_SLASH)?;
+			}
+		} else {
+			self.advance()?;
+		}
+		Ok(())
+	}
+
+	fn render_only(&mut self) -> SquarkResult
+	{
+		if self.try_eat("")? {
+			self.eat_whitespace()?;
+
+			if self.try_eat("#SQUARK")? {
+				self.try_open_close_squark("slash", Ctx::SQUARK_SLASH)?;
 			}
 		} else {
 			self.advance()?;
