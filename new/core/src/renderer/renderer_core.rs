@@ -6,7 +6,7 @@ use crate::{
 	macros::*,
 };
 
-use std::io::{ Read, Write, BufRead };
+use std::io::{ Read, Write };
 
 
 /// The number of characters the renderer reads into a chunk at a time.
@@ -92,6 +92,29 @@ impl<Source: Read, Target: Write>
 		} else {
 			Ok(())
 		}
+	}
+
+	pub(super) fn eat(&mut self,
+		target: &str,
+		to: impl Fn() -> String,
+		hint: impl Fn() -> String,
+	) -> SquarkResult
+	{
+		for expected in target.chars()
+		{
+			if self.current() != Some(expected) {
+				return Err(SquarkError::Recoverable {
+					msg: fmt!("expected {target} to {}", to()),
+					hint: hint(),
+					debug: vec![
+						slash!("while rendering {}", self.target_filepath),
+					],
+				});
+			}
+			self.advance()?;
+		}
+
+		Ok(())
 	}
 	
 	/// Attempt to consume exactly `target`, returning `Ok(true)` if succesful.

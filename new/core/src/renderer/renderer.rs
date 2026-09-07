@@ -102,11 +102,11 @@ impl<Source: Read, Target: Write>
 
 		match self.ctx.current()
 		{
-			Ctx::MARKDOWN     => self.render_plain(page, config),
+			Ctx::MARKDOWN     => self.render_plain(config),
 			Ctx::CODE_BLOCK   => self.render_code_block(),
-			Ctx::COMMENT      => self.render_comment(page, config),
-			Ctx::SQUARK_LEAVE => self.render_leave(page, config),
-			Ctx::SQUARK_SLASH => todo!(), // self.render_slash(),
+			Ctx::COMMENT      => self.render_comment(config),
+			Ctx::SQUARK_LEAVE => self.render_leave(config),
+			Ctx::SQUARK_SLASH => self.render_slash(config),
 			Ctx::SQUARK_ONLY  => todo!(), // self.render_only(),
 			_ => unimplemented!(),
 		}
@@ -116,7 +116,7 @@ impl<Source: Read, Target: Write>
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	fn render_plain(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render_plain(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
 			if config.format.preserve_comments {
@@ -153,7 +153,7 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
-	fn render_comment(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render_comment(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("-->")? {
 			self.ctx.pop(Ctx::COMMENT);
@@ -178,19 +178,54 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
-	fn render_leave(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render_leave(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
-			self.emit("<!-- ")?;
+			if config.format.preserve_comments {
+				self.emit("<!-- ")?;
+			}
+			
 			self.eat_whitespace()?;
+			
+			if self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, true, true)? {
+				self.eat_whitespace()?;
 
-			self.try_eat_paired_squark("leave", Ctx::SQUARK_LEAVE, false, true)?;
+				self.eat("-->",
+					to!("terminate squark"),
+					hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
+				)?;
+			}
 		}
-		else if let Some(c) = self.current() && config.format.preserve_comments {
-			self.emit_char(c)?;
+		else if let Some(c) = self.current() {
+			if config.format.preserve_comments {
+				self.emit_char(c)?;
+			}
 			self.advance()?;
 		}
+		Ok(())
+	}
 
+	fn render_slash(&mut self, config: &SquarkupConfig) -> SquarkResult
+	{
+		if self.try_eat("<!--")? {
+			if config.format.preserve_comments {
+				self.emit("<!-- ")?;
+			}
+
+			self.eat_whitespace()?;
+
+			if self.try_eat_paired_squark("slash", Ctx::SQUARK_LEAVE, true, true)? {
+				self.eat_whitespace()?;
+
+				self.eat("-->",
+					to!("terminate squark"),
+					hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
+				)?;
+			}
+		}
+		else {
+			self.advance()?;
+		}
 		Ok(())
 	}
 }
@@ -258,13 +293,28 @@ mod test
 		);
 	}
 
-	// #[test] fn test_slash()
-	// {
-	// 	test_expected(&[
-	// 		(
-	// 			"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
-	// 			"Remove  please",
-	// 		),
-	// 	]);
-	// }
+	#[test] fn test_slash()
+	{
+		test_expected(&[
+			(
+				"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
+				"Remove  please",
+			),
+		]);
+	}
+
+	#[test] fn test_leave()
+	{
+		test_expected(&[
+			(
+"Don't <!-- #SQUARK leave? -->
+<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+<!-- #SQUARK leave. --> this",
+
+"Don't 
+<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+ this"
+			),
+		]);
+	}
 }
