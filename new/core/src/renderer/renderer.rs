@@ -207,8 +207,13 @@ impl<Source: Read, Target: Write>
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
 
-			// FIXME only skip emit on closing
-			if !self.try_open_close_squark("leave", Ctx::SQUARK_LEAVE)? {
+			// FIXME leave should do best-effort tracking, but otherwise allow invalid syntax
+			if self.try_close_squark("leave", Ctx::SQUARK_LEAVE)?
+			{}
+			else if self.try_open_squark("leave", Ctx::SQUARK_LEAVE)? {
+				self.emit("<!-- #SQUARK leave? -->")?;
+			}
+			else {
 				self.emit("<!-- ")?;
 			}
 		}
