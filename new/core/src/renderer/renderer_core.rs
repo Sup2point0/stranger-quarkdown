@@ -173,8 +173,12 @@ impl<Source: Read, Target: Write>
 
 		Ok(did_consume)
 	}
+}
 
-	/// Attempt to consume a ` <squark><?|.> -->` instance, pushing or popping the context stack as required.
+impl<Source: Read, Target: Write>
+	Renderer<Source, Target>
+{
+	/// Attempt to consume a ` #SQUARK <squark><?|.> -->` instance, pushing or popping the context stack as required.
 	/// 
 	/// `allow_open` must be enabled to consume `squark?`, and `allow_close` must be enabled to consume `squark.`. At least 1 of the 2 should be `true`.
 	pub(super) fn try_eat_twin_squark(&mut self,
@@ -185,58 +189,58 @@ impl<Source: Read, Target: Write>
 		require_terminator: bool,
 	) -> SquarkResult<bool>
 	{
-		self.eat_whitespace()?;
+		let init = self._index;
 
-		if !self.try_eat_caseless(squark)? {
-			return Ok(false);
+		'abort: {
+			self.eat_whitespace()?;
+			if !self.try_eat_caseless("#SQUARK")? { break 'abort; }
+			self.eat_whitespace()?;
+			if !self.try_eat_caseless(squark)? { break 'abort; }
+
+			if allow_open && self.try_eat("?")? {
+				self.ctx.pop(Ctx::COMMENT);
+				self.ctx.push(ctx);
+			}
+			else if allow_close && self.try_eat(".")? {
+				self.ctx.pop(ctx);
+			}
+			else {
+				// TODO colour
+				self.errors.push(SquarkError::Recoverable {
+					msg:  fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
+					hint: str!("twin squarks should end in `?` to open a section, or `.` to close it"),
+					debug: vec![
+						slash!("in file: {}:{}", self.target_filepath, self.line_number),
+					],
+				});
+			}
+
+			// TODO allow excess input
+			self.eat_whitespace()?;
+
+			if require_terminator {
+				self.eat("-->",
+					to!("terminate squark"),
+					hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
+				)?;
+			}
+
+			return Ok(true)
 		}
 
-		if allow_open && self.try_eat("?")? {
-			self.ctx.pop(Ctx::COMMENT);
-			self.ctx.push(ctx);
-		}
-		else if allow_close && self.try_eat(".")? {
-			self.ctx.pop(ctx);
-			self.ctx.pop(Ctx::COMMENT);
-		}
-		else {
-			// TODO colour
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
-				hint: str!("twin squarks should end in `?` to open a section, or `.` to close it"),
-				debug: vec![
-					slash!("in file: {}:{}", self.target_filepath, self.line_number),
-				],
-			});
-		}
-
-		// TODO allow excess input
-		self.eat_whitespace()?;
-
-		if require_terminator {
-			self.eat("-->",
-				to!("terminate squark"),
-				hints!("close a slashed section like `<!-- #SQUARK slash. -->`"),
-			)?;
-
-			// FIXME emit --> when preserving comments
-		}
-
-		Ok(true)
+		self._index = init;
+		Ok(false)
 	}
 
-	pub(super) fn try_open_close_squark(&mut self,  squark: &str, ctx: Ctx) -> SquarkResult<bool>
-	{
+	pub(super) fn try_open_close_squark(&mut self, squark: &str, ctx: Ctx) -> SquarkResult<bool> {
 		self.try_eat_twin_squark(squark, ctx, true, true, true)
 	}
 
-	pub(super) fn try_open_squark(&mut self,  squark: &str, ctx: Ctx) -> SquarkResult<bool>
-	{
+	pub(super) fn try_open_squark(&mut self, squark: &str, ctx: Ctx) -> SquarkResult<bool> {
 		self.try_eat_twin_squark(squark, ctx, true, false, true)
 	}
 
-	pub(super) fn try_close_squark(&mut self,  squark: &str, ctx: Ctx) -> SquarkResult<bool>
-	{
+	pub(super) fn try_close_squark(&mut self, squark: &str, ctx: Ctx) -> SquarkResult<bool> {
 		self.try_eat_twin_squark(squark, ctx, false, true, true)
 	}
 }

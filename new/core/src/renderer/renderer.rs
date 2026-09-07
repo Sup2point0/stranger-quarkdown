@@ -103,7 +103,7 @@ impl<Source: Read, Target: Write>
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	fn render_next_chunk(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	fn render_next_chunk(&mut self, _page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		self.cleanup_chunk();
 
@@ -188,13 +188,11 @@ impl<Source: Read, Target: Write>
 				self.emit("-->")?;
 			}
 		}
-		else if self.try_eat("#SQUARK")? {
-			let _ =
+		else if
 				self.try_open_squark("leave", Ctx::SQUARK_LEAVE)?
 			|| self.try_open_squark("slash", Ctx::SQUARK_SLASH)?
 			|| self.try_eat_twin_squark("only",  Ctx::SQUARK_ONLY, true, false, false)?
-			;
-		}
+		{}
 		else if let Some(c) = self.current() {
 			if config.format.preserve_comments {
 				self.emit_char(c)?;
@@ -209,12 +207,8 @@ impl<Source: Read, Target: Write>
 		if self.try_eat("<!--")? {
 			self.eat_whitespace()?;
 
-			if self.try_eat("#SQUARK")? {
-				if !self.try_open_close_squark("leave", Ctx::SQUARK_LEAVE)? {
-					self.emit("<!-- #SQUARK ")?;
-				}
-			}
-			else if config.format.preserve_comments {
+			// FIXME only skip emit on closing
+			if !self.try_open_close_squark("leave", Ctx::SQUARK_LEAVE)? {
 				self.emit("<!-- ")?;
 			}
 		}
@@ -228,11 +222,7 @@ impl<Source: Read, Target: Write>
 	fn render_slash(&mut self) -> SquarkResult
 	{
 		if self.try_eat("<!--")? {
-			self.eat_whitespace()?;
-
-			if self.try_eat("#SQUARK")? {
-				self.try_open_close_squark("slash", Ctx::SQUARK_SLASH)?;
-			}
+			self.try_open_close_squark("slash", Ctx::SQUARK_SLASH)?;
 		} else {
 			self.advance()?;
 		}
@@ -242,14 +232,8 @@ impl<Source: Read, Target: Write>
 	fn render_only(&mut self, config: &SquarkupConfig) -> SquarkResult
 	{
 		if !self.render_plain(config)? {
-			if self.try_eat("#SQUARK")? {
-				self.eat_whitespace()?;
-
-				if self.try_close_squark("only", Ctx::SQUARK_ONLY)? {}
-				else {
-					self.emit("#SQUARK")?;
-				}
-			}
+			if self.try_close_squark("only", Ctx::SQUARK_ONLY)?
+			{}
 			else if let Some(c) = self.current() {
 				self.emit_char(c)?;
 				self.advance()?;
@@ -355,51 +339,61 @@ y = x
 		use super::*;
 
 		#[test] fn easy() {
-			test_expected(
-				&vec![
-					"Strip <!--this--> comment",
-					"Strip <!--this --> comment",
-					"Strip <!-- this--> comment",
-					"Strip <!-- this --> comment",
-				]
-				.into_iter()
-				.map(|case| (case, "Strip  comment"))
-				.collect::<Vec<_>>()
-			);
+			test_expected(&[
+				("erase <!--this--> comment",   "erase  comment"),
+				("erase <!--this --> comment",  "erase  comment"),
+				("erase <!-- this--> comment",  "erase  comment"),
+				("erase <!-- this --> comment", "erase  comment"),
+			]);
 			
-			test_expected(
-				&vec![
-					"Strip <!--this comment--> please",
-					"Strip <!--this comment --> please",
-					"Strip <!-- this comment--> please",
-					"Strip <!-- this comment --> please",
-				]
-				.into_iter()
-				.map(|case| (case, "Strip  please"))
-				.collect::<Vec<_>>()
-			);
+			test_expected(&[
+				("erase <!--this comment--> please",   "erase  please"),
+				("erase <!--this comment --> please",  "erase  please"),
+				("erase <!-- this comment--> please",  "erase  please"),
+				("erase <!-- this comment --> please", "erase  please"),
+			]);
 			
-			test_expected(
-				&vec![
-					"Strip\n<!-- this comment -->\nplease",
-					"Strip\n<!--\nthis comment\n-->\nplease",
-					"Strip\n<!--\nthis\ncomment\n-->\nplease",
-				]
-				.into_iter()
-				.map(|case| (case, "Strip\n\nplease"))
-				.collect::<Vec<_>>()
-			);
+			test_expected(&[
+				("erase\n<!-- this comment -->\nplease",    "erase\n\nplease"),
+				("erase\n<!--\nthis comment\n-->\nplease",  "erase\n\nplease"),
+				("erase\n<!--\nthis\ncomment\n-->\nplease", "erase\n\nplease"),
+			]);
+		}
+
+		#[test] fn nested() {
+			test_expected(&[
+				("<!-- <!-- illegal --> comment", " comment"),
+			]);
 		}
 	}
 
 	mod slash {
 		use super::*;
 
-		#[test] fn easy() {
+		#[test] fn one_line() {
 			test_expected(&[
 				(
-					"Remove <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
-					"Remove  please",
+					"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
+					"erase  please",
+				),
+			]);
+		}
+
+		#[test] fn multi_line() {
+			test_expected(&[
+				(
+					indoc! {"
+						erase
+						<!-- #SQUARK slash? -->
+						this
+						<!-- #SQUARK slash. -->
+						please
+					"},
+					indoc! {"
+						erase
+
+						please
+					"},
 				),
 			]);
 		}
@@ -420,23 +414,47 @@ y = x
 		#[test] fn standard() {
 			test_expected(&[
 				(
-"
-Don't
-<!-- #SQUARK leave? -->
-<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
-<!-- #SQUARK leave. -->
-this
-",
+					indoc! {"
+						Don't
+						<!-- #SQUARK leave? -->
+						<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+						<!-- #SQUARK leave. -->
+						this
+					"},
+					indoc! {"
+						Don't
 
-"
-Don't
+						<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
 
-<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
-
-this
-"
+						this
+					"}
 				),
 			]);
+		}
+
+		#[test] fn nested() {
+			test_expected(&[
+				(
+					indoc! {"
+						1
+						<!-- #SQUARK leave? -->
+						<!-- #SQUARK leave? -->
+						2
+						<!-- #SQUARK leave. -->
+						<!-- #SQUARK leave. -->
+						3
+					"},
+					indoc! {"
+						1
+
+						<!-- #SQUARK leave? -->
+						2
+						<!-- #SQUARK leave. -->
+
+						3
+					"},
+				),
+			])
 		}
 	}
 
@@ -445,7 +463,7 @@ this
 
 		#[test] fn easy() {
 			test_expected(&[
-				("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show  me"),
+				("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show me"),
 			]);
 		}
 
@@ -472,9 +490,9 @@ this
 
 		#[test] fn awkward_whitespace() {
 			test_expected(&[
-				("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
-				("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
-				("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
+				("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y z"),
+				("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y z"),
+				("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y  z"),
 			]);
 		}
 	}

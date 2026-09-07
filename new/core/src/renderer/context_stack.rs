@@ -51,10 +51,25 @@ impl ContextStack
 		}
 	}
 
+	/// Pop `ctx` from the stack as deep as possible, regardless of the current context.
+	/// 
+	/// For instance, when seeing a `-->`, this should completely terminate a comment context, which might look like:
+	/// 
+	/// ```ts
+	/// [COMMENT]       // normal
+	/// [COMMENT, ...]  // unclosed, but we don't care cuz it's a comment
+	/// [COMMENT, COMMENT]  // user used <!-- <!--
+	/// ```
+	/// 
+	/// If `ctx` is not present in the context stack, this is a no-op.
 	pub fn force_pop(&mut self, ctx: Ctx)
 	{
 		if let Some(idx) = self.stack.iter().rposition(|c| *c == ctx) {
 			self.stack.truncate(idx);
+		}
+
+		while self.current() == ctx {
+			self.stack.pop();
 		}
 	}
 }
