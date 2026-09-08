@@ -417,14 +417,12 @@ mod comments {
 				("erase <!-- this--> comment",  "erase  comment"),
 				("erase <!-- this --> comment", "erase  comment"),
 			]);
-			
 			test_expected(&[
 				("erase <!--this comment--> please",   "erase  please"),
 				("erase <!--this comment --> please",  "erase  please"),
 				("erase <!-- this comment--> please",  "erase  please"),
 				("erase <!-- this comment --> please", "erase  please"),
 			]);
-			
 			test_expected(&[
 				("erase\n<!-- this comment -->\nplease",    "erase\n\nplease"),
 				("erase\n<!--\nthis comment\n-->\nplease",  "erase\n\nplease"),
@@ -438,10 +436,40 @@ mod comments {
 			]);
 		}
 	}
+
+	mod preserves {
+		use super::*;
+
+		#[test] fn easy() {
+			test_preserves_with_comments(&[
+				"keep <!--this--> comment",
+				"keep <!--this --> comment",
+				"keep <!-- this--> comment",
+				"keep <!-- this --> comment",
+			]);
+			test_preserves_with_comments(&[
+				"keep <!--this comment--> please",
+				"keep <!--this comment --> please",
+				"keep <!-- this comment--> please",
+				"keep <!-- this comment --> please",
+			]);
+			test_preserves_with_comments(&[
+				"keep\n<!-- this comment -->\nplease",
+				"keep\n<!--\nthis comment\n-->\nplease",
+				"keep\n<!--\nthis\ncomment\n-->\nplease",
+			]);
+		}
+
+		#[test] fn nested() {
+			test_preserves_with_comments(&[
+				"<!-- <!-- illegal --> comment",
+			]);
+		}
 	}
+}
 
 #[cfg(test)]
-	mod slash {
+mod slash {
 	use super::*;
 
 	#[test] fn one_line() {
