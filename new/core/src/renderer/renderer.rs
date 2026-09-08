@@ -279,130 +279,133 @@ mod test {
 
 	use super::*;
 
-	mod plain {
-		use super::*;
+mod plain {
+	use super::*;
 
-		#[test] fn easy() {
-			test_exact(&[
-				"sup, world!",
-				"sup,\nworld!",
-				"sup,\nworld!\n",
-				"sup, \nworld!\n",
-				"sup,\n world!\n",
-				"sup, \n world!\n",
-			]);
-		}
+	#[test] fn easy() {
+		test_preserves(&[
+			"sup, world!",
+			"sup,\nworld!",
+			"sup,\nworld!\n",
+			"sup, \nworld!\n",
+			"sup,\n world!\n",
+			"sup, \n world!\n",
+		]);
+	}
+}
+
+mod code_inline {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			"this `is` code",
+			"this `is ` code",
+			"this ` is` code",
+			"this ` is ` code",
+			"this `is` some `more` code",
+			"line `1` onto\nline `2`.",
+		]);
 	}
 
-	mod code_inline {
-		use super::*;
-
-		#[test] fn easy() {
-			test_exact(&[
-				"this `is` code",
-				"this `is ` code",
-				"this ` is` code",
-				"this ` is ` code",
-				"this `is` some `more` code",
-				"line `1` onto\nline `2`.",
-			]);
-		}
-
-		#[test] fn medium() {
-			test_exact(&[
-				"`1` onto\nline `2`",
-				// "`x` `y`",
-				// "` x ` ` y `",
-				// "`x y` `z`",
-				// "`x`y`z`",
-			]);
-		}
-
-		#[test] fn unclosed() {
-			test_exact(&[
-				"`x\ny",
-			]);
-		}
-
-		#[test] fn edge_cases() {
-			test_exact(&[
-				"`x`",
-				"`code`",
-			])
-		}
+	#[test] fn medium() {
+		test_preserves(&[
+			"`1` onto\nline `2`",
+			// "`x` `y`",
+			// "` x ` ` y `",
+			// "`x y` `z`",
+			// "`x`y`z`",
+		]);
 	}
 
-	mod code_blocks {
-		use super::*;
-
-		#[test] fn easy() {
-			test_exact(&[
-"
-This is some code
-
-```
-print(\"hello world\")
-```
-",
-			])
-		}
-
-		#[test] fn medium() {
-			test_exact(&[
-"
-```md
-<!-- #SQUARK slash? -->
-sup
-<!-- #SQUARK slash. -->
-```
-",
-			])
-		}
-
-		#[test] fn hard() {
-			test_exact(&[
-"
-```md
-<!-- #SQUARK slash? -->
-```
-
-sup
-
-```py
-sup
-```
-
-```
-<!-- #SQUARK slash. -->
-```
-",
-			])
-		}
-
-		#[test] fn escaped() {
-			test_exact(&[
-"
-```md
-\\```math
-y = x
-\\```
-```
-",
-			])
-		}
-
-		#[test] fn edge_cases() {
-			test_exact(&[
-				"```code```",
-				"```code\n```",
-				"``````",
-				"``` ```",
-				"```\n```",
-			])
-		}
+	#[test] fn unclosed() {
+		test_preserves(&[
+			"`x\ny",
+		]);
 	}
 
-	mod comments {
+	#[test] fn edge_cases() {
+		test_preserves(&[
+			"`x`",
+			"`code`",
+		])
+	}
+}
+
+mod code_blocks {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			indoc! {"
+				This is some code
+
+				```
+				print(\"hello world\")
+				```
+			"},
+		])
+	}
+
+	#[test] fn medium() {
+		test_preserves(&[
+			indoc! {"
+				```md
+				<!-- #SQUARK slash? -->
+				sup
+				<!-- #SQUARK slash. -->
+				```
+			"},
+		])
+	}
+
+	#[test] fn hard() {
+		test_preserves(&[
+			indoc! {"
+				```md
+				<!-- #SQUARK slash? -->
+				```
+
+				sup
+
+				```py
+				sup
+				```
+
+				```
+				<!-- #SQUARK slash. -->
+				```
+			"},
+		])
+	}
+
+	#[test] fn escaped() {
+		test_preserves(&[
+			indoc! {"
+				```md
+				\\```math
+				y = x
+				\\```
+				```
+			"},
+		])
+	}
+
+	#[test] fn edge_cases() {
+		test_preserves(&[
+			"```code```",
+			"```code\n```",
+			"``````",
+			"``` ```",
+			"```\n```",
+		])
+	}
+}
+
+mod comments {
+	use super::*;
+
+	mod erases {
 		use super::*;
 
 		#[test] fn easy() {
@@ -433,134 +436,136 @@ y = x
 			]);
 		}
 	}
-
-	mod slash {
-		use super::*;
-
-		#[test] fn one_line() {
-			test_expected(&[
-				(
-					"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
-					"erase  please",
-				),
-			]);
-		}
-
-		#[test] fn multi_line() {
-			test_expected(&[
-				(
-					indoc! {"
-						erase
-						<!-- #SQUARK slash? -->
-						this
-						<!-- #SQUARK slash. -->
-						please
-					"},
-					indoc! {"
-						erase
-
-						please
-					"},
-				),
-			]);
-		}
 	}
 
-	mod leave {
-		use super::*;
+mod slash {
+	use super::*;
 
-		#[test] fn easy() {
-			test_expected(&[
-				(
-					"Don't <!-- #SQUARK leave? --> do <!-- #SQUARK leave. --> anything",
-					"Don't  do  anything",
-				),
-			]);
-		}
-
-		#[test] fn standard() {
-			test_expected(&[
-				(
-					indoc! {"
-						Don't
-						<!-- #SQUARK leave? -->
-						<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
-						<!-- #SQUARK leave. -->
-						this
-					"},
-					indoc! {"
-						Don't
-
-						<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
-
-						this
-					"}
-				),
-			]);
-		}
-
-		#[test] fn nested() {
-			test_expected(&[
-				(
-					indoc! {"
-						1
-						<!-- #SQUARK leave? -->
-						<!-- #SQUARK leave? -->
-						2
-						<!-- #SQUARK leave. -->
-						<!-- #SQUARK leave. -->
-						3
-					"},
-					indoc! {"
-						1
-
-						<!-- #SQUARK leave? -->
-						2
-						<!-- #SQUARK leave. -->
-
-						3
-					"},
-				),
-			])
-		}
+	#[test] fn one_line() {
+		test_expected(&[
+			(
+				"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
+				"erase  please",
+			),
+		]);
 	}
 
-	mod only {
-		use super::*;
+	#[test] fn multi_line() {
+		test_expected(&[
+			(
+				indoc! {"
+					erase
+					<!-- #SQUARK slash? -->
+					this
+					<!-- #SQUARK slash. -->
+					please
+				"},
+				indoc! {"
+					erase
 
-		#[test] fn easy() {
-			test_expected(&[
-				("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show me"),
-			]);
-		}
-
-		#[test] fn medium() {
-			test_expected(&[
-				(
-					indoc! {"
-						Please
-
-						<!-- #SQUARK only?
-
-						show me!
-
-						     #SQUARK only. -->
-					"},
-					indoc! {"
-						Please
-
-						show me!
-					"}
-				),
-			]);
-		}
-
-		#[test] fn awkward_whitespace() {
-			test_expected(&[
-				("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y z"),
-				("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y z"),
-				("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y  z"),
-			]);
-		}
+					please
+				"},
+			),
+		]);
 	}
+}
+
+mod leave {
+	use super::*;
+
+	#[test] fn easy() {
+		test_expected(&[
+			(
+				"Don't <!-- #SQUARK leave? --> do <!-- #SQUARK leave. --> anything",
+				"Don't  do  anything",
+			),
+		]);
+	}
+
+	#[test] fn standard() {
+		test_expected(&[
+			(
+				indoc! {"
+					Don't
+					<!-- #SQUARK leave? -->
+					<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+					<!-- #SQUARK leave. -->
+					this
+				"},
+				indoc! {"
+					Don't
+
+					<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+
+					this
+				"}
+			),
+		]);
+	}
+
+	#[test] fn nested() {
+		test_expected(&[
+			(
+				indoc! {"
+					1
+					<!-- #SQUARK leave? -->
+					<!-- #SQUARK leave? -->
+					2
+					<!-- #SQUARK leave. -->
+					<!-- #SQUARK leave. -->
+					3
+				"},
+				indoc! {"
+					1
+
+					<!-- #SQUARK leave? -->
+					2
+					<!-- #SQUARK leave. -->
+
+					3
+				"},
+			),
+		])
+	}
+}
+
+mod only {
+	use super::*;
+
+	#[test] fn easy() {
+		test_expected(&[
+			("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show me"),
+		]);
+	}
+
+	#[test] fn medium() {
+		test_expected(&[
+			(
+				indoc! {"
+					Please
+
+					<!-- #SQUARK only?
+
+					show me!
+
+							#SQUARK only. -->
+				"},
+				indoc! {"
+					Please
+
+					show me!
+				"}
+			),
+		]);
+	}
+
+	#[test] fn awkward_whitespace() {
+		test_expected(&[
+			("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y z"),
+			("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y z"),
+			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y  z"),
+		]);
+	}
+}
+
 }
