@@ -92,12 +92,6 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
-	pub(super) fn try_advance(&mut self) -> SquarkResult<bool>
-	{
-		self._advance_()?;
-		Ok(true)
-	}
-
 	fn _advance_(&mut self) -> SquarkResult
 	{
 		self._index += 1;
@@ -137,12 +131,11 @@ impl<Source: Read, Target: Write>
 		let init = self._index;
 
 		for expected in target.chars() {
-			if self.current() != Some(expected)
-			|| !self.try_advance()?
-			{
+			if self.current() != Some(expected) {
 				self._index = init;
 				return Ok(false);
 			}
+			self.advance()?;
 		}
 
 		Ok(true)
