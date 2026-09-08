@@ -229,7 +229,11 @@ impl<Source: Read, Target: Write>
 
 			// FIXME leave should do best-effort tracking, but otherwise allow invalid syntax
 			if self.try_close_squark("leave", Ctx::SQUARK_LEAVE)?
-			{}
+			{
+				if self.ctx.current() == Ctx::SQUARK_LEAVE {
+					self.emit("<!-- #SQUARK leave. -->")?;
+				}
+			}
 			else if self.try_open_squark("leave", Ctx::SQUARK_LEAVE)? {
 				self.emit("<!-- #SQUARK leave? -->")?;
 			}

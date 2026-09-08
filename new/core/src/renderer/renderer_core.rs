@@ -3,6 +3,7 @@ use utf8_chars::BufReadCharsExt;
 use super::*;
 use crate::{
 	SquarkResult, SquarkError,
+	colours::*,
 	macros::*,
 };
 
@@ -116,6 +117,7 @@ impl<Source: Read, Target: Write>
 					msg: fmt!("expected {target} to {}", to()),
 					hint: hint(),
 					debug: vec![
+						fmt!("got: {GREY1}{}", self.preview()),
 						slash!("in {}:{}", self.source_filepath, self.line_number),
 					],
 				});
@@ -208,12 +210,14 @@ impl<Source: Read, Target: Write>
 			else {
 				// TODO colour
 				self.errors.push(SquarkError::Recoverable {
-					msg:  fmt!("unknown squark: `#SQUARK {squark}{}`", self.preview()),
-					hint: str!("twin squarks should end in `?` to open a section, or `.` to close it"),
+					msg:  fmt!("unknown squark: {W}#SQUARK {squark}{}", self.preview()),
+					hint: fmt!("twin squarks should end in {W}?{G} to open a section, or {W}.{G} to close it"),
 					debug: vec![
 						slash!("in file: {}:{}", self.target_filepath, self.line_number),
 					],
 				});
+
+				break 'abort;
 			}
 
 			// TODO allow excess input
@@ -226,7 +230,7 @@ impl<Source: Read, Target: Write>
 				)?;
 			}
 
-			return Ok(true)
+			return Ok(true);
 		}
 
 		self._index = init;
