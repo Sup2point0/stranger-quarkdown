@@ -274,11 +274,10 @@ impl<Source: Read, Target: Write>
 
 
 #[cfg(test)]
-mod test {
-	use indoc::indoc;
+use indoc::indoc;
 
-	use super::*;
 
+#[cfg(test)]
 mod plain {
 	use super::*;
 
@@ -294,6 +293,7 @@ mod plain {
 	}
 }
 
+#[cfg(test)]
 mod code_inline {
 	use super::*;
 
@@ -332,6 +332,7 @@ mod code_inline {
 	}
 }
 
+#[cfg(test)]
 mod code_blocks {
 	use super::*;
 
@@ -402,9 +403,10 @@ mod code_blocks {
 	}
 }
 
+#[cfg(test)]
 mod comments {
 	use super::*;
-
+	
 	mod erases {
 		use super::*;
 
@@ -438,7 +440,8 @@ mod comments {
 	}
 	}
 
-mod slash {
+#[cfg(test)]
+	mod slash {
 	use super::*;
 
 	#[test] fn one_line() {
@@ -470,6 +473,7 @@ mod slash {
 	}
 }
 
+#[cfg(test)]
 mod leave {
 	use super::*;
 
@@ -529,6 +533,7 @@ mod leave {
 	}
 }
 
+#[cfg(test)]
 mod only {
 	use super::*;
 
@@ -566,6 +571,4 @@ mod only {
 			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y  z"),
 		]);
 	}
-}
-
 }
