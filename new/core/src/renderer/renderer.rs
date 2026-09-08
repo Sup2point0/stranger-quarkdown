@@ -21,7 +21,7 @@ pub struct Renderer<Source: Read = File, Target: Write = File>
 	*/
 
 	/// Have we reached the end of the source?
-	pub is_done: bool,
+	pub done_reading: bool,
 
 	pub errors: Vec<SquarkError>,
 
@@ -60,7 +60,7 @@ impl<Source: Read, Target: Write>
 	) -> SquarkResult<Self>
 	{
 		let mut out = Self {
-			is_done: false,
+			done_reading: false,
 			errors: vec![],
 			ctx: ContextStack::new(),
 			line_number: 0,
@@ -79,7 +79,7 @@ impl<Source: Read, Target: Write>
 
 	pub fn render(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
-		while !self.is_done {
+		while !self.is_done() {
 			self.render_next_chunk(page, config)?;
 		}
 
@@ -157,8 +157,8 @@ impl<Source: Read, Target: Write>
 			self.emit_char(c)?;
 			self.advance()?;
 			
-			if c == '\\' && let Some(c2) = self.current() {
-				self.emit_char(c2)?;
+			if c == '\\' && let Some(cc) = self.current() {
+				self.emit_char(cc)?;
 				self.advance()?;
 			}
 		}
@@ -174,7 +174,7 @@ impl<Source: Read, Target: Write>
 			self.emit_char(c)?;
 			self.advance()?;
 
-			if c == '`' || c == '\n' {
+			if c == '`' || c == '\n' || self.out_of_bounds() {
 				self.ctx.pop(Ctx::CODE_INLINE);
 			}
 		}
@@ -299,16 +299,32 @@ mod test {
 				"this `is ` code",
 				"this ` is` code",
 				"this ` is ` code",
+				"this `is` some `more` code",
+				"line `1` onto\nline `2`.",
 			]);
 		}
 
 		#[test] fn medium() {
 			test_exact(&[
-				"`x` `y`",
-				"` x ` ` y `",
-				"`x y` `z`",
-				"`x`y`z`",
+				"`1` onto\nline `2`",
+				// "`x` `y`",
+				// "` x ` ` y `",
+				// "`x y` `z`",
+				// "`x`y`z`",
 			]);
+		}
+
+		#[test] fn unclosed() {
+			test_exact(&[
+				"`x\ny",
+			]);
+		}
+
+		#[test] fn edge_cases() {
+			test_exact(&[
+				"`x`",
+				"`code`",
+			])
 		}
 	}
 

@@ -16,9 +16,14 @@ pub(super) const CHUNK_SIZE: usize = 256;
 impl<Source: Read, Target: Write>
 	Renderer<Source, Target>
 {
-	pub(super) fn has_exhausted_chunk(&self) -> bool
+	pub(super) fn out_of_bounds(&self) -> bool
 	{
 		self._index >= self._window.len()
+	}
+
+	pub(super) fn is_done(&self) -> bool
+	{
+		self.done_reading && self.out_of_bounds()
 	}
 
 	/// The character in the source the renderer is currently pointing to.
@@ -27,22 +32,6 @@ impl<Source: Read, Target: Write>
 	pub(super) fn current(&self) -> Option<char>
 	{
 		self._window.get(self._index).copied()
-	}
-
-	/// Peek the character directly *after* the current character in the source.
-	/// 
-	/// This may trigger a chunk read from the buffer.
-	pub(super) fn peek(&mut self) -> Option<char>
-	{
-		if self.is_done {
-			None
-		}
-		else {
-			if self._index == self._window.len() - 1 {
-				let _ = self.next_chunk();
-			}
-			self._window.get(self._index + 1).copied()
-		}
 	}
 
 	pub(super) fn preview(&self) -> String
@@ -70,8 +59,6 @@ impl<Source: Read, Target: Write>
 	/// Append the next chunk of source text into `._window`.
 	pub(super) fn next_chunk(&mut self) -> SquarkResult
 	{
-		debug_assert!(!self.is_done);
-
 		let mut t = 0;
 
 		for c in self._reader.chars().take(CHUNK_SIZE) {
@@ -87,7 +74,7 @@ impl<Source: Read, Target: Write>
 		}
 
 		if t == 0 {
-			self.is_done = true;
+			self.done_reading = true;
 		}
 
 		Ok(())
@@ -105,11 +92,17 @@ impl<Source: Read, Target: Write>
 		Ok(())
 	}
 
+	pub(super) fn try_advance(&mut self) -> SquarkResult<bool>
+	{
+		self._advance_()?;
+		Ok(true)
+	}
+
 	fn _advance_(&mut self) -> SquarkResult
 	{
 		self._index += 1;
 
-		if self.has_exhausted_chunk() {
+		if self.out_of_bounds() {
 			self.next_chunk()
 		} else {
 			Ok(())
@@ -122,9 +115,9 @@ impl<Source: Read, Target: Write>
 		hint: impl Fn() -> String,
 	) -> SquarkResult
 	{
-		for expected in target.chars()
-		{
-			if self.current() != Some(expected) {
+		for expected in target.chars() {
+			if self.current() != Some(expected)
+			{
 				return Err(SquarkError::Recoverable {
 					msg: fmt!("expected {target} to {}", to()),
 					hint: hint(),
@@ -135,7 +128,6 @@ impl<Source: Read, Target: Write>
 			}
 			self.advance()?;
 		}
-
 		Ok(())
 	}
 	
@@ -144,13 +136,13 @@ impl<Source: Read, Target: Write>
 	{
 		let init = self._index;
 
-		for expected in target.chars()
-		{
-			if self.current() != Some(expected) {
+		for expected in target.chars() {
+			if self.current() != Some(expected)
+			|| !self.try_advance()?
+			{
 				self._index = init;
 				return Ok(false);
 			}
-			self.advance()?;
 		}
 
 		Ok(true)
