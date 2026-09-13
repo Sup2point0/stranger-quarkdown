@@ -6,11 +6,30 @@ use crate::{
 	macros::*,
 };
 
+use lazy_static::lazy_static;
 use pulldown_cmark as pulldown;
 use pulldown_cmark_to_cmark as cmark;
+use regex::Regex;
 
 use std::fs::{ self, File };
 use std::io::{ Read, Write };
+
+
+lazy_static! {
+	pub static ref RENDER_OPTIONS: cmark::Options<'static> = cmark::Options {
+		list_token: '-',
+		..cmark::Options::default()
+	};
+
+	/// The RegEx pattern for twin squarks.
+	/// 
+	/// - Group 1 is the squark (`leave`, `slash`)
+	/// - Group 2 is either `?` (open) or `.` (close).
+	/// - Group 3, if present, is an alphanumeric identifier for the section.
+	pub static ref TWIN_SQUARK: Regex = Regex::new(
+		r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
+	).unwrap();
+}
 
 
 pub struct Renderer
@@ -72,16 +91,97 @@ impl Renderer
 	{
 		let parser =
 			pulldown::Parser::new(&source)
-				.map(|e| match e {
-					_ => e,
-				})
+				.filter_map(|e| self.process_event(e, page, config))
+				// .inspect(|e| { dbg!(e); })
 		;
 
 		let mut out = str!();
-
-		cmark::cmark(parser.inspect(|e| { dbg!(e); }), &mut out).unwrap();
+		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone()).unwrap();
 
 		Ok(out)
+	}
+}
+
+impl Renderer
+{
+	fn process_event<'e>(&mut self,
+		event: pulldown::Event<'e>,
+		page: &PageData,
+		config: &SquarkupConfig,
+	) -> Option<pulldown::Event<'e>>
+	{
+		match event {
+			pulldown::Event::InlineHtml(ref html) =>
+				if html.starts_with("<!--") && html.ends_with("-->") && self.process_comment(html, page, config) {
+					None
+				}
+				else {
+					Some(event)
+				}
+			_ => Some(event),
+		}
+	}
+
+	fn process_comment(&mut self,
+		html: &pulldown::CowStr,
+		page: &PageData,
+		config: &SquarkupConfig,
+	) -> bool
+	{
+		if let Some(captures) = TWIN_SQUARK.captures(html) {
+			let key = captures.get(3).map(|k| k.as_str().to_owned());
+
+			let squark = match captures.get(1) {
+				Some(m) => match m.as_str().to_ascii_uppercase().as_str() {
+					"LEAVE" => Ctx::LEAVE { key },
+					"SLASH" => Ctx::SLASH { key },
+
+					s => {
+						self.errors.push(SquarkError::Recoverable {
+							msg: fmt!("unknown twin squark: {W}{s}"),
+							hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
+							debug: vec![
+								fmt!("context stack: {:?}", self.ctx.stack())
+							],
+						});
+						return false;
+					}
+				}
+				None => unreachable!(),
+			};
+
+			match captures.get(2) {
+				Some(m) => match m.as_str() {
+					"?" => self.ctx.push(squark),
+					"." => {
+						let did_pop = self.ctx.try_pop(squark);
+
+						if !did_pop {
+							self.errors.push(SquarkError::Recoverable {
+								msg: fmt!("unpaired closing squark: {W}{html}"),
+								hint: fmt!(""),
+								debug: vec![
+									fmt!("context stack: {:?}", self.ctx)
+								],
+							});
+						}
+					}
+					_ => unreachable!(),
+				}
+				None => unreachable!(),
+			}
+
+			return true;
+		}
+		else if html.contains("#squark") || html.contains("#SQUARK") {
+			self.errors.push(SquarkError::Recoverable {
+				msg: fmt!("unknown squark pattern: {W}{html}"),
+				hint: fmt!("use squarks like this: {W}<!-- #SQUARK leave? -->"),
+				debug: vec![],
+			});
+		}
+
+		false
 	}
 }
 
