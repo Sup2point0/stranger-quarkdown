@@ -80,3 +80,16 @@ impl SquarkError
 		}
 	}
 }
+
+macro_rules! impl_from_error {
+	($error_type:path) =>
+	{
+		impl From<$error_type> for SquarkError {
+			fn from(e: $error_type) -> Self {
+				Self::external(e)
+			}
+		}
+	}
+}
+
+impl_from_error!(std::io::Error);
