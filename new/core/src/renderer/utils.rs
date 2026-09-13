@@ -28,7 +28,7 @@ pub(super) fn test_preserves_with_comments(cases: &[&str])
 		let mut renderer = Renderer::new();
 		let output = renderer.render_from(source, &PageData::default(), &config).unwrap();
 
-		assert_eq!( &output, source );
+		assert_eq!( &output, source, "{:?}", renderer.ctx.stack() );
 	}
 }
 
@@ -39,7 +39,7 @@ pub(super) fn test_expect(cases: &[&str], expected: &str)
 		let mut renderer = Renderer::new();
 		let output = renderer.render_from(source, &PageData::default(), &TEST_CONFIG).unwrap();
 
-		assert_eq!( &output, expected );
+		assert_eq!( &output, expected, "{:?}", renderer.ctx.stack() );
 	}
 }
 
@@ -50,6 +50,6 @@ pub(super) fn test_expected(cases: &[(&str, &str)])
 		let mut renderer = Renderer::new();
 		let output = renderer.render_from(source, &PageData::default(), &TEST_CONFIG).unwrap();
 
-		assert_eq!( &output, expected );
+		assert_eq!( &output, expected, "{:?}", renderer.ctx.stack() );
 	}
 }

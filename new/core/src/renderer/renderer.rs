@@ -7,7 +7,7 @@ use crate::{
 };
 
 use lazy_static::lazy_static;
-use pulldown_cmark as pulldown;
+use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
 use regex::Regex;
 
@@ -90,9 +90,9 @@ impl Renderer
 	) -> SquarkResult<String>
 	{
 		let parser =
-			pulldown::Parser::new(&source)
+			pd::Parser::new(&source)
 				.filter_map(|e| self.process_event(e, page, config))
-				// .inspect(|e| { dbg!(e); })
+				.inspect(|e| { dbg!(e); })
 		;
 
 		let mut out = str!();
@@ -105,27 +105,44 @@ impl Renderer
 impl Renderer
 {
 	fn process_event<'e>(&mut self,
-		event: pulldown::Event<'e>,
+		event: pd::Event<'e>,
 		page: &PageData,
 		config: &SquarkupConfig,
-	) -> Option<pulldown::Event<'e>>
+	) -> Option<pd::Event<'e>>
 	{
 		match event {
-			pulldown::Event::InlineHtml(ref html) =>
-				if html.starts_with("<!--") && html.ends_with("-->") && self.process_comment(html, page, config) {
-					None
-				}
-				else {
+			| pd::Event::Html(ref html)
+			| pd::Event::InlineHtml(ref html)
+			=>
+				if html.starts_with("<!--") && html.ends_with("-->") {
+					if self.process_comment(html) {
+						None
+					} else if config.format.preserve_comments {
+						Some(event)
+					} else {
+						None
+					}
+				} else {
 					Some(event)
 				}
+			_ => self.process_markdown(event),
+		}
+	}
+
+	fn process_markdown<'e>(&mut self,
+		event: pd::Event<'e>,
+	) -> Option<pd::Event<'e>>
+	{
+		match self.ctx.current()
+		{
+			Ctx::SLASH{..} => None,
 			_ => Some(event),
 		}
 	}
 
+	/// Attempt to process squarks inside `html`, returning `true` if a squark was matched (and so the comment should be removed).
 	fn process_comment(&mut self,
-		html: &pulldown::CowStr,
-		page: &PageData,
-		config: &SquarkupConfig,
+		html: &pd::CowStr,
 	) -> bool
 	{
 		if let Some(captures) = TWIN_SQUARK.captures(html) {
@@ -149,6 +166,12 @@ impl Renderer
 				}
 				None => unreachable!(),
 			};
+
+			if matches!(self.ctx.current(), Ctx::LEAVE{..})
+			&& !matches!(squark, Ctx::LEAVE{..})
+			{
+				return false;
+			}
 
 			match captures.get(2) {
 				Some(m) => match m.as_str() {

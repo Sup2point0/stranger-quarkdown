@@ -6,21 +6,6 @@ pub enum Ctx {
 	ONLY,
 }
 
-impl Ctx
-{
-	fn key(&self) -> Option<&str>
-	{
-		match self
-		{
-			| Self::LEAVE { key }
-			| Self::SLASH { key }
-			=> key.as_ref().map(|s| s.as_str()),
-			
-			_ => None,
-		}
-	}
-}
-
 
 #[derive(Debug)]
 pub struct ContextStack
