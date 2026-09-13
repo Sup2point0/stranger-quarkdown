@@ -1,13 +1,24 @@
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Ctx {
 	MARKDOWN,
-	CODE_INLINE,
-	CODE_BLOCK,
-	LINK,
-	COMMENT,
-	SQUARK_LEAVE,
-	SQUARK_SLASH,
-	SQUARK_ONLY,
+	LEAVE { key: Option<String> },
+	SLASH { key: Option<String> },
+	ONLY,
+}
+
+impl Ctx
+{
+	fn key(&self) -> Option<&str>
+	{
+		match self
+		{
+			| Self::LEAVE { key }
+			| Self::SLASH { key }
+			=> key.as_ref().map(|s| s.as_str()),
+			
+			_ => None,
+		}
+	}
 }
 
 
@@ -36,18 +47,22 @@ impl ContextStack
 	}
 
 	/// What's the current context?
-	pub fn current(&self) -> Ctx {
-		*self.stack.last().unwrap_or(&Ctx::MARKDOWN)
+	pub fn current(&self) -> &Ctx {
+		self.stack.last().unwrap_or(&Ctx::MARKDOWN)
 	}
 
 	pub fn push(&mut self, ctx: Ctx) {
 		self.stack.push(ctx);
 	}
 
-	pub fn pop(&mut self, ctx: Ctx)
+	/// Pop `ctx` from the stack if it is the currently active context, taking keys into account.
+	pub fn try_pop(&mut self, ctx: Ctx) -> bool
 	{
-		if self.current() == ctx {
+		if *self.current() == ctx {
 			self.stack.pop();
+			true
+		} else {
+			false
 		}
 	}
 
@@ -68,7 +83,7 @@ impl ContextStack
 			self.stack.truncate(idx);
 		}
 
-		while self.current() == ctx {
+		while *self.current() == ctx {
 			self.stack.pop();
 		}
 	}
@@ -84,39 +99,39 @@ mod test
 	{
 		let mut ctx = ContextStack::new();
 
-		ctx.push(Ctx::CODE_BLOCK);
+		ctx.push(Ctx::LEAVE { key: None });
 
-		ctx.push(Ctx::COMMENT);
-		ctx.push(Ctx::LINK);
-		ctx.force_pop(Ctx::COMMENT);
-		assert_eq!( ctx.current(), Ctx::CODE_BLOCK );
+		ctx.push(Ctx::SLASH { key: None });
+		ctx.push(Ctx::ONLY);
+		ctx.force_pop(Ctx::SLASH { key: None });
+		assert_eq!( *ctx.current(), Ctx::LEAVE { key: None } );
 	}
 
 	#[test] fn force_pop_medium()
 	{
 		let mut ctx = ContextStack::new();
-		ctx.push(Ctx::CODE_BLOCK);
+		ctx.push(Ctx::LEAVE { key: None });
 
-		ctx.push(Ctx::COMMENT);
-		ctx.push(Ctx::LINK);
-		ctx.push(Ctx::COMMENT);
-		ctx.force_pop(Ctx::COMMENT);
-		assert_eq!( ctx.current(), Ctx::LINK );
+		ctx.push(Ctx::SLASH { key: None });
+		ctx.push(Ctx::ONLY);
+		ctx.push(Ctx::SLASH { key: None });
+		ctx.force_pop(Ctx::SLASH { key: None });
+		assert_eq!( *ctx.current(), Ctx::ONLY );
 		
-		ctx.force_pop(Ctx::COMMENT);
-		assert_eq!( ctx.current(), Ctx::CODE_BLOCK );
+		ctx.force_pop(Ctx::SLASH { key: None });
+		assert_eq!( *ctx.current(), Ctx::LEAVE { key: None } );
 	}
 
 	#[test] fn force_pop_hard()
 	{
 		let mut ctx = ContextStack::new();
-		ctx.push(Ctx::CODE_BLOCK);
+		ctx.push(Ctx::LEAVE { key: None });
 
-		ctx.push(Ctx::COMMENT);
-		ctx.push(Ctx::LINK);
-		ctx.push(Ctx::CODE_INLINE);
+		ctx.push(Ctx::SLASH { key: None });
+		ctx.push(Ctx::ONLY);
+		ctx.push(Ctx::ONLY);
 
-		ctx.force_pop(Ctx::CODE_BLOCK);
-		assert_eq!( ctx.current(), Ctx::MARKDOWN );
+		ctx.force_pop(Ctx::LEAVE { key: None });
+		assert_eq!( *ctx.current(), Ctx::MARKDOWN );
 	}
 }
