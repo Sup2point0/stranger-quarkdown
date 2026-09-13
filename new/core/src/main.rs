@@ -100,24 +100,7 @@ fn squarkup() -> SquarkResult<bool>
 
 	for page in site_data.pages.values() {
 		catch!(errs => {
-			let dest = config.out.folder.join(&page.destination).join(&config.out.file);
-
-			log::info!(slash!(
-				"rendering to: {GREY1}{}",
-				dest.strip_prefix(&config.paths.root).unwrap().to_path_buf(),
-			));
-
-			let source = File::open(&page.filepath).map_err(err!())?;
-
-			if let Some(folder) = dest.parent() {
-				if !folder.exists() {
-					fs::create_dir_all(folder).map_err(err!())?;
-				}
-			}
-
-			let target = File::create(&dest).map_err(err!())?;
-
-			let mut renderer = Renderer::init(source, target, page.filepath.clone(), dest)?;
+			let mut renderer = Renderer::new();
 			renderer.render(&page, &config)?;
 		});
 

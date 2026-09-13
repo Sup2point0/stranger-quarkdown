@@ -1,274 +1,87 @@
 use super::*;
 use crate::{
 	SquarkupConfig, PageData, SquarkResult, SquarkError,
+	log,
+	colours::*,
 	macros::*,
 };
 
-use std::fs::{ File };
-use std::io::{ BufReader, BufWriter, Read, Write };
-use std::path::{ PathBuf };
-use std::debug_assert_matches;
+use pulldown_cmark as pulldown;
+use pulldown_cmark_to_cmark as cmark;
+
+use std::fs::{ self, File };
+use std::io::{ Read, Write };
 
 
-pub struct Renderer<Source: Read = File, Target: Write = File>
+pub struct Renderer
 {
-	/* NOTE:
-		The renderer architecture is very similar to `CharmParser`, because `Renderer` is technically a parser+emitter in one lmao
-
-		However, the renderer reads in _chunks_ instead of _lines_, because unlike the parser, it handles arbitrary Markdown text that could be super short or super long. Reading in chunks means memory usage doesn't explode if a file has one diabolically long line!
-		
-		Not really worth extracting into common shared functionality, more hassle than it's worth without structural traits in Rust =(
-	*/
-
-	/// Have we reached the end of the source?
-	pub done_reading: bool,
-
-	pub errors: Vec<SquarkError>,
-
+	/// The parsing context stack.
 	pub(super) ctx: ContextStack,
 
-	pub(super) line_number: usize,
-
-	/// The location of the source file to read from.
-	pub(super) source_filepath: PathBuf,
-
-	/// The location of the target file to write to.
-	pub(super) target_filepath: PathBuf,
-
-	pub(super) _reader: BufReader<Source>,
-	
-	pub(super) _writer: BufWriter<Target>,
-
-	/// The index in the current chunk the renderer is pointing to.
-	pub(super) _index: usize,
-
-	/// The characters of the currently in-memory chunk to process.
-	/// 
-	/// As the renderer reads from the source file, we append characters to this buffer. When it's safe to do so, we chop off characters that have already been processed to keep the buffer short (avoiding huge memory usage).
-	pub(super) _window: Vec<char>,
+	/// Accumulated errors during rendering.
+	pub(super) errors: Vec<SquarkError>,
 }
 
-impl<Source: Read, Target: Write>
-	Renderer<Source, Target>
+impl Renderer
 {
 	/// Construct a renderer for rendering from `source` to `target`.
-	pub fn init(
-		source: Source,
-		target: Target,
-		source_filepath: PathBuf,
-		target_filepath: PathBuf,
-	) -> SquarkResult<Self>
+	pub fn new() -> Self
 	{
-		let mut out = Self {
-			done_reading: false,
-			errors: vec![],
+		Self {
 			ctx: ContextStack::new(),
-			line_number: 0,
-			_reader: BufReader::new(source),
-			_writer: BufWriter::new(target),
-			source_filepath,
-			target_filepath,
-			_index: 0,
-			_window: vec![],
-		};
+			errors: vec![],
+		}
+	}
 
-		out.next_chunk()?;
+	pub fn render(&mut self,
+		page: &PageData,
+		config: &SquarkupConfig,
+	) -> SquarkResult
+	{
+		let dest = config.out.folder.join(&page.destination).join(&config.out.file);
+
+		log::info!(slash!(
+			"rendering to: {GREY1}{}",
+			dest.strip_prefix(&config.paths.root).unwrap().to_path_buf(),
+		));
+
+		let mut file = File::open(&page.filepath)?;
+
+		let mut source = str!();
+		file.read_to_string(&mut source)?;
+
+		if let Some(folder) = dest.parent() {
+			if !folder.exists() {
+				fs::create_dir_all(folder)?;
+			}
+		}
+
+		let output = self.render_from(&source, page, config)?;
+
+		let mut target = File::create(dest)?;
+		target.write_all(output.as_bytes())?;
+
+		Ok(())
+	}
+
+	pub(super) fn render_from(&mut self,
+		source: &str,
+		page: &PageData,
+		config: &SquarkupConfig,
+	) -> SquarkResult<String>
+	{
+		let parser =
+			pulldown::Parser::new(&source)
+				.map(|e| match e {
+					_ => e,
+				})
+		;
+
+		let mut out = str!();
+
+		cmark::cmark(parser.inspect(|e| { dbg!(e); }), &mut out).unwrap();
 
 		Ok(out)
-	}
-
-	pub fn render(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
-	{
-		while !self.is_done() {
-			self.render_next_chunk(page, config)?;
-		}
-
-		self._writer.flush().map_err(err!())?;
-
-		if self.ctx.stack().len() > 0 {
-			Err(SquarkError::Recoverable {
-				msg: str!("unterminated renderer context"),
-				hint: str!("this means you have an unclosed comment, bracket, code block, etc. somewhere"),
-				debug: vec![
-					slash!("in: {}", self.source_filepath),
-					fmt!("context stack: {:?}", self.ctx.stack()),
-				],
-			})
-		} else {
-			Ok(())
-		}
-	}
-}
-
-impl<Source: Read, Target: Write>
-	Renderer<Source, Target>
-{
-	fn render_next_chunk(&mut self, _page: &PageData, config: &SquarkupConfig) -> SquarkResult
-	{
-		self.cleanup_chunk();
-
-		debug_assert_matches!(self.current(), Some(..));
-
-		match self.ctx.current()
-		{
-			Ctx::MARKDOWN     => self.render_markdown(config),
-			Ctx::CODE_INLINE  => self.render_code_inline(),
-			Ctx::CODE_BLOCK   => self.render_code_block(),
-			Ctx::COMMENT      => self.render_comment(config),
-			Ctx::SQUARK_LEAVE => self.render_leave(config),
-			Ctx::SQUARK_SLASH => self.render_slash(),
-			Ctx::SQUARK_ONLY  => self.render_only(config),
-			_ => unimplemented!(),
-		}
-	}
-
-	/// Handle generic Markdown context openers, which may be shared between many different contexts.
-	fn render_plain(&mut self, config: &SquarkupConfig) -> SquarkResult<bool>
-	{
-		if self.try_eat("<!--")? {
-			self.eat_whitespace()?;
-			self.ctx.push(Ctx::COMMENT);
-
-			if config.format.preserve_comments {
-				self.emit("<!--")?;
-			}
-			return Ok(true);
-		}
-		else if self.try_eat("```")? {
-			self.emit("```")?;
-			self.ctx.push(Ctx::CODE_BLOCK);
-			return Ok(true);
-		}
-		else if self.try_eat("`")? {
-			self.emit_char('`')?;
-			self.ctx.push(Ctx::CODE_INLINE);
-			return Ok(true);
-		}
-		Ok(false)
-	}
-}
-
-impl<Source: Read, Target: Write>
-	Renderer<Source, Target>
-{
-	fn render_markdown(&mut self, config: &SquarkupConfig) -> SquarkResult
-	{
-		if !self.render_plain(config)? && let Some(c) = self.current() {
-			self.emit_char(c)?;
-			self.advance()?;
-			
-			if c == '\\' && let Some(cc) = self.current() {
-				self.emit_char(cc)?;
-				self.advance()?;
-			}
-		}
-		Ok(())
-	}
-
-	fn render_code_inline(&mut self) -> SquarkResult
-	{
-		if self.try_eat("```")? {
-			self.emit("```")?;
-		}
-		else if let Some(c) = self.current() {
-			self.emit_char(c)?;
-			self.advance()?;
-
-			if c == '`' || c == '\n' || self.out_of_bounds() {
-				self.ctx.pop(Ctx::CODE_INLINE);
-			}
-		}
-		Ok(())
-	}
-
-	fn render_code_block(&mut self) -> SquarkResult
-	{
-		if self.try_eat("```")? {
-			self.emit("```")?;
-			self.ctx.pop(Ctx::CODE_BLOCK);
-		}
-		else if let Some(c) = self.current() {
-			self.emit_char(c)?;
-			self.advance()?;
-			
-			if c == '\\' && let Some(c2) = self.current() {
-				self.emit_char(c2)?;
-				self.advance()?;
-			}
-		}
-		Ok(())
-	}
-
-	fn render_comment(&mut self, config: &SquarkupConfig) -> SquarkResult
-	{
-		if self.try_eat("-->")? {
-			self.ctx.pop(Ctx::COMMENT);
-
-			if config.format.preserve_comments {
-				self.emit("-->")?;
-			}
-		}
-		else if
-				self.try_open_squark("leave", Ctx::SQUARK_LEAVE)?
-			|| self.try_open_squark("slash", Ctx::SQUARK_SLASH)?
-			|| self.try_eat_twin_squark("only",  Ctx::SQUARK_ONLY, true, false, false)?
-		{}
-		else if let Some(c) = self.current() {
-			if config.format.preserve_comments {
-				self.emit_char(c)?;
-			}
-			self.advance()?;
-		}
-		Ok(())
-	}
-
-	fn render_leave(&mut self, config: &SquarkupConfig) -> SquarkResult
-	{
-		if self.try_eat("<!--")? {
-			self.eat_whitespace()?;
-
-			// FIXME leave should do best-effort tracking, but otherwise allow invalid syntax
-			if self.try_close_squark("leave", Ctx::SQUARK_LEAVE)?
-			{
-				if self.ctx.current() == Ctx::SQUARK_LEAVE {
-					self.emit("<!-- #SQUARK leave. -->")?;
-				}
-			}
-			else if self.try_open_squark("leave", Ctx::SQUARK_LEAVE)? {
-				self.emit("<!-- #SQUARK leave? -->")?;
-			}
-			else {
-				self.emit("<!-- ")?;
-			}
-		}
-		else if let Some(c) = self.current() {
-			self.emit_char(c)?;
-			self.advance()?;
-		}
-		Ok(())
-	}
-
-	fn render_slash(&mut self) -> SquarkResult
-	{
-		if self.try_eat("<!--")? {
-			self.try_open_close_squark("slash", Ctx::SQUARK_SLASH)?;
-		} else {
-			self.advance()?;
-		}
-		Ok(())
-	}
-
-	fn render_only(&mut self, config: &SquarkupConfig) -> SquarkResult
-	{
-		if !self.render_plain(config)? {
-			if self.try_close_squark("only", Ctx::SQUARK_ONLY)?
-			{}
-			else if let Some(c) = self.current() {
-				self.emit_char(c)?;
-				self.advance()?;
-			}
-		}
-		Ok(())
 	}
 }
 

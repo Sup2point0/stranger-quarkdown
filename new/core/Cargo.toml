@@ -12,6 +12,8 @@ strip = true
 enum_stringify = "0.6.5"
 glob = "0.3.4"
 path-slash = "0.2.1"
+pulldown-cmark = "0.13.4"
+pulldown-cmark-to-cmark = "22.0.1"
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive"] }
 thiserror = "2.0.20"
