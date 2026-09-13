@@ -55,6 +55,11 @@ macro_rules! hints {
 // == STRUCTS == //
 
 #[macro_export]
+macro_rules! pair {
+	($t:expr) => { ($t, $t) }
+} pub use pair;
+
+#[macro_export]
 macro_rules! bx {
 	()        => { Box::new() };
 	($t:expr) => { Box::new($t) };

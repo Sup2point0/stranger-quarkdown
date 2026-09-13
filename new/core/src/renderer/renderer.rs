@@ -98,6 +98,11 @@ mod plain {
 		test_preserves(&[
 			"sup, world!",
 			"sup,\nworld!",
+		]);
+	}
+
+	#[test] fn medium() {
+		test_preserves(&[
 			"sup,\nworld!\n",
 			"sup, \nworld!\n",
 			"sup,\n world!\n",
@@ -111,29 +116,29 @@ mod code_inline {
 	use super::*;
 
 	#[test] fn easy() {
-		test_preserves(&[
-			"this `is` code",
-			"this `is ` code",
-			"this ` is` code",
-			"this ` is ` code",
-			"this `is` some `more` code",
-			"line `1` onto\nline `2`.",
+		test_expected(&[
+			pair!("this `is` code"),
+			pair!("this `is ` code"),
+			pair!("this ` is` code"),
+				  ("this ` is ` code", "this `is` code"),
+			pair!("this `is` some `more` code"),
+			pair!("`1` onto\nline `2`"),
+			pair!("line `1` onto\nline `2`."),
 		]);
 	}
 
 	#[test] fn medium() {
-		test_preserves(&[
-			"`1` onto\nline `2`",
-			// "`x` `y`",
-			// "` x ` ` y `",
-			// "`x y` `z`",
-			// "`x`y`z`",
+		test_expected(&[
+			pair!("`x` `y`"),
+				  ("` 1 ` ` 2 `", "`1` `2`"),
+			pair!("`x y` `z`"),
+			pair!("`x`y`z`"),
 		]);
 	}
 
 	#[test] fn unclosed() {
-		test_preserves(&[
-			"`x\ny",
+		test_expected(&[
+			("`1\n2", "\\`1\n2"),
 		]);
 	}
 

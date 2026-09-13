@@ -32,6 +32,17 @@ pub(super) fn test_preserves_with_comments(cases: &[&str])
 	}
 }
 
+/// Run the renderer over `cases`, checking that each input renders to `expected`.
+pub(super) fn test_expect(cases: &[&str], expected: &str)
+{
+	for source in cases {
+		let mut renderer = Renderer::new();
+		let output = renderer.render_from(source, &PageData::default(), &TEST_CONFIG).unwrap();
+
+		assert_eq!( &output, expected );
+	}
+}
+
 /// Run the renderer over `cases`, checking that each input renders to its expected output.
 pub(super) fn test_expected(cases: &[(&str, &str)])
 {
