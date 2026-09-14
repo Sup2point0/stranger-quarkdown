@@ -65,6 +65,11 @@ macro_rules! bx {
 	($t:expr) => { Box::new($t) };
 } pub use bx;
 
+/// Join paths using a `/` separator.
+/// 
+/// ```ignore
+/// dir!(base / rel / file.rs)
+/// ```
 #[macro_export]
 macro_rules! dir {
 	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };

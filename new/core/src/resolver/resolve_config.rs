@@ -1,9 +1,7 @@
-use crate::{
-	SquarkupConfig, SquarkResult, SquarkError,
-	log,
-	colours::*,
-	macros::*,
-};
+use crate::core::*;
+use crate::log;
+use crate::colours::*;
+use crate::macros::*;
 
 use std::error::Error;
 use std::fs::{ File };

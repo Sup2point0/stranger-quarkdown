@@ -3,6 +3,7 @@ pub mod colours;
 pub mod macros;
 
 pub mod strings; pub use strings::*;
+pub mod paths; pub use paths::*;
 
 #[cfg(test)] pub mod testing;
 #[cfg(test)] pub use testing::*;

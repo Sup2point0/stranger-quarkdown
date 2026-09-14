@@ -1,5 +1,5 @@
 use super::*;
-use crate::*;
+use crate::core::*;
 use crate::log;
 use crate::colours::*;
 use crate::macros::*;
@@ -140,7 +140,7 @@ impl<'d> Renderer<'d>
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser =
 			pd::Parser::new_ext(&source, PARSER_OPTIONS.clone())
-				.inspect(|e| { dbg!(e); })
+				// .inspect(|e| { dbg!(e); })
 				.filter_map(|e| self.process_event(e))
 		;
 
@@ -182,11 +182,11 @@ impl<'d> Renderer<'d>
 					None => self.process_markdown(event)
 				}
 
-			// pd::Event::Start(pd::Tag::Link { ref mut dest_url, .. })
-			// => {
-			// 	self.process_link(dest_url);
-			// 	Some(event)
-			// }
+			pd::Event::Start(pd::Tag::Link { ref mut dest_url, .. })
+			=> {
+				self.process_link(dest_url);
+				Some(event)
+			}
 
 			_ => self.process_markdown(event),
 		}
@@ -308,15 +308,19 @@ impl<'d> Renderer<'d>
 	fn process_link(&mut self, dest_url: &mut pd::CowStr)
 	{
 		// 1. find where the target file lives, relative to the current file
-		let resolved_dest_url = self.page.filepath.join(dest_url.as_ref());
+		let dest_path = self.page.filepath.join(dest_url.as_ref());
 
-		if !resolved_dest_url.exists() {
+		if !dest_path.exists() {
 			self.errors.push(todo!());
 		}
 
-		// if let Some(dest_page) = self.site.pages.get(&dest_path) {
+		// if let Some(dest_page) = self.site.pages.get(&dest_path)
+		// {
 		// 	let href = self.config.out.folder.join(dest_page.destination);
 		// 	*dest_url = pd::CowStr::Inlined(href);
+		// }
+		// else {
+		// 	self.errors.push(todo!())
 		// }
 	}
 }

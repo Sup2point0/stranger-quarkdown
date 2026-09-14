@@ -1,10 +1,8 @@
 use path_slash::PathExt;
 
-use crate::{
-	SquarkupConfig, SquarkResult,
-	log,
-	macros::*,
-};
+use crate::core::*;
+use crate::log;
+use crate::macros::*;
 
 use std::path::PathBuf;
 

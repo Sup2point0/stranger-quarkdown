@@ -1,5 +1,7 @@
 use super::*;
-use crate::{ *, macros::*, utils::testing::* };
+use crate::core::*;
+use crate::macros::*;
+use crate::utils::testing::*;
 
 
 /// Run the renderer over `cases`, checking that the rendered output is exactly identical to the input.

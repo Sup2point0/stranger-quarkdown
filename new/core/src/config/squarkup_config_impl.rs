@@ -1,11 +1,10 @@
 use regex::regex;
 
 use super::*;
-use crate::{
-	SquarkResult, SquarkError,
-	colours::*,
-	macros::*,
-};
+use crate::core::*;
+use crate::utils;
+use crate::colours::*;
+use crate::macros::*;
 
 use std::path::{ Path, PathBuf };
 
@@ -152,7 +151,7 @@ impl SquarkupConfig
 			if let Some(value) = out.get("data") {
 				catch!(errs => {
 					let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;
-					let path = site.join(raw.trim_start_matches(|c| matches!(c, '/' | '\\')));
+					let path = site.join(utils::rel_path(raw));
 					s.out.data = Some(path);
 				});
 			}
@@ -300,7 +299,7 @@ impl SquarkupConfig
 		hint: String,
 	) -> SquarkResult<PathBuf>
 	{
-		let path = root.join(dir.trim_start_matches(|c| matches!(c, '/' | '\\')));
+		let path = root.join(utils::rel_path(dir));
 
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {

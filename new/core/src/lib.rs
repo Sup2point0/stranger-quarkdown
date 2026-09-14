@@ -11,8 +11,11 @@ pub mod errors;
 pub mod utils;
 pub use utils::{ log, colours, macros };
 
-/* These types are central to all of Squarkdown, so we'll root-export them for convenience. */
-pub use config::{ SquarkupConfig };
-pub use parser::{ CharmParser };
-pub use types::{ PageData, SiteData };
-pub use errors::{ SquarkResult, SquarkError };
+/// Central Squarkdown types packaged for convenience.
+pub mod core
+{
+	pub use super::config::{ SquarkupConfig };
+	pub use super::parser::{ CharmParser };
+	pub use super::types::{ PageData, SiteData };
+	pub use super::errors::{ SquarkResult, SquarkError };
+}

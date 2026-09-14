@@ -1,13 +1,13 @@
 use time::Date;
 use time::macros::format_description;
 
-use crate::{
-	SquarkupConfig,
-	config::*,
-	types::*,
-	log,
-	macros::*,
-};
+use crate::core::*;
+use crate::config::*;
+use crate::types::*;
+use crate::utils;
+use crate::log;
+use crate::colours::*;
+use crate::macros::*;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -19,8 +19,10 @@ pub struct PageData
 	/// Location of the original `.md` file this page represents.
 	pub filepath: PathBuf,
 	
+	/// Location of the `+page.svx` file to render this page to.
+	pub destination: PathBuf,
+	
 	pub flags: Strings,
-	pub destination: String,
 
 	pub title: Option<String>,
 	pub description: Option<String>,
@@ -41,16 +43,37 @@ pub struct PageData
 
 impl PageData
 {
-	// TODO prefer SquarkError
 	pub fn init(
 		filepath: PathBuf,
 		flags: Strings,
 		mut fields: HashMap<String, Strings>,
 		config: &SquarkupConfig,
-	) -> Result<Self, CharmError>
+	) -> SquarkResult<Self>
 	{
-		let dest = Self::take1(&mut fields, "destination", "dest")
-			.ok_or_else(|| CharmError::MissingField { field: str!("dest") })?;
+		let mut errs = vec![];
+
+		let mut destination = PathBuf::new();
+
+		if let Some(dest) = Self::take1(&mut fields, "destination", "dest") {
+			destination = config.out.folder.join(utils::rel_path(&dest));
+
+			if !destination.starts_with(&config.paths.root) {
+				errs.push(SquarkError::Unrecoverable {
+					msg: str!(slash!("cannot export a file to {}", destination)),
+					hint: fmt!("a file's destination directory must remain under the root directory of your project"),
+					debug: vec![
+						str!(slash!("your project's root directory is {}", config.paths.root))
+					],
+				});
+			}
+		}
+		else {
+			errs.push(SquarkError::Unrecoverable {
+				msg: fmt!("missing field: {W}dest"),
+				hint: fmt!("active pages must specify where they should be rendered to"),
+				debug: vec![],
+			});
+		}
 		
 		let heading      = Self::take1(&mut fields, "heading", "head");
 		let title        = Self::take1(&mut fields, "title", "title").or_else(|| heading.clone());
@@ -74,30 +97,30 @@ impl PageData
 			{
 				Ok(value) => cleanse.push(value),
 				Err(_) => {
-					let err = CharmError::InvalidValue {
-						field: str!("cleanse"),
-						value: raw,
-					};
-
-					match config.errors.on_error {
-						ErrorAction::KILL => return Err(err),
-						ErrorAction::WARN => { log::bad!(err); continue; },
-					}
+					errs.push(SquarkError::Recoverable {
+						msg: fmt!("invalid value for {W}cleanse{R}: {W}{raw}"),
+						hint: fmt!("valid values are {W}angles{G}, {W}braces{G}, {W}comments{G}, {W}line-breaks"),
+						debug: vec![],
+					});
 				}
 			};
 		}
 
-		Ok(Self {
-			filepath,
-			flags,
-			destination: dest.to_string(),
-			title, description,
-			heading, caption,
-			tags,
-			release_date, last_updated,
-			cleanse,
-			other: fields,
-		})
+		if errs.is_empty() {
+			Ok(Self {
+				filepath,
+				flags,
+				destination,
+				title, description,
+				heading, caption,
+				tags,
+				release_date, last_updated,
+				cleanse,
+				other: fields,
+			})
+		} else {
+			Err(SquarkError::Multiple { errs })
+		}
 	}
 
 	fn take(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<Vec<String>>

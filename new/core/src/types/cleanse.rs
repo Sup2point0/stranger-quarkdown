@@ -6,7 +6,6 @@ use crate::macros::*;
 pub enum CleanseOperation
 {
 	/// Replace non-tag `<>` with `&lt;`, `&gt;` for HTML safety.
-	#[enum_stringify(case = "flat")]
 	ANGLES,
 
 	/// Replace `{}` with `&lbrace;`, `&rbrace;` for HTML safety.

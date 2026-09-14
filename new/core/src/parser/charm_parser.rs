@@ -1,12 +1,10 @@
 use tinyvec::tiny_vec;
 
 use super::*;
-use crate::{
-	SquarkupConfig, PageData,
-	types::{ Strings, CharmError },
-	utils,
-	macros::*,
-};
+use crate::core::*;
+use crate::types::*;
+use crate::utils;
+use crate::macros::*;
 
 use std::collections::HashMap;
 use std::error::Error;
@@ -97,7 +95,7 @@ impl<Source: Read> CharmParser<Source>
 /// Parser internals specialised to Squarkdown-Flavoured Markdown.
 impl<Source: Read> CharmParser<Source>
 {
-	pub(super) fn _parse(&mut self, config: &SquarkupConfig) -> ParseResult<Result<PageData, CharmError>>
+	pub(super) fn _parse(&mut self, config: &SquarkupConfig) -> ParseResult<SquarkResult<PageData>>
 	{
 		self.eat_whitespace();
 		
@@ -375,7 +373,7 @@ mod test
 		let file_data = parser.parse(&TEST_CONFIG).unwrap().unwrap();
 
 		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, str!("test") );
+		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
 	}
 
 	#[test] fn parse_heading_matches_single_line()
