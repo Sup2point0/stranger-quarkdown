@@ -12,7 +12,12 @@ pub(super) fn test_preserves(cases: &[&str])
 {
 	for source in cases {
 		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim(), &PageData::default(), &TEST_CONFIG).unwrap();
+
+		let output = renderer.render_from(
+			source.trim().to_owned(),
+			&PageData::default(),
+			&TEST_CONFIG
+		).unwrap();
 
 		assert_eq!( output.trim(), source.trim(), "{:?}", renderer.ctx.stack() );
 	}
@@ -26,7 +31,12 @@ pub(super) fn test_preserves_with_comments(cases: &[&str])
 
 	for source in cases {
 		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim(), &PageData::default(), &config).unwrap();
+
+		let output = renderer.render_from(
+			source.trim().to_owned(),
+			&PageData::default(),
+			&config
+		).unwrap();
 
 		assert_eq!( output.trim(), source.trim(), "{:?}", renderer.ctx.stack() );
 	}
@@ -37,7 +47,12 @@ pub(super) fn test_expect(cases: &[&str], expected: &str)
 {
 	for source in cases {
 		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim(), &PageData::default(), &TEST_CONFIG).unwrap();
+
+		let output = renderer.render_from(
+			source.trim().to_owned(),
+			&PageData::default(),
+			&TEST_CONFIG
+		).unwrap();
 
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}
@@ -48,7 +63,12 @@ pub(super) fn test_expected(cases: &[(&str, &str)])
 {
 	for (source, expected) in cases {
 		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim(), &PageData::default(), &TEST_CONFIG).unwrap();
+
+		let output = renderer.render_from(
+			source.trim().to_owned(),
+			&PageData::default(),
+			&TEST_CONFIG
+		).unwrap();
 
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}

@@ -76,7 +76,7 @@ impl Renderer
 			}
 		}
 
-		let output = self.render_from(&source, page, config)?;
+		let output = self.render_from(source, page, config)?;
 
 		let mut target = File::create(dest)?;
 		target.write_all(output.as_bytes())?;
@@ -85,11 +85,14 @@ impl Renderer
 	}
 
 	pub(super) fn render_from(&mut self,
-		source: &str,
+		mut source: String,
 		page: &PageData,
 		config: &SquarkupConfig,
 	) -> SquarkResult<String>
 	{
+		source = Self::expand_only(source);
+		dbg!(&source);
+
 		let parser =
 			pd::Parser::new(&source)
 				.filter_map(|e| self.process_event(e, page, config))
@@ -100,6 +103,15 @@ impl Renderer
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone()).unwrap();
 
 		Ok(out)
+	}
+
+	fn expand_only(source: String) -> String
+	{
+		Regex::new(
+			r"(?is)<!--\s*#SQUARK\s+ONLY\?\s+(?-i)(.*?)(?i)#SQUARK\s+ONLY\.\s*-->"
+		).unwrap()
+		.replace_all(&source, "$1")
+		.to_string()
 	}
 }
 
@@ -531,7 +543,8 @@ mod only {
 
 	#[test] fn easy() {
 		test_expected(&[
-			("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show me"),
+			("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show  me"),
+			("Please <!-- #SQUARK only? do show #SQUARK only. --> me", "Please do show  me"),
 		]);
 	}
 
@@ -558,9 +571,9 @@ mod only {
 
 	#[test] fn awkward_whitespace() {
 		test_expected(&[
-			("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y z"),
-			("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y z"),
-			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y  z"),
+			("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
+			("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
+			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
 		]);
 	}
 }
