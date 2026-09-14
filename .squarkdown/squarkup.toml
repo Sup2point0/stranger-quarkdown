@@ -9,14 +9,16 @@ sources = [
 ]
 
 [out]
-folder = "/src/routes/(docs)/(dyna)/"
+folder = "src/routes/(docs)/(dyna)/"
 file = "+page.svx"
+data = "src/site.json"
 
-[data]
-path = "/src/site.json"
+[format]
+preserve-comments = true
+externalise-links = true
 
 [styles]
-folder = "/src/styles/"
+folder = "src/styles/"
 base-file = "article.scss"
 
 [fonts]
@@ -26,4 +28,5 @@ queries = [
 
 [errors]
 on-error = "kill"
-on-file-exists = "overwrite"
+file-already-exists = "overwrite"
+linked-file-does-not-exist = "link-to-github"

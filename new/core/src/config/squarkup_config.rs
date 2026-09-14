@@ -96,7 +96,10 @@ pub struct ErrorConfig {
 	pub on_error: ErrorAction,
 
 	/// What to do when a target file to write to already exists.
-	pub on_file_exists: FileAction,
+	pub file_already_exists: FileAction,
+
+	/// When rendering Markdown, what should Squarkdown do to a link that points to an inactive file?
+	pub linked_file_does_not_exist: LinkRewriteAction,
 }
 
 #[derive(EnumStringify)] #[enum_stringify(case = "flat")]
@@ -119,5 +122,18 @@ pub enum FileAction {
 	ERROR,
 
 	/// Skip regenerating this file.
+	SKIP,
+}
+
+#[derive(EnumStringify)] #[enum_stringify(case = "flat")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LinkRewriteAction {
+	/// Still strip the `.md` file extension, but don't do anything else
+	STRIP_EXTENSION,
+
+	/// Replace the link with an absolute link to the original file in the GitHub repo.
+	LINK_TO_GITHUB,
+
+	/// Skip rewriting this file.
 	SKIP,
 }

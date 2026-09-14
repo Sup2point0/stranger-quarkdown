@@ -46,7 +46,11 @@ impl SquarkupConfig
 				],
 			},
 			fonts:  FontsConfig { queries: vec![] },
-			errors: ErrorConfig { on_error: ErrorAction::WARN, on_file_exists: FileAction::OVERWRITE },
+			errors: ErrorConfig {
+				on_error: ErrorAction::WARN,
+				file_already_exists: FileAction::OVERWRITE,
+				linked_file_does_not_exist: LinkRewriteAction::STRIP_EXTENSION,
+			},
 		}
 	}
 
@@ -62,7 +66,7 @@ impl SquarkupConfig
 			
 			However, better than repeatedly failing with fatal errors is to report all of them at once, so *if possible*, we'll still process the entire config and aggregate any errors we encounter in `errs`, only returning `Err()` once we reach the end.
 		*/
-		let mut errs = vec![];
+		let mut errs = SquarkError::multiple();
 
 		/* NOTE:
 			We first separately read `paths.site` because many *defaults* depend on it, so we need it before calling `::init_defaults()`.
@@ -107,20 +111,24 @@ impl SquarkupConfig
 			Self::for_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
 				match regex::Regex::new(&pattern) {
 					Ok(compiled) => s.paths.include.push(compiled),
-					Err(e) => errs.push(SquarkError::External {
-						err: bx!(e),
-						msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
-					}),
+					Err(e) => {
+						errs.push(SquarkError::External {
+							err: bx!(e),
+							msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
+						});
+					}
 				}
 			});
 
 			Self::for_string_array(&paths, "paths", "exclude", "(RegEx patterns)", &mut errs, |pattern, errs| {
 				match regex::Regex::new(&pattern) {
 					Ok(compiled) => s.paths.exclude.push(compiled),
-					Err(e) => errs.push(SquarkError::External {
-						err: bx!(e),
-						msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
-					}),
+					Err(e) => {
+						errs.push(SquarkError::External {
+							err: bx!(e),
+							msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
+						});
+					}
 				}
 			});
 
@@ -207,16 +215,16 @@ impl SquarkupConfig
 				});
 			}
 			
-			if let Some(value) = errors.get("on-file-exists")
+			if let Some(value) = errors.get("file-already-exists")
 			{
 				catch!(errs => {
-					let raw = Self::try_get_string(value, "errors.on-file-exists", "(a file conflict handling strategy)")?;
+					let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
 
 					match FileAction::try_from(raw.as_str())
 					{
-						Ok(opt) => s.errors.on_file_exists = opt,
+						Ok(opt) => s.errors.file_already_exists = opt,
 						Err(..) => return Err(SquarkError::Unrecoverable {
-							msg: fmt!("unknown setting for {Y}errors.on-file-exists"),
+							msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
 							hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
 							debug: vec![
 								fmt!("you provided \"{value}\""),
@@ -230,7 +238,7 @@ impl SquarkupConfig
 		if errs.is_empty() {
 			Ok(s)
 		} else {
-			Err(SquarkError::Multiple { errs })
+			Err(errs)
 		}
 	}
 }
@@ -329,8 +337,8 @@ impl SquarkupConfig
 		category: &'static str,
 		field: &'static str,
 		hint: &'static str,
-		errs: &mut Vec<SquarkError>,
-		mut callback: impl FnMut(&String, &mut Vec<SquarkError>),
+		errs: &mut SquarkError,
+		mut callback: impl FnMut(&String, &mut SquarkError),
 	)
 	{
 		match Self::get_string_array(data, category, field, hint)
@@ -339,10 +347,10 @@ impl SquarkupConfig
 			Ok(Some(values)) => for value in values {
 				match Self::require_string_entry(value, category, field, hint) {
 					Ok(value) => callback(value, errs),
-					Err(e) => errs.push(e),
+					Err(e) => { errs.push(e); }
 				}
-			},
-			Err(e) => errs.push(e),
+			}
+			Err(e) => { errs.push(e); }
 		}
 	}
 
