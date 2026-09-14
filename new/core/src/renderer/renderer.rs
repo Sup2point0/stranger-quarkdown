@@ -15,21 +15,33 @@ use std::fs::{ self, File };
 use std::io::{ Read, Write };
 
 
-lazy_static! {
-	pub static ref RENDER_OPTIONS: cmark::Options<'static> = cmark::Options {
-		code_block_token_count: 3,
-		list_token: '-',
-		..cmark::Options::default()
-	};
+lazy_static!
+{
+	/// Options for parsing with `pulldown_cmark`.
+	pub static ref PARSER_OPTIONS: pd::Options
+		= pd::Options::from(
+			  pd::Options::ENABLE_GFM
+			| pd::Options::ENABLE_TABLES
+			| pd::Options::ENABLE_FOOTNOTES
+		);
+
+	/// Options for rendering with `pulldown_cmark_to_cmark`.
+	pub static ref RENDER_OPTIONS: cmark::Options<'static>
+		= cmark::Options {
+			code_block_token_count: 3,
+			list_token: '-',
+			..cmark::Options::default()
+		};
 
 	/// The RegEx pattern for twin squarks.
 	/// 
 	/// - Group 1 is the squark (`leave`, `slash`)
 	/// - Group 2 is either `?` (open) or `.` (close).
 	/// - Group 3, if present, is an alphanumeric identifier for the section.
-	pub static ref TWIN_SQUARK: Regex = Regex::new(
-		r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
-	).unwrap();
+	pub static ref TWIN_SQUARK: Regex
+		= Regex::new(
+			r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
+		).unwrap();
 }
 
 
@@ -39,7 +51,7 @@ pub struct Renderer
 	pub(super) ctx: ContextStack,
 
 	/// Accumulated errors during rendering.
-	pub(super) errors: Vec<SquarkError>,
+	errors: Vec<SquarkError>,
 }
 
 impl Renderer
@@ -76,24 +88,29 @@ impl Renderer
 			}
 		}
 
-		let output = self.render_from(source, page, config)?;
+		let output = self.render_from(source, page, config);
 
 		let mut target = File::create(dest)?;
 		target.write_all(output.as_bytes())?;
 
-		Ok(())
+		if self.errors.is_empty() {
+			Ok(())
+		} else {
+			Err(SquarkError::Multiple { errs: self.errors.drain(..).collect() })
+		}
 	}
 
 	pub(super) fn render_from(&mut self,
 		mut source: String,
 		page: &PageData,
 		config: &SquarkupConfig,
-	) -> SquarkResult<String>
+	) -> String
 	{
 		source = Self::expand_only(source);
 
+		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser =
-			pd::Parser::new(&source)
+			pd::Parser::new_ext(&source, PARSER_OPTIONS.clone())
 				.filter_map(|e| self.process_event(e, page, config))
 				// .inspect(|e| { dbg!(e); })
 		;
@@ -101,7 +118,7 @@ impl Renderer
 		let mut out = str!();
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone()).unwrap();
 
-		Ok(out)
+		out
 	}
 
 	fn expand_only(source: String) -> String
@@ -367,6 +384,40 @@ mod code_blocks {
 			("``` ```",      "` `"),
 			("```\n```",     "```\n```"),
 		])
+	}
+}
+
+#[cfg(test)]
+mod tables {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			indoc! {"
+				|one|two|
+				|---|---|
+				|1|2|
+				|3|4|
+			"},
+			indoc! {"
+				|one|two|
+				|:--|:--|
+				|1|2|
+				|3|4|
+			"},
+			indoc! {"
+				|one|two|
+				|--:|--:|
+				|1|2|
+				|3|4|
+			"},
+			indoc! {"
+				|one|two|
+				|:-:|:-:|
+				|1|2|
+				|3|4|
+			"},
+		]);
 	}
 }
 
