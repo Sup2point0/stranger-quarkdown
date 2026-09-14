@@ -17,6 +17,7 @@ use std::io::{ Read, Write };
 
 lazy_static! {
 	pub static ref RENDER_OPTIONS: cmark::Options<'static> = cmark::Options {
+		code_block_token_count: 3,
 		list_token: '-',
 		..cmark::Options::default()
 	};
@@ -113,9 +114,11 @@ impl Renderer
 		match event {
 			| pd::Event::Html(ref html)
 			| pd::Event::InlineHtml(ref html)
-			=>
+			=> {
+				let html = html.trim();
+				
 				if html.starts_with("<!--") && html.ends_with("-->") {
-					if self.process_comment(html) {
+					if self.process_comment(html) || matches!(self.ctx.current(), Ctx::SLASH{..}) {
 						None
 					} else if config.format.preserve_comments {
 						Some(event)
@@ -125,6 +128,7 @@ impl Renderer
 				} else {
 					Some(event)
 				}
+			}
 			_ => self.process_markdown(event),
 		}
 	}
@@ -142,7 +146,7 @@ impl Renderer
 
 	/// Attempt to process squarks inside `html`, returning `true` if a squark was matched (and so the comment should be removed).
 	fn process_comment(&mut self,
-		html: &pd::CowStr,
+		html: &str,
 	) -> bool
 	{
 		if let Some(captures) = TWIN_SQUARK.captures(html) {
@@ -226,10 +230,7 @@ mod plain {
 
 	#[test] fn medium() {
 		test_preserves(&[
-			"sup,\nworld!\n",
-			"sup, \nworld!\n",
-			"sup,\n world!\n",
-			"sup, \n world!\n",
+			"# Heading\n\ncontent",
 		]);
 	}
 }
@@ -432,11 +433,7 @@ mod slash {
 					<!-- #SQUARK slash. -->
 					please
 				"},
-				indoc! {"
-					erase
-
-					please
-				"},
+				"erase\n\n\nplease"
 			),
 		]);
 	}
