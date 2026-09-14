@@ -1,6 +1,7 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Ctx {
 	MARKDOWN,
+	CODE,
 	LEAVE { key: Option<String> },
 	SLASH { key: Option<String> },
 	ONLY,

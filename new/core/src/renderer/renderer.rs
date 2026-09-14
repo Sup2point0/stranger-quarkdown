@@ -112,6 +112,12 @@ impl Renderer
 	) -> Option<pd::Event<'e>>
 	{
 		match event {
+			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(Ctx::CODE); }
+			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(Ctx::CODE); }
+			_ => (),
+		};
+
+		match event {
 			| pd::Event::Html(ref html)
 			| pd::Event::InlineHtml(ref html)
 			=> {
@@ -230,7 +236,15 @@ mod plain {
 
 	#[test] fn medium() {
 		test_preserves(&[
-			"# Heading\n\ncontent",
+			indoc! {"
+				# Heading
+				The quick brown fox jumps over the lazy dog
+			"},
+			indoc! {"
+				# Heading
+				
+				The quick brown fox jumps over the lazy dog
+			"},
 		]);
 	}
 }
@@ -335,12 +349,12 @@ mod code_blocks {
 	}
 
 	#[test] fn edge_cases() {
-		test_preserves(&[
-			"```code```",
-			"```code\n```",
-			"``````",
-			"``` ```",
-			"```\n```",
+		test_expected(&[
+			("```code```",   "`code`"),
+			("```code\n```", "```code\n```"),
+			("``````",       "```\n```"),
+			("``` ```",      "` `"),
+			("```\n```",     "```\n```"),
 		])
 	}
 }
@@ -353,23 +367,29 @@ mod comments {
 		use super::*;
 
 		#[test] fn easy() {
-			test_expected(&[
-				("erase <!--this--> comment",   "erase  comment"),
-				("erase <!--this --> comment",  "erase  comment"),
-				("erase <!-- this--> comment",  "erase  comment"),
-				("erase <!-- this --> comment", "erase  comment"),
-			]);
-			test_expected(&[
-				("erase <!--this comment--> please",   "erase  please"),
-				("erase <!--this comment --> please",  "erase  please"),
-				("erase <!-- this comment--> please",  "erase  please"),
-				("erase <!-- this comment --> please", "erase  please"),
-			]);
-			test_expected(&[
-				("erase\n<!-- this comment -->\nplease",    "erase\n\nplease"),
-				("erase\n<!--\nthis comment\n-->\nplease",  "erase\n\nplease"),
-				("erase\n<!--\nthis\ncomment\n-->\nplease", "erase\n\nplease"),
-			]);
+			test_expect(&[
+				"erase <!--this--> this",
+				"erase <!--this --> this",
+				"erase <!-- this--> this",
+				"erase <!-- this --> this",
+			], "erase  this");
+		}
+
+		#[test] fn medium() {
+			test_expect(&[
+				"erase <!--this comment--> please",
+				"erase <!--this comment --> please",
+				"erase <!-- this comment--> please",
+				"erase <!-- this comment --> please",
+			], "erase  please");
+		}
+
+		#[test] fn hard() {
+			test_expect(&[
+				"erase\n<!-- this comment -->\nplease",
+				"erase\n<!--\nthis comment\n-->\nplease",
+				"erase\n<!--\nthis\ncomment\n-->\nplease",
+			], "erase\n\n\nplease");
 		}
 
 		#[test] fn nested() {
@@ -389,12 +409,18 @@ mod comments {
 				"keep <!-- this--> comment",
 				"keep <!-- this --> comment",
 			]);
+		}
+
+		#[test] fn medium() {
 			test_preserves_with_comments(&[
 				"keep <!--this comment--> please",
 				"keep <!--this comment --> please",
 				"keep <!-- this comment--> please",
 				"keep <!-- this comment --> please",
 			]);
+		}
+
+		#[test] fn hard() {
 			test_preserves_with_comments(&[
 				"keep\n<!-- this comment -->\nplease",
 				"keep\n<!--\nthis comment\n-->\nplease",
