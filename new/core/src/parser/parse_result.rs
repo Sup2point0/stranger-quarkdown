@@ -49,10 +49,10 @@ impl std::fmt::Display for ParseFailure
 	{
 		match self
 		{
-			Self::FatalEnd { when: cause }
+			Self::FatalEnd{ when: cause }
 				=> write!(f, "unexpected end of input while {cause}!"),
 			
-			Self::UnexpectedInput { when: origin, expected, actual } =>
+			Self::UnexpectedInput{ when: origin, expected, actual } =>
 				write!(f, "while {origin}: expected {expected}, but found {actual}"),
 			
 			_ => write!(f, "leaked internal error!")

@@ -1,4 +1,5 @@
 use squarkdown::*;
+use squarkdown::core::*;
 use squarkdown::config::*;
 use squarkdown::colours::*;
 
@@ -42,6 +43,9 @@ fn main() -> ExitCode
 /// - `Ok(false)` if no squarkup was attempted
 fn squarkup() -> SquarkResult<bool>
 {
+	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
+
+	// == SETUP == //
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
 
@@ -52,7 +56,8 @@ fn squarkup() -> SquarkResult<bool>
 	let mut active_files = 0;
 	log::is!("finding files to squarkup...");
 
-	let mut errs = vec![];
+	// == PARSE == //
+	let mut errs = SquarkError::multiple();
 	
 	for filepath in resolver::resolve_files(&config) {
 		catch!(errs => {
@@ -74,17 +79,13 @@ fn squarkup() -> SquarkResult<bool>
 	}
 
 	if !errs.is_empty() {
-		let err = SquarkError::Multiple { errs: errs.drain(..).collect() };
-		
-		if err.is_fatal() || config.errors.on_error == ErrorAction::KILL {
-			return Err(err);
+		if errs.is_fatal() || config.errors.on_error == ErrorAction::KILL {
+			return Err(errs);
 		}
 
 		log::line();
-		print_error(err);
+		print_error(errs);
 		log::line();
-
-		errs.clear();
 	}
 	
 	if active_files == 0 {
@@ -94,6 +95,7 @@ fn squarkup() -> SquarkResult<bool>
 		log::ok!("found {active_files} active files to squarkup");
 	}
 
+	// == RENDER == //
 	log::is!("rendering...");
 
 	for page in site_data.pages.values() {
@@ -117,8 +119,8 @@ fn squarkup() -> SquarkResult<bool>
 fn print_error(err: SquarkError)
 {
 	match err {
-		SquarkError::Recoverable { msg, hint, debug }
-		| SquarkError::Unrecoverable { msg, hint, debug } => {
+		SquarkError::Recoverable{ msg, hint, debug }
+		| SquarkError::Unrecoverable{ msg, hint, debug } => {
 			log::bad!(msg);
 			for each in debug {
 				log::info!(each);
@@ -127,13 +129,13 @@ fn print_error(err: SquarkError)
 				log::hint!(hint);
 			}
 		},
-		SquarkError::Multiple { errs } => {
+		SquarkError::Multiple{ errs } => {
 			for (i, err) in errs.into_iter().enumerate() {
 				if i != 0 { log::line(); }
 				print_error(err);
 			}
 		},
-		SquarkError::External { err, msg } => {
+		SquarkError::External{ err, msg } => {
 			log::bad!(msg);
 			log::line();
 			println!("{R}{err}");

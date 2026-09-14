@@ -29,7 +29,7 @@ pub enum SquarkError
 
 	/// Multiple errors, aggregated from an atomic operation.
 	/// 
-	/// Handling depends on `config.errors.on_error`.
+	/// Handling depends on `config::errors::on_error`.
 	#[error("{R}multiple fatal errors")]
 	Multiple {
 		errs: Vec<SquarkError>,
@@ -46,7 +46,7 @@ pub enum SquarkError
 /// Constructors
 impl SquarkError
 {
-	/// Construct a `SquarkError::Unrecoverable` with only a plain error message.
+	/// Construct a [`Self::Unrecoverable`] with only a plain error message.
 	pub fn fatal(msg: &str) -> Self
 	{
 		Self::Unrecoverable {
@@ -56,6 +56,15 @@ impl SquarkError
 		}
 	}
 
+	/// Construct an empty [`Self::Multiple`] for aggregating errors.
+	/// 
+	/// Use alongside the [`catch`] macro.
+	pub fn multiple() -> Self
+	{
+		Self::Multiple { errs: vec![] }
+	}
+
+	/// Construct a [`Self::External`] with only a plain error message.
 	pub fn external(e: impl std::error::Error + 'static) -> Self
 	{
 		Self::External {
@@ -67,6 +76,21 @@ impl SquarkError
 
 impl SquarkError
 {
+	/// Is this a [`Self::Multiple`] error with no aggregated errors?
+	pub fn is_empty(&self) -> bool
+	{
+		if let Self::Multiple { errs } = self && errs.is_empty() {
+			true
+		} else {
+			false
+		}
+	}
+
+	/// Is this a non-recoverable error?
+	/// 
+	/// Some errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
+	/// 
+	/// Other errors are 'unrecoverable' because they invalidate how everything works down the line. For instance, a missing required field.
 	pub fn is_fatal(&self) -> bool
 	{
 		match self
@@ -77,6 +101,17 @@ impl SquarkError
 			| Self::External{..} => true,
 			
 			Self::Multiple{ errs } => errs.iter().any(|err| err.is_fatal()),
+		}
+	}
+
+	/// Add an error to a [`Self::Multiple`] instance.
+	pub fn push(&mut self, error: SquarkError) -> bool
+	{
+		if let Self::Multiple{ errs } = self {
+			errs.push(error);
+			true
+		} else {
+			false
 		}
 	}
 }
