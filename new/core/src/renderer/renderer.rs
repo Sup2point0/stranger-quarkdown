@@ -472,34 +472,34 @@ mod comments {
 		use super::*;
 
 		#[test] fn easy() {
-			test_preserves_with_comments(&[
-				"keep <!--this--> comment",
-				"keep <!--this --> comment",
-				"keep <!-- this--> comment",
-				"keep <!-- this --> comment",
+			test_expected_for(|c| c.format.preserve_comments = true, &[
+				pair!("keep <!--this--> comment"),
+				pair!("keep <!--this --> comment"),
+				pair!("keep <!-- this--> comment"),
+				pair!("keep <!-- this --> comment"),
 			]);
 		}
 
 		#[test] fn medium() {
-			test_preserves_with_comments(&[
-				"keep <!--this comment--> please",
-				"keep <!--this comment --> please",
-				"keep <!-- this comment--> please",
-				"keep <!-- this comment --> please",
+			test_expected_for(|c| c.format.preserve_comments = true, &[
+				pair!("keep <!--this comment--> please"),
+				pair!("keep <!--this comment --> please"),
+				pair!("keep <!-- this comment--> please"),
+				pair!("keep <!-- this comment --> please"),
 			]);
 		}
 
 		#[test] fn hard() {
-			test_preserves_with_comments(&[
-				"keep\n<!-- this comment -->\nplease",
-				"keep\n<!--\nthis comment\n-->\nplease",
-				"keep\n<!--\nthis\ncomment\n-->\nplease",
+			test_expected_for(|c| c.format.preserve_comments = true, &[
+				("keep\n<!-- this one -->\nplease",    "keep\n\n<!-- this one -->\n\nplease"),
+				("keep\n<!--\nthis one\n-->\nplease",  "keep\n\n<!--\nthis one\n-->\n\nplease"),
+				("keep\n<!--\nthis\none\n-->\nplease", "keep\n\n<!--\nthis\none\n-->\n\nplease"),
 			]);
 		}
 
 		#[test] fn nested() {
-			test_preserves_with_comments(&[
-				"<!-- <!-- illegal --> comment",
+			test_expected_for(|c| c.format.preserve_comments = true, &[
+				pair!("<!-- <!-- illegal --> comment"),
 			]);
 		}
 	}
