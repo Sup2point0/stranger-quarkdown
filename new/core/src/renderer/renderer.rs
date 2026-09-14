@@ -91,12 +91,11 @@ impl Renderer
 	) -> SquarkResult<String>
 	{
 		source = Self::expand_only(source);
-		dbg!(&source);
 
 		let parser =
 			pd::Parser::new(&source)
 				.filter_map(|e| self.process_event(e, page, config))
-				.inspect(|e| { dbg!(e); })
+				// .inspect(|e| { dbg!(e); })
 		;
 
 		let mut out = str!();

@@ -99,23 +99,17 @@ fn squarkup() -> SquarkResult<bool>
 	log::is!("rendering...");
 
 	for page in site_data.pages.values() {
-		catch!(errs => {
-			let mut renderer = Renderer::new();
-			renderer.render(&page, &config)?;
-		});
+		let r = Renderer::new().render(&page, &config);
 
-		if !errs.is_empty() {
-			let err = SquarkError::Multiple { errs: errs.drain(..).collect() };
-			
-			if err.is_fatal() || config.errors.on_error == ErrorAction::KILL {
+		if let Err(err) = r {
+			if err.is_fatal()  || config.errors.on_error == ErrorAction::KILL {
 				return Err(err);
 			}
-
-			log::line();
-			print_error(err);
-			log::line();
-
-			errs.clear();
+			else {
+				log::line();
+				print_error(err);
+				log::line();
+			}
 		}
 	}
 	

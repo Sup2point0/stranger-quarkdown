@@ -16,7 +16,7 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 
 	// if only we had `yield` generators syntax...
 	config.paths.sources.iter().flat_map(|source| {
-		log::info!(slash!("searching from {}", *source));
+		log::info!(slash!("searching from: {}", *source));
 
 		walkdir::WalkDir::new(&config.paths.root.join(source))
 			.into_iter()
