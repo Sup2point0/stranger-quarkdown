@@ -73,6 +73,16 @@ impl ContextStack
 			self.stack.pop();
 		}
 	}
+
+	/// Is the current context `Ctx::LEAVE`?
+	pub fn is_leave(&self) -> bool {
+		matches!(self.current(), Ctx::LEAVE{..})
+	}
+
+	/// Is the current context `Ctx::SLASH`?
+	pub fn is_slash(&self) -> bool {
+		matches!(self.current(), Ctx::SLASH{..})
+	}
 }
 
 

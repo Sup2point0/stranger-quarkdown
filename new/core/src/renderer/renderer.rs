@@ -6,6 +6,7 @@ use crate::{
 	macros::*,
 };
 
+use kiam::when;
 use lazy_static::lazy_static;
 use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
@@ -152,12 +153,10 @@ impl Renderer
 				let html = html.trim();
 				
 				if html.starts_with("<!--") && html.ends_with("-->") {
-					if self.process_comment(html) || matches!(self.ctx.current(), Ctx::SLASH{..}) {
-						None
-					} else if config.format.preserve_comments {
-						Some(event)
-					} else {
-						None
+					when! {
+						self.process_comment(html) || self.ctx.is_slash()      => None,
+						config.format.preserve_comments || self.ctx.is_leave() => Some(event),
+						_ => None,
 					}
 				} else {
 					Some(event)
@@ -263,17 +262,11 @@ mod plain {
 	}
 
 	#[test] fn medium() {
-		test_preserves(&[
-			indoc! {"
-				# Heading
-				The quick brown fox jumps over the lazy dog
-			"},
-			indoc! {"
-				# Heading
-				
-				The quick brown fox jumps over the lazy dog
-			"},
-		]);
+		test_expect(&[
+			"# Heading\nThe quick brown fox jumps over the lazy dog",
+			"# Heading\n\nThe quick brown fox jumps over the lazy dog",
+			"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
+		], "# Heading\n\nThe quick brown fox jumps over the lazy dog");
 	}
 }
 
