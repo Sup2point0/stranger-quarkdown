@@ -1,8 +1,6 @@
-use lazy_static::lazy_static;
+use crate::*;
 
-use crate::{
-	config::*,
-};
+use lazy_static::lazy_static;
 
 use std::path::PathBuf;
 
@@ -14,4 +12,8 @@ lazy_static!
 	
 	/// A barebones testing squarkup config used for unit tests.
 	pub static ref TEST_CONFIG: SquarkupConfig = SquarkupConfig::init_defaults(&TESTS, &TESTS);
+
+	pub static ref TEST_PAGE: PageData = PageData::default();
+
+	pub static ref TEST_SITE: SiteData = SiteData::new();
 }

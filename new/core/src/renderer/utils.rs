@@ -1,19 +1,13 @@
 use super::*;
-
-use crate::{
-	PageData, SquarkupConfig,
-	macros::*,
-	utils::testing::*,
-};
+use crate::{ *, macros::*, utils::testing::* };
 
 
 /// Run the renderer over `cases`, checking that the rendered output is exactly identical to the input.
 pub(super) fn test_preserves(cases: &[&str])
 {
 	for source in cases {
-		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim().to_owned(), &PageData::default(), &TEST_CONFIG);
-
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let output = renderer.render_from(source.trim().to_owned());
 		assert_eq!( output.trim(), source.trim(), "{:?}", renderer.ctx.stack() );
 	}
 }
@@ -22,9 +16,8 @@ pub(super) fn test_preserves(cases: &[&str])
 pub(super) fn test_expect(cases: &[&str], expected: &str)
 {
 	for source in cases {
-		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim().to_owned(), &PageData::default(), &TEST_CONFIG);
-
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let output = renderer.render_from(source.trim().to_owned());
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}
 }
@@ -45,9 +38,8 @@ pub(super) fn test_expected_for(
 	change_config(&mut config);
 
 	for (source, expected) in cases {
-		let mut renderer = Renderer::new();
-		let output = renderer.render_from(source.trim().to_owned(), &PageData::default(), &config);
-
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+		let output = renderer.render_from(source.trim().to_owned());
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}
 }

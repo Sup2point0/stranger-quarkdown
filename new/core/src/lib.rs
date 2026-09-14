@@ -14,6 +14,5 @@ pub use utils::{ log, colours, macros };
 /* These types are central to all of Squarkdown, so we'll root-export them for convenience. */
 pub use config::{ SquarkupConfig };
 pub use parser::{ CharmParser };
-pub use renderer::{ Renderer };
 pub use types::{ PageData, SiteData };
 pub use errors::{ SquarkResult, SquarkError };

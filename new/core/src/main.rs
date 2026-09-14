@@ -1,6 +1,5 @@
 use squarkdown::*;
 use squarkdown::config::*;
-use squarkdown::log;
 use squarkdown::colours::*;
 
 use std::fs::File;
@@ -98,7 +97,7 @@ fn squarkup() -> SquarkResult<bool>
 	log::is!("rendering...");
 
 	for page in site_data.pages.values() {
-		let r = Renderer::new().render(&page, &config);
+		let r = renderer::render(&page, &site_data, &config);
 
 		if let Err(err) = r {
 			if err.is_fatal()  || config.errors.on_error == ErrorAction::KILL {
