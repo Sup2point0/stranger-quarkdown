@@ -22,3 +22,6 @@ However, extracting the content from all those Markdown files to the Svelte site
 What Squarkdown does is exactly that – it automates the process of collecting all the relevant `.md` files in the repo, processing and extracting their metadata, and generating their equivalent pages in the site. It means I can write content in Markdown as usual, then simply configure a few options in [squarks](walkthrough/squarkdown-flavoured-markdown.md), and have the peace of mind that it’ll all be automatically reflected in the site.
 
 One of the most important points of the framework is that it should leave no visible artefacts on the Markdown – hence why everything is achieved through comments, which do not impact the displayed Markdown at all!
+
+
+<br>

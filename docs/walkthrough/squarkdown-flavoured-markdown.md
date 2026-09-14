@@ -35,16 +35,13 @@ You can use these anywhere in your file to customise how Squarkdown should proce
 | date = 2025 March 14
 -->
 
-<!-- NOTE: There shouldn't be spaces between the `#` and the rest of the squark, but having a real squark in the demo code interferes with *actual* Squarkdown LMAO -->
-
-<!-- # SQUARK leave? -->
+<!-- #SQUARK leave? -->
 Squarks won’t change your Markdown preview in any way.
-<!-- # SQUARK leave. -->
+<!-- #SQUARK leave. -->
 
-<!-- # SQUARK only?
+<!-- #SQUARK only?
 But they can influence how it’s processed when rendered to HTML!
-     # SQUARK only. -->
-
+     #SQUARK only. -->
 ```
 
 
