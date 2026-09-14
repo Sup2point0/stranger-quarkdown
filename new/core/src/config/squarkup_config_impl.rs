@@ -36,9 +36,7 @@ impl SquarkupConfig
 			out: OutConfig {
 				folder: dir!(site / "src/routes/"),
 				file: str!("+page.svx"),
-			},
-			data: DataConfig {
-				path: dir!(site / "src/site-data.json")
+				data: None,
 			},
 			format: FormatConfig { preserve_comments: false, externalise_links: false },
 			bases:  BasesConfig  { folder: None, page_js: None },
@@ -150,9 +148,15 @@ impl SquarkupConfig
 					s.out.file = raw.clone();
 				});
 			}
-		}
 
-		// DataConfig
+			if let Some(value) = out.get("data") {
+				catch!(errs => {
+					let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;
+					let path = site.join(raw.trim_start_matches(|c| matches!(c, '/' | '\\')));
+					s.out.data = Some(path);
+				});
+			}
+		}
 
 		// FormatConfig
 		if let Some(format) = data.get("format")
@@ -385,6 +389,37 @@ impl SquarkupConfig
 					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 				],
 			}),
+		}
+	}
+}
+
+
+// == TESTS == //
+
+#[cfg(test)]
+use std::assert_matches;
+
+#[cfg(test)]
+fn load_config(source: &str) -> SquarkResult<SquarkupConfig>
+{
+	let toml = str!(source).parse::<toml::Table>().unwrap();
+	SquarkupConfig::try_from_toml(toml, &PathBuf::new())
+}
+
+#[cfg(test)]
+mod error_handling {
+	use super::*;
+
+	#[test] fn reject()
+	{
+		for source in [
+			"[errors]\non-error = 0",
+			"[errors]\non-error = false",
+			"[errors]\non-error = 'x'",
+			"[errors]\non-error = \"y\"",
+		]
+		{
+			assert_matches!(load_config(source), Err(..));
 		}
 	}
 }

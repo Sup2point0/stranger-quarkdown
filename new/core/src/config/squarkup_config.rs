@@ -13,7 +13,6 @@ pub struct SquarkupConfig
 {
 	pub paths:  PathsConfig,
 	pub out:    OutConfig,
-	pub data:   DataConfig,
 	pub format: FormatConfig,
 	pub bases:  BasesConfig,
 	pub styles: StylesConfig,
@@ -50,12 +49,11 @@ pub struct OutConfig {
 
 	/// The file name for exported files, including the (expected) `.svx` extension.
 	pub file: String,
-}
 
-#[derive(Clone, Debug)]
-pub struct DataConfig {
 	/// Where to export site data, including the (expected) `.json` extension.
-	pub path: PathBuf,
+	/// 
+	/// If absent, site data is not exported.
+	pub data: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug)]
