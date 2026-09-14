@@ -112,8 +112,8 @@ impl Renderer
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser =
 			pd::Parser::new_ext(&source, PARSER_OPTIONS.clone())
+				.inspect(|e| { dbg!(e); })
 				.filter_map(|e| self.process_event(e, page, config))
-				// .inspect(|e| { dbg!(e); })
 		;
 
 		let mut out = str!();
@@ -153,25 +153,38 @@ impl Renderer
 				let html = html.trim();
 				
 				if html.starts_with("<!--") && html.ends_with("-->") {
-					when! {
+					return when! {
 						self.process_comment(html) || self.ctx.is_slash()      => None,
 						config.format.preserve_comments || self.ctx.is_leave() => Some(event),
 						_ => None,
 					}
-				} else {
-					Some(event)
 				}
+				else if !self.ctx.is_slash() {
+					if html.starts_with("<!--") {
+						self.ctx.push(Ctx::COMMENT);
+						return config.format.preserve_comments.then_some(event)
+					}
+					else if html.ends_with("-->") {
+						self.ctx.force_pop(Ctx::COMMENT);
+						return config.format.preserve_comments.then_some(event)
+					}
+				}
+				self.process_markdown(event, config)
 			}
-			_ => self.process_markdown(event),
+			_ => self.process_markdown(event, config),
 		}
 	}
 
 	fn process_markdown<'e>(&mut self,
 		event: pd::Event<'e>,
+		config: &SquarkupConfig,
 	) -> Option<pd::Event<'e>>
 	{
+		dbg!(self.ctx.stack());
+
 		match self.ctx.current()
 		{
+			Ctx::COMMENT => config.format.preserve_comments.then_some(event),
 			Ctx::SLASH{..} => None,
 			_ => Some(event),
 		}
@@ -214,7 +227,7 @@ impl Renderer
 				Some(m) => match m.as_str() {
 					"?" => self.ctx.push(squark),
 					"." => {
-						let did_pop = self.ctx.try_pop(squark);
+						let did_pop = self.ctx.force_pop(squark);
 
 						if !did_pop {
 							self.errors.push(SquarkError::Recoverable {
@@ -447,6 +460,7 @@ mod comments {
 			], "erase\n\n\nplease");
 		}
 
+		// FIXME
 		#[test] fn nested() {
 			test_expected(&[
 				("<!-- <!-- illegal --> comment", " comment"),
@@ -546,7 +560,9 @@ mod leave {
 				indoc! {"
 					Don't
 
+
 					<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+
 
 					this
 				"}

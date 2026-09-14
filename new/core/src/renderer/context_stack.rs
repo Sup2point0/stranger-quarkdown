@@ -1,6 +1,7 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Ctx {
 	MARKDOWN,
+	COMMENT,
 	CODE,
 	LEAVE { key: Option<String> },
 	SLASH { key: Option<String> },
@@ -63,15 +64,19 @@ impl ContextStack
 	/// ```
 	/// 
 	/// If `ctx` is not present in the context stack, this is a no-op.
-	pub fn force_pop(&mut self, ctx: Ctx)
+	pub fn force_pop(&mut self, ctx: Ctx) -> bool
 	{
 		if let Some(idx) = self.stack.iter().rposition(|c| *c == ctx) {
 			self.stack.truncate(idx);
+		} else {
+			return false;
 		}
 
 		while *self.current() == ctx {
 			self.stack.pop();
 		}
+
+		true
 	}
 
 	/// Is the current context `Ctx::LEAVE`?
