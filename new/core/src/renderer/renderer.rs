@@ -1,5 +1,6 @@
 use super::*;
 use crate::core::*;
+use crate::config::*;
 use crate::log;
 use crate::colours::*;
 use crate::macros::*;
@@ -78,6 +79,7 @@ pub(super) struct Renderer<'d>
 	errors: Vec<SquarkError>,
 }
 
+/// Core interface.
 impl<'d> Renderer<'d>
 {
 	pub fn new(
@@ -123,8 +125,10 @@ impl<'d> Renderer<'d>
 
 		let output = self.render_from(source);
 
-		let mut target = File::create(&self.dest)?;
-		target.write_all(output.as_bytes())?;
+		if self.errors.is_empty() || self.config.errors.on_error == ErrorAction::WARN {
+			let mut target = File::create(&self.dest)?;
+			target.write_all(output.as_bytes())?;
+		}
 
 		if self.errors.is_empty() {
 			Ok(())
@@ -161,6 +165,7 @@ impl<'d> Renderer<'d>
 	}
 }
 
+/// Specific transforms.
 impl<'d> Renderer<'d>
 {
 	/// Transform a single `pulldown-cmark` event.
@@ -308,20 +313,37 @@ impl<'d> Renderer<'d>
 	fn process_link(&mut self, dest_url: &mut pd::CowStr)
 	{
 		// 1. find where the target file lives, relative to the current file
-		let dest_path = self.page.filepath.join(dest_url.as_ref());
+		let target_source = self.page.filepath.join(dest_url.as_ref());
 
-		if !dest_path.exists() {
-			self.errors.push(todo!());
+		if !target_source.exists() {
+			self.errors.push(SquarkError::Recoverable {
+				msg: fmt!("found invalid link: {dest_url}"),
+				hint: str!(),
+				debug: vec![
+					// TODO add line number
+					str!(slash!("in: {}", self.page.filepath)),
+				]
+			});
 		}
 
-		// if let Some(dest_page) = self.site.pages.get(&dest_path)
-		// {
-		// 	let href = self.config.out.folder.join(dest_page.destination);
-		// 	*dest_url = pd::CowStr::Inlined(href);
-		// }
-		// else {
-		// 	self.errors.push(todo!())
-		// }
+		// 2. find where the target file will be exported to
+		if let Some(dest_page) = self.site.pages.get(&target_source)
+		{
+			let href = pathdiff::diff_paths(&dest_page.destination, &self.page.destination)
+				.expect("destinations of files always have ROOT as common ancestor");
+
+			*dest_url = pd::CowStr::Boxed(Box::from(href.to_str().unwrap()));
+		}
+		else {
+			self.errors.push(SquarkError::Recoverable {
+				msg: fmt!("found link to inactive page: {dest_url}"),
+				hint: str!(),
+				debug: vec![
+					// TODO add line number
+					str!(slash!("in: {}", self.page.filepath)),
+				]
+			});
+		}
 	}
 }
 
