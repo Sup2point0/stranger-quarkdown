@@ -101,12 +101,8 @@ macro_rules! err {
 macro_rules! catch
 {
 	($errs:ident => $eval:block) => {
-		match (|| -> SquarkResult<_> { $eval; Ok(()) })() {
-			Ok(r) => Some(r),
-			Err(e) => {
-				$errs.push(e);
-				None
-			},
+		if let Err(e) = (|| -> SquarkResult<_> { $eval; Ok(()) })() {
+			$errs.push(e);
 		}
 	};
 } pub use catch;

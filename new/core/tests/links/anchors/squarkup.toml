@@ -8,4 +8,4 @@ folder = "src/routes/links/anchors/"
 
 [errors]
 on-error = "kill"
-linked-file-does-not-exist = "error"
+linked-file-inactive = "error"

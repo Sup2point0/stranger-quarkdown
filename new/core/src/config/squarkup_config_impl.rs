@@ -37,7 +37,11 @@ impl SquarkupConfig
 				file: str!("+page.svx"),
 				data: None,
 			},
-			format: FormatConfig { preserve_comments: false, externalise_links: false },
+			format: FormatConfig {
+				preserve_comments: false,
+				externalise_links: false,
+				mark_invalid_links: false,
+			},
 			bases:  BasesConfig  { folder: None, page_js: None },
 			styles: StylesConfig { folder: None, base_file: None },
 			assets: AssetsConfig { folder: None, site_assets_folder: None,
@@ -49,7 +53,7 @@ impl SquarkupConfig
 			errors: ErrorConfig {
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
-				linked_file_does_not_exist: LinkRewriteAction::STRIP_EXTENSION,
+				linked_file_inactive: LinkRewriteAction::STRIP_EXTENSION,
 			},
 		}
 	}
@@ -141,46 +145,38 @@ impl SquarkupConfig
 		// OutConfig
 		if let Some(out) = data.get("out")
 		{
-			if let Some(value) = out.get("folder") {
-				catch!(errs => {
-					let raw = Self::try_get_string(value, "out.folder", "(folder relative to your site folder)")?;
-					let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
-					s.out.folder = dir;
-				});
-			}
+			if let Some(value) = out.get("folder") { catch!(errs => {
+				let raw = Self::try_get_string(value, "out.folder", "(folder relative to your site folder)")?;
+				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
+				s.out.folder = dir;
+			}) }
 
-			if let Some(value) = out.get("file") {
-				catch!(errs => {
-					let raw = Self::try_get_string(value, "out.file", "(filename including `.svx` extension)")?;
-					s.out.file = raw.clone();
-				});
-			}
+			if let Some(value) = out.get("file") { catch!(errs => {
+				let raw = Self::try_get_string(value, "out.file", "(filename including `.svx` extension)")?;
+				s.out.file = raw.clone();
+			}) }
 
-			if let Some(value) = out.get("data") {
-				catch!(errs => {
-					let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;
-					let path = site.join(utils::rel_path(raw));
-					s.out.data = Some(path);
-				});
-			}
+			if let Some(value) = out.get("data") { catch!(errs => {
+				let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;
+				let path = site.join(utils::rel_path(raw));
+				s.out.data = Some(path);
+			}) }
 		}
 
 		// FormatConfig
 		if let Some(format) = data.get("format")
 		{
-			if let Some(value) = format.get("preserve-comments") {
-				catch!(errs => {
-					let raw = Self::try_get_bool(value, "format.preserve-comments")?;
-					s.format.preserve_comments = raw.clone();
-				});
-			}
-			
-			if let Some(value) = format.get("externalise-links") {
-				catch!(errs => {
-					let raw = Self::try_get_bool(value, "format.externalise-links")?;
-					s.format.externalise_links = raw.clone();
-				});
-			}
+			let c = &mut s.format;
+
+			if let Some(value) = format.get("preserve-comments") { catch!(errs => {
+				c.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?.clone();
+			}) }
+			if let Some(value) = format.get("externalise-links") { catch!(errs => {
+				c.externalise_links = Self::try_get_bool(value, "format.externalise-links")?.clone();
+			}) }
+			if let Some(value) = format.get("mark-invalid-links") { catch!(errs => {
+				c.mark_invalid_links = Self::try_get_bool(value, "format.mark-invalid-links")?.clone();
+			}) }
 		}
 
 		// BasesConfig
@@ -196,53 +192,47 @@ impl SquarkupConfig
 		{
 			Self::check_is_table(errors, "errors", fmt!("write your config like this: {W}```\n\n\t[errors]\n\non-error = \"kill\"\n\n```"))?;
 
-			if let Some(value) = errors.get("on-error") {
-				catch!(errs => {
-					let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
+			if let Some(value) = errors.get("on-error") { catch!(errs => {
+				let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
 
-					if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
-						s.errors.on_error = opt;
-					} else {
-						return Err(SquarkError::Unrecoverable {
-							msg: fmt!("unknown setting for {Y}errors.on-error"),
-							hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
-							debug: vec![fmt!("you provided {value}")],
-						});
-					}
-				});
-			}
+				if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
+					s.errors.on_error = opt;
+				} else {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.on-error"),
+						hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
+						debug: vec![fmt!("you provided {value}")],
+					});
+				}
+			}) }
 			
-			if let Some(value) = errors.get("file-already-exists") {
-				catch!(errs => {
-					let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
+			if let Some(value) = errors.get("file-already-exists") { catch!(errs => {
+				let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
 
-					if let Ok(opt) = FileAction::try_from(raw.as_str()) {
-						s.errors.file_already_exists = opt;
-					} else {
-						return Err(SquarkError::Unrecoverable {
-							msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
-							hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
-							debug: vec![fmt!("you provided {value}")],
-						});
-					}
-				});
-			}
+				if let Ok(opt) = FileAction::try_from(raw.as_str()) {
+					s.errors.file_already_exists = opt;
+				} else {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
+						hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
+						debug: vec![fmt!("you provided {value}")],
+					});
+				}
+			}) }
 			
-			if let Some(value) = errors.get("linked-file-does-not-exist") {
-				catch!(errs => {
-					let raw = Self::try_get_string(value, "errors.linked-file-does-not-exist", "(a missing file handling strategy)")?;
+			if let Some(value) = errors.get("linked-file-inactive") { catch!(errs => {
+				let raw = Self::try_get_string(value, "errors.linked-file-inactive", "(a missing file handling strategy)")?;
 
-					if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
-						s.errors.linked_file_does_not_exist = opt;
-					} else {
-						return Err(SquarkError::Unrecoverable {
-							msg: fmt!("unknown setting for {Y}errors.linked-file-does-not-exist"),
-							hint: fmt!("valid values are \"strip-extension\" (default), \"link-to-github\" or \"error\""),
-							debug: vec![fmt!("you provided {value}")],
-						});
-					}
-				});
-			}
+				if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
+					s.errors.linked_file_inactive = opt;
+				} else {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.linked-file-inactive"),
+						hint: fmt!("valid values are \"strip-extension\" (default), \"link-to-github\" or \"error\""),
+						debug: vec![fmt!("you provided {value}")],
+					});
+				}
+			}) }
 		}
 
 		if errs.is_empty() {

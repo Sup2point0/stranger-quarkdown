@@ -350,7 +350,7 @@ impl<'d> Renderer<'d>
 			return;
 		}
 
-		match self.config.errors.linked_file_does_not_exist {
+		match self.config.errors.linked_file_inactive {
 			LinkRewriteAction::STRIP_EXTENSION => {
 				todo!("replace regex")
 			}

@@ -63,6 +63,9 @@ pub struct FormatConfig {
 
 	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 	pub externalise_links: bool,
+
+	/// Mark hyperlinks to nonexistent pages?
+	pub mark_invalid_links: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -98,8 +101,8 @@ pub struct ErrorConfig {
 	/// What to do when a target file to write to already exists.
 	pub file_already_exists: FileAction,
 
-	/// When rendering Markdown, what should Squarkdown do to a link that points to an inactive file?
-	pub linked_file_does_not_exist: LinkRewriteAction,
+	/// When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?
+	pub linked_file_inactive: LinkRewriteAction,
 }
 
 #[derive(EnumStringify)] #[enum_stringify(case = "flat")]
