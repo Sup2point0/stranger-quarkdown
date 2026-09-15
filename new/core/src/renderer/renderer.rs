@@ -47,14 +47,24 @@ lazy_static!
 }
 
 
-/// Render `page` to its `+page.svx` and/or `+page.js` files, applying `site` and `config` accordingly.
+/// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
 pub fn render(
 	page: &PageData,
 	site: &SiteData,
 	config: &SquarkupConfig,
 ) -> SquarkResult
 {
-	Renderer::new(page, site, config)._render_()
+	let mut errs = SquarkError::multiple();
+	let mut renderer = Renderer::new(page, site, config);
+
+	if !renderer.dest_folder.exists() {
+		fs::create_dir_all(&renderer.dest_folder)?;
+	}
+
+	catch!(errs => { renderer.render()?; });
+	catch!(errs => { renderer.render_page_ts()?; });
+
+	errs.into()
 }
 
 
@@ -62,21 +72,24 @@ pub fn render(
 pub(super) struct Renderer<'d>
 {
 	// == IMMUTABLE == //
-	page: &'d PageData,
+	pub(super) page: &'d PageData,
 
-	site: &'d SiteData,
+	pub(super) site: &'d SiteData,
 
-	config: &'d SquarkupConfig,
+	pub(super) config: &'d SquarkupConfig,
 
-	/// File to render to.
-	dest: PathBuf,
+	/// Target file to render to.
+	pub(super) dest_file: PathBuf,
+
+	/// Target folder to render to.
+	pub(super) dest_folder: PathBuf,
 
 	// == MUTABLE == //
 	/// The parsing context stack.
 	pub(super) ctx: ContextStack,
 
 	/// Accumulated errors during rendering.
-	errors: Vec<SquarkError>,
+	pub(super) errors: Vec<SquarkError>,
 }
 
 /// Core interface.
@@ -88,43 +101,35 @@ impl<'d> Renderer<'d>
 		config: &'d SquarkupConfig,
 	) -> Self
 	{
+		let dest_folder = config.out.folder.join(&page.destination);
+
 		Self {
 			page,
 			site,
 			config,
-			ctx: ContextStack::new(),
 			errors: vec![],
-			dest: PathBuf::new(),
+			dest_file: dest_folder.join(&config.out.file),
+			dest_folder,
+			ctx: ContextStack::new(),
 		}
 	}
 
-	fn _render_(&mut self) -> SquarkResult
-	{
-		self.dest =
-			self.config.out.folder
-			.join(&self.page.destination)
-			.join(&self.config.out.file);
-		
-		debug_assert!(self.dest != PathBuf::new());
-
-		log::info!(slash!(
-			"rendering to: {GREY1}{}",
-			self.dest.strip_prefix(&self.config.paths.root).unwrap().to_path_buf(),
-		));
+	fn render(&mut self) -> SquarkResult
+	{	
+		log::info!(
+			"rendering to: {GREY1}{}{GREY}/{}",
+			utils::display_rel(&self.dest_folder, &self.config.paths.root),
+			self.config.out.file,
+		);
 
 		let mut file = File::open(&self.page.filepath)?;
-
 		let mut source = str!();
 		file.read_to_string(&mut source)?;
-
-		if let Some(folder) = self.dest.parent() && !folder.exists() {
-			fs::create_dir_all(folder)?;
-		}
 
 		let output = self.render_from(source);
 
 		if self.errors.is_empty() || self.config.errors.on_error == ErrorAction::WARN {
-			let mut target = File::create(&self.dest)?;
+			let mut target = File::create(&self.dest_file)?;
 			target.write_all(output.as_bytes())?;
 		}
 
@@ -418,7 +423,7 @@ mod plain {
 		test_preserves(&[
 			"sup, world!",
 			"sup,\nworld!",
-		]);
+		])
 	}
 
 	#[test] fn medium() {
@@ -426,7 +431,7 @@ mod plain {
 			"# Heading\nThe quick brown fox jumps over the lazy dog",
 			"# Heading\n\nThe quick brown fox jumps over the lazy dog",
 			"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
-		], "# Heading\n\nThe quick brown fox jumps over the lazy dog");
+		], "# Heading\n\nThe quick brown fox jumps over the lazy dog")
 	}
 }
 
@@ -443,7 +448,7 @@ mod code_inline {
 			pair!("this `is` some `more` code"),
 			pair!("`1` onto\nline `2`"),
 			pair!("line `1` onto\nline `2`."),
-		]);
+		])
 	}
 
 	#[test] fn medium() {
@@ -452,13 +457,13 @@ mod code_inline {
 				  ("` 1 ` ` 2 `", "`1` `2`"),
 			pair!("`x y` `z`"),
 			pair!("`x`y`z`"),
-		]);
+		])
 	}
 
 	#[test] fn unclosed() {
 		test_expected(&[
 			("`1\n2", "\\`1\n2"),
-		]);
+		])
 	}
 
 	#[test] fn edge_cases() {
@@ -512,6 +517,15 @@ mod code_blocks {
 
 				```
 				<!-- #SQUARK slash. -->
+				```
+			"},
+			indoc! {"
+				```md
+				<!-- #SQUARK only?
+
+				This is dangerous
+
+				     #SQUARK only. -->
 				```
 			"},
 		])
@@ -570,7 +584,7 @@ mod tables {
 				|1|2|
 				|3|4|
 			"},
-		]);
+		])
 	}
 }
 
@@ -581,7 +595,7 @@ mod maths_inline {
 	#[test] fn easy() {
 		test_preserves(&[
 			"the $x$ variable",
-		]);
+		])
 	}
 }
 
@@ -596,7 +610,7 @@ mod maths_block {
 				f(x) = x
 				```
 			"},
-		]);
+		])
 	}
 }
 
@@ -688,7 +702,7 @@ mod slash {
 				"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
 				"erase  please",
 			),
-		]);
+		])
 	}
 
 	#[test] fn multi_line() {
@@ -703,7 +717,7 @@ mod slash {
 				"},
 				"erase\n\n\nplease"
 			),
-		]);
+		])
 	}
 }
 
@@ -717,7 +731,7 @@ mod leave {
 				"Don't <!-- #SQUARK leave? --> do <!-- #SQUARK leave. --> anything",
 				"Don't  do  anything",
 			),
-		]);
+		])
 	}
 
 	#[test] fn standard() {
@@ -740,7 +754,7 @@ mod leave {
 					this
 				"}
 			),
-		]);
+		])
 	}
 
 	#[test] fn nested() {
@@ -778,7 +792,7 @@ mod only {
 		test_expected(&[
 			("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show  me"),
 			("Please <!-- #SQUARK only? do show #SQUARK only. --> me", "Please do show  me"),
-		]);
+		])
 	}
 
 	#[test] fn medium() {
@@ -799,7 +813,7 @@ mod only {
 					show me!
 				"}
 			),
-		]);
+		])
 	}
 
 	#[test] fn awkward_whitespace() {
@@ -807,6 +821,6 @@ mod only {
 			("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
 			("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
 			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
-		]);
+		])
 	}
 }
