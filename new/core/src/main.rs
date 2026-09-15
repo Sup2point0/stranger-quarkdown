@@ -4,7 +4,6 @@ use squarkdown::config::*;
 use squarkdown::colours::*;
 
 use std::fs::File;
-use std::io::Write;
 use std::process::ExitCode;
 use std::time::Instant;
 
@@ -115,14 +114,14 @@ fn squarkup() -> SquarkResult<bool>
 	}
 
 	// == SITE DATA == //
-	if let Some(dest) = config.out.data {
+	if let Some(ref dest) = config.out.data {
 		log::is!("saving site data...");
 
-		let site_data = serde_json::to_string_pretty(&site_data).map_err(err!())?;
-		let mut w = File::create(&dest)?;
-		w.write_all(site_data.as_bytes())?;
+		let data_raw = site_data.serialise(&config);
+		let file = File::create(&dest)?;
+		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
 
-		log::ok!(slash!("saved site data to {B}{}", dest));
+		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
 	}
 	
 	Ok(true)

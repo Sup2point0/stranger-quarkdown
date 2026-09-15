@@ -158,7 +158,7 @@ impl SquarkupConfig
 
 			if let Some(value) = out.get("data") { catch!(errs => {
 				let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;
-				let path = site.join(utils::rel_path(raw));
+				let path = site.join(utils::to_rel(raw));
 				s.out.data = Some(path);
 			}) }
 		}
@@ -307,7 +307,7 @@ impl SquarkupConfig
 		hint: String,
 	) -> SquarkResult<PathBuf>
 	{
-		let path = root.join(utils::rel_path(dir));
+		let path = root.join(utils::to_rel(dir));
 
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {

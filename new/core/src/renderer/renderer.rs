@@ -2,6 +2,7 @@ use super::*;
 use crate::core::*;
 use crate::config::*;
 use crate::log;
+use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
@@ -360,7 +361,9 @@ impl<'d> Renderer<'d>
 		}
 
 		// 2. find where the target file will be exported to
-		if let Some(dest_page) = self.site.get_page(&their_source_path)
+		let key = utils::display_rel(&their_source_path, &self.config.paths.root);
+
+		if let Some(dest_page) = self.site.get_page(&key)
 		{
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
@@ -389,11 +392,12 @@ impl<'d> Renderer<'d>
 			}
 			LinkRewriteAction::ERROR => {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found link to inactive page: {dest_url}"),
+					msg: fmt!("found link to inactive page: ({dest_url})"),
 					hint: str!(),
 					debug: vec![
 						// TODO add line number
 						str!(slash!("in: {GREY1}{}", self.page.filepath)),
+						fmt!("resolved to: {GREY1}{key}"),
 					]
 				});
 			}

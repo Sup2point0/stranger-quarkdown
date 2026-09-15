@@ -9,12 +9,15 @@ use crate::colours::*;
 use crate::macros::*;
 
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{ PathBuf };
 
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PageData
 {
+	/// Unique identifier for the page.
+	pub shard: String,
+
 	/// Location of the original `.md` file this page represents.
 	pub filepath: PathBuf,
 	
@@ -34,7 +37,6 @@ pub struct PageData
 	pub release_date: Option<Date>,
 	pub last_updated: Option<Date>,
 
-	#[serde(skip_serializing)]
 	pub cleanse: Vec<CleanseOperation>,
 
 	pub other: HashMap<String, Strings>,
@@ -54,7 +56,7 @@ impl PageData
 		let mut destination = PathBuf::new();
 
 		if let Some(dest) = Self::take1(&mut fields, "destination", "dest") {
-			destination = config.out.folder.join(utils::rel_path(&dest));
+			destination = config.out.folder.join(utils::to_rel(&dest));
 
 			if !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {
@@ -107,6 +109,7 @@ impl PageData
 
 		if errs.is_empty() {
 			Ok(Self {
+				shard: utils::display_rel(&filepath, &config.paths.root),
 				filepath,
 				flags,
 				destination,
@@ -142,4 +145,41 @@ impl PageData
 			.or_else(|_| Date::parse(&date, &format_description!("[year] [month repr:short] [day]")))
 			.ok()
 	}
+}
+
+impl PageData
+{
+	pub fn serialise(self, config: &SquarkupConfig) -> SerialisedPageData
+	{
+		SerialisedPageData {
+			filepath:     utils::display_rel(self.filepath, &config.paths.root),
+			destination:  utils::display_rel(self.destination, &config.out.folder),
+			flags:        self.flags,
+			title:        self.title,
+			description:  self.description,
+			heading:      self.heading,
+			caption:      self.caption,
+			tags:         self.tags,
+			release_date: self.release_date,
+			last_updated: self.last_updated,
+			other:        self.other,
+		}
+	}
+}
+
+
+#[derive(serde::Serialize)]
+pub struct SerialisedPageData
+{
+	filepath: String,
+	destination: String,
+	flags: Strings,
+	title: Option<String>,
+	description: Option<String>,
+	heading: Option<String>,
+	caption: Option<String>,
+	tags: Vec<String>,
+	release_date: Option<Date>,
+	last_updated: Option<Date>,
+	other: HashMap<String, Strings>,
 }

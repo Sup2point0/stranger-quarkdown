@@ -1,13 +1,15 @@
-use time::{ UtcDateTime };
-
 use super::PageData;
+use crate::core::*;
+use crate::utils;
+
+use time::{ UtcDateTime };
 
 use std::collections::HashMap;
 use std::fs;
 use std::path::{ Path };
 
 
-#[derive(Clone, Debug, Default, serde::Serialize)]
+#[derive(Clone, Debug, Default)]
 pub struct SiteData
 {
 	/// The active pages in the site, keyed by the location (filepath) of their source file.
@@ -51,32 +53,40 @@ impl SiteData
 		self.pages.values()
 	}
 
-	pub fn get_page(&self, path: impl AsRef<Path>) -> Option<&PageData>
+	pub fn get_page(&self, key: &str) -> Option<&PageData>
 	{
-		self.pages.get(&Self::normalise_path(path))
+		self.pages.get(key)
 	}
 
 	/// Add a page's metadata to the site.
 	pub fn add_page(&mut self, page_data: PageData)
 	{
-		let key = Self::normalise_path(&page_data.filepath);
+		let key = &page_data.shard;
 
 		for tag in &page_data.tags {
 			self.tags
-				.entry(tag.clone()).or_default()
-				.push(key.clone());
+				.entry(tag.to_owned()).or_default()
+				.push(key.to_owned());
 		}
 
-		self.pages.insert(key, page_data);
+		self.pages.insert(key.to_owned(), page_data);
 	}
+}
 
-	pub fn normalise_path(path: impl AsRef<Path>) -> String
+impl SiteData
+{
+	pub fn serialise(self, config: &SquarkupConfig) -> impl serde::Serialize
 	{
-		let absolute = fs::canonicalize(path.as_ref())
-			.expect("file data is always sourced from a real file");
+		serde_json::json!({
+			"pages":
+				self.pages.into_iter()
+				.map(|(key, page)|
+					(key, page.serialise(config))
+				)
+				.collect::<HashMap<_, _>>(),
 
-		let slashed = path_slash::PathBufExt::to_slash(&absolute).unwrap();
-
-		slashed.to_string()
+			"tags": self.tags,
+			"stats": self.stats,
+		})
 	}
 }
