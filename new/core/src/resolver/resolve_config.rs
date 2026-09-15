@@ -9,6 +9,7 @@ use std::io::{ Read };
 use std::path::{ PathBuf, Path };
 
 
+#[allow(clippy::upper_case_acronyms)]
 enum Extension { TOML, JSON }
 
 

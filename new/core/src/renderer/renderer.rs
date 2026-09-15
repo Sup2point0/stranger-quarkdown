@@ -21,12 +21,11 @@ use std::path::{ PathBuf };
 lazy_static!
 {
 	/// Options for parsing with `pulldown-cmark`.
-	pub static ref PARSER_OPTIONS: pd::Options
-		= pd::Options::from(
-			  pd::Options::ENABLE_GFM
-			| pd::Options::ENABLE_TABLES
-			| pd::Options::ENABLE_FOOTNOTES
-		);
+	pub static ref PARSER_OPTIONS: pd::Options =
+		  pd::Options::ENABLE_GFM
+		| pd::Options::ENABLE_TABLES
+		| pd::Options::ENABLE_FOOTNOTES
+	;
 
 	/// Options for rendering with `pulldown-cmark-to-cmark`.
 	pub static ref RENDER_OPTIONS: cmark::Options<'static>
@@ -118,10 +117,8 @@ impl<'d> Renderer<'d>
 		let mut source = str!();
 		file.read_to_string(&mut source)?;
 
-		if let Some(folder) = self.dest.parent() {
-			if !folder.exists() {
-				fs::create_dir_all(folder)?;
-			}
+		if let Some(folder) = self.dest.parent() && !folder.exists() {
+			fs::create_dir_all(folder)?;
 		}
 
 		let output = self.render_from(source);

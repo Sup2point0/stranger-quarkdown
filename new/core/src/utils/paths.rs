@@ -11,7 +11,7 @@ use std::path::Path;
 ///   - With a leading separator, the latter is treated as an absolute path, overriding the base path.
 pub fn to_rel(path: &str) -> &str
 {
-	path.trim_start_matches(|c| matches!(c, '/' | '\\'))
+	path.trim_start_matches(['/', '\\'])
 }
 
 /// Display an `absolute` path relative to `base`.

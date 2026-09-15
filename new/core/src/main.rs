@@ -99,7 +99,7 @@ fn squarkup() -> SquarkResult<bool>
 	log::is!("rendering...");
 
 	for page in site_data.pages() {
-		let r = renderer::render(&page, &site_data, &config);
+		let r = renderer::render(page, &site_data, &config);
 
 		if let Err(err) = r {
 			if err.is_fatal()  || config.errors.on_error == ErrorAction::KILL {
@@ -118,7 +118,7 @@ fn squarkup() -> SquarkResult<bool>
 		log::is!("saving site data...");
 
 		let data_raw = site_data.serialise(&config);
-		let file = File::create(&dest)?;
+		let file = File::create(dest)?;
 		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
 
 		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));

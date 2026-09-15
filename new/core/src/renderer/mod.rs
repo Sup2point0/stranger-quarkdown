@@ -1,5 +1,5 @@
 mod renderer;      pub use renderer::*;
-mod context_stack; pub(self) use context_stack::*;
+mod context_stack; use context_stack::*;
 
 #[cfg(test)] mod utils;
-#[cfg(test)] pub(self) use utils::*;
+#[cfg(test)] use utils::*;

@@ -99,7 +99,7 @@ impl SquarkupConfig
 		{
 			s.paths.sources.clear();
 
-			Self::for_string_array(&paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
+			Self::for_string_array(paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
 				catch!(errs => {
 					s.paths.sources.push(Self::try_resolve_folder(
 						root, dir, "a source folder you specified",
@@ -112,8 +112,8 @@ impl SquarkupConfig
 				s.paths.sources.push(root.to_path_buf());
 			}
 
-			Self::for_string_array(&paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
-				match regex::Regex::new(&pattern) {
+			Self::for_string_array(paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
+				match regex::Regex::new(pattern) {
 					Ok(compiled) => s.paths.include.push(compiled),
 					Err(e) => {
 						errs.push(SquarkError::External {
@@ -124,8 +124,8 @@ impl SquarkupConfig
 				}
 			});
 
-			Self::for_string_array(&paths, "paths", "exclude", "(RegEx patterns)", &mut errs, |pattern, errs| {
-				match regex::Regex::new(&pattern) {
+			Self::for_string_array(paths, "paths", "exclude", "(RegEx patterns)", &mut errs, |pattern, errs| {
+				match regex::Regex::new(pattern) {
 					Ok(compiled) => s.paths.exclude.push(compiled),
 					Err(e) => {
 						errs.push(SquarkError::External {
@@ -169,13 +169,13 @@ impl SquarkupConfig
 			let c = &mut s.format;
 
 			if let Some(value) = format.get("preserve-comments") { catch!(errs => {
-				c.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?.clone();
+				c.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?;
 			}) }
 			if let Some(value) = format.get("externalise-links") { catch!(errs => {
-				c.externalise_links = Self::try_get_bool(value, "format.externalise-links")?.clone();
+				c.externalise_links = Self::try_get_bool(value, "format.externalise-links")?;
 			}) }
 			if let Some(value) = format.get("mark-invalid-links") { catch!(errs => {
-				c.mark_invalid_links = Self::try_get_bool(value, "format.mark-invalid-links")?.clone();
+				c.mark_invalid_links = Self::try_get_bool(value, "format.mark-invalid-links")?;
 			}) }
 		}
 
@@ -332,8 +332,8 @@ impl SquarkupConfig
 		}
 	}
 
-	fn for_string_array<'d>(
-		data: &'d toml::Value,
+	fn for_string_array(
+		data: &toml::Value,
 		category: &'static str,
 		field: &'static str,
 		hint: &'static str,

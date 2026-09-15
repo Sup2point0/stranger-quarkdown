@@ -86,10 +86,10 @@ impl PageData
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
 
 		let release_date = Self::take1(&mut fields, "release-date", "date")
-			.map(|raw| Self::try_parse_date(&raw)).flatten();
+			.and_then(|raw| Self::try_parse_date(&raw));
 
 		let last_updated = Self::take1(&mut fields, "last-updated", "update")
-			.map(|raw| Self::try_parse_date(&raw)).flatten();
+			.and_then(|raw| Self::try_parse_date(&raw));
 
 		let mut cleanse = vec![];
 
@@ -141,8 +141,8 @@ impl PageData
 
 	fn try_parse_date(date: &str) -> Option<Date>
 	{
-		Date::parse(&date, &format_description!("[year] [month repr:long] [day]"))
-			.or_else(|_| Date::parse(&date, &format_description!("[year] [month repr:short] [day]")))
+		Date::parse(date, &format_description!("[year] [month repr:long] [day]"))
+			.or_else(|_| Date::parse(date, &format_description!("[year] [month repr:short] [day]")))
 			.ok()
 	}
 }
