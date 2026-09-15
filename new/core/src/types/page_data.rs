@@ -5,7 +5,6 @@ use crate::core::*;
 use crate::config::*;
 use crate::types::*;
 use crate::utils;
-use crate::log;
 use crate::colours::*;
 use crate::macros::*;
 

@@ -98,7 +98,7 @@ fn squarkup() -> SquarkResult<bool>
 	// == RENDER == //
 	log::is!("rendering...");
 
-	for page in site_data.pages.values() {
+	for page in site_data.pages() {
 		let r = renderer::render(&page, &site_data, &config);
 
 		if let Err(err) = r {

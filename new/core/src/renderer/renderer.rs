@@ -333,11 +333,11 @@ impl<'d> Renderer<'d>
 			return;
 		}
 
-		let mut file_name = dest_url.to_string();
+		let mut their_file_name = dest_url.to_string();
 		let mut anchor: Option<String> = None;
 
 		if let Some((left, right)) = dest_url.split_once(".md#") {
-			file_name = left.to_string() + ".md";
+			their_file_name = left.to_string() + ".md";
 			anchor = Some(right.to_string());
 		}
 
@@ -345,22 +345,22 @@ impl<'d> Renderer<'d>
 		let own_source_folder = self.page.filepath.parent()
 			.expect("active files are always inside a folder");
 
-		let their_source_folder = own_source_folder.join(file_name);
+		let their_source_path = own_source_folder.join(their_file_name);
 
-		let Ok(their_source_path) = fs::canonicalize(&their_source_folder) else {
+		if !their_source_path.exists() {
 			return self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found broken link: {dest_url}"),
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
 					str!(slash!("in: {GREY1}{}", self.page.filepath)),
-					str!(slash!("resolved to: {}", their_source_folder)),
+					str!(slash!("resolved to: {}", their_source_path)),
 				]
 			});
-		};
+		}
 
 		// 2. find where the target file will be exported to
-		if let Some(dest_page) = self.site.pages.get(&their_source_path)
+		if let Some(dest_page) = self.site.get_page(&their_source_path)
 		{
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
@@ -394,7 +394,6 @@ impl<'d> Renderer<'d>
 					debug: vec![
 						// TODO add line number
 						str!(slash!("in: {GREY1}{}", self.page.filepath)),
-						str!(slash!("resolved to: {}", their_source_path)),
 					]
 				});
 			}
