@@ -1,0 +1,11 @@
+repo = "Squarkdown Tests"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/links/basic/"
+
+[errors]
+on-error = "kill"
+linked-file-does-not-exist = "error"
