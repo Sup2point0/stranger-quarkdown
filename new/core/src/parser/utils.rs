@@ -1,4 +1,5 @@
 use super::*;
+use crate::utils::testing::*;
 
 use std::io::Cursor;
 
@@ -10,7 +11,7 @@ pub(super) fn test_exact(
 {
 	for case in cases {
 		let cursor = Cursor::new(case);
-		let parser = CharmParser::init(cursor, None).unwrap();
+		let parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
 
 		test(parser, case)
 	}
@@ -23,7 +24,7 @@ pub(super) fn test_expected<X>(
 {
 	for (source, expected) in cases {
 		let cursor = Cursor::new(source);
-		let parser = CharmParser::init(cursor, None).unwrap();
+		let parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
 
 		test(parser, expected)
 	}

@@ -64,7 +64,7 @@ fn squarkup() -> SquarkResult<bool>
 			let filepath = filepath?;
 
 			let file = File::open(&filepath).map_err(err!())?;
-			let mut parser = CharmParser::init(file, Some(filepath.clone())).map_err(err!())?;
+			let mut parser = CharmParser::init(file, filepath.clone()).map_err(err!())?;
 			
 			if let Some(page) = parser.parse(&config).unwrap() {
 				active_files += 1;

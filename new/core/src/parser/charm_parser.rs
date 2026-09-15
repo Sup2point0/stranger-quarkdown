@@ -31,7 +31,7 @@ pub struct CharmParser<Source: Read = File>
 	pub(super) _reader: BufReader<Source>,
 
 	/// The location of the source file.
-	pub(super) _filepath: Option<PathBuf>,
+	pub(super) _filepath: PathBuf,
 
 	/// The index in the current line the parser is pointing to.
 	pub(super) _index: usize,
@@ -56,7 +56,7 @@ pub struct CharmParser<Source: Read = File>
 impl<Source: Read> CharmParser<Source>
 {
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
-	pub fn init(file: Source, filepath: Option<PathBuf>) -> Result<Self, ParseFailure>
+	pub fn init(file: Source, filepath: PathBuf) -> Result<Self, ParseFailure>
 	{
 		let mut out = Self {
 			is_done: false,
@@ -106,9 +106,7 @@ impl<Source: Read> CharmParser<Source>
 		let (flags, mut fields) = self.parse_charm_squark()?;
 		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
 
-		let filepath = self._filepath.take().unwrap_or_else(|| PathBuf::new());
-
-		Ok(PageData::init(filepath, flags, fields, config))
+		Ok(PageData::init(self._filepath.clone(), flags, fields, config))
 	}
 	
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
@@ -348,17 +346,16 @@ impl<Source: Read> CharmParser<Source>
 #[cfg(test)]
 mod test
 {
+	use crate::parser::*;
+	use crate::macros::*;
+	use crate::utils::testing::*;
+	
 	use tinyvec::tiny_vec;
-
-	use crate::{
-		parser::*,
-		macros::*,
-		utils::testing::*,
-	};
 	
 	use std::collections::HashMap;
 	use std::io::Cursor;
 	use std::assert_matches;
+	
 	
 	#[test] fn parse_basic()
 	{
@@ -369,11 +366,11 @@ mod test
 	-->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let file_data = parser.parse(&TEST_CONFIG).unwrap().unwrap();
 
 		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
+		assert_eq!( file_data.destination, dir!(TESTS / "src/routes") );
 	}
 
 	#[test] fn parse_heading_matches_single_line()
@@ -415,7 +412,7 @@ mod test
 	#[test] fn parse_charm_squark_no_fields()
 	{
 		let source = Cursor::new("<!-- #SQUARK live! -->");
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
@@ -431,7 +428,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -449,7 +446,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!["feat", "dev"] );
@@ -469,7 +466,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -490,7 +487,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -510,7 +507,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!["feat", "dev"] );
@@ -564,7 +561,7 @@ mod test
 -->
 		".trim());
 
-		let mut parser = CharmParser::init(source, None).unwrap();
+		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
 		let fields = parser.parse_fields().unwrap();
 
 		assert!( fields.contains_key("field") );
