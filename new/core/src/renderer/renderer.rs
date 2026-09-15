@@ -326,19 +326,19 @@ impl<'d> Renderer<'d>
 	{
 		// 1. find where the target file lives, relative to the current file
 		let folder = self.page.filepath.parent().expect("active files are always inside a folder");
-		let target_source = folder.join(dest_url.as_ref());
+		let path = folder.join(file_name);
 
-		if !target_source.exists() {
-			self.errors.push(SquarkError::Recoverable {
+		let Ok(target_source) = fs::canonicalize(&path) else {
+			return self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found invalid link: {dest_url}"),
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
 					str!(slash!("in: {}", self.page.filepath)),
-					str!(slash!("resolved to: {}", target_source)),
+					str!(slash!("resolved to: {}", path)),
 				]
 			});
-		}
+		};
 
 		// 2. find where the target file will be exported to
 		if let Some(dest_page) = self.site.pages.get(&target_source)
@@ -366,6 +366,7 @@ impl<'d> Renderer<'d>
 					debug: vec![
 						// TODO add line number
 						str!(slash!("in: {}", self.page.filepath)),
+						str!(slash!("resolved to: {}", target_source)),
 					]
 				});
 			}
