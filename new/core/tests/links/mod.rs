@@ -1,41 +1,26 @@
-use std::assert_matches;
+use crate::*;
 
 
 /// Squarkdown rewrites links.
 #[test] fn basic()
 {
-	let bin = env!("CARGO_BIN_EXE_squarkdown");
+	assert!( squarkup_from("tests/links/basic").success() );
+}
 
-	let r = std::process::Command::new(bin)
-		.current_dir(std::env::current_dir().unwrap().join("tests/links/basic"))
-		.status();
-
-	assert_matches!( r, Ok(..) );
-	assert!( r.unwrap().success() );
+/// Squarkdown rewrites links to folders outside a file's parent folder.
+#[test] fn nested()
+{
+	assert!( squarkup_from("tests/links/nested").success() );
 }
 
 /// Squarkdown resolves links with anchors (`path/to/page.md#anchor`) while keeping the anchor.
 #[test] fn anchors()
 {
-	let bin = env!("CARGO_BIN_EXE_squarkdown");
-
-	let r = std::process::Command::new(bin)
-		.current_dir(std::env::current_dir().unwrap().join("tests/links/anchors"))
-		.status();
-
-	assert_matches!( r, Ok(..) );
-	assert!( r.unwrap().success() );
+	assert!( squarkup_from("tests/links/anchors").success() );
 }
 
 /// With `linked-file-inactive: error`, Squarkdown cesrash when encountering links to inactive pages.
-#[test] fn inactive()
+#[test] fn inactive_crash()
 {
-	let bin = env!("CARGO_BIN_EXE_squarkdown");
-
-	let r = std::process::Command::new(bin)
-		.current_dir(std::env::current_dir().unwrap().join("tests/links/inactive-crash"))
-		.status();
-
-	assert_matches!( r, Ok(..) );
-	assert!( !r.unwrap().success() );
+	assert!( !squarkup_from("tests/links/inactive-crash").success() );
 }
