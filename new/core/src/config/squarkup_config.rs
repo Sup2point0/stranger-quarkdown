@@ -105,7 +105,7 @@ pub struct ErrorConfig {
 	pub linked_file_inactive: LinkRewriteAction,
 }
 
-#[derive(EnumStringify)] #[enum_stringify(case = "flat")]
+#[derive(EnumStringify)] #[enum_stringify(case = "kebab")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ErrorAction {
 	/// Log the error, recover and continue.
@@ -115,7 +115,7 @@ pub enum ErrorAction {
 	KILL,
 }
 
-#[derive(EnumStringify)] #[enum_stringify(case = "flat")]
+#[derive(EnumStringify)] #[enum_stringify(case = "kebab")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileAction {
 	/// Overwrite the existing file.
@@ -128,7 +128,7 @@ pub enum FileAction {
 	SKIP,
 }
 
-#[derive(EnumStringify)] #[enum_stringify(case = "flat")]
+#[derive(EnumStringify)] #[enum_stringify(case = "kebab")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LinkRewriteAction {
 	/// Still strip the `.md` file extension, but don't do anything else
