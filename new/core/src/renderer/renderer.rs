@@ -348,7 +348,7 @@ impl<'d> Renderer<'d>
 
 		let their_source_path = own_source_folder.join(their_file_name);
 
-		if !their_source_path.exists() {
+		let Ok(their_source_path) = dunce::canonicalize(&their_source_path) else {
 			return self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found broken link: {dest_url}"),
 				hint: str!(),
@@ -358,7 +358,7 @@ impl<'d> Renderer<'d>
 					str!(slash!("resolved to: {}", their_source_path)),
 				]
 			});
-		}
+		};
 
 		// 2. find where the target file will be exported to
 		let key = utils::display_rel(&their_source_path, &self.config.paths.root);

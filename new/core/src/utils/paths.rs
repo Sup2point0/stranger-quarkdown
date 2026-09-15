@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 
 
@@ -21,7 +20,6 @@ pub fn display_rel(
 	base: impl AsRef<Path>,
 ) -> String
 	{
-		let absolute = fs::canonicalize(absolute).expect("caller should verify that `absolute` exists");
 		let relative = pathdiff::diff_paths(absolute, base).unwrap();
 		let slashed = path_slash::PathBufExt::to_slash(&relative).unwrap();
 		slashed.to_string()
