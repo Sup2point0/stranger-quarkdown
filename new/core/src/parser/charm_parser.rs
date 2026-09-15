@@ -346,6 +346,7 @@ impl<Source: Read> CharmParser<Source>
 #[cfg(test)]
 mod test
 {
+	use super::test_utils::*;
 	use crate::parser::*;
 	use crate::macros::*;
 	use crate::utils::testing::*;

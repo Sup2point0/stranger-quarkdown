@@ -1,4 +1,4 @@
-use super::*;
+use super::context_stack::*;
 use crate::core::*;
 use crate::config::*;
 use crate::log;
@@ -411,8 +411,9 @@ impl<'d> Renderer<'d>
 
 // == TESTS == //
 
-#[cfg(test)]
-use indoc::indoc;
+#[cfg(test)] use super::test_utils::*;
+
+#[cfg(test)] use indoc::indoc;
 
 
 #[cfg(test)]

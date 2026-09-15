@@ -239,12 +239,13 @@ impl<Source: Read> CharmParser<Source>
 #[cfg(test)]
 mod test
 {
-	use std::assert_matches;
-	use std::io::Cursor;
-
+	use super::test_utils::*;
 	use crate::parser::*;
 	use crate::macros::*;
 	use crate::utils::testing::*;
+	
+	use std::assert_matches;
+	use std::io::Cursor;
 	
 
 	#[test] fn advance_and_current_single_line()

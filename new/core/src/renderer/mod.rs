@@ -1,6 +1,6 @@
-mod renderer;      pub use renderer::*;
-mod render_ts;
-mod context_stack; use context_stack::*;
+mod svx_renderer; pub use svx_renderer::*;
+mod ts_renderer;
+mod context_stack;
 
-#[cfg(test)] mod utils;
-#[cfg(test)] use utils::*;
+#[cfg(test)]
+mod test_utils;
