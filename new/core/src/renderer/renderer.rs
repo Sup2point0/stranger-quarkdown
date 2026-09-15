@@ -169,7 +169,7 @@ impl<'d> Renderer<'d>
 impl<'d> Renderer<'d>
 {
 	/// Transform a single `pulldown-cmark` event.
-	fn process_event<'e>(&mut self, mut event: pd::Event<'e>) -> Option<pd::Event<'e>>
+	fn process_event<'e>(&mut self, event: pd::Event<'e>) -> Option<pd::Event<'e>>
 	{
 		match event {
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(Ctx::CODE); }
@@ -178,36 +178,48 @@ impl<'d> Renderer<'d>
 		};
 
 		match event {
+			/* We always need to process comments regardless of the current context, to check for squarks that may _change_ the context */
 			| pd::Event::Html(ref html)
 			| pd::Event::InlineHtml(ref html)
 			=>
 				match self.process_html(html) {
 					Some(true) => Some(event),
 					Some(false) => None,
-					None => self.process_markdown(event)
+					None => self.process_ctx(event)
 				}
 
-			pd::Event::Start(pd::Tag::Link { ref mut dest_url, .. })
-			=> {
-				self.process_link(dest_url);
-				Some(event)
-			}
-
-			_ => self.process_markdown(event),
+			/* But for everything else, handling will depend on the current context */
+			_ => self.process_ctx(event)
 		}
 	}
 
-	fn process_markdown<'e>(&mut self, event: pd::Event<'e>) -> Option<pd::Event<'e>>
+	/// Transform content depending on the current context.
+	fn process_ctx<'e>(&mut self, mut event: pd::Event<'e>) -> Option<pd::Event<'e>>
 	{
 		match self.ctx.current()
 		{
-			Ctx::COMMENT   => self.config.format.preserve_comments.then_some(event),
+			/* Don't transform anything */
+			Ctx::LEAVE{..} => Some(event),
+
+			/* Remove this content */
 			Ctx::SLASH{..} => None,
-			_              => Some(event),
+
+			/* Keep comments only if `preserve_comments: true` */
+			Ctx::COMMENT   => self.config.format.preserve_comments.then_some(event),
+
+			_ => match event
+			{
+				pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) => {
+					self.process_link(dest_url);
+					Some(event)
+				}
+
+				_ => Some(event),
+			}
 		}
 	}
 
-	/// Process HTML content.
+	/// Process HTML content – specifically comments, to check for `<!-- #SQUARK -->`s.
 	/// 
 	/// Returns:
 	/// - `Some(true)` if processing was performed, and the content should be kept.
@@ -313,10 +325,8 @@ impl<'d> Renderer<'d>
 	fn process_link(&mut self, dest_url: &mut pd::CowStr)
 	{
 		// 1. find where the target file lives, relative to the current file
-		let folder = self.page.filepath.parent().expect("active file is inside a folder");
+		let folder = self.page.filepath.parent().expect("active files are always inside a folder");
 		let target_source = folder.join(dest_url.as_ref());
-
-		dbg!(&target_source);
 
 		if !target_source.exists() {
 			self.errors.push(SquarkError::Recoverable {
@@ -337,16 +347,26 @@ impl<'d> Renderer<'d>
 				.expect("destinations of files always have ROOT as common ancestor");
 
 			*dest_url = pd::CowStr::Boxed(Box::from(href.to_str().unwrap()));
+			return;
 		}
-		else {
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found link to inactive page: {dest_url}"),
-				hint: str!(),
-				debug: vec![
-					// TODO add line number
-					str!(slash!("in: {}", self.page.filepath)),
-				]
-			});
+
+		match self.config.errors.linked_file_does_not_exist {
+			LinkRewriteAction::STRIP_EXTENSION => {
+				todo!("replace regex")
+			}
+			LinkRewriteAction::LINK_TO_GITHUB => {
+				todo!("link to github")
+			}
+			LinkRewriteAction::ERROR => {
+				self.errors.push(SquarkError::Recoverable {
+					msg: fmt!("found link to inactive page: {dest_url}"),
+					hint: str!(),
+					debug: vec![
+						// TODO add line number
+						str!(slash!("in: {}", self.page.filepath)),
+					]
+				});
+			}
 		}
 	}
 }
