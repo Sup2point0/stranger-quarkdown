@@ -20,18 +20,33 @@ use assertables::*;
 #[test] fn nested()
 {
 	assert!( squarkup_from("links/nested").success() );
+
+	let main = read_file("links/nested/main/+page.svx");
+	let side = read_file("links/nested/nested/side/+page.svx");
+	assert_contains!( main, "[side](nested/side)" );
+	assert_contains!( side, "[main](../main)" );
+	assert_not_contains!( main, "[side](./nested/side)" );
 }
 
 /// Squarkdown does not resolve external links, and rewrites links with `<sup>↗</sup>` to `<a target="_blank">`.
 #[test] fn external()
 {
 	assert!( squarkup_from("links/external").success() );
+
+	let main = read_file("links/external/main/+page.svx");
+	assert_contains!( main, "[GitHub](https://github.com/Sup2point0/stranger-quarkdown)" );
+	// assert_contains!( main, "<a target=\"_blank\" href=\"https://svelte.dev\">Svelte</a>" );
 }
 
 /// Squarkdown resolves links with anchors (`path/to/page.md#anchor`) while keeping the anchor.
 #[test] fn anchors()
 {
 	assert!( squarkup_from("links/anchors").success() );
+	
+	let main = read_file("links/anchors/main/+page.svx");
+	let side = read_file("links/anchors/side/+page.svx");
+	assert_contains!( main, "[side](side#section)" );
+	assert_contains!( side, "[main](main)" );
 }
 
 /// Squarkdown crashes when encountering links to nonexistent files.

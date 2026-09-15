@@ -362,15 +362,17 @@ impl<'d> Renderer<'d>
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
 
-			let mut href = pathdiff::diff_paths(&dest_page.destination, own_dest_folder)
+			let href_path = pathdiff::diff_paths(&dest_page.destination, own_dest_folder)
 				.expect("destinations of files always have ROOT as common ancestor");
 
-			if let Some(anchor) = anchor {
-				href.push(anchor);
-			}
+			let href_path_slashed = path_slash::PathBufExt::to_slash(&href_path).unwrap();
 
-			let href_slashed = path_slash::PathBufExt::to_slash(&href).unwrap();
-			*dest_url = pd::CowStr::Boxed(Box::from(href_slashed));
+			let href = match anchor {
+				Some(a) => fmt!("{href_path_slashed}#{a}"),
+				None => href_path_slashed.to_string(),
+			};
+
+			*dest_url = pd::CowStr::Boxed(Box::from(href));
 
 			return;
 		}
