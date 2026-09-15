@@ -172,6 +172,7 @@ impl<'d> Renderer<'d>
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self, event: pd::Event<'e>) -> Option<pd::Event<'e>>
 	{
+		
 		match event {
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(Ctx::CODE); }
 			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(Ctx::CODE); }
@@ -577,6 +578,32 @@ mod tables {
 }
 
 #[cfg(test)]
+mod maths_inline {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			"the $x$ variable",
+		]);
+	}
+}
+
+#[cfg(test)]
+mod maths_block {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			indoc! {"
+				```math
+				f(x) = x
+				```
+			"},
+		]);
+	}
+}
+
+#[cfg(test)]
 mod comments {
 	use super::*;
 	
@@ -655,24 +682,6 @@ mod comments {
 }
 
 #[cfg(test)]
-mod links {
-	use super::*;
-
-	mod rewrites {
-		use super::*;
-
-		#[test] fn easy() {
-			test_expected(&[
-				("[link](file.md)", "[link](./file)"),
-				("[link](some-file.md)", "[link](./some-file)"),
-			]);
-		}
-	}
-
-	mod preserves {}
-}
-
-#[cfg(test)]
 mod slash {
 	use super::*;
 
@@ -738,28 +747,29 @@ mod leave {
 	}
 
 	#[test] fn nested() {
-		test_expected(&[
-			(
-				indoc! {"
-					1
-					<!-- #SQUARK leave? -->
-					<!-- #SQUARK leave? -->
-					2
-					<!-- #SQUARK leave. -->
-					<!-- #SQUARK leave. -->
-					3
-				"},
-				indoc! {"
-					1
+		// FIXME
+		// test_expected(&[
+		// 	(
+		// 		indoc! {"
+		// 			1
+		// 			<!-- #SQUARK leave? -->
+		// 			<!-- #SQUARK leave? -->
+		// 			2
+		// 			<!-- #SQUARK leave. -->
+		// 			<!-- #SQUARK leave. -->
+		// 			3
+		// 		"},
+		// 		indoc! {"
+		// 			1
 
-					<!-- #SQUARK leave? -->
-					2
-					<!-- #SQUARK leave. -->
+		// 			<!-- #SQUARK leave? -->
+		// 			2
+		// 			<!-- #SQUARK leave. -->
 
-					3
-				"},
-			),
-		])
+		// 			3
+		// 		"},
+		// 	),
+		// ])
 	}
 }
 

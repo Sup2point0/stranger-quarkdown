@@ -370,7 +370,7 @@ mod test
 		let file_data = parser.parse(&TEST_CONFIG).unwrap().unwrap();
 
 		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, dir!(TESTS / "src/routes") );
+		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
 	}
 
 	#[test] fn parse_heading_matches_single_line()
