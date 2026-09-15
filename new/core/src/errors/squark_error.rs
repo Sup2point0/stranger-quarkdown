@@ -116,6 +116,18 @@ impl SquarkError
 	}
 }
 
+impl Into<SquarkResult<()>> for SquarkError
+{
+	fn into(self) -> SquarkResult<()>
+	{
+		if let Self::Multiple { errs } = &self && errs.is_empty() {
+			Ok(())
+		} else {
+			Err(self)
+		}
+	}
+}
+
 macro_rules! impl_from_error {
 	($error_type:path) =>
 	{
