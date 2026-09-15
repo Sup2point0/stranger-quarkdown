@@ -196,40 +196,50 @@ impl SquarkupConfig
 		{
 			Self::check_is_table(errors, "errors", fmt!("write your config like this: {W}```\n\n\t[errors]\n\non-error = \"kill\"\n\n```"))?;
 
-			if let Some(value) = errors.get("on-error")
-			{
+			if let Some(value) = errors.get("on-error") {
 				catch!(errs => {
 					let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
 
-					match ErrorAction::try_from(raw.as_str())
-					{
-						Ok(opt) => s.errors.on_error = opt,
-						Err(..) => return Err(SquarkError::Unrecoverable {
+					if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
+						s.errors.on_error = opt;
+					} else {
+						return Err(SquarkError::Unrecoverable {
 							msg: fmt!("unknown setting for {Y}errors.on-error"),
 							hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
-							debug: vec![
-								fmt!("you provided \"{value}\""),
-							],
-						}),
+							debug: vec![fmt!("you provided {value}")],
+						});
 					}
 				});
 			}
 			
-			if let Some(value) = errors.get("file-already-exists")
-			{
+			if let Some(value) = errors.get("file-already-exists") {
 				catch!(errs => {
 					let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
 
-					match FileAction::try_from(raw.as_str())
-					{
-						Ok(opt) => s.errors.file_already_exists = opt,
-						Err(..) => return Err(SquarkError::Unrecoverable {
+					if let Ok(opt) = FileAction::try_from(raw.as_str()) {
+						s.errors.file_already_exists = opt;
+					} else {
+						return Err(SquarkError::Unrecoverable {
 							msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
 							hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
-							debug: vec![
-								fmt!("you provided \"{value}\""),
-							],
-						}),
+							debug: vec![fmt!("you provided {value}")],
+						});
+					}
+				});
+			}
+			
+			if let Some(value) = errors.get("linked-file-does-not-exist") {
+				catch!(errs => {
+					let raw = Self::try_get_string(value, "errors.linked-file-does-not-exist", "(a missing file handling strategy)")?;
+
+					if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
+						s.errors.linked_file_does_not_exist = opt;
+					} else {
+						return Err(SquarkError::Unrecoverable {
+							msg: fmt!("unknown setting for {Y}errors.linked-file-does-not-exist"),
+							hint: fmt!("valid values are \"strip-extension\" (default), \"link-to-github\" or \"error\""),
+							debug: vec![fmt!("you provided {value}")],
+						});
 					}
 				});
 			}

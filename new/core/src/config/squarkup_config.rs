@@ -134,6 +134,6 @@ pub enum LinkRewriteAction {
 	/// Replace the link with an absolute link to the original file in the GitHub repo.
 	LINK_TO_GITHUB,
 
-	/// Skip rewriting this file.
-	SKIP,
+	/// Throw an error, handled according to `config.errors.on_error`.
+	ERROR,
 }

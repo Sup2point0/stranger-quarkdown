@@ -13,4 +13,4 @@ externalise-links = true
 [errors]
 on-error = "kill"
 file-already-exists = "overwrite"
-linked-file-does-not-exist = "link-to-github"
+linked-file-does-not-exist = "error"
