@@ -35,6 +35,7 @@ impl SquarkupConfig
 			out: OutConfig {
 				folder: dir!(site / "src/routes/"),
 				file: str!("+page.svx"),
+				page_ts: true,
 				data: None,
 			},
 			format: FormatConfig {

@@ -50,6 +50,9 @@ pub struct OutConfig {
 	/// The file name for exported files, including the (expected) `.svx` extension.
 	pub file: String,
 
+	/// Should `+page.ts` files be exported?
+	pub page_ts: bool,
+
 	/// Where to export site data, including the (expected) `.json` extension.
 	/// 
 	/// If absent, site data is not exported.
