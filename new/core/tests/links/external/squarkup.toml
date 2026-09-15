@@ -4,7 +4,7 @@ repo = "Squarkdown Tests"
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/links/basic/"
+folder = "src/routes/links/external/"
 
 [format]
 externalise-links = true

@@ -23,9 +23,16 @@ use assertables::*;
 
 	let main = read_file("links/nested/main/+page.svx");
 	let side = read_file("links/nested/nested/side/+page.svx");
+	let more = read_file("links/nested/more/+page.svx");
+
 	assert_contains!( main, "[side](nested/side)" );
 	assert_contains!( side, "[main](../main)" );
 	assert_not_contains!( main, "[side](./nested/side)" );
+
+	assert_contains!( main, "[more](more)" );
+	assert_contains!( side, "[more](../more)" );
+	assert_contains!( more, "[side](nested/side)" );
+	assert_contains!( more, "[main](main)" );
 }
 
 /// Squarkdown does not resolve external links, and rewrites links with `<sup>↗</sup>` to `<a target="_blank">`.
