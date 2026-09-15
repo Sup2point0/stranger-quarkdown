@@ -346,7 +346,9 @@ impl<'d> Renderer<'d>
 			let href = pathdiff::diff_paths(&dest_page.destination, &self.page.destination)
 				.expect("destinations of files always have ROOT as common ancestor");
 
-			*dest_url = pd::CowStr::Boxed(Box::from(href.to_str().unwrap()));
+			let href_slashed = path_slash::PathBufExt::to_slash(&href).unwrap();
+			*dest_url = pd::CowStr::Boxed(Box::from(href_slashed));
+
 			return;
 		}
 
