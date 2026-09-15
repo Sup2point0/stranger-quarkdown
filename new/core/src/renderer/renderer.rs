@@ -324,6 +324,20 @@ impl<'d> Renderer<'d>
 	/// If resolution fails, an error is added to `self.errors`, and as a best-effort fallback, we try to strip a `.md` suffix from the link.
 	fn process_link(&mut self, dest_url: &mut pd::CowStr)
 	{
+		/* We only rewrite relative links to Markdown files */
+		if !dest_url.contains(".md")
+		|| dest_url.starts_with("http") {
+			return;
+		}
+
+		let mut file_name = dest_url.to_string();
+		let mut anchor: Option<String> = None;
+
+		if let Some((left, right)) = dest_url.split_once(".md#") {
+			file_name = left.to_string() + ".md";
+			anchor = Some(right.to_string());
+		}
+
 		// 1. find where the target file lives, relative to the current file
 		let folder = self.page.filepath.parent().expect("active files are always inside a folder");
 		let path = folder.join(file_name);
@@ -343,8 +357,12 @@ impl<'d> Renderer<'d>
 		// 2. find where the target file will be exported to
 		if let Some(dest_page) = self.site.pages.get(&target_source)
 		{
-			let href = pathdiff::diff_paths(&dest_page.destination, &self.page.destination)
+			let mut href = pathdiff::diff_paths(&dest_page.destination, &self.page.destination)
 				.expect("destinations of files always have ROOT as common ancestor");
+
+			if let Some(anchor) = anchor {
+				href.push(anchor);
+			}
 
 			let href_slashed = path_slash::PathBufExt::to_slash(&href).unwrap();
 			*dest_url = pd::CowStr::Boxed(Box::from(href_slashed));
