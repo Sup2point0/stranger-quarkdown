@@ -3,4 +3,6 @@
 | dest = main
 -->
 
+This link to [side](side.md) should be rewritten to `side`.
+
 This link to [side](./side.md) should be rewritten to `./side`.
