@@ -1,0 +1,10 @@
+repo = "Squarkdown Tests"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/render/dest/"
+
+[errors]
+on-error = "kill"
