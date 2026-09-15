@@ -88,4 +88,4 @@ This type of squark comes in pairs, with one to open the section and one to clos
 
 ## Squark Charm
 
-> Main article: [Squark Charm](../ref/squark-charm.md)
+> Main article: [Squark Charm](../reference/squark-charm.md)
