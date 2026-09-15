@@ -9,23 +9,23 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, Default)]
 pub struct SiteData
 {
-	/// The active pages in the site, keyed by the location (filepath) of their source file.
-	/// 
-	/// Since the filepath of any file must be unique, this reliably identifies files with minimal effort!
-	pages: HashMap<String, PageData>,
+	pub stats: SiteStats,
 
 	/// Maps tags to the pages that included them.
 	tags: HashMap<String, Vec<String>>,
 
-	stats: SiteStats,
+	/// The active pages in the site, keyed by the location (filepath) of their source file.
+	/// 
+	/// Since the filepath of any file must be unique, this reliably identifies files with minimal effort!
+	pages: HashMap<String, PageData>,
 }
 
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct SiteStats
 {
-	built_on: UtcDateTime,
-	source_files: usize,
-	active_pages: usize,
+	pub built_on: UtcDateTime,
+	pub source_files: usize,
+	pub active_pages: usize,
 }
 
 impl Default for SiteStats
@@ -67,6 +67,7 @@ impl SiteData
 		}
 
 		self.pages.insert(key.to_owned(), page_data);
+		self.stats.active_pages += 1;
 	}
 }
 

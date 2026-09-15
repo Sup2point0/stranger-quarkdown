@@ -51,7 +51,7 @@ impl PageData
 		config: &SquarkupConfig,
 	) -> SquarkResult<Self>
 	{
-		let mut errs = vec![];
+		let mut errs = SquarkError::multiple();
 
 		let mut destination = PathBuf::new();
 
@@ -121,7 +121,7 @@ impl PageData
 				other: fields,
 			})
 		} else {
-			Err(SquarkError::Multiple { errs })
+			Err(errs)
 		}
 	}
 
@@ -171,15 +171,15 @@ impl PageData
 #[derive(serde::Serialize)]
 pub struct SerialisedPageData
 {
-	filepath: String,
-	destination: String,
-	flags: Strings,
-	title: Option<String>,
-	description: Option<String>,
-	heading: Option<String>,
-	caption: Option<String>,
-	tags: Vec<String>,
-	release_date: Option<Date>,
-	last_updated: Option<Date>,
-	other: HashMap<String, Strings>,
+	pub filepath: String,
+	pub destination: String,
+	pub flags: Strings,
+	pub title: Option<String>,
+	pub description: Option<String>,
+	pub heading: Option<String>,
+	pub caption: Option<String>,
+	pub tags: Vec<String>,
+	pub release_date: Option<Date>,
+	pub last_updated: Option<Date>,
+	pub other: HashMap<String, Strings>,
 }

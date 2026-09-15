@@ -53,7 +53,6 @@ fn squarkup() -> SquarkResult<bool>
 	log::ok!(slash!("found your site: {B}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();
-	let mut active_files = 0;
 	log::is!("finding files to squarkup...");
 
 	// == PARSE == //
@@ -67,7 +66,6 @@ fn squarkup() -> SquarkResult<bool>
 			let mut parser = CharmParser::init(file, filepath.clone()).map_err(err!())?;
 			
 			if let Some(page) = parser.parse(&config).unwrap() {
-				active_files += 1;
 				site_data.add_page(page);
 				
 				log::info!(slash!(
@@ -88,11 +86,11 @@ fn squarkup() -> SquarkResult<bool>
 		log::line();
 	}
 	
-	if active_files == 0 {
+	if site_data.stats.active_pages == 0 {
 		log::bad!("no files found to squarkup, exiting!");
 		return Ok(false);
 	} else {
-		log::ok!("found {active_files} active files to squarkup");
+		log::ok!("found {} active files to squarkup", site_data.stats.active_pages);
 	}
 
 	// == RENDER == //
@@ -131,7 +129,8 @@ fn print_error(err: SquarkError)
 {
 	match err {
 		SquarkError::Recoverable{ msg, hint, debug }
-		| SquarkError::Unrecoverable{ msg, hint, debug } => {
+		| SquarkError::Unrecoverable{ msg, hint, debug }
+		=> {
 			log::bad!(msg);
 			for each in debug {
 				log::info!(each);

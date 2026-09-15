@@ -7,37 +7,37 @@ use std::fmt::Display;
 
 /// Log an action that Squarkdown is about to perform, to set up expectations.
 #[macro_export] macro_rules! is {
-	($msg:literal) => { $crate::log::log_is(fmt!($msg)) };
-	($var:expr)    => { $crate::log::log_is(fmt!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_is(fmt!($($args)*)) };
+	($msg:literal) => { $crate::log::log_is(format!($msg)) };
+	($var:expr)    => { $crate::log::log_is(format!("{}", $var)) };
+	($($args:tt)*) => { $crate::log::log_is(format!($($args)*)) };
 } pub use is;
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! info {
-	($msg:literal) => { $crate::log::log_info(fmt!($msg)) };
-	($var:expr)    => { $crate::log::log_info(fmt!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_info(fmt!($($args)*)) };
+	($msg:literal) => { $crate::log::log_info(format!($msg)) };
+	($var:expr)    => { $crate::log::log_info(format!("{}", $var)) };
+	($($args:tt)*) => { $crate::log::log_info(format!($($args)*)) };
 } pub use info;
 
 /// Log a checkpoint that has successfully been reached.
 #[macro_export] macro_rules! ok {
-	($msg:literal) => { $crate::log::log_ok(fmt!($msg)) };
-	($var:expr)    => { $crate::log::log_ok(fmt!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_ok(fmt!($($args)*)) };
+	($msg:literal) => { $crate::log::log_ok(format!($msg)) };
+	($var:expr)    => { $crate::log::log_ok(format!("{}", $var)) };
+	($($args:tt)*) => { $crate::log::log_ok(format!($($args)*)) };
 } pub use ok;
 
 /// Log an error, failure or issue the user should be aware of.
 #[macro_export] macro_rules! bad {
-	($msg:literal) => { $crate::log::log_bad(fmt!($msg)) };
-	($var:expr)    => { $crate::log::log_bad(fmt!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_bad(fmt!($($args)*)) };
+	($msg:literal) => { $crate::log::log_bad(format!($msg)) };
+	($var:expr)    => { $crate::log::log_bad(format!("{}", $var)) };
+	($($args:tt)*) => { $crate::log::log_bad(format!($($args)*)) };
 } pub use bad;
 
 /// Log a hint to the user that may help them fix an error.
 #[macro_export] macro_rules! hint {
-	($msg:literal) => { $crate::log::log_hint(fmt!($msg)) };
-	($var:expr)    => { $crate::log::log_hint(fmt!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_hint(fmt!($($args)*)) };
+	($msg:literal) => { $crate::log::log_hint(format!($msg)) };
+	($var:expr)    => { $crate::log::log_hint(format!("{}", $var)) };
+	($($args:tt)*) => { $crate::log::log_hint(format!($($args)*)) };
 } pub use hint;
 
 
