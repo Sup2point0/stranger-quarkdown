@@ -339,25 +339,30 @@ impl<'d> Renderer<'d>
 		}
 
 		// 1. find where the target file lives, relative to the current file
-		let folder = self.page.filepath.parent().expect("active files are always inside a folder");
-		let path = folder.join(file_name);
+		let own_source_folder = self.page.filepath.parent()
+			.expect("active files are always inside a folder");
 
-		let Ok(target_source) = fs::canonicalize(&path) else {
+		let their_source_folder = own_source_folder.join(file_name);
+
+		let Ok(their_source_path) = fs::canonicalize(&their_source_folder) else {
 			return self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found broken link: {dest_url}"),
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
 					str!(slash!("in: {GREY1}{}", self.page.filepath)),
-					str!(slash!("resolved to: {GREY1}{}", path)),
+					str!(slash!("resolved to: {GREY1}{}", their_source_folder)),
 				]
 			});
 		};
 
 		// 2. find where the target file will be exported to
-		if let Some(dest_page) = self.site.pages.get(&target_source)
+		if let Some(dest_page) = self.site.pages.get(&their_source_path)
 		{
-			let mut href = pathdiff::diff_paths(&dest_page.destination, &self.page.destination)
+			let own_dest_folder = self.page.destination.parent()
+				.expect("destination always has a parent folder");
+
+			let mut href = pathdiff::diff_paths(&dest_page.destination, own_dest_folder)
 				.expect("destinations of files always have ROOT as common ancestor");
 
 			if let Some(anchor) = anchor {
@@ -384,7 +389,7 @@ impl<'d> Renderer<'d>
 					debug: vec![
 						// TODO add line number
 						str!(slash!("in: {GREY1}{}", self.page.filepath)),
-						str!(slash!("resolved to: {GREY1}{}", target_source)),
+						str!(slash!("resolved to: {GREY1}{}", their_source_path)),
 					]
 				});
 			}
