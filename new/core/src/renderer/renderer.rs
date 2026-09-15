@@ -264,13 +264,16 @@ impl<'d> Renderer<'d>
 					"SLASH" => Ctx::SLASH { key },
 
 					s => {
-						self.errors.push(SquarkError::Recoverable {
-							msg: fmt!("unknown twin squark: {W}{s}"),
-							hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
-							debug: vec![
-								fmt!("context stack: {:?}", self.ctx.stack())
-							],
-						});
+						if !self.ctx.is_leave() {
+							self.errors.push(SquarkError::Recoverable {
+								msg: fmt!("unknown twin squark: {W}{s}"),
+								hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
+								debug: vec![
+									str!(slash!("in: {GREY1}{}", self.page.filepath)),
+									fmt!("context stack: {:?}", self.ctx.stack()),
+								],
+							});
+						}
 						return false;
 					}
 				}
@@ -351,7 +354,7 @@ impl<'d> Renderer<'d>
 				debug: vec![
 					// TODO add line number
 					str!(slash!("in: {GREY1}{}", self.page.filepath)),
-					str!(slash!("resolved to: {GREY1}{}", their_source_folder)),
+					str!(slash!("resolved to: {}", their_source_folder)),
 				]
 			});
 		};
@@ -391,7 +394,7 @@ impl<'d> Renderer<'d>
 					debug: vec![
 						// TODO add line number
 						str!(slash!("in: {GREY1}{}", self.page.filepath)),
-						str!(slash!("resolved to: {GREY1}{}", their_source_path)),
+						str!(slash!("resolved to: {}", their_source_path)),
 					]
 				});
 			}

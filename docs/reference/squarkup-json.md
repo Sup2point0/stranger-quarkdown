@@ -24,6 +24,8 @@ Most settings simply tell Squarkdown what filepaths to use for your particular p
 > [!Note]
 > This table is auto-generated from the exact specification as laid out by the [JSON schema](https://sup2point0.github.io/stranger-quarkdown/squarkup-schema/latest.json).
 
+<!-- #SQUARK leave? -->
+
 <!-- #SQUARK inject? -->
 | Field | Type | Values | Default | Description |
 | :---- | :--- | :----- | :------ | :---------- |
@@ -49,6 +51,8 @@ Most settings simply tell Squarkdown what filepaths to use for your particular p
 | `assets / extensions` | `string[]` |  | `["jpg", "jpeg", "png", "svg", "webp"]` | Only files with these extensions will be preprocessed by Squarkdown. |
 | `fonts / queries` | `string[]` |  |  | Individual URL query params for requesting fonts from Google Fonts. |
 <!-- #SQUARK inject. -->
+
+<!-- #SQUARK leave. -->
 
 
 <br>
