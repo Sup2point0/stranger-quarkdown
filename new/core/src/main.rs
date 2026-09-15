@@ -22,13 +22,13 @@ fn main() -> ExitCode
 	match status
 	{
 		Ok(_) => {
-			println!("{P}squarkup finished! {GREY}{:.2?} ms", t.as_secs_f64() * 1000.0);
+			println!("{P}squarkup finished! {GREY}{:.2?} ms{W}", t.as_secs_f64() * 1000.0);
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
 			print_error(e);
 			log::line();
-			println!("{R}squarkup failed! {GREY}{:.2?} ms\n", t.as_secs_f64() * 1000.0);
+			println!("{R}squarkup failed! {GREY}{:.2?} ms\n{W}", t.as_secs_f64() * 1000.0);
 			ExitCode::FAILURE
 		},
 	}
