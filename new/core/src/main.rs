@@ -68,7 +68,7 @@ fn squarkup() -> SquarkResult<bool>
 			
 			if let Some(page) = parser.parse(&config).unwrap() {
 				active_files += 1;
-				site_data.add_page(filepath.clone(), page);
+				site_data.add_page(page);
 				
 				log::info!(slash!(
 					"found active file: {GREY1}{}",

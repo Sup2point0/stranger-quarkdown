@@ -3,6 +3,7 @@ use time::{ UtcDateTime };
 use super::PageData;
 
 use std::collections::HashMap;
+use std::fs;
 use std::path::PathBuf;
 
 
@@ -46,14 +47,17 @@ impl SiteData
 	}
 
 	/// Add a page's metadata to the site.
-	pub fn add_page(&mut self, filepath: PathBuf, page_data: PageData)
+	pub fn add_page(&mut self, page_data: PageData)
 	{
+		let key = fs::canonicalize(&page_data.filepath)
+			.expect("file data is always sourced from a real file");
+
 		for tag in &page_data.tags {
 			self.tags
 				.entry(tag.clone()).or_default()
-				.push(filepath.clone());
+				.push(key.clone());
 		}
 
-		self.pages.insert(filepath, page_data);
+		self.pages.insert(key, page_data);
 	}
 }
