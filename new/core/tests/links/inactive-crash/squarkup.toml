@@ -4,8 +4,8 @@ repo = "Squarkdown Tests"
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/links/inactive/"
+folder = "src/routes/links/inactive-crash/"
 
 [errors]
 on-error = "kill"
-linked-file-does-not-exist = "error"
+linked-file-inactive = "error"
