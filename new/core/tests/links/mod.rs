@@ -25,7 +25,13 @@ use crate::*;
 	assert!( squarkup_from("tests/links/anchors").success() );
 }
 
-/// With `linked-file-inactive: error`, Squarkdown cesrash when encountering links to inactive pages.
+/// Squarkdown crashes when encountering links to nonexistent files.
+#[test] fn broken_crash()
+{
+	assert!( !squarkup_from("tests/links/broken").success() );
+}
+
+/// With `linked-file-inactive: error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crash()
 {
 	assert!( !squarkup_from("tests/links/inactive-crash").success() );

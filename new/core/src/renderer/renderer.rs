@@ -344,12 +344,12 @@ impl<'d> Renderer<'d>
 
 		let Ok(target_source) = fs::canonicalize(&path) else {
 			return self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found invalid link: {dest_url}"),
+				msg: fmt!("found broken link: {dest_url}"),
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
-					str!(slash!("in: {}", self.page.filepath)),
-					str!(slash!("resolved to: {}", path)),
+					str!(slash!("in: {GREY1}{}", self.page.filepath)),
+					str!(slash!("resolved to: {GREY1}{}", path)),
 				]
 			});
 		};
@@ -383,8 +383,8 @@ impl<'d> Renderer<'d>
 					hint: str!(),
 					debug: vec![
 						// TODO add line number
-						str!(slash!("in: {}", self.page.filepath)),
-						str!(slash!("resolved to: {}", target_source)),
+						str!(slash!("in: {GREY1}{}", self.page.filepath)),
+						str!(slash!("resolved to: {GREY1}{}", target_source)),
 					]
 				});
 			}
