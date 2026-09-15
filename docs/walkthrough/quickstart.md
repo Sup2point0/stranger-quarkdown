@@ -7,7 +7,7 @@
 Here’s a guided walkthrough on how to use Squarkdown in a SvelteKit project.
 
 > [!Tip]
-> It may be helpful to have the [Glossary](glossary.md) open while reading.
+> It may be helpful to have the [Glossary](../glossary.md) open while reading.
 
 
 <br>

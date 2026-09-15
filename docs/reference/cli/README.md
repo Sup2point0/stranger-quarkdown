@@ -6,14 +6,7 @@
 
 Squarkdown is a CLI tool! This page provides an overview of the different commands included in Squarkdown.
 
-<!-- #SQUARK slash? -->
 To run these commands, you’ll need to have [cloned the Stranger Quarkdown repo as a submodule](../../walkthrough/quickstart.md#add-squarkdown) into your project, and installed Ruby. Remember to also install Stranger Quarkdown’s dependencies before using it:
-<!-- #SQUARK slash. -->
-<!-- #SQUARK only?
-
-To run these commands, you’ll need to have [cloned the Stranger Quarkdown repo as a submodule](https://sup2point0.github.io/stranger-quarkdown/docs/walkthrough/quickstart#add-squarkdown) into your project, and installed Ruby. Remember to also install Stranger Quarkdown’s dependencies before using it:
-
-     #SQUARK only. -->
 
 ```bash
 your-project/stranger-quarkdown> bundle install
@@ -23,7 +16,9 @@ your-project/stranger-quarkdown> bundle install
 <br>
 
 
+<!-- #SQUARK leave? -->
 ## [`rake init`](init.md)
+<!-- #SQUARK leave. -->
 
 Setup Squarkdown in your project.
 
@@ -42,7 +37,9 @@ This automatically builds your `squarkup.json` for you, so you don’t need to r
 <br>
 
 
+<!-- #SQUARK leave? -->
 ## [`rake squark`](squark.md)
+<!-- #SQUARK leave. -->
 
 Squarkup your project.
 

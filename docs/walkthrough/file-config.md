@@ -55,7 +55,7 @@ Precise details of the available flags and fields are covered below.
 | :--- | :---------- | :---- |
 | `live!` | File is active. | If this flag is not detected within a few lines, the file is assumed to be inactive and processing is skipped – this saves a lot of otherwise wasted time!
 | `dead!` | File is inactive. | Little difference to omitting core entirely, but explicitly indicates to developers “we’re not squarking this up, for a reason”. |
-| `index!` | Index file for listing other pages, treated differently during rendering. | See [Index Files](index-files.md) for more. |
+<!-- | `index!` | Index file for listing other pages, treated differently during rendering. | See [Index Files](index-files.md) for more. | -->
 
 Anything else that follows the format `<identifier>!` and appears in this first line will be parsed as a flag and saved in `FileData.flags`.
 
