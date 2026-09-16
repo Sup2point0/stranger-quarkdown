@@ -2,8 +2,8 @@ use squarkdown::macros::*;
 
 use lazy_static::lazy_static;
 
-use std::fs::{ File };
-use std::io::{ Read };
+use std::fs::{ self, File };
+use std::io::{ self, Read };
 use std::path::{ PathBuf };
 use std::assert_matches;
 
@@ -28,6 +28,29 @@ pub fn squarkup_from(path: &str) -> std::process::ExitStatus
 
 	assert_matches!( r, Ok(..) );
 	r.unwrap()
+}
+
+
+/// Recursively delete all files under `path`, except `.gitkeep`.
+pub fn clear_files(path: &str) -> io::Result<()>
+{
+	let path = TEST_SITE.join(path);
+	if !path.exists() {
+		panic!("{}", slash!("no folder found at: {}", path));
+	}
+	if !path.is_dir() {
+		panic!("{}", slash!("{} is not a folder", path))
+	}
+	
+	if !dir!(path / ".gitkeep").exists() {
+		panic!("{}", slash!("danger: {} does not contain a .gitkeep file", path))
+	}
+
+	fs::remove_dir_all(&path)?;
+	fs::create_dir(&path)?;
+	File::create(dir!(path / ".gitkeep"))?;
+
+	Ok(())
 }
 
 

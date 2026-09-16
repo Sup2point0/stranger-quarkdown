@@ -6,6 +6,7 @@ use assertables::*;
 /// Squarkdown exports files to the right place.
 #[test] fn dest()
 {
+	clear_files("render/dest").unwrap();
 	assert!( squarkup_from("render/dest").success() );
 
 	let f1 = read_file("render/dest/1/+page.svx");
