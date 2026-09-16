@@ -116,22 +116,23 @@ impl<'d> CharmParser<'d>
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
 	pub(super) fn parse_heading(&mut self) -> SquarkResult<String>
 	{
-		ctx!(self, ParseCtx::HEADING => {
+		ctx!(self, ParseCtx::HEADING =>
+		{
+			self.eat("#", to!("start heading"))?;
 
-		while let Some('#') = self.current() {
-			self.advance()?;
-		}
-		self.eat_spaces();
+			while let Some('#') = self.current() {
+				self.advance()?;
+			}
+			self.eat_spaces();
 
-		let start = self.i;
-		while let Some(c) = self.current() && c != '\n' {
-			self.advance()?;
-		}
-		let stop = self.i;
-		let heading = self.source[start..stop].iter().collect();
-		
-		Ok(utils::trim_end(heading))
-		
+			let start = self.i;
+			while let Some(c) = self.current() && c != '\n' {
+				self.advance()?;
+			}
+			let stop = self.i;
+			let heading = self.source[start..stop].iter().collect();
+			
+			Ok(utils::trim_end(heading))
 		})
 	}
 	
@@ -355,6 +356,8 @@ impl<'d> CharmParser<'d>
 mod full {
 	use super::*;
 
+	// TODO add tests
+
 	#[test] fn parse_basic()
 	{
 		let source = indoc! {"
@@ -546,12 +549,15 @@ mod partial {
 	#[test] fn parse_flags_fails()
 	{
 		test_expected(&[
-			("live! ignore", vec![str!("live")]),
-			("live!\nignore", vec![str!("live")]),
-			("live! \nignore", vec![str!("live")]),
-			("live!\n ignore", vec![str!("live")]),
-			("one! ignore two!", vec![str!("one"), str!("two")]),
-			("kebab-case! ignore-me snake_case! ignore_me", vec![str!("kebab-case"), str!("snake_case")]),
+			("live! ignore\n",     vec!["live"]),
+			("live!\nignore\n",    vec!["live"]),
+			("live! \nignore\n",   vec!["live"]),
+			("live!\n ignore\n",   vec!["live"]),
+			("one! ignore two!\n", vec!["one", "two"]),
+			(
+				"kebab-case! ignore-me snake_case! ignore_me\n",
+				vec!["kebab-case", "snake_case"]
+			),
 		],
 		|mut parser, expected_flags| {
 			let flags = parser.parse_flags().unwrap();

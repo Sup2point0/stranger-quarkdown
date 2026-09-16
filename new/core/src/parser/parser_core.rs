@@ -232,226 +232,196 @@ impl<'d> CharmParser<'d>
 }
 
 
-#[cfg(test)]
-mod test
+#[cfg(test)] use super::test_utils::*;
+#[cfg(test)] use crate::utils::testing::*;
+
+#[cfg(test)] use assertables::*;
+	
+	
+#[test] fn advance_and_current()
 {
-	use super::test_utils::*;
-	use crate::parser::*;
-	use crate::macros::*;
-	use crate::utils::testing::*;
+	let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
+	assert_eq!( parser.current(), Some('0') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.current(), None );
+	assert_err!( parser.advance() );
+}
 
-	use assertables::*;
-	
+#[test] fn advance_and_peek()
+{
+	let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
+	assert_eq!( parser.peek(), Some('1') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('3') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
+	assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+	assert_ok!( parser.advance() );
+	assert_err!( parser.advance() );
+}
 
-	#[test] fn advance_and_current_singlesource()
-	{
-		let mut parser = CharmParser::new("012345", TEST_FILE.clone(), &TEST_CONFIG);
+#[test] fn preview()
+{
+	test_exact(&[
+		"sup",
+		"sup\n",
+		"sup world",
+		"sup world\n",
+	],
+	|parser, case| {
+		assert_eq!( parser.preview(), case );
+	});
 
-		assert_eq!( parser.current(), Some('0') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
-		assert_err!( parser.advance() );
-	}
-	
-	#[test] fn advance_and_current_multisource()
-	{
-		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
+	test_exact(&[
+		"The quick brown fox jumps over the lazy dog",
+		"The quick brown fox jumps over the lazy dog\n",
+	],
+	|parser, case| {
+		assert_starts_with!( parser.preview(), case.chars().take(10).collect::<String>() );
+	});
+}
 
-		assert_eq!( parser.current(), Some('0') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
-		assert_err!( parser.advance() );
-	}
+#[test] fn eat_fails()
+{
+	test_exact(&[
+		" ",
+		"test",
+		"testing testing",
+		"testing 123",
+	],
+	|mut parser, _case| {
+		let r = parser.eat("FAIL", to!());
+		assert_err!(r);
+	});
+}
 
-	#[test] fn advance_and_peek_singlesource()
-	{
-		let mut parser = CharmParser::new("012345", TEST_FILE.clone(), &TEST_CONFIG);
+#[test] fn eat_matches()
+{
+	test_exact(&[
+		" ",
+		"test",
+		"testing testing",
+		"testing 123",
+	],
+	|mut parser, case| {
+		assert_ok!( parser.eat(case, to!()) );
+	});
+}
 
-		assert_eq!( parser.peek(), Some('1') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('3') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
-		assert_err!( parser.advance() );
-	}
+#[test] fn eat_caseless_matches()
+{
+	test_exact(&[
+		" ",
+		"Test",
+		"Testing TESTING",
+		"tEsTiNg 123",
+	],
+	|mut parser, case| {
+		assert_ok!( parser.eat_caseless(&case.to_ascii_uppercase(), to!()) );
+	});
+}
 
-	#[test] fn advance_and_peek_multisource()
-	{
-		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
+#[test] fn eat_spaces_fails()
+{
+	test_exact(&[
+		"nothing",
+		"nothing ",
+		"n othing ",
+	],
+	|mut parser, _case| {
+		assert_eq!( parser.eat_spaces(), false );
+		assert_eq!( parser.current(), Some('n') );
+	});
+}
 
-		assert_eq!( parser.peek(), Some('1') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
-		assert_err!( parser.advance() );
-	}
+#[test] fn eat_spaces_stops()
+{
+	test_exact(&[
+		" stop",
+		" stop ",
+		"  stop ",
+	],
+	|mut parser, _case| {
+		assert_eq!( parser.eat_spaces(), true );
+		assert_eq!( parser.current(), Some('s') );
+	});
+}
 
-	#[test] fn preview()
-	{
-		test_exact(&[
-			"Sup",
-			"Sup World",
-		],
-		|parser, case| {
-			assert_eq!( parser.preview(), case.to_string() + "\n" );
-		});
-	}
+#[test] fn eat_spaces_matches()
+{
+	test_exact(&[
+		" ",
+		"  ",
+		"        ",
+	],
+	|mut parser, _case| {
+		assert_eq!( parser.eat_spaces(), true );
+		assert_eq!( parser.current(), None );
+	});
+}
 
-	#[test] fn eat_fails()
-	{
-		test_exact(&[
-			" ",
-			"test",
-			"testing testing",
-			"testing 123",
-		],
-		|mut parser, _case| {
-			let r = parser.eat("FAIL", to!());
-			assert_err!(r);
-		});
-	}
+#[test] fn eat_whitespace_stops()
+{
+	test_exact(&[
+		" stop",
+		"  stop",
+		"        stop",
+		" \nstop",
+		"\n stop",
+		" \n stop",
+		" \n \n\nstop",
+		"\tstop",
+		" \n\t stop",
+	],
+	|mut parser, _case| {
+		assert_eq!( parser.eat_whitespace(), true );
 
-	#[test] fn eat_matches()
-	{
-		test_exact(&[
-			" ",
-			"test",
-			"testing testing",
-			"testing 123",
-		],
-		|mut parser, case| {
-			assert_ok!( parser.eat(case, to!()) );
-		});
-	}
-
-	#[test] fn eat_caseless_matches()
-	{
-		test_exact(&[
-			" ",
-			"Test",
-			"Testing TESTING",
-			"tEsTiNg 123",
-		],
-		|mut parser, case| {
-			assert_ok!( parser.eat_caseless(&case.to_ascii_uppercase(), to!()) );
-		});
-	}
-
-	#[test] fn eat_spaces_fails()
-	{
-		test_exact(&[
-			"nothing",
-			"nothing ",
-			"n othing ",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_spaces(), false );
-			assert_eq!( parser.current(), Some('n') );
-		});
-	}
-
-	#[test] fn eat_spaces_stops()
-	{
-		test_exact(&[
-			" stop",
-			" stop ",
-			"  stop ",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_spaces(), true );
+		if parser.current() != Some('s') {
+			assert_ok!( parser.advance() );
 			assert_eq!( parser.current(), Some('s') );
-		});
-	}
+		}
+	});
+}
 
-	#[test] fn eat_spaces_matches()
-	{
-		test_exact(&[
-			" ",
-			"  ",
-			"        ",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_spaces(), true );
-			assert_eq!( parser.current(), Some('\n') );
-		});
-	}
+#[test] fn eat_whitespace_matches()
+{
+	test_exact(&[
+		" ",
+		"  ",
+		"        ",
+		" \n",
+		"\n ",
+		" \n ",
+		" \n \n\n",
+		"\t",
+		" \n\t ",
+	],
+	|mut parser, _case| {
+		assert_eq!( parser.eat_whitespace(), true );
+		assert_eq!( parser.current(), None );
+	});
+}
 
-	#[test] fn eat_whitespace_stops()
-	{
-		test_exact(&[
-			" stop",
-			"  stop",
-			"        stop",
-			" \nstop",
-			"\n stop",
-			" \n stop",
-			" \n \n\nstop",
-			"\tstop",
-			" \n\t stop",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_whitespace(), true );
-
-			if parser.current() != Some('s') {
-				assert_ok!( parser.advance() );
-				assert_eq!( parser.current(), Some('s') );
-			}
-		});
-	}
-
-	#[test] fn eat_whitespace_matches()
-	{
-		test_exact(&[
-			" ",
-			"  ",
-			"        ",
-			" \n",
-			"\n ",
-			" \n ",
-			" \n \n\n",
-			"\t",
-			" \n\t ",
-		],
-		|mut parser, _case| {
-			assert_eq!( parser.eat_whitespace(), true );
-			assert_eq!( parser.current(), None );
-		});
-	}
-
-	#[test] fn parse_ident()
-	{
-		test_exact(&[
-			"identifier",
-			"camelCase",
-			"PascalCase",
-			"kebab-case",
-			"snake_case",
-			"dot.case",
-			"very-much_mixedCase",
-		],
-		|mut parser, case| {
-			let r = parser.parse_ident();
-			assert_ok!( &r );
-			assert_eq!( r.unwrap(), case.to_string() );
-		});
-	}
+#[test] fn parse_ident()
+{
+	test_exact(&[
+		"identifier",
+		"camelCase",
+		"PascalCase",
+		"kebab-case",
+		"snake_case",
+		"dot.case",
+		"very-much_mixedCase",
+	],
+	|mut parser, case| {
+		let r = parser.parse_ident();
+		assert_ok!( &r );
+		assert_eq!( r.unwrap(), case.to_string() );
+	});
 }

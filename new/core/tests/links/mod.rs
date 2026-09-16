@@ -59,11 +59,13 @@ use assertables::*;
 /// Squarkdown crashes when encountering links to nonexistent files.
 #[test] fn broken_crash()
 {
+	// TODO check specific error
 	assert!( !squarkup_from("links/broken").success() );
 }
 
 /// With `linked-file-inactive: error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crash()
 {
+	// TODO check specific error
 	assert!( !squarkup_from("links/inactive-crash").success() );
 }

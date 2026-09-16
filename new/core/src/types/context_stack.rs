@@ -73,49 +73,47 @@ impl<Ctx> ContextStack<Ctx>
 }
 
 
-#[cfg(test)]
-mod test
+// == TESTS == //
+
+#[cfg(test)] use crate::renderer::RenderCtx;
+
+
+#[test] fn force_pop_easy()
 {
-	use super::*;
-	use crate::renderer::RenderCtx;
+	let mut ctx = ContextStack::new();
+
+	ctx.push(RenderCtx::LEAVE { key: None });
+
+	ctx.push(RenderCtx::SLASH { key: None });
+	ctx.push(RenderCtx::ONLY);
+	ctx.force_pop(RenderCtx::SLASH { key: None });
+	assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
+}
+
+#[test] fn force_pop_medium()
+{
+	let mut ctx = ContextStack::new();
+	ctx.push(RenderCtx::LEAVE { key: None });
+
+	ctx.push(RenderCtx::SLASH { key: None });
+	ctx.push(RenderCtx::ONLY);
+	ctx.push(RenderCtx::SLASH { key: None });
+	ctx.force_pop(RenderCtx::SLASH { key: None });
+	assert_eq!( *ctx.current(), RenderCtx::ONLY );
 	
-	#[test] fn force_pop_easy()
-	{
-		let mut ctx = ContextStack::new();
+	ctx.force_pop(RenderCtx::SLASH { key: None });
+	assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
+}
 
-		ctx.push(RenderCtx::LEAVE { key: None });
+#[test] fn force_pop_hard()
+{
+	let mut ctx = ContextStack::new();
+	ctx.push(RenderCtx::LEAVE { key: None });
 
-		ctx.push(RenderCtx::SLASH { key: None });
-		ctx.push(RenderCtx::ONLY);
-		ctx.force_pop(RenderCtx::SLASH { key: None });
-		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
-	}
+	ctx.push(RenderCtx::SLASH { key: None });
+	ctx.push(RenderCtx::ONLY);
+	ctx.push(RenderCtx::ONLY);
 
-	#[test] fn force_pop_medium()
-	{
-		let mut ctx = ContextStack::new();
-		ctx.push(RenderCtx::LEAVE { key: None });
-
-		ctx.push(RenderCtx::SLASH { key: None });
-		ctx.push(RenderCtx::ONLY);
-		ctx.push(RenderCtx::SLASH { key: None });
-		ctx.force_pop(RenderCtx::SLASH { key: None });
-		assert_eq!( *ctx.current(), RenderCtx::ONLY );
-		
-		ctx.force_pop(RenderCtx::SLASH { key: None });
-		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
-	}
-
-	#[test] fn force_pop_hard()
-	{
-		let mut ctx = ContextStack::new();
-		ctx.push(RenderCtx::LEAVE { key: None });
-
-		ctx.push(RenderCtx::SLASH { key: None });
-		ctx.push(RenderCtx::ONLY);
-		ctx.push(RenderCtx::ONLY);
-
-		ctx.force_pop(RenderCtx::LEAVE { key: None });
-		assert_eq!( *ctx.current(), RenderCtx::MARKDOWN );
-	}
+	ctx.force_pop(RenderCtx::LEAVE { key: None });
+	assert_eq!( *ctx.current(), RenderCtx::MARKDOWN );
 }
