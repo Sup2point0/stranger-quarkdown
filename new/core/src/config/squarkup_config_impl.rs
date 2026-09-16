@@ -39,6 +39,7 @@ impl SquarkupConfig
 				data: None,
 			},
 			format: FormatConfig {
+				preserve_heading: false,
 				preserve_comments: false,
 				externalise_links: false,
 				mark_invalid_links: false,
@@ -196,6 +197,9 @@ impl SquarkupConfig
 
 			let c = &mut s.format;
 
+			if let Some(value) = format.get("preserve-heading") { catch!(errs => {
+				c.preserve_heading = Self::try_get_bool(value, "format.preserve-heading")?;
+			}) }
 			if let Some(value) = format.get("preserve-comments") { catch!(errs => {
 				c.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?;
 			}) }

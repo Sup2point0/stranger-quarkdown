@@ -67,7 +67,10 @@ pub struct OutConfig {
 
 #[derive(Clone, Debug)]
 pub struct FormatConfig {
-	/// Strip `<!-- comments -->` from the rendered output?
+	/// Keep the first heading in the rendered output
+	pub preserve_heading: bool,
+
+	/// Keep `<!-- comments -->` in the rendered output?
 	pub preserve_comments: bool,
 
 	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
