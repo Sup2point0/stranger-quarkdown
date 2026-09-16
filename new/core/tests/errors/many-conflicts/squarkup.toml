@@ -4,7 +4,7 @@ repo = "Squarkdown Tests"
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/errors/conflicts/"
+folder = "src/routes/errors/many-conflicts/"
 
 [errors]
 strict = true
