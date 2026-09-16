@@ -2,6 +2,7 @@ use super::*;
 use crate::core::*;
 use crate::types::*;
 use crate::utils;
+use crate::colours::*;
 use crate::macros::*;
 
 use tinyvec::tiny_vec;
@@ -115,21 +116,22 @@ impl<'d> CharmParser<'d>
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
 	pub(super) fn parse_heading(&mut self) -> SquarkResult<String>
 	{
-		ctx!(self, ParseCtx::HEADING =>
-		{
-			while let Some('#') = self.current() {
-				self.advance()?;
-			}
-			self.eat_spaces();
+		ctx!(self, ParseCtx::HEADING => {
 
-			let start = self.i;
-			while let Some(c) = self.current() && c != '\n' {
-				self.advance()?;
-			}
-			let stop = self.i;
-			let heading = self.source[start..stop].iter().collect();
-			
-			Ok(utils::trim_end(heading))
+		while let Some('#') = self.current() {
+			self.advance()?;
+		}
+		self.eat_spaces();
+
+		let start = self.i;
+		while let Some(c) = self.current() && c != '\n' {
+			self.advance()?;
+		}
+		let stop = self.i;
+		let heading = self.source[start..stop].iter().collect();
+		
+		Ok(utils::trim_end(heading))
+		
 		})
 	}
 	
@@ -148,7 +150,7 @@ impl<'d> CharmParser<'d>
 	/// Attempt to look for `<!-- #SQUARK live!`.
 	/// 
 	/// If found, set `.is_live: true`; otherwise return `NO_MATCH`.
-	pub(super) fn try_parse_squark_live(&mut self) -> ParseResult
+	pub(super) fn try_parse_squark_live(&mut self) -> SquarkResult<ParseResult>
 	{
 		self.try_eat("<!--")?;
 		self.eat_whitespace(); self.try_eat_caseless("#SQUARK")?;
@@ -156,7 +158,7 @@ impl<'d> CharmParser<'d>
 		self.eat_spaces(); self.try_eat_caseless("live!")?;
 
 		self.is_live = true;
-		Ok(())
+		Ok(ParseResult::ADVANCE)
 	}
 
 	/// Parse the flags in the charm squark and return their identifiers.
@@ -167,41 +169,36 @@ impl<'d> CharmParser<'d>
 	/// ```
 	pub(super) fn parse_flags(&mut self) -> SquarkResult<Strings>
 	{
-		let when = when!("parsing charm squark flags");
-
-		let mut flags = strings!();
-
-		while let Some(c) = self.current()
-			&& c != '\n'
+		ctx!(self, ParseCtx::FLAGS =>
 		{
-			let ident = match self.parse_ident(when) {
-				Ok(ident) => ident,
+			let mut flags = strings!();
 
-				/* NOTE:
-					This means we've seen a `-` which starts the terminating `-->`.
+			while let Some(c) = self.current()
+				&& c != '\n'
+			{
+				/* NOTE: We're assuming `-` starts the terminating `-->`, since identifiers can't start with `-`. However, it could be the user genuinely using an illegal identifier... maybe we can handle that properly in future. */
+				if c == '-' { break; }
 
-					Or the user genuinely used an illegal identifier... maybe we can handle that properly in future
-				*/
-				Err(ParseFailure::IllegalInput{..}) => break,
+				let ident = self.parse_ident()?;
 
-				Err(e) => return Err(e),
-			};
-
-			if self.current() == Some('!') {
-				flags.push(ident);
+				if self.current() == Some('!') {
+					flags.push(ident);
+				}
+				else {
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("flags must end in {W}!"),
+						hint: fmt!("write flags like: {W}{ident}!"),
+						debug: self.show_ctx_stack(),
+					});
+					
+					// TODO recover
+				}
+				
+				self.advance()?;
 			}
-			else {
-				self.errors.push(ParseFailure::MissingInput {
-					when: when(),
-					expected: fmt!("{ident}! (flags must end in !)"),
-					actual: ident,
-				});
-			}
-			
-			self.advance(when)?;
-		}
 
-		Ok(flags)
+			Ok(flags)
+		})
 	}
 
 	/// Parse the fields in the charm squark and return a hashmap of the data.
@@ -216,19 +213,22 @@ impl<'d> CharmParser<'d>
 	/// ```
 	pub(super) fn parse_fields(&mut self) -> SquarkResult<HashMap<String, Strings>>
 	{
-		let mut data = HashMap::new();
+		ctx!(self, ParseCtx::FIELDS =>
+		{
+			let mut data = HashMap::new();
 
-		self.eat_whitespace();
-
-		while self.current() != Some('-') {
-			let (key, value) = self.parse_field()?;
-			data.insert(key, value);
 			self.eat_whitespace();
-		}
-		
-		self.eat("-->", to!("terminate charm squark"), when!("parsing charm squark fields"))?;
 
-		Ok(data)
+			while self.current() != Some('-') {
+				let (key, value) = self.parse_field()?;
+				data.insert(key, value);
+				self.eat_whitespace();
+			}
+			
+			self.eat("-->", to!("terminate charm squark"))?;
+
+			Ok(data)
+		})
 	}
 
 	/// Parse a single field and return its key and value.
@@ -243,20 +243,21 @@ impl<'d> CharmParser<'d>
 	/// ```
 	pub(super) fn parse_field(&mut self) -> SquarkResult<(String, Strings)>
 	{
-		let when = when!("parsing charm squark field");
+		ctx!(self, ParseCtx::FIELD =>
+		{
+			self.eat("|", to!("start field in charm squark"))?;
+			self.eat_whitespace();
 
-		self.eat("|", to!("start field in charm squark"), when)?;
-		self.eat_whitespace();
+			let key = self.parse_ident()?;
 
-		let key = self.parse_ident(when)?;
+			self.eat_whitespace();
+			self.eat("=", to!("after field identifier"))?;
+			self.eat_whitespace();
 
-		self.eat_whitespace();
-		self.eat("=", when!("after field identifier"), when)?;
-		self.eat_whitespace();
+			let values = self.parse_values()?;
 
-		let values = self.parse_values()?;
-
-		Ok((key, values))
+			Ok((key, values))
+		})
 	}
 
 	/// Parse 1 or more values in a charm squark field.
@@ -274,126 +275,106 @@ impl<'d> CharmParser<'d>
 	/// ```
 	pub(super) fn parse_values(&mut self) -> SquarkResult<Strings>
 	{
-		let when = when!("parsing values in charm squark field");
-
-		/// All values collected so far.
-		let mut values = strings!();
-
-		/// The current value being built.
-		let mut value = str!("");
-
-		/* NOTE: Start on `true`, so leading `/ ` is ignored */
-		let mut can_terminate = true;
-
-		self.eat_whitespace();
-
-		while let Some(c) = self.current()
+		ctx!(self, ParseCtx::VALUES =>
 		{
-			match c {
-				// ` / ` flushes current value
-				'/' if can_terminate && utils::is_whitespace(self.peek()
-					.expect("safe from newline termination")) =>
-				{
-					let _ = self.advance(when!());  // safe from if check
-					self.eat_whitespace();
+			/// All values collected so far.
+			let mut values = strings!();
 
-					let trimmed = utils::trim_end(value.clone());
-					if !trimmed.is_empty() {
-						values.push(trimmed);
-					}
+			/// The current value being built.
+			let mut value = str!("");
 
-					value.clear();
-					continue;
-				},
+			/* NOTE: Start on `true`, so leading `/ ` is ignored */
+			let mut can_terminate = true;
 
-				// `|` terminates
-				'|' if can_terminate => break,
+			self.eat_whitespace();
 
-				// `-->` terminates
-				'-' if can_terminate && self.preview().starts_with("-->") => break,
-
-				_ => {
-					can_terminate = utils::is_whitespace(c);
-					
-					if utils::is_whitespace(c) {
-						value.push(' ');
-					} else {
-						value.push(c);
-					}
-
-					// normalise multiple whitespace into one ' '
-					if can_terminate {
+			while let Some(c) = self.current()
+			{
+				match c {
+					// ` / ` flushes current value
+					'/' if can_terminate && utils::is_whitespace(self.peek()
+						.expect("safe from newline termination")) =>
+					{
+						let _ = self.advance();  // safe from if check
 						self.eat_whitespace();
-					} else {
-						self.advance(when)?
-					}
-				},
+
+						let trimmed = utils::trim_end(value.clone());
+						if !trimmed.is_empty() {
+							values.push(trimmed);
+						}
+
+						value.clear();
+						continue;
+					},
+
+					// `|` terminates
+					'|' if can_terminate => break,
+
+					// `-->` terminates
+					'-' if can_terminate && self.preview().starts_with("-->") => break,
+
+					_ => {
+						can_terminate = utils::is_whitespace(c);
+						
+						if utils::is_whitespace(c) {
+							value.push(' ');
+						} else {
+							value.push(c);
+						}
+
+						// normalise multiple whitespace into one ' '
+						if can_terminate {
+							self.eat_whitespace();
+						} else {
+							self.advance()?
+						}
+					},
+				}
 			}
-		}
-		
-		if !value.is_empty() {
-			values.push(utils::trim_end(value));
-		}
+			
+			if !value.is_empty() {
+				values.push(utils::trim_end(value));
+			}
 
-		Ok(values)
-	}
-
-	/// Return the appropriate response for an unexpected end of file.
-	/// 
-	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
-	/// 
-	/// If not, then Squarkdown can just ignore the file.
-	pub(super) fn err_eof(&self) -> SquarkResult
-	{
-		let msg = str!("unexpected end of file");
-		let hint = str!();
-		let debug = vec![
-			fmt!("while {}", self.ctx)
-		];
-
-		let err = if self.is_live {
-			SquarkError::Unrecoverable { msg, hint, debug }
-		} else {
-			SquarkError::Recoverable { msg, hint, debug }
-		};
-
-		Err(err)
+			Ok(values)
+		})
 	}
 }
 
 
 // == TESTS == //
 
+#[cfg(test)] use super::test_utils::*;
+#[cfg(test)] use crate::utils::testing::*;
+
+#[cfg(test)] use assertables::*;
+#[cfg(test)] use indoc::indoc;
+
+
 #[cfg(test)]
-mod test
-{
-	use super::test_utils::*;
-	use crate::parser::*;
-	use crate::macros::*;
-	use crate::utils::testing::*;
-	
-	use tinyvec::tiny_vec;
-	
-	use std::collections::HashMap;
-	use std::io::Cursor;
-	use std::assert_matches;
-	
-	
+mod full {
+	use super::*;
+
 	#[test] fn parse_basic()
 	{
-		let source = Cursor::new("
-	# Test
-	<!-- #SQUARK live!
-	| dest = test
-	-->
-		".trim());
+		let source = indoc! {"
+			# Test
+			<!-- #SQUARK live!
+			| dest = test
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
-		let file_data = parser.parse(&TEST_CONFIG).unwrap().unwrap();
+		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+		let file_data = parser.parse().unwrap();
 
 		assert_eq!( file_data.heading, Some(str!("Test")) );
 		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
 	}
+}
+
+#[cfg(test)]
+mod partial {
+	use super::*;
 
 	#[test] fn parse_heading_matches_single_line()
 	{
@@ -403,7 +384,9 @@ mod test
 			("# Suppety Sup", "Suppety Sup"),
 		],
 		|mut parser, expected| {
-			assert_eq!( parser.parse_heading(), Ok(str!(*expected)) );
+			let r = parser.parse_heading();
+			assert_ok!( &r );
+			assert_eq!( r.unwrap(), str!(*expected) );
 		});
 	}
 
@@ -415,7 +398,9 @@ mod test
 			("# Suppety Sup\nDECOY", "Suppety Sup"),
 		],
 		|mut parser, expected| {
-			assert_eq!( parser.parse_heading(), Ok(str!(*expected)) );
+			let r = parser.parse_heading();
+			assert_ok!( &r );
+			assert_eq!( r.unwrap(), str!(*expected) );
 		});
 	}
 
@@ -427,14 +412,16 @@ mod test
 			"Don't Do It",
 		],
 		|mut parser, _case| {
-			assert_matches!( parser.parse_heading(), Err(ParseFailure::UnexpectedInput{..}) );
+			let r = parser.parse_heading();
+			assert_err!( r );
+			// TODO check error message
 		});
 	}
 
 	#[test] fn parse_charm_squark_no_fields()
 	{
-		let source = Cursor::new("<!-- #SQUARK live! -->");
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let source = "<!-- #SQUARK live! -->";
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
@@ -444,13 +431,13 @@ mod test
 
 	#[test] fn parse_charm_squark_one_field()
 	{
-		let source = Cursor::new("
-<!-- #SQUARK live!
-| dest = test
--->
-		".trim());
+		let source = indoc! {"
+			<!-- #SQUARK live!
+			| dest = test
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -462,13 +449,13 @@ mod test
 
 	#[test] fn parse_charm_squark_one_field_many_flags()
 	{
-		let source = Cursor::new("
-<!-- #SQUARK live! feat! dev!
-| dest = test
--->
-		".trim());
+		let source = indoc! {"
+			<!-- #SQUARK live! feat! dev!
+			| dest = test
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!["feat", "dev"] );
@@ -480,15 +467,15 @@ mod test
 
 	#[test] fn parse_charm_squark_many_fields()
 	{
-		let source = Cursor::new("
-<!-- #SQUARK live!
-| dest = test
-| head = tests
-| title = testing
--->
-		".trim());
+		let source = indoc! {"
+			<!-- #SQUARK live!
+			| dest = test
+			| head = tests
+			| title = testing
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -502,14 +489,14 @@ mod test
 
 	#[test] fn parse_charm_squark_many_fields_values()
 	{
-		let source = Cursor::new("
-<!-- #SQUARK live!
-| dest = test
-| tags = prot / deut / trit
--->
-		".trim());
+		let source = indoc! {"
+			<!-- #SQUARK live!
+			| dest = test
+			| tags = prot / deut / trit
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings![] );
@@ -522,14 +509,14 @@ mod test
 
 	#[test] fn parse_charm_squark_many_flags_fields_values()
 	{
-		let source = Cursor::new("
-<!-- #SQUARK live! feat! dev!
-| dest = test
-| tags = prot / deut / trit
--->
-		".trim());
+		let source = indoc! {"
+			<!-- #SQUARK live! feat! dev!
+			| dest = test
+			| tags = prot / deut / trit
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
 
 		assert_eq!( flags, strings!["feat", "dev"] );
@@ -577,13 +564,13 @@ mod test
 
 	#[test] fn parse_fields_usual()
 	{
-		let source = Cursor::new("
-| field = value
-| fields = one / two / three
--->
-		".trim());
+		let source = indoc! {"
+			| field = value
+			| fields = one / two / three
+			-->
+		"};
 
-		let mut parser = CharmParser::init(source, TEST_FILE.clone()).unwrap();
+		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let fields = parser.parse_fields().unwrap();
 
 		assert!( fields.contains_key("field") );

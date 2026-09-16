@@ -68,7 +68,7 @@ impl<'d> CharmParser<'d>
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
-						debug: self.show_ctx_stack().collect(),
+						debug: self.show_ctx_stack(),
 					});
 				}
 				None => return self.err_eof(),
@@ -111,7 +111,7 @@ impl<'d> CharmParser<'d>
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
-						debug: self.show_ctx_stack().collect(),
+						debug: self.show_ctx_stack(),
 					});
 				}
 				None => return self.err_eof(),
@@ -175,38 +175,59 @@ impl<'d> CharmParser<'d>
 	/// Identifiers cannot start with `-`.
 	pub(super) fn parse_ident(&mut self) -> SquarkResult<String>
 	{
-		ctx!(self, ParseCtx::IDENT =>
-		{
-			// FIXME require at least 1 character
-			let mut chars = vec![];
-
-			if let Some('-') = self.current() {
-				return Err(SquarkError::Unrecoverable {
-					msg: fmt!("illegal input: {}", self.preview()),
-					hint: str!("identifiers cannot start with `-`"),
-					debug: self.show_ctx_stack().collect()
-				});
-			}
-
-			while let Some(c) = self.current()
-				&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
-			{
-				chars.push(c);
-				let _ = self.advance();
-			}
+		ctx!(self, ParseCtx::IDENT => {
 			
-			self.ctx.force_pop(ParseCtx::IDENT);
+		// FIXME require at least 1 character
+		let mut chars = vec![];
 
-			Ok(chars.into_iter().collect())
+		if let Some('-') = self.current() {
+			return Err(SquarkError::Unrecoverable {
+				msg: fmt!("illegal input: {}", self.preview()),
+				hint: str!("identifiers cannot start with `-`"),
+				debug: self.show_ctx_stack()
+			});
+		}
+
+		while let Some(c) = self.current()
+			&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+		{
+			chars.push(c);
+			let _ = self.advance();
+		}
+		
+		self.ctx.force_pop(ParseCtx::IDENT);
+
+		Ok(chars.into_iter().collect())
+		
 		})
 	}
 }
 
 impl<'d> CharmParser<'d>
 {
-	pub(super) fn show_ctx_stack(&self) -> impl Iterator<Item = String>
+	/// Return the appropriate response for an unexpected end of file.
+	/// 
+	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
+	/// 
+	/// If not, then Squarkdown can just ignore the file.
+	pub(super) fn err_eof(&self) -> SquarkResult
 	{
-		self.ctx.stack().iter().rev().map(ToString::to_string)
+		let msg = str!("unexpected end of file");
+		let hint = str!();
+		let debug = self.show_ctx_stack();
+
+		let err = if self.is_live {
+			SquarkError::Unrecoverable { msg, hint, debug }
+		} else {
+			SquarkError::Recoverable { msg, hint, debug }
+		};
+
+		Err(err)
+	}
+
+	pub(super) fn show_ctx_stack(&self) -> Vec<String>
+	{
+		self.ctx.stack().iter().rev().map(ToString::to_string).collect()
 	}
 }
 
@@ -429,7 +450,7 @@ mod test
 		],
 		|mut parser, case| {
 			let r = parser.parse_ident();
-			assert_ok!( r );
+			assert_ok!( &r );
 			assert_eq!( r.unwrap(), case.to_string() );
 		});
 	}

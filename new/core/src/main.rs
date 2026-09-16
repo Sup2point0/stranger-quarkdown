@@ -62,10 +62,9 @@ fn squarkup() -> SquarkResult<bool>
 		catch!(errs => {
 			let filepath = filepath?;
 
-			let file = File::open(&filepath).map_err(err!())?;
-			let mut parser = CharmParser::init(file, filepath.clone()).map_err(err!())?;
+			let r = parser::parse(filepath.clone(), &config)?;
 			
-			if let Some(page) = parser.parse(&config).unwrap() {
+			if let Some(page) = r {
 				site_data.add_page(page);
 				
 				log::info!(slash!(
