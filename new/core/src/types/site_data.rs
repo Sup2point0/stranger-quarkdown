@@ -28,7 +28,6 @@ pub struct SiteData
 pub struct SiteStats
 {
 	pub built_on: UtcDateTime,
-	pub source_files: usize,
 	pub active_pages: usize,
 }
 
@@ -37,7 +36,6 @@ impl Default for SiteStats
 	fn default() -> Self {
 		Self {
 			built_on: UtcDateTime::now(),
-			source_files: 0,
 			active_pages: 0,
 		}
 	}

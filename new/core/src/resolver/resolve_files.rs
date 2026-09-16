@@ -63,7 +63,6 @@ fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bo
 				return true;
 			}
 		}
-
 		return false;
 	}
 

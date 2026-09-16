@@ -29,5 +29,5 @@ queries = [
 [errors]
 on-error = "warn"
 file-already-exists = "overwrite"
-# linked-file-inactive = "link-to-github"
-linked-file-inactive = "error"
+# inactive-link = "link-to-github"
+inactive-link = "error"
