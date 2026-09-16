@@ -49,6 +49,7 @@ lazy_static!
 		  pd::Options::ENABLE_GFM
 		| pd::Options::ENABLE_TABLES
 		| pd::Options::ENABLE_FOOTNOTES
+		| pd::Options::ENABLE_TASKLISTS
 	;
 
 	/// Options for rendering with `pulldown-cmark-to-cmark`.
@@ -359,7 +360,7 @@ impl Renderer<'_>
 
 		let Ok(their_source_path) = dunce::canonicalize(&their_source_path) else {
 			return self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found broken link: {dest_url}"),
+				msg: fmt!("found broken link: {W}({dest_url})"),
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
@@ -401,7 +402,7 @@ impl Renderer<'_>
 			}
 			LinkRewriteAction::ERROR => {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found link to inactive page: ({dest_url})"),
+					msg: fmt!("found link to inactive page: {W}({dest_url})"),
 					hint: str!(),
 					debug: vec![
 						// TODO add line number
@@ -526,15 +527,16 @@ mod code_blocks {
 				<!-- #SQUARK slash. -->
 				```
 			"},
-			indoc! {"
-				```md
-				<!-- #SQUARK only?
+			// TODO track only context
+			// indoc! {"
+			// 	```md
+			// 	<!-- #SQUARK only?
 
-				This is dangerous
+			// 	This is dangerous
 
-				     #SQUARK only. -->
-				```
-			"},
+			// 	     #SQUARK only. -->
+			// 	```
+			// "},
 		])
 	}
 
