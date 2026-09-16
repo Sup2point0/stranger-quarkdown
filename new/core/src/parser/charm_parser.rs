@@ -8,9 +8,11 @@ use tinyvec::tiny_vec;
 
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{ Read };
-use std::path::{ PathBuf, Path };
+use std::io::Read;
+use std::path::{ PathBuf };
 
+
+// == PUBLIC == //
 
 /// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
 pub fn parse(filepath: PathBuf, config: &SquarkupConfig) -> SquarkResult<Option<PageData>>
@@ -19,10 +21,20 @@ pub fn parse(filepath: PathBuf, config: &SquarkupConfig) -> SquarkResult<Option<
 	let mut source = str!();
 	file.read_to_string(&mut source)?;
 
-	let mut parser = CharmParser::new(filepath, config);
-	parser.parse_from(source)
+	let mut parser = CharmParser::new(&source, filepath, config);
+	
+	match parser.parse() {
+		Ok(page) => Ok(Some(page)),
+		Err(e) => if !e.is_fatal() {
+			Ok(None)
+		} else {
+			Err(e)
+		}
+	}
 }
 
+
+// == IMPLEMENTATION == //
 
 /// A parser for the charm squark of a file.
 pub struct CharmParser<'d>
@@ -55,12 +67,12 @@ pub struct CharmParser<'d>
 impl<'d> CharmParser<'d>
 {
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
-	pub fn new(filepath: PathBuf, config: &'d SquarkupConfig) -> Self
+	pub fn new(source: &str, filepath: PathBuf, config: &'d SquarkupConfig) -> Self
 	{
 		Self {
 			config,
 			filepath,
-			source: vec!(),
+			source: source.chars().collect(),
 			i: 0,
 			is_live: false,
 			errors: SquarkError::multiple(),
@@ -68,12 +80,8 @@ impl<'d> CharmParser<'d>
 	}
 	
 	/// Run the parser to completion, extracting the heading and charm squark of the source.
-	/// 
-	/// If the file is active (has `#SQUARK live!`), this extracts the metadata from the charm squark and returns `Some(FileData)`. Otherwise, it returns `None` for an inactive file.
-	pub fn parse_from(&mut self, source: String) -> SquarkResult<Option<PageData>>
+	pub fn parse(&mut self) -> SquarkResult<PageData>
 	{
-		self.source = source.chars().collect();
-
 		self.eat_whitespace();
 		
 		let heading = {
@@ -90,7 +98,9 @@ impl<'d> CharmParser<'d>
 		let (flags, mut fields) = self.parse_charm_squark()?;
 		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
 
-		Ok(PageData::init(self.filepath.clone(), flags, fields, self.config))
+		let page = PageData::init(self.filepath.clone(), flags, fields, self.config)?;
+		
+		self.errors.or(page)
 	}
 }
 
@@ -123,7 +133,7 @@ impl<'d> CharmParser<'d>
 	/// Attempt to look for `<!-- #SQUARK live!`.
 	/// 
 	/// If found, set `.is_live: true`; otherwise return `NO_MATCH`.
-	pub(super) fn try_parse_squark_live(&mut self) -> Backtracks
+	pub(super) fn try_parse_squark_live(&mut self) -> ParseResult
 	{
 		self.try_eat("<!--")?;
 		self.eat_whitespace(); self.try_eat_caseless("#SQUARK")?;
@@ -313,23 +323,32 @@ impl<'d> CharmParser<'d>
 		Ok(values)
 	}
 
-	/// Return the appropriate `Err(ParseError)` for an unexpected end of file.
+	// TODO make macro to make `when` optional
+	/// Return the appropriate response for an unexpected end of file.
 	/// 
 	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
 	/// 
 	/// If not, then Squarkdown can just ignore the file.
-	pub(super) fn err_eof(&self, when: impl Fn() -> String) -> ParseResult
+	pub(super) fn err_eof(&self, when: impl Fn() -> String) -> SquarkResult
 	{
-		Err(if self.is_live {
-			ParseFailure::FatalEnd { when: when() }
+		let msg = str!("unexpected end of file");
+		let hint = str!();
+		let debug = vec![
+			fmt!("while: {}", when())
+		];
+
+		let err = if self.is_live {
+			SquarkError::Unrecoverable { msg, hint, debug }
 		} else {
-			ParseFailure::NO_MATCH
-		})
+			SquarkError::Recoverable { msg, hint, debug }
+		};
+
+		Err(err)
 	}
 }
 
 
-// == UNIT TESTS == //
+// == TESTS == //
 
 #[cfg(test)]
 mod test

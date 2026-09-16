@@ -1,17 +1,14 @@
 use super::*;
 use crate::utils::testing::*;
 
-use std::io::Cursor;
-
 
 pub(super) fn test_exact(
 	cases: &[&'static str],
-	test: impl Fn(CharmParser<Cursor<&&str>>, &str),
+	test: impl Fn(CharmParser, &str),
 )
 {
 	for case in cases {
-		let cursor = Cursor::new(case);
-		let parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
+		let parser = CharmParser::new(case, TEST_FILE.clone(), &TEST_CONFIG);
 
 		test(parser, case)
 	}
@@ -19,12 +16,11 @@ pub(super) fn test_exact(
 
 pub(super) fn test_expected<X>(
 	cases: &[(&'static str, X)],
-	test: impl Fn(CharmParser<Cursor<&&str>>, &X),
+	test: impl Fn(CharmParser, &X),
 )
 {
 	for (source, expected) in cases {
-		let cursor = Cursor::new(source);
-		let parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
+		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 
 		test(parser, expected)
 	}

@@ -3,7 +3,6 @@ use crate::core::*;
 use crate::macros::*;
 
 
-
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
 impl<'d> CharmParser<'d>
 {
@@ -43,13 +42,13 @@ impl<'d> CharmParser<'d>
 		}
 	}
 
-	/// Proceed to the next character in the source text, and read in a new line afterwards if necessary.
+	/// Proceed to the next character in the source text.
 	/// 
-	/// If this function is called when `self.is_eof: true`, this returns an end-of-input error.
+	/// Errors if the parser is out-of-bounds *before* advancing.
 	pub(super) fn advance(&mut self, when: impl Fn() -> String) -> SquarkResult
 	{
 		if self.is_out_of_bounds() {
-			return Err(todo!());
+			return self.err_eof(when);
 		}
 
 		self.i += 1;
@@ -83,7 +82,7 @@ impl<'d> CharmParser<'d>
 	}
 	
 	/// Attempt to consume exactly `target`. On failure, backtrack and return `NO_MATCH`.
-	pub(super) fn try_eat(&mut self, target: &str) -> Backtracks
+	pub(super) fn try_eat(&mut self, target: &str) -> SquarkResult<ParseResult>
 	{
 		let init = self.i;
 
@@ -91,12 +90,12 @@ impl<'d> CharmParser<'d>
 		{
 			if self.current() != Some(expected) {
 				self.i = init;
-				return Err(ParseFailure::NO_MATCH);
+				return Ok(ParseResult::BACKTRACK);
 			}
 			self.advance(when!())?;
 		}
 
-		Ok(())
+		Ok(ParseResult::ADVANCE)
 	}
 	
 	/// Consume `target` disregarding casing, erroring on failure.
@@ -129,7 +128,7 @@ impl<'d> CharmParser<'d>
 	}
 
 	/// Attempt to consume `target` disregarding casing, returning `NO_MATCH` on failure.
-	pub(super) fn try_eat_caseless(&mut self, target: &str) -> Backtracks
+	pub(super) fn try_eat_caseless(&mut self, target: &str) -> SquarkResult<ParseResult>
 	{
 		let init = self.i;
 
@@ -139,12 +138,12 @@ impl<'d> CharmParser<'d>
 
 			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
 				self.i = init;
-				return Err(ParseFailure::NO_MATCH);
+				return Ok(ParseResult::BACKTRACK);
 			}
 			self.advance(when!())?;
 		}
 
-		Ok(())
+		Ok(ParseResult::ADVANCE)
 	}
 	
 	/// Consume 0 or more space characters. Returns `true` if any characters were consumed.
@@ -228,7 +227,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(ParseResult::BACKTRACK) );
 	}
 	
 	#[test] fn advance_and_current_multisource()
@@ -245,7 +244,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('5') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.current(), Some('\n') );
-		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(ParseResult::BACKTRACK) );
 	}
 
 	#[test] fn advance_and_peek_singlesource()
@@ -261,7 +260,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(ParseResult::BACKTRACK) );
 	}
 
 	#[test] fn advance_and_peek_multisource()
@@ -278,7 +277,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), Some('\n') );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
 		assert_eq!( parser.advance(when!()), Ok(()) ); assert_eq!( parser.peek(), None );
-		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
+		assert_eq!( parser.advance(when!()), Ok(ParseResult::BACKTRACK) );
 	}
 
 	#[test] fn preview()
