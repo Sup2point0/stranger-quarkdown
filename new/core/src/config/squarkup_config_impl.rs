@@ -236,11 +236,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		if errs.is_empty() {
-			Ok(s)
-		} else {
-			Err(errs)
-		}
+		errs.or(s)
 	}
 }
 

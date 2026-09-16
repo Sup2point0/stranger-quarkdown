@@ -63,7 +63,8 @@ impl PageData
 					msg: str!(slash!("cannot export a file to {}", destination)),
 					hint: fmt!("a file's destination directory must remain under the root directory of your project"),
 					debug: vec![
-						str!(slash!("your project's root directory is {}", config.paths.root))
+						str!(slash!("your project's root directory is {}", config.paths.root)),
+						str!(slash!("in file: {}", filepath)),
 					],
 				});
 			}
@@ -72,7 +73,9 @@ impl PageData
 			errs.push(SquarkError::Unrecoverable {
 				msg: fmt!("missing field: {W}dest"),
 				hint: fmt!("active pages must specify where they should be rendered to"),
-				debug: vec![],
+				debug: vec![
+					str!(slash!("in file: {}", filepath)),
+				],
 			});
 		}
 		
@@ -101,14 +104,16 @@ impl PageData
 					errs.push(SquarkError::Recoverable {
 						msg: fmt!("invalid value for {W}cleanse{R}: {W}{raw}"),
 						hint: fmt!("valid values are {W}angles{G}, {W}braces{G}, {W}comments{G}, {W}line-breaks"),
-						debug: vec![],
+						debug: vec![
+							str!(slash!("in file: {}", filepath)),
+						],
 					});
 				}
 			};
 		}
 
-		if errs.is_empty() {
-			Ok(Self {
+		errs.or_else(||
+			Self {
 				shard: utils::display_rel(&filepath, &config.paths.root),
 				filepath,
 				flags,
@@ -119,10 +124,8 @@ impl PageData
 				release_date, last_updated,
 				cleanse,
 				other: fields,
-			})
-		} else {
-			Err(errs)
-		}
+			}
+		)
 	}
 
 	fn take(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<Vec<String>>

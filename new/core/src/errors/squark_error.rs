@@ -121,8 +121,13 @@ impl SquarkError
 
 	pub fn or<T>(self, t: T) -> SquarkResult<T>
 	{
+		self.or_else(|| t)
+	}
+
+	pub fn or_else<T>(self, f: impl FnOnce() -> T) -> SquarkResult<T>
+	{
 		if self.is_empty() {
-			Ok(t)
+			Ok(f())
 		} else {
 			Err(self)
 		}
