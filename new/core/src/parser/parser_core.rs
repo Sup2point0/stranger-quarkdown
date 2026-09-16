@@ -175,29 +175,30 @@ impl<'d> CharmParser<'d>
 	/// Identifiers cannot start with `-`.
 	pub(super) fn parse_ident(&mut self) -> SquarkResult<String>
 	{
-		self.error_ctx.push(ParseCtx::IDENT);
-
-		// FIXME require at least 1 character
-		let mut chars = vec![];
-
-		if let Some('-') = self.current() {
-			return Err(SquarkError::Unrecoverable {
-				msg: fmt!("illegal input: {}", self.preview()),
-				hint: str!("identifiers cannot start with `-`"),
-				debug: self.show_ctx_stack().collect()
-			});
-		}
-
-		while let Some(c) = self.current()
-			&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+		ctx!(self, ParseCtx::IDENT =>
 		{
-			chars.push(c);
-			let _ = self.advance();
-		}
-		
-		self.error_ctx.force_pop(ParseCtx::IDENT);
+			// FIXME require at least 1 character
+			let mut chars = vec![];
 
-		Ok(chars.into_iter().collect())
+			if let Some('-') = self.current() {
+				return Err(SquarkError::Unrecoverable {
+					msg: fmt!("illegal input: {}", self.preview()),
+					hint: str!("identifiers cannot start with `-`"),
+					debug: self.show_ctx_stack().collect()
+				});
+			}
+
+			while let Some(c) = self.current()
+				&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+			{
+				chars.push(c);
+				let _ = self.advance();
+			}
+			
+			self.ctx.force_pop(ParseCtx::IDENT);
+
+			Ok(chars.into_iter().collect())
+		})
 	}
 }
 
@@ -205,7 +206,7 @@ impl<'d> CharmParser<'d>
 {
 	pub(super) fn show_ctx_stack(&self) -> impl Iterator<Item = String>
 	{
-		self.error_ctx.stack().iter().rev().map(ToString::to_string)
+		self.ctx.stack().iter().rev().map(ToString::to_string)
 	}
 }
 
@@ -217,9 +218,8 @@ mod test
 	use crate::parser::*;
 	use crate::macros::*;
 	use crate::utils::testing::*;
-	
-	use std::assert_matches;
-	use std::io::Cursor;
+
+	use assertables::*;
 	
 
 	#[test] fn advance_and_current_singlesource()
@@ -227,14 +227,14 @@ mod test
 		let mut parser = CharmParser::new("012345", TEST_FILE.clone(), &TEST_CONFIG);
 
 		assert_eq!( parser.current(), Some('0') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('1') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('2') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('3') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('4') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('5') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('\n') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('\n') );
-		assert_matches!( parser.advance(), Err(..) );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+		assert_err!( parser.advance() );
 	}
 	
 	#[test] fn advance_and_current_multisource()
@@ -242,15 +242,15 @@ mod test
 		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
 
 		assert_eq!( parser.current(), Some('0') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('1') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('2') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('\n') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('3') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('4') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('5') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('\n') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.current(), Some('\n') );
-		assert_matches!( parser.advance(), Err(..) );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+		assert_err!( parser.advance() );
 	}
 
 	#[test] fn advance_and_peek_singlesource()
@@ -258,14 +258,14 @@ mod test
 		let mut parser = CharmParser::new("012345", TEST_FILE.clone(), &TEST_CONFIG);
 
 		assert_eq!( parser.peek(), Some('1') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('2') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('3') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('4') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('5') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('\n') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), None );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), None );
-		assert_matches!( parser.advance(), Err(..) );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('3') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+		assert_err!( parser.advance() );
 	}
 
 	#[test] fn advance_and_peek_multisource()
@@ -273,15 +273,15 @@ mod test
 		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
 
 		assert_eq!( parser.peek(), Some('1') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('2') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('\n') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), None );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('4') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('5') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), Some('\n') );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), None );
-		assert_matches!( parser.advance(), Ok(..) ); assert_eq!( parser.peek(), None );
-		assert_matches!( parser.advance(), Err(..) );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+		assert_err!( parser.advance() );
 	}
 
 	#[test] fn preview()
@@ -304,7 +304,8 @@ mod test
 			"testing 123",
 		],
 		|mut parser, _case| {
-			assert_matches!( parser.eat("FAIL", when!(), when!()), Err(ParseFailure::UnexpectedInput{..}) );
+			let r = parser.eat("FAIL", to!());
+			assert_err!(r);
 		});
 	}
 
@@ -317,7 +318,7 @@ mod test
 			"testing 123",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat(case, when!(), when!()), Ok(()) );
+			assert_ok!( parser.eat(case, to!()) );
 		});
 	}
 
@@ -330,7 +331,7 @@ mod test
 			"tEsTiNg 123",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.eat_caseless(&case.to_ascii_uppercase(), when!(), when!()), Ok(()) );
+			assert_ok!( parser.eat_caseless(&case.to_ascii_uppercase(), to!()) );
 		});
 	}
 
@@ -390,7 +391,7 @@ mod test
 			assert_eq!( parser.eat_whitespace(), true );
 
 			if parser.current() != Some('s') {
-				assert_matches!( parser.advance(), Ok(..) );
+				assert_ok!( parser.advance() );
 				assert_eq!( parser.current(), Some('s') );
 			}
 		});
@@ -427,7 +428,9 @@ mod test
 			"very-much_mixedCase",
 		],
 		|mut parser, case| {
-			assert_eq!( parser.parse_ident(when!()), Ok(case.to_string()) );
+			let r = parser.parse_ident();
+			assert_ok!( r );
+			assert_eq!( r.unwrap(), case.to_string() );
 		});
 	}
 }

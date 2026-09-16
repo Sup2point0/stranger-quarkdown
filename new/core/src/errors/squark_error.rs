@@ -6,7 +6,7 @@ use crate::{
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 
 
-#[derive(Clone, Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum SquarkError
 {
 	/// A non-fatal error.

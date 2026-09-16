@@ -1,41 +1,41 @@
 #[derive(Debug, Clone)]
-pub struct ContextStack<T>
+pub struct ContextStack<Ctx>
 {
-	base: T,
-	stack: Vec<T>,
+	base: Ctx,
+	stack: Vec<Ctx>,
 }
 
 /// Constructors
-impl<T> ContextStack<T>
-	where T: Default + PartialEq + Eq
+impl<Ctx> ContextStack<Ctx>
+	where Ctx: Default + PartialEq + Eq
 {
 	pub fn new() -> Self {
 		Self {
-			base: T::default(),
+			base: Ctx::default(),
 			stack: vec![],
 		}
 	}
 }
 
 /// Implementation
-impl<T> ContextStack<T>
-	where T: Default + PartialEq + Eq
+impl<Ctx> ContextStack<Ctx>
+	where Ctx: Default + PartialEq + Eq
 {
-	pub fn stack(&self) -> &[T] {
+	pub fn stack(&self) -> &[Ctx] {
 		&self.stack
 	}
 
 	/// What's the current context?
-	pub fn current(&self) -> &T {
+	pub fn current(&self) -> &Ctx {
 		self.stack.last().unwrap_or(&self.base)
 	}
 
-	pub fn push(&mut self, ctx: T) {
+	pub fn push(&mut self, ctx: Ctx) {
 		self.stack.push(ctx);
 	}
 
 	/// Pop `ctx` from the stack if it is the currently active context, taking keys into account.
-	pub fn try_pop(&mut self, ctx: T) -> bool
+	pub fn try_pop(&mut self, ctx: Ctx) -> bool
 	{
 		if *self.current() == ctx {
 			self.stack.pop();
@@ -56,7 +56,7 @@ impl<T> ContextStack<T>
 	/// ```
 	/// 
 	/// If `ctx` is not present in the context stack, this is a no-op.
-	pub fn force_pop(&mut self, ctx: T) -> bool
+	pub fn force_pop(&mut self, ctx: Ctx) -> bool
 	{
 		if let Some(idx) = self.stack.iter().rposition(|c| *c == ctx) {
 			self.stack.truncate(idx);
@@ -69,19 +69,6 @@ impl<T> ContextStack<T>
 		}
 
 		true
-	}
-}
-
-impl ContextStack<RenderCtx>
-{
-	/// Is the current context `RenderCtx::LEAVE`?
-	pub fn is_leave(&self) -> bool {
-		matches!(self.current(), RenderCtx::LEAVE{..})
-	}
-
-	/// Is the current context `RenderCtx::SLASH`?
-	pub fn is_slash(&self) -> bool {
-		matches!(self.current(), RenderCtx::SLASH{..})
 	}
 }
 
@@ -129,6 +116,6 @@ mod test
 		ctx.push(RenderCtx::ONLY);
 
 		ctx.force_pop(RenderCtx::LEAVE { key: None });
-		assert_eq!( *ctx.current(), T::MARKDOWN );
+		assert_eq!( *ctx.current(), RenderCtx::MARKDOWN );
 	}
 }

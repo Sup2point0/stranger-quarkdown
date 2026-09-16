@@ -21,9 +21,10 @@ pub fn parse(filepath: PathBuf, config: &SquarkupConfig) -> SquarkResult<Option<
 	let mut source = str!();
 	file.read_to_string(&mut source)?;
 
-	let mut parser = CharmParser::new(&source, filepath, config);
+	let parser = CharmParser::new(&source, filepath, config);
 	
-	match parser.parse() {
+	match parser.parse()
+	{
 		Ok(page) => Ok(Some(page)),
 		Err(e) => if !e.is_fatal() {
 			Ok(None)
@@ -63,7 +64,7 @@ pub struct CharmParser<'d>
 	pub errors: SquarkError,
 
 	/// Context stack of what the parser is doing, for error diagnostics.
-	pub error_ctx: ContextStack<ParseCtx>,
+	pub ctx: ContextStack<ParseCtx>,
 }
 
 /// The public parser interface.
@@ -79,17 +80,17 @@ impl<'d> CharmParser<'d>
 			i: 0,
 			is_live: false,
 			errors: SquarkError::multiple(),
-			error_ctx: ContextStack::new(),
+			ctx: ContextStack::new(),
 		}
 	}
 	
 	/// Run the parser to completion, extracting the heading and charm squark of the source.
-	pub fn parse(&mut self) -> SquarkResult<PageData>
+	pub fn parse(mut self) -> SquarkResult<PageData>
 	{
 		self.eat_whitespace();
 		
 		let heading = {
-			self.current() == Some('#') {
+			if self.current() == Some('#') {
 				Some(self.parse_heading()?)
 			}
 			else {
@@ -114,12 +115,22 @@ impl<'d> CharmParser<'d>
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
 	pub(super) fn parse_heading(&mut self) -> SquarkResult<String>
 	{
-		self.eat("# ", to!("start page heading"), when!("parsing heading"))?;
-		self.eat_spaces();
+		ctx!(self, ParseCtx::HEADING =>
+		{
+			while let Some('#') = self.current() {
+				self.advance()?;
+			}
+			self.eat_spaces();
 
-		let heading = self._line[self._index..].iter().collect();
-		self.next_line(when!())?;  // safe cuz not live
-		Ok(utils::trim_end(heading))
+			let start = self.i;
+			while let Some(c) = self.current() && c != '\n' {
+				self.advance()?;
+			}
+			let stop = self.i;
+			let heading = self.source[start..stop].iter().collect();
+			
+			Ok(utils::trim_end(heading))
+		})
 	}
 	
 	/// Parse the `<!-- #SQUARK live! ... -->` charm squark, extracting the flags and fields.
@@ -337,7 +348,7 @@ impl<'d> CharmParser<'d>
 		let msg = str!("unexpected end of file");
 		let hint = str!();
 		let debug = vec![
-			fmt!("while {}", self.error_ctx)
+			fmt!("while {}", self.ctx)
 		];
 
 		let err = if self.is_live {

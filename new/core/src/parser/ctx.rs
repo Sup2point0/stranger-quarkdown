@@ -8,6 +8,9 @@ pub enum ParseCtx
 	#[display("while parsing charm squark")]
 	CHARM_SQUARK,
 
+	#[display("extracting <h1> heading")]
+	HEADING,
+
 	#[display("while parsing identifier")]
 	IDENT,
 }
