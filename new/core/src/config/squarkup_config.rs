@@ -98,6 +98,14 @@ pub struct FontsConfig {
 
 #[derive(Clone, Debug)]
 pub struct ErrorConfig {
+	/// Enable stricter checks for safety?
+	/// 
+	/// This includes:
+	/// 
+	/// - Checking directories remain inside your project
+	/// - Checking multiple files don't export to the same directory
+	pub strict: bool,
+
 	/// What to do when a non-fatal error is encountered (e.g. parsing a file failed).
 	pub on_error: ErrorAction,
 

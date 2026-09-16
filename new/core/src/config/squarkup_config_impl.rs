@@ -52,6 +52,7 @@ impl SquarkupConfig
 			},
 			fonts:  FontsConfig { queries: vec![] },
 			errors: ErrorConfig {
+				strict: true,
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
 				linked_file_inactive: LinkRewriteAction::STRIP_EXTENSION,
@@ -82,7 +83,9 @@ impl SquarkupConfig
 
 		if let Some(paths) = data.get("paths")
 		{
-			Self::check_is_table(paths, "paths", fmt!("try setting {W}```\n\n\t[paths]\n\tsite = \"/your-site/\"\n\n```"))?;
+			Self::check_is_table(paths, "paths",
+				hints!("try setting {W}```\n\n\t[paths]\n\tsite = '/your-site/'\n\n```")
+			)?;
 
 			if let Some(value) = paths.get("site") {
 				let dir = Self::try_get_string(value, "paths.site", "(filepath relative to your project root)")?;
@@ -98,6 +101,10 @@ impl SquarkupConfig
 		// PathsConfig
 		if let Some(paths) = data.get("paths")
 		{
+			Self::check_is_table(paths, "paths",
+				hints!("write your config like this: {W}```\n\n\t[paths]\nsources = ['/']\n\n```")
+			)?;
+
 			s.paths.sources.clear();
 
 			Self::for_string_array(paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
@@ -157,6 +164,10 @@ impl SquarkupConfig
 		// OutConfig
 		if let Some(out) = data.get("out")
 		{
+			Self::check_is_table(out, "out",
+				hints!("write your config like this: {W}```\n\n\t[out]\nfile = '+page.svx'\n\n```")
+			)?;
+
 			if let Some(value) = out.get("folder") { catch!(errs => {
 				let raw = Self::try_get_string(value, "out.folder", "(folder relative to your site folder)")?;
 				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
@@ -178,6 +189,10 @@ impl SquarkupConfig
 		// FormatConfig
 		if let Some(format) = data.get("format")
 		{
+			Self::check_is_table(format, "format",
+				hints!("write your config like this: {W}```\n\n\t[format]\n\npreserve-comments = true\n\n```")
+			)?;
+
 			let c = &mut s.format;
 
 			if let Some(value) = format.get("preserve-comments") { catch!(errs => {
@@ -200,7 +215,13 @@ impl SquarkupConfig
 		// ErrorConfig
 		if let Some(errors) = data.get("errors")
 		{
-			Self::check_is_table(errors, "errors", fmt!("write your config like this: {W}```\n\n\t[errors]\n\non-error = \"kill\"\n\n```"))?;
+			Self::check_is_table(errors, "errors",
+				hints!("write your config like this: {W}```\n\n\t[errors]\n\non-error = 'kill'\n\n```")
+			)?;
+			
+			if let Some(value) = errors.get("strict") { catch!(errs => {
+				s.errors.strict = Self::try_get_bool(value, "errors.strict")?;
+			}) }
 
 			if let Some(value) = errors.get("on-error") { catch!(errs => {
 				let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
@@ -210,7 +231,7 @@ impl SquarkupConfig
 				} else {
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unknown setting for {Y}errors.on-error"),
-						hint: fmt!("valid values are \"warn\" (default) or \"kill\""),
+						hint: fmt!("valid values are {W}'warn'{G} (default) or {W}'kill'"),
 						debug: vec![fmt!("you provided {value}")],
 					});
 				}
@@ -224,7 +245,7 @@ impl SquarkupConfig
 				} else {
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
-						hint: fmt!("valid values are \"overwrite\" (default), \"error\" or \"skip\""),
+						hint: fmt!("valid values are {W}'overwrite'{G} (default), {W}'error'{G}, {W}'skip'"),
 						debug: vec![fmt!("you provided {value}")],
 					});
 				}
@@ -238,7 +259,7 @@ impl SquarkupConfig
 				} else {
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unknown setting for {Y}errors.linked-file-inactive"),
-						hint: fmt!("valid values are \"strip-extension\" (default), \"link-to-github\" or \"error\""),
+						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					});
 				}
@@ -253,7 +274,7 @@ impl SquarkupConfig
 impl SquarkupConfig
 {
 	/// Validate that `data` is a TOML table.
-	fn check_is_table(data: &toml::Value, setting: &str, hint: String) -> SquarkResult
+	fn check_is_table(data: &toml::Value, setting: &str, hint: impl FnOnce() -> String) -> SquarkResult
 	{
 		if matches!(data, toml::Value::Table(..)) {
 			Ok(())
@@ -261,7 +282,7 @@ impl SquarkupConfig
 		else {
 			Err(SquarkError::Unrecoverable {
 				msg: fmt!("{Y}{setting}{R} must be a table, not a field"),
-				hint,
+				hint: hint(),
 				debug: vec![
 					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}{GREY}", data.type_str()),
 				],
@@ -412,8 +433,7 @@ impl SquarkupConfig
 #[cfg(test)] use crate::utils::testing::*;
 
 #[cfg(test)] use assertables::*;
-
-#[cfg(test)] use std::assert_matches;
+#[cfg(test)] use indoc::indoc;
 
 
 #[cfg(test)]
@@ -459,6 +479,34 @@ mod paths {
 mod error_handling {
 	use super::*;
 
+	#[test] fn accept() {
+		let c = load_config(indoc! {"
+			[errors]
+			strict = true
+			on-error = 'kill'
+			file-already-exists = 'error'
+			linked-file-inactive = 'error'
+		"}).unwrap().errors;
+
+		assert_eq!( c.strict, true );
+		assert_eq!( c.on_error, ErrorAction::KILL );
+		assert_eq!( c.file_already_exists, FileAction::ERROR );
+		assert_eq!( c.linked_file_inactive, LinkRewriteAction::ERROR );
+		
+		let c = load_config(indoc! {"
+			[errors]
+			strict = false
+			on-error = 'warn'
+			file-already-exists = 'overwrite'
+			linked-file-inactive = 'strip-extension'
+		"}).unwrap().errors;
+
+		assert_eq!( c.strict, false );
+		assert_eq!( c.on_error, ErrorAction::WARN );
+		assert_eq!( c.file_already_exists, FileAction::OVERWRITE );
+		assert_eq!( c.linked_file_inactive, LinkRewriteAction::STRIP_EXTENSION );
+	}
+
 	#[test] fn reject() {
 		for source in [
 			"[errors]\non-error = 0",
@@ -466,9 +514,26 @@ mod error_handling {
 			"[errors]\non-error = 'x'",
 			"[errors]\non-error = \"y\"",
 		] {
+			let e = load_config(source).unwrap_err();
+			assert_contains!( e, "errors.on-error" );
+		}
+	}
+}
+
+#[cfg(test)]
+mod rejects {
+	use super::*;
+
+	#[test] fn non_tables() {
+		for source in [
+			"paths = false",
+			"out = false",
+			"format = false",
+			"errors = false",
+		] {
 			let r = load_config(source);
 			assert_err!( &r );
-			assert_contains!( r.unwrap_err(), "errors.on-error" );
+			assert_contains!( r.unwrap_err(), "table" );
 		}
 	}
 }
