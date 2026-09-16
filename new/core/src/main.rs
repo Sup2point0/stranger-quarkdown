@@ -57,8 +57,11 @@ fn squarkup() -> SquarkResult<bool>
 
 	// == PARSE == //
 	let mut errs = SquarkError::multiple();
+	let mut tried = 0;
 	
 	for filepath in resolver::resolve_files(&config) {
+		tried += 1;
+
 		catch!(errs => {
 			let filepath = filepath?;
 
@@ -85,10 +88,23 @@ fn squarkup() -> SquarkResult<bool>
 		log::line();
 	}
 	
-	if site_data.stats.active_pages == 0 {
-		log::bad!("no files found to squarkup, exiting!");
-		return Ok(false);
-	} else {
+	if tried == 0 {
+		return Err(SquarkError::Unrecoverable {
+			msg: str!("no files found to squarkup"),
+			hint: fmt!("check your {W}paths.sources{G} is configured correctly?"),
+			debug: vec![],
+		});
+	}
+	else if site_data.stats.active_pages == 0 {
+		return Err(SquarkError::Unrecoverable {
+			msg: str!("no active files found"),
+			hint: fmt!("check your fields have {W}<!-- #SQUARK live!{G} under their heading"),
+			debug: vec![
+				fmt!("parsed {tried} files"),
+			],
+		});
+	}
+	else {
 		log::ok!("found {} active files to squarkup", site_data.stats.active_pages);
 	}
 
@@ -126,7 +142,8 @@ fn squarkup() -> SquarkResult<bool>
 
 fn print_error(err: SquarkError)
 {
-	match err {
+	match err
+	{
 		SquarkError::Recoverable{ msg, hint, debug }
 		| SquarkError::Unrecoverable{ msg, hint, debug }
 		=> {
@@ -137,17 +154,18 @@ fn print_error(err: SquarkError)
 			if !hint.is_empty() {
 				log::hint!(hint);
 			}
-		},
+		}
 		SquarkError::Multiple{ errs } => {
 			for (i, err) in errs.into_iter().enumerate() {
 				if i != 0 { log::line(); }
 				print_error(err);
 			}
-		},
+		}
 		SquarkError::External{ err, msg } => {
 			log::bad!(msg);
 			log::line();
 			println!("{R}{err}");
-		},
+		}
+		SquarkError::ABANDON => (),
 	}
 }

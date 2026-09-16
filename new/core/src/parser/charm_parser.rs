@@ -18,20 +18,18 @@ use std::path::{ PathBuf };
 /// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
 pub fn parse(filepath: PathBuf, config: &SquarkupConfig) -> SquarkResult<Option<PageData>>
 {
+	// TODO read until -->
 	let mut file = File::open(&filepath)?;
 	let mut source = str!();
 	file.read_to_string(&mut source)?;
 
-	let parser = CharmParser::new(&source, filepath, config);
+	let parser = CharmParser::new(&source, filepath.clone(), config);
 	
 	match parser.parse()
 	{
 		Ok(page) => Ok(Some(page)),
-		Err(e) => if !e.is_fatal() {
-			Ok(None)
-		} else {
-			Err(e)
-		}
+		Err(SquarkError::ABANDON) => Ok(None),
+		Err(e) => Err(e)
 	}
 }
 
@@ -150,8 +148,8 @@ impl<'d> CharmParser<'d>
 
 	/// Attempt to look for `<!-- #SQUARK live!`.
 	/// 
-	/// If found, set `.is_live: true`; otherwise return `NO_MATCH`.
-	pub(super) fn try_parse_squark_live(&mut self) -> SquarkResult<ParseResult>
+	/// If found, set `.is_live: true`.
+	pub(super) fn try_parse_squark_live(&mut self) -> SquarkResult
 	{
 		self.try_eat("<!--")?;
 		self.eat_whitespace(); self.try_eat_caseless("#SQUARK")?;
@@ -159,7 +157,7 @@ impl<'d> CharmParser<'d>
 		self.eat_spaces(); self.try_eat_caseless("live!")?;
 
 		self.is_live = true;
-		Ok(ParseResult::ADVANCE)
+		Ok(())
 	}
 
 	/// Parse the flags in the charm squark and return their identifiers.
@@ -184,18 +182,19 @@ impl<'d> CharmParser<'d>
 
 				if self.current() == Some('!') {
 					flags.push(ident);
+					self.advance()?;
 				}
 				else {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("flags must end in {W}!"),
-						hint: fmt!("write flags like: {W}{ident}!"),
+						msg: fmt!("invalid flag: {}", self.preview()),
+						hint: fmt!("flags must end in {W}!{G}, like: {W}{ident}!"),
 						debug: self.show_ctx_stack(),
 					});
 					
 					// TODO recover
 				}
 				
-				self.advance()?;
+				self.eat_spaces();
 			}
 
 			Ok(flags)
@@ -369,7 +368,21 @@ mod full {
 
 		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let file_data = parser.parse().unwrap();
+		assert_eq!( file_data.heading, Some(str!("Test")) );
+		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
+	}
 
+	#[test] fn parse_basic_cr()
+	{
+		let source = indoc! {"
+			# Test\r
+			<!-- #SQUARK live!\r
+			| dest = test\r
+			-->
+		"};
+
+		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+		let file_data = parser.parse().unwrap();
 		assert_eq!( file_data.heading, Some(str!("Test")) );
 		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
 	}
@@ -427,7 +440,6 @@ mod partial {
 		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 
 		let (flags, fields) = parser.parse_charm_squark().unwrap();
-
 		assert_eq!( flags, strings!() );
 		assert_eq!( fields, HashMap::new() );
 	}
@@ -447,7 +459,7 @@ mod partial {
 
 		assert_eq!( fields, HashMap::from([
 			(str!("dest"), strings!["test"]),
-		]))
+		]));
 	}
 
 	#[test] fn parse_charm_squark_one_field_many_flags()
@@ -465,7 +477,7 @@ mod partial {
 
 		assert_eq!( fields, HashMap::from([
 			(str!("dest"), strings!["test"]),
-		]))
+		]));
 	}
 
 	#[test] fn parse_charm_squark_many_fields()
@@ -487,7 +499,7 @@ mod partial {
 			(str!("dest"), strings!["test"]),
 			(str!("head"), strings!["tests"]),
 			(str!("title"), strings!["testing"]),
-		]))
+		]));
 	}
 
 	#[test] fn parse_charm_squark_many_fields_values()
@@ -507,7 +519,7 @@ mod partial {
 		assert_eq!( fields, HashMap::from([
 			(str!("dest"), strings!["test"]),
 			(str!("tags"), strings!["prot", "deut", "trit"]),
-		]))
+		]));
 	}
 
 	#[test] fn parse_charm_squark_many_flags_fields_values()
@@ -527,7 +539,7 @@ mod partial {
 		assert_eq!( fields, HashMap::from([
 			(str!("dest"), strings!["test"]),
 			(str!("tags"), strings!["prot", "deut", "trit"]),
-		]))
+		]));
 	}
 
 	#[test] fn parse_flags_matches()

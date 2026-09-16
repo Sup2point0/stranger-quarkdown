@@ -1,6 +1,9 @@
 use super::*;
 use crate::core::*;
+use crate::colours::*;
 use crate::macros::*;
+
+use std::iter;
 
 
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
@@ -45,6 +48,8 @@ impl<'d> CharmParser<'d>
 	/// Proceed to the next character in the source text.
 	/// 
 	/// Errors if the parser is out-of-bounds *before* advancing.
+	/// 
+	/// Skips `\r` characters.
 	pub(super) fn advance(&mut self) -> SquarkResult
 	{
 		if self.is_out_of_bounds() {
@@ -52,6 +57,11 @@ impl<'d> CharmParser<'d>
 		}
 
 		self.i += 1;
+
+		while let Some('\r') = self.current() {
+			self.i += 1;
+		}
+
 		Ok(())
 	}
 	
@@ -79,8 +89,8 @@ impl<'d> CharmParser<'d>
 		Ok(())
 	}
 	
-	/// Attempt to consume exactly `target`. On failure, backtrack and return `NO_MATCH`.
-	pub(super) fn try_eat(&mut self, target: &str) -> SquarkResult<ParseResult>
+	/// Attempt to consume exactly `target`. On failure, backtrack and return [`SquarkError::ABANDON`].
+	pub(super) fn try_eat(&mut self, target: &str) -> SquarkResult
 	{
 		let init = self.i;
 
@@ -88,12 +98,12 @@ impl<'d> CharmParser<'d>
 		{
 			if self.current() != Some(expected) {
 				self.i = init;
-				return Ok(ParseResult::BACKTRACK);
+				return Err(SquarkError::ABANDON);
 			}
 			self.advance()?;
 		}
 
-		Ok(ParseResult::ADVANCE)
+		Ok(())
 	}
 	
 	/// Consume `target` disregarding casing, erroring on failure.
@@ -123,8 +133,8 @@ impl<'d> CharmParser<'d>
 		Ok(())
 	}
 
-	/// Attempt to consume `target` disregarding casing, returning `NO_MATCH` on failure.
-	pub(super) fn try_eat_caseless(&mut self, target: &str) -> SquarkResult<ParseResult>
+	/// Attempt to consume `target` disregarding casing. On failure, backtrack and return [`SquarkError::ABANDON`]
+	pub(super) fn try_eat_caseless(&mut self, target: &str) -> SquarkResult
 	{
 		let init = self.i;
 
@@ -134,12 +144,12 @@ impl<'d> CharmParser<'d>
 
 			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
 				self.i = init;
-				return Ok(ParseResult::BACKTRACK);
+				return Err(SquarkError::ABANDON);
 			}
 			self.advance()?;
 		}
 
-		Ok(ParseResult::ADVANCE)
+		Ok(())
 	}
 	
 	/// Consume 0 or more space characters. Returns `true` if any characters were consumed.
@@ -175,30 +185,37 @@ impl<'d> CharmParser<'d>
 	/// Identifiers cannot start with `-`.
 	pub(super) fn parse_ident(&mut self) -> SquarkResult<String>
 	{
-		ctx!(self, ParseCtx::IDENT => {
-			
-		// FIXME require at least 1 character
-		let mut chars = vec![];
-
-		if let Some('-') = self.current() {
-			return Err(SquarkError::Unrecoverable {
-				msg: fmt!("illegal input: {}", self.preview()),
-				hint: str!("identifiers cannot start with `-`"),
-				debug: self.show_ctx_stack()
-			});
-		}
-
-		while let Some(c) = self.current()
-			&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+		ctx!(self, ParseCtx::IDENT =>
 		{
-			chars.push(c);
-			let _ = self.advance();
-		}
-		
-		self.ctx.force_pop(ParseCtx::IDENT);
+			// FIXME require at least 1 character
+			let mut chars = vec![];
 
-		Ok(chars.into_iter().collect())
-		
+			if let Some('-') = self.current() {
+				return Err(SquarkError::Unrecoverable {
+					msg: fmt!("illegal input: {}", self.preview()),
+					hint: fmt!("identifiers cannot start with {W}'-'"),
+					debug: self.show_ctx_stack(),
+				});
+			}
+
+			if let Some(c) = self.current()
+				&& !matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+			{
+				return Err(SquarkError::Unrecoverable {
+					msg: fmt!("expected identifier, but found: {W}{}", self.preview()),
+					hint: fmt!("identifiers cannot start with {W}{c:?}"),
+					debug: self.show_ctx_stack(),
+				});
+			}
+
+			while let Some(c) = self.current()
+				&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+			{
+				chars.push(c);
+				self.advance()?;
+			}
+			
+			Ok(chars.into_iter().collect())
 		})
 	}
 }
@@ -225,9 +242,13 @@ impl<'d> CharmParser<'d>
 		Err(err)
 	}
 
+	/// Build the debug diagnostics for printing errors.
 	pub(super) fn show_ctx_stack(&self) -> Vec<String>
 	{
-		self.ctx.stack().iter().rev().map(ToString::to_string).collect()
+		(
+			iter::once(slash!("in: {GREY1}{}", self.filepath))
+			.chain(self.ctx.stack().iter().rev().map(ToString::to_string))
+		).collect()
 	}
 }
 

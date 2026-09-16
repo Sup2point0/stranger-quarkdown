@@ -6,6 +6,7 @@ use assertables::*;
 /// Squarkdown rewrites internal links.
 #[test] fn basic()
 {
+	clear_files("links/basic").unwrap();
 	assert!( squarkup_from("links/basic").success() );
 
 	let main = read_file("links/basic/main/+page.svx");
@@ -19,6 +20,7 @@ use assertables::*;
 /// Squarkdown rewrites links to folders outside a file's parent folder.
 #[test] fn nested()
 {
+	clear_files("links/nested").unwrap();
 	assert!( squarkup_from("links/nested").success() );
 
 	let main = read_file("links/nested/main/+page.svx");
@@ -38,6 +40,7 @@ use assertables::*;
 /// Squarkdown does not resolve external links, and rewrites links with `<sup>↗</sup>` to `<a target="_blank">`.
 #[test] fn external()
 {
+	clear_files("links/external").unwrap();
 	assert!( squarkup_from("links/external").success() );
 
 	let main = read_file("links/external/main/+page.svx");
@@ -48,6 +51,7 @@ use assertables::*;
 /// Squarkdown resolves links with anchors (`path/to/page.md#anchor`) while keeping the anchor.
 #[test] fn anchors()
 {
+	clear_files("links/anchors").unwrap();
 	assert!( squarkup_from("links/anchors").success() );
 	
 	let main = read_file("links/anchors/main/+page.svx");
@@ -60,6 +64,7 @@ use assertables::*;
 #[test] fn broken_crash()
 {
 	// TODO check specific error
+	clear_files("links/broken").unwrap();
 	assert!( !squarkup_from("links/broken").success() );
 }
 
@@ -67,5 +72,6 @@ use assertables::*;
 #[test] fn inactive_crash()
 {
 	// TODO check specific error
+	clear_files("links/inactive-crash").unwrap();
 	assert!( !squarkup_from("links/inactive-crash").success() );
 }

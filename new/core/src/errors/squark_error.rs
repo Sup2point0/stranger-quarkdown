@@ -1,18 +1,18 @@
 use crate::{
-	colours::*,
 	macros::*,
 };
 
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
 pub enum SquarkError
 {
+	ABANDON,
+
 	/// A non-fatal error.
 	/// 
 	/// Handling depends on `config.errors.on_error`.
-	#[error("{R}{msg}")]
 	Recoverable {
 		msg: String,
 		hint: String,
@@ -20,7 +20,6 @@ pub enum SquarkError
 	},
 
 	/// A fatal error that crashes Squarkdown, irrespective of `config.errors.on_error`.
-	#[error("{R}{msg}")]
 	Unrecoverable {
 		msg: String,
 		hint: String,
@@ -30,13 +29,11 @@ pub enum SquarkError
 	/// Multiple errors, aggregated from an atomic operation.
 	/// 
 	/// Handling depends on `config::errors::on_error`.
-	#[error("{R}multiple fatal errors")]
 	Multiple {
 		errs: Vec<SquarkError>,
 	},
 
 	/// A fatal error that crashes Squarkdown, caused by external factors such as a file read failure.
-	#[error("{R}{msg}")]
 	External {
 		err: Box<dyn std::error::Error>,
 		msg: String,
@@ -85,12 +82,14 @@ impl SquarkError
 	{
 		match self
 		{
-			Self::Recoverable{..} => false,
+			Self::ABANDON | Self::Recoverable{..}
+				=> false,
 
-			Self::Unrecoverable{..}
-			| Self::External{..} => true,
-			
-			Self::Multiple{ errs } => errs.iter().any(|err| err.is_fatal()),
+			Self::Unrecoverable{..} | Self::External{..}
+				=> true,
+
+			Self::Multiple{ errs }
+				=> errs.iter().any(|err| err.is_fatal()),
 		}
 	}
 
