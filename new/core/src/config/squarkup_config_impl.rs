@@ -22,10 +22,9 @@ impl SquarkupConfig
 			paths: PathsConfig {
 				root: root.to_path_buf(),
 				site: site.to_path_buf(),
-				sources: vec![root.to_path_buf()],
+				sources: vec![PathBuf::new()],
 				include: vec![
 					regex!(r"\.md$").clone(),
-					regex!(r"\.svx$").clone(),
 				],
 				exclude: vec![
 					regex!(r"/\.git/").clone(),
@@ -105,6 +104,7 @@ impl SquarkupConfig
 				hints!("write your config like this: {W}```\n\n\t[paths]\nsources = ['/']\n\n```")
 			)?;
 
+			/* NOTE: We're eagerly clearing defaults... */
 			s.paths.sources.clear();
 
 			Self::for_string_array(paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
@@ -127,8 +127,9 @@ impl SquarkupConfig
 				});
 			});
 
+			/* NOTE: ...if it turns out `paths.sources` was unset or empty, we'll reinstate the default full-project */
 			if s.paths.sources.is_empty() {
-				s.paths.sources.push(root.to_path_buf());
+				s.paths.sources.push(PathBuf::new());
 			}
 
 			Self::for_string_array(paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
