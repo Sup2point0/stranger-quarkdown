@@ -11,4 +11,4 @@ externalise-links = true
 
 [errors]
 on-error = "kill"
-linked-file-inactive = "error"
+inactive-link = "error"

@@ -78,7 +78,7 @@ use assertables::*;
 	assert_contains!( out, "(./nested/side.md)" );
 }
 
-/// With `linked-file-inactive: error`, Squarkdown crashes when encountering links to inactive pages.
+/// With `inactive-link: error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crash()
 {
 	clear_files("links/inactive-crash").unwrap();

@@ -54,7 +54,7 @@ impl SquarkupConfig
 				strict: true,
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
-				linked_file_inactive: LinkRewriteAction::STRIP_EXTENSION,
+				inactive_link: LinkRewriteAction::STRIP_EXTENSION,
 			},
 		}
 	}
@@ -252,14 +252,14 @@ impl SquarkupConfig
 				}
 			}) }
 			
-			if let Some(value) = errors.get("linked-file-inactive") { catch!(errs => {
-				let raw = Self::try_get_string(value, "errors.linked-file-inactive", "(a missing file handling strategy)")?;
+			if let Some(value) = errors.get("inactive-link") { catch!(errs => {
+				let raw = Self::try_get_string(value, "errors.inactive-link", "(a missing file handling strategy)")?;
 
 				if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
-					s.errors.linked_file_inactive = opt;
+					s.errors.inactive_link = opt;
 				} else {
 					return Err(SquarkError::Unrecoverable {
-						msg: fmt!("unknown setting for {Y}errors.linked-file-inactive"),
+						msg: fmt!("unknown setting for {Y}errors.inactive-link"),
 						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					});
@@ -486,26 +486,26 @@ mod error_handling {
 			strict = true
 			on-error = 'kill'
 			file-already-exists = 'error'
-			linked-file-inactive = 'error'
+			inactive-link = 'error'
 		"}).unwrap().errors;
 
 		assert_eq!( c.strict, true );
 		assert_eq!( c.on_error, ErrorAction::KILL );
 		assert_eq!( c.file_already_exists, FileAction::ERROR );
-		assert_eq!( c.linked_file_inactive, LinkRewriteAction::ERROR );
+		assert_eq!( c.inactive_link, LinkRewriteAction::ERROR );
 		
 		let c = load_config(indoc! {"
 			[errors]
 			strict = false
 			on-error = 'warn'
 			file-already-exists = 'overwrite'
-			linked-file-inactive = 'strip-extension'
+			inactive-link = 'strip-extension'
 		"}).unwrap().errors;
 
 		assert_eq!( c.strict, false );
 		assert_eq!( c.on_error, ErrorAction::WARN );
 		assert_eq!( c.file_already_exists, FileAction::OVERWRITE );
-		assert_eq!( c.linked_file_inactive, LinkRewriteAction::STRIP_EXTENSION );
+		assert_eq!( c.inactive_link, LinkRewriteAction::STRIP_EXTENSION );
 	}
 
 	#[test] fn reject() {
