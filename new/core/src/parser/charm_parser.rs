@@ -61,6 +61,9 @@ pub struct CharmParser<'d>
 
 	/// Accumulated errors during parsing.
 	pub errors: SquarkError,
+
+	/// Context stack of what the parser is doing, for error diagnostics.
+	pub error_ctx: ContextStack<ParseCtx>,
 }
 
 /// The public parser interface.
@@ -76,6 +79,7 @@ impl<'d> CharmParser<'d>
 			i: 0,
 			is_live: false,
 			errors: SquarkError::multiple(),
+			error_ctx: ContextStack::new(),
 		}
 	}
 	
@@ -323,18 +327,17 @@ impl<'d> CharmParser<'d>
 		Ok(values)
 	}
 
-	// TODO make macro to make `when` optional
 	/// Return the appropriate response for an unexpected end of file.
 	/// 
 	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
 	/// 
 	/// If not, then Squarkdown can just ignore the file.
-	pub(super) fn err_eof(&self, when: impl Fn() -> String) -> SquarkResult
+	pub(super) fn err_eof(&self) -> SquarkResult
 	{
 		let msg = str!("unexpected end of file");
 		let hint = str!();
 		let debug = vec![
-			fmt!("while: {}", when())
+			fmt!("while {}", self.error_ctx)
 		];
 
 		let err = if self.is_live {
