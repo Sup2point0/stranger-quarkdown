@@ -17,8 +17,21 @@ pub(super) fn test_preserves(cases: &[&str])
 /// Run the renderer over `cases`, checking that each input renders to `expected`.
 pub(super) fn test_expect(cases: &[&str], expected: &str)
 {
+	test_expect_for(|_| {}, cases, expected)
+}
+
+/// Run the renderer over `cases`, checking that each input renders to its expected output.
+pub(super) fn test_expect_for(
+	change_config: impl FnOnce(&mut SquarkupConfig) -> (),
+	cases: &[&str],
+	expected: &str,
+)
+{
+	let mut config = TEST_CONFIG.clone();
+	change_config(&mut config);
+
 	for source in cases {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
 		let output = renderer.render_from(source.trim().to_owned());
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}

@@ -95,6 +95,8 @@ pub(super) struct Renderer<'d>
 
 	/// Accumulated errors during rendering.
 	pub(super) errors: Vec<SquarkError>,  // TODO use SquarkError::multiple
+
+	pub(super) erasing_heading: bool,
 }
 
 /// Core interface.
@@ -116,6 +118,7 @@ impl<'d> Renderer<'d>
 			dest_file: dest_folder.join(&config.out.file),
 			dest_folder,
 			ctx: ContextStack::new(),
+			erasing_heading: true,
 		}
 	}
 
@@ -153,6 +156,7 @@ impl<'d> Renderer<'d>
 		let parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
 				.into_offset_iter()
+				// .inspect(|e| { dbg!(e); })
 				.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -184,7 +188,17 @@ impl Renderer<'_>
 	{
 		match event {
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
-			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(RenderCtx::CODE); }
+			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.force_pop(RenderCtx::CODE); }
+
+			pd::Event::Start(pd::Tag::Heading{..}) => { self.ctx.push(RenderCtx::HEADING); }
+			pd::Event::End(pd::TagEnd::Heading(..)) => {
+				self.ctx.force_pop(RenderCtx::HEADING);
+				self.erasing_heading = false;
+				if !self.config.format.preserve_heading {
+					return None;
+				}
+			}
+
 			_ => (),
 		};
 
@@ -212,11 +226,14 @@ impl Renderer<'_>
 			/* Don't transform anything */
 			RenderCtx::LEAVE{..} => Some(event),
 
-			/* Remove this content */
+			/* Erase this content */
 			RenderCtx::SLASH{..} => None,
 
+			/* Erase heading */
+			RenderCtx::HEADING if self.erasing_heading && !self.config.format.preserve_heading => None,
+
 			/* Keep comments only if `preserve_comments: true` */
-			RenderCtx::COMMENT   => self.config.format.preserve_comments.then_some(event),
+			RenderCtx::COMMENT => self.config.format.preserve_comments.then_some(event),
 
 			_ => match event
 			{
@@ -224,7 +241,6 @@ impl Renderer<'_>
 					self.process_link(dest_url);
 					Some(event)
 				}
-
 				_ => Some(event),
 			}
 		}
@@ -234,7 +250,7 @@ impl Renderer<'_>
 	/// 
 	/// Returns:
 	/// - `Some(true)` if processing was performed, and the content should be kept.
-	/// - `Some(false)` if processing was performed, and the content should be stripped from the output.
+	/// - `Some(false)` if processing was performed, and the content should be erased from the output.
 	/// - `None` if processing was NOT performed, and the caller should forward to another method.
 	fn process_html(&mut self, html: &pd::CowStr<'_>) -> Option<bool>
 	{
@@ -433,13 +449,34 @@ mod plain {
 			"sup,\nworld!",
 		])
 	}
+}
 
-	#[test] fn medium() {
-		test_expect(&[
-			"# Heading\nThe quick brown fox jumps over the lazy dog",
-			"# Heading\n\nThe quick brown fox jumps over the lazy dog",
-			"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
-		], "# Heading\n\nThe quick brown fox jumps over the lazy dog")
+#[cfg(test)]
+mod heading {
+	use super::*;
+
+	mod erases {
+		use super::*;
+
+		#[test] fn easy() {
+			test_expect(&[
+				"# Heading\nThe quick brown fox jumps over the lazy dog",
+				"# Heading\n\nThe quick brown fox jumps over the lazy dog",
+				"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
+			], "The quick brown fox jumps over the lazy dog")
+		}
+	}
+
+	mod preserves {
+		use super::*;
+
+		#[test] fn easy() {
+			test_expect_for(|c| c.format.preserve_heading = true, &[
+				"# Heading\nThe quick brown fox jumps over the lazy dog",
+				"# Heading\n\nThe quick brown fox jumps over the lazy dog",
+				"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
+			], "# Heading\n\nThe quick brown fox jumps over the lazy dog");
+		}
 	}
 }
 
