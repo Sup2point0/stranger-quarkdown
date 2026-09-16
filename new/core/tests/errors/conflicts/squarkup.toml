@@ -1,0 +1,11 @@
+repo = "Squarkdown Tests"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/errors/strict/"
+
+[errors]
+strict = true
+on-error = "kill"
