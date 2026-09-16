@@ -16,6 +16,29 @@ use std::io::{ Read, Write };
 use std::path::{ PathBuf };
 
 
+// == PUBLIC == //
+
+/// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
+pub fn render(
+	page: &PageData,
+	site: &SiteData,
+	config: &SquarkupConfig,
+) -> SquarkResult
+{
+	let mut errs = SquarkError::multiple();
+	let mut renderer = Renderer::new(page, site, config);
+
+	if !renderer.dest_folder.exists() {
+		fs::create_dir_all(&renderer.dest_folder)?;
+	}
+
+	catch!(errs => { renderer.render()?; });
+	catch!(errs => { renderer.render_page_ts()?; });
+
+	errs.into()
+}
+
+
 // == IMPLEMENTATION == //
 
 lazy_static!
@@ -47,27 +70,6 @@ lazy_static!
 }
 
 
-/// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
-pub fn render(
-	page: &PageData,
-	site: &SiteData,
-	config: &SquarkupConfig,
-) -> SquarkResult
-{
-	let mut errs = SquarkError::multiple();
-	let mut renderer = Renderer::new(page, site, config);
-
-	if !renderer.dest_folder.exists() {
-		fs::create_dir_all(&renderer.dest_folder)?;
-	}
-
-	catch!(errs => { renderer.render()?; });
-	catch!(errs => { renderer.render_page_ts()?; });
-
-	errs.into()
-}
-
-
 /// Mutable state for tracking rendering context and errors.
 pub(super) struct Renderer<'d>
 {
@@ -78,18 +80,19 @@ pub(super) struct Renderer<'d>
 
 	pub(super) config: &'d SquarkupConfig,
 
-	/// Target file to render to.
+	/// The target file to render to.
 	pub(super) dest_file: PathBuf,
 
-	/// Target folder to render to.
+	/// The target folder to render to.
 	pub(super) dest_folder: PathBuf,
 
 	// == MUTABLE == //
+	
 	/// The parsing context stack.
 	pub(super) ctx: ContextStack,
 
 	/// Accumulated errors during rendering.
-	pub(super) errors: Vec<SquarkError>,
+	pub(super) errors: Vec<SquarkError>,  // TODO use SquarkError::multiple
 }
 
 /// Core interface.
@@ -147,8 +150,8 @@ impl<'d> Renderer<'d>
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser =
 			pd::Parser::new_ext(&source, PARSER_OPTIONS.clone())
-				// .inspect(|e| { dbg!(e); })
-				.filter_map(|e| self.process_event(e))
+				.into_offset_iter()
+				.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
 		let mut out = str!();
@@ -172,7 +175,10 @@ impl<'d> Renderer<'d>
 impl<'d> Renderer<'d>
 {
 	/// Transform a single `pulldown-cmark` event.
-	fn process_event<'e>(&mut self, event: pd::Event<'e>) -> Option<pd::Event<'e>>
+	fn process_event<'e>(&mut self,
+		event: pd::Event<'e>,
+		range: std::ops::Range<usize>,
+	) -> Option<pd::Event<'e>>
 	{
 		
 		match event {

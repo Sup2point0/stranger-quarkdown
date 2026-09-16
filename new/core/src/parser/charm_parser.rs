@@ -1,116 +1,104 @@
-use tinyvec::tiny_vec;
-
 use super::*;
 use crate::core::*;
 use crate::types::*;
 use crate::utils;
 use crate::macros::*;
 
+use tinyvec::tiny_vec;
+
 use std::collections::HashMap;
-use std::error::Error;
 use std::fs::File;
-use std::io::{ BufReader, Read };
-use std::path::PathBuf;
+use std::io::{ Read };
+use std::path::{ PathBuf, Path };
+
+
+/// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
+pub fn parse(filepath: PathBuf, config: &SquarkupConfig) -> SquarkResult<Option<PageData>>
+{
+	let mut file = File::open(&filepath)?;
+	let mut source = str!();
+	file.read_to_string(&mut source)?;
+
+	let mut parser = CharmParser::new(filepath, config);
+	parser.parse_from(source)
+}
 
 
 /// A parser for the charm squark of a file.
-pub struct CharmParser<Source: Read = File>
+pub struct CharmParser<'d>
 {
-	/// Have we reached the end of the source?
-	pub is_done: bool,
+	// == IMMUTABLE == //
 
-	/// Non-crashing errors to report to the user.
-	pub errors: Vec<ParseFailure>,
+	pub(super) config: &'d SquarkupConfig,
+
+	/// The source file being parsed.
+	pub(super) filepath: PathBuf,
+
+	// == MUTABLE == //
+
+	/// The source text to parse, containing the charm squark.
+	pub(super) source: Vec<char>,
+
+	/// The current index in [`Self::source`]'s characters.
+	pub(super) i: usize,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
 	///
 	/// If so, this means the user intends for the file to be squarked up, and error checking should be stricter to catch mistakes on their end.
 	pub(super) is_live: bool,
 
-	/// The backing buffer that reads from the source file.
-	pub(super) _reader: BufReader<Source>,
-
-	/// The location of the source file.
-	pub(super) _filepath: PathBuf,
-
-	/// The index in the current line the parser is pointing to.
-	pub(super) _index: usize,
-
-	/* NOTE:
-		Storing a `Chars` iterator over `_line_buffer` ended up with lifetime issues =(
-		Having another `Vec<char>` is a little duplication, but it does make it much nicer to work with
-	*/
-
-	/// Individual characters of the currently in-memory line to process.
-	/// 
-	/// Guaranteed to be terminated by a `\n` newline.
-	pub(super) _line: Vec<char>,
-	
-	/// The currently in-memory line to process.
-	/// 
-	/// This backs `._line`. Reuse this between line reads to avoid excessive allocations!
-	pub(super) _line_buffer: String,
+	/// Accumulated errors during parsing.
+	pub errors: SquarkError,
 }
 
 /// The public parser interface.
-impl<Source: Read> CharmParser<Source>
+impl<'d> CharmParser<'d>
 {
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
-	pub fn init(file: Source, filepath: PathBuf) -> Result<Self, ParseFailure>
+	pub fn new(filepath: PathBuf, config: &'d SquarkupConfig) -> Self
 	{
-		let mut out = Self {
-			is_done: false,
-			errors: vec![],
+		Self {
+			config,
+			filepath,
+			source: vec!(),
+			i: 0,
 			is_live: false,
-			_reader: BufReader::new(file),
-			_filepath: filepath,
-			_index: 0,
-			_line: vec![],
-			_line_buffer: String::new(),
-		};
-		
-		out.next_line(when!("initialising parser"))?;
-		
-		Ok(out)
+			errors: SquarkError::multiple(),
+		}
 	}
 	
 	/// Run the parser to completion, extracting the heading and charm squark of the source.
 	/// 
 	/// If the file is active (has `#SQUARK live!`), this extracts the metadata from the charm squark and returns `Some(FileData)`. Otherwise, it returns `None` for an inactive file.
-	pub fn parse(&mut self, config: &SquarkupConfig) -> Result<Option<PageData>, Box<dyn Error>>
+	pub fn parse_from(&mut self, source: String) -> SquarkResult<Option<PageData>>
 	{
-		match self._parse(config)
-		{
-			// happy
-			Ok(Ok(page_data))           => Ok(Some(page_data)),
-			Err(ParseFailure::NO_MATCH) => Ok(None),
+		self.source = source.chars().collect();
 
-			// error
-			Ok(Err(file_error)) => Err(bx!(file_error)),
-			Err(parse_error)    => Err(bx!(parse_error)),
-		}
-	}
-}
-
-/// Parser internals specialised to Squarkdown-Flavoured Markdown.
-impl<Source: Read> CharmParser<Source>
-{
-	pub(super) fn _parse(&mut self, config: &SquarkupConfig) -> ParseResult<SquarkResult<PageData>>
-	{
 		self.eat_whitespace();
 		
-		let heading = if self.current() == Some('#') { Some(self.parse_heading()?) } else { None };
+		let heading = {
+			self.current() == Some('#') {
+				Some(self.parse_heading()?)
+			}
+			else {
+				None
+			}
+		};
 
 		self.eat_whitespace();
 
 		let (flags, mut fields) = self.parse_charm_squark()?;
 		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
 
-		Ok(PageData::init(self._filepath.clone(), flags, fields, config))
+		Ok(PageData::init(self.filepath.clone(), flags, fields, self.config))
 	}
-	
+}
+
+/// Parser internals specialised to Squarkdown-Flavoured Markdown.
+impl<'d> CharmParser<'d>
+{
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
-	pub(super) fn parse_heading(&mut self) -> ParseResult<String>
+	pub(super) fn parse_heading(&mut self) -> SquarkResult<String>
 	{
 		self.eat("# ", to!("start page heading"), when!("parsing heading"))?;
 		self.eat_spaces();
@@ -121,7 +109,7 @@ impl<Source: Read> CharmParser<Source>
 	}
 	
 	/// Parse the `<!-- #SQUARK live! ... -->` charm squark, extracting the flags and fields.
-	pub(super) fn parse_charm_squark(&mut self) -> ParseResult<(Strings, HashMap<String, Strings>)>
+	pub(super) fn parse_charm_squark(&mut self) -> SquarkResult<(Strings, HashMap<String, Strings>)>
 	{
 		self.try_parse_squark_live()?;
 		self.eat_spaces();
@@ -135,7 +123,7 @@ impl<Source: Read> CharmParser<Source>
 	/// Attempt to look for `<!-- #SQUARK live!`.
 	/// 
 	/// If found, set `.is_live: true`; otherwise return `NO_MATCH`.
-	pub(super) fn try_parse_squark_live(&mut self) -> Recoverable
+	pub(super) fn try_parse_squark_live(&mut self) -> Backtracks
 	{
 		self.try_eat("<!--")?;
 		self.eat_whitespace(); self.try_eat_caseless("#SQUARK")?;
@@ -152,7 +140,7 @@ impl<Source: Read> CharmParser<Source>
 	/// <!-- #SQUARK live! feat! dev! -->
 	///                    ^^^^  ^^^
 	/// ```
-	pub(super) fn parse_flags(&mut self) -> ParseResult<Strings>
+	pub(super) fn parse_flags(&mut self) -> SquarkResult<Strings>
 	{
 		let when = when!("parsing charm squark flags");
 
@@ -201,7 +189,7 @@ impl<Source: Read> CharmParser<Source>
 	///   ^^^^^^   ^^^^^   ^^^^^   ^^^^^
 	/// -->
 	/// ```
-	pub(super) fn parse_fields(&mut self) -> ParseResult<HashMap<String, Strings>>
+	pub(super) fn parse_fields(&mut self) -> SquarkResult<HashMap<String, Strings>>
 	{
 		let mut data = HashMap::new();
 
@@ -228,7 +216,7 @@ impl<Source: Read> CharmParser<Source>
 	/// | field3 = value1 / value2 / value3
 	/// -->
 	/// ```
-	pub(super) fn parse_field(&mut self) -> ParseResult<(String, Strings)>
+	pub(super) fn parse_field(&mut self) -> SquarkResult<(String, Strings)>
 	{
 		let when = when!("parsing charm squark field");
 
@@ -259,7 +247,7 @@ impl<Source: Read> CharmParser<Source>
 	/// | field = value
 	/// -->
 	/// ```
-	pub(super) fn parse_values(&mut self) -> ParseResult<Strings>
+	pub(super) fn parse_values(&mut self) -> SquarkResult<Strings>
 	{
 		let when = when!("parsing values in charm squark field");
 

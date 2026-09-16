@@ -1,19 +1,16 @@
 use super::*;
-use crate::{
-	macros::*,
-};
-
-use std::io::{ BufRead, Read };
+use crate::core::*;
+use crate::macros::*;
 
 
 
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
-impl<Source: Read> CharmParser<Source>
+impl<'d> CharmParser<'d>
 {
 	/// Is the parser currently pointing outside the bounds of the current chunk?
-	pub(super) fn is_past_end_of_line(&self) -> bool
+	pub(super) fn is_out_of_bounds(&self) -> bool
 	{
-		self._index >= self._line.len()
+		self.i >= self.source.len()
 	}
 
 	/// The character in the source the parser is currently pointing to.
@@ -21,7 +18,7 @@ impl<Source: Read> CharmParser<Source>
 	/// This returns `None` iff the parser has reached the end of its source and is out of bounds.
 	pub(super) fn current(&self) -> Option<char>
 	{
-		self._line.get(self._index).copied()
+		self.source.get(self.i).copied()
 	}
 
 	/// Peek the next character in the line immediately after the current character.
@@ -29,7 +26,7 @@ impl<Source: Read> CharmParser<Source>
 	/// Returns `None` if the parser is at the end of a line (since loading in the next line would require flushing the buffer).
 	pub(super) fn peek(&self) -> Option<char>
 	{
-		self._line.get(self._index + 1).copied()
+		self.source.get(self.i + 1).copied()
 	}
 
 	/// Get a preview of the upcoming text.
@@ -37,8 +34,8 @@ impl<Source: Read> CharmParser<Source>
 	{
 		const PREVIEW_CHARS: usize = 20;
 
-		let end = (self._index + PREVIEW_CHARS).min(self._line.len());
-		let chars = self._line.get(self._index..end);
+		let end = (self.i + PREVIEW_CHARS).min(self.source.len());
+		let chars = self.source.get(self.i..end);
 		
 		match chars {
 			Some(c) => c.iter().collect(),
@@ -46,47 +43,17 @@ impl<Source: Read> CharmParser<Source>
 		}
 	}
 
-	/// Read the next line of the source text into memory.
-	/// 
-	/// Errors if the parser has already reached the end of the source, or if reading from the buffer fails.
-	pub(super) fn next_line(&mut self, when: impl Fn() -> String) -> ParseResult
-	{
-		if self.is_done {
-			return self.err_eof(when);
-		}
-
-		self._line_buffer.clear();
-
-		match self._reader.read_line(&mut self._line_buffer) {
-			Err(_) => return self.err_eof(when),
-			Ok(0) => self.is_done = true,
-			Ok(_) => (),
-		}
-
-		self._line = self._line_buffer.chars().collect();
-
-		/* NOTE: We rely on `\n` as the indicator of a new line, so even the last line must have one */
-		if self._line.last() != Some(&'\n') {
-			self._line.push('\n');
-		}
-
-		self._index = 0;
-
-		Ok(())
-	}
-
 	/// Proceed to the next character in the source text, and read in a new line afterwards if necessary.
 	/// 
 	/// If this function is called when `self.is_eof: true`, this returns an end-of-input error.
-	pub(super) fn advance(&mut self, when: impl Fn() -> String) -> ParseResult
+	pub(super) fn advance(&mut self, when: impl Fn() -> String) -> SquarkResult
 	{
-		self._index += 1;
-
-		if self.is_past_end_of_line() {
-			self.next_line(when)
-		} else {
-			Ok(())
+		if self.is_out_of_bounds() {
+			return Err(todo!());
 		}
+
+		self.i += 1;
+		Ok(())
 	}
 	
 	/// Consume exactly `target`, erroring on failure.
@@ -94,7 +61,7 @@ impl<Source: Read> CharmParser<Source>
 		target: &str,
 		to: impl Fn() -> String,
 		when: impl Fn() -> String,
-	) -> ParseResult
+	) -> SquarkResult
 	{
 		for expected in target.chars()
 		{
@@ -116,14 +83,14 @@ impl<Source: Read> CharmParser<Source>
 	}
 	
 	/// Attempt to consume exactly `target`. On failure, backtrack and return `NO_MATCH`.
-	pub(super) fn try_eat(&mut self, target: &str) -> Recoverable
+	pub(super) fn try_eat(&mut self, target: &str) -> Backtracks
 	{
-		let init = self._index;
+		let init = self.i;
 
 		for expected in target.chars()
 		{
 			if self.current() != Some(expected) {
-				self._index = init;
+				self.i = init;
 				return Err(ParseFailure::NO_MATCH);
 			}
 			self.advance(when!())?;
@@ -137,7 +104,7 @@ impl<Source: Read> CharmParser<Source>
 		target: &str,
 		to: impl Fn() -> String,
 		when: impl Fn() -> String,
-	) -> ParseResult
+	) -> SquarkResult
 	{
 		for mut expected in target.chars()
 		{
@@ -162,16 +129,16 @@ impl<Source: Read> CharmParser<Source>
 	}
 
 	/// Attempt to consume `target` disregarding casing, returning `NO_MATCH` on failure.
-	pub(super) fn try_eat_caseless(&mut self, target: &str) -> Recoverable
+	pub(super) fn try_eat_caseless(&mut self, target: &str) -> Backtracks
 	{
-		let init = self._index;
+		let init = self.i;
 
 		for mut expected in target.chars()
 		{
 			expected.make_ascii_lowercase();
 
 			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
-				self._index = init;
+				self.i = init;
 				return Err(ParseFailure::NO_MATCH);
 			}
 			self.advance(when!())?;
@@ -211,7 +178,7 @@ impl<Source: Read> CharmParser<Source>
 	/// Parse an identifier like `sup`, `sup-world`, `internal.flag`.
 	/// 
 	/// Identifiers cannot start with `-`.
-	pub(super) fn parse_ident(&mut self, when: impl Fn() -> String) -> ParseResult<String>
+	pub(super) fn parse_ident(&mut self, when: impl Fn() -> String) -> SquarkResult<String>
 	{
 		// FIXME require at least 1 character
 		let mut chars = vec![];
@@ -248,7 +215,7 @@ mod test
 	use std::io::Cursor;
 	
 
-	#[test] fn advance_and_current_single_line()
+	#[test] fn advance_and_current_singlesource()
 	{
 		let cursor = Cursor::new("012345");
 		let mut parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
@@ -264,7 +231,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 	
-	#[test] fn advance_and_current_multi_line()
+	#[test] fn advance_and_current_multisource()
 	{
 		let cursor = Cursor::new("012\n345");
 		let mut parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
@@ -281,7 +248,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 
-	#[test] fn advance_and_peek_single_line()
+	#[test] fn advance_and_peek_singlesource()
 	{
 		let cursor = Cursor::new("012345");
 		let mut parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
@@ -297,7 +264,7 @@ mod test
 		assert_eq!( parser.advance(when!()), Err(ParseFailure::NO_MATCH) );
 	}
 
-	#[test] fn advance_and_peek_multi_line()
+	#[test] fn advance_and_peek_multisource()
 	{
 		let cursor = Cursor::new("012\n345");
 		let mut parser = CharmParser::init(cursor, TEST_FILE.clone()).unwrap();
@@ -325,7 +292,7 @@ mod test
 		});
 	}
 
-	#[test] fn next_line()
+	#[test] fn nextsource()
 	{
 		test_expected(&[
 			(
@@ -335,8 +302,8 @@ mod test
 		],
 		|mut parser, _expected| {
 			for line in _expected {
-				assert_eq!( parser._line, line.chars().collect::<Vec<_>>() );
-				let _ = parser.next_line(when!());
+				assert_eq!( parser.source, line.chars().collect::<Vec<_>>() );
+				let _ = parser.nextsource(when!());
 			}
 		});
 	}
