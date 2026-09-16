@@ -110,7 +110,7 @@ fn squarkup() -> SquarkResult<bool>
 	}
 
 	if config.errors.strict {
-		site_data.check_conflicts()?;
+		site_data.check_conflicts(&config)?;
 	}
 
 	// == RENDER == //

@@ -1,5 +1,7 @@
 use super::PageData;
 use crate::core::*;
+use crate::utils;
+use crate::colours::*;
 use crate::macros::*;
 
 use time::{ UtcDateTime };
@@ -73,20 +75,20 @@ impl SiteData
 	}
 
 	/// Check if there are active pages in the site that conflict (want to export to the same destination folder).
-	pub fn check_conflicts(&self) -> SquarkResult
+	pub fn check_conflicts(&self, config: &SquarkupConfig) -> SquarkResult
 	{
 		let mut seen_dests = HashMap::<PathBuf, &PageData>::new();
 
 		for page in self.pages() {
-			let dest = dunce::canonicalize(&page.destination).unwrap();
+			let Ok(dest) = dunce::canonicalize(&page.destination) else { continue };
 
 			if let Some(conflict) = seen_dests.get(&dest) {
 				return Err(SquarkError::Unrecoverable {
 					msg: fmt!(
-						"found conflicting pages: {} and {} both want to export to {}",
-						slash!("{}", conflict.filepath),
-						slash!("{}", page.filepath),
-						slash!("{}", dest),
+						"found conflicting pages: {W}{}{R} and {W}{}{R} both want to export to {W}{}",
+						utils::display_rel(&conflict.filepath, &config.paths.root),
+						utils::display_rel(&page.filepath, &config.paths.root),
+						utils::display_rel(dest, &config.paths.site),
 					),
 					hint: str!(),
 					debug: vec![],
