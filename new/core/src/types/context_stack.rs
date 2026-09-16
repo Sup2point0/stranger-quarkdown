@@ -31,17 +31,7 @@ impl<Ctx> ContextStack<Ctx>
 		self.stack.push(ctx);
 	}
 
-	/// Pop `ctx` from the stack if it is the currently active context, taking keys into account.
-	pub fn try_pop(&mut self, ctx: Ctx) -> bool
-	{
-		if *self.current() == ctx {
-			self.stack.pop();
-			true
-		} else {
-			false
-		}
-	}
-
+	// TODO use result when forced
 	/// Pop `ctx` from the stack as deep as possible, regardless of the current context.
 	/// 
 	/// For instance, when seeing a `-->`, this should completely terminate a comment context, which might look like:
