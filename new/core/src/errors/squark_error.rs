@@ -76,16 +76,6 @@ impl SquarkError
 
 impl SquarkError
 {
-	/// Is this a [`Self::Multiple`] error with no aggregated errors?
-	pub fn is_empty(&self) -> bool
-	{
-		if let Self::Multiple { errs } = self && errs.is_empty() {
-			true
-		} else {
-			false
-		}
-	}
-
 	/// Is this a non-recoverable error?
 	/// 
 	/// Some errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
@@ -116,12 +106,23 @@ impl SquarkError
 	}
 }
 
-impl Into<SquarkResult<()>> for SquarkError
+/// Implementations specific to [`SquarkError::Multiple`].
+impl SquarkError
 {
-	fn into(self) -> SquarkResult<()>
+	/// Is this a [`SquarkError::Multiple`] error with no aggregated errors?
+	pub fn is_empty(&self) -> bool
 	{
-		if let Self::Multiple { errs } = &self && errs.is_empty() {
-			Ok(())
+		if let Self::Multiple { errs } = self && errs.is_empty() {
+			true
+		} else {
+			false
+		}
+	}
+
+	pub fn or<T>(self, t: T) -> SquarkResult<T>
+	{
+		if self.is_empty() {
+			Ok(t)
 		} else {
 			Err(self)
 		}

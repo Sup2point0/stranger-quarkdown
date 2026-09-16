@@ -35,7 +35,7 @@ pub fn render(
 	catch!(errs => { renderer.render()?; });
 	catch!(errs => { renderer.render_page_ts()?; });
 
-	errs.into()
+	errs.or(())
 }
 
 
