@@ -1,19 +1,36 @@
 # Squarkdown Changelog
 
 
-## v3.5.0 (Next)
+## v4.0 (Next)
 
-### Breaking
-- `squarkup.json`: `opts / on-no-dir` changed to `opts / on-file-exists`
-  - Available options are `kill`, `skip`, `overwrite`
-  - This is more relevant than the previous "on no directory" – it doesn’t really matter if the directory doesn’t exist, and for a fully generated site it never will.
+Squarkdown has been rewritten in Rust. Yeah, I’m sorry, lmao.
+
+This keeps the core semantics and functionality of Squarkdown the same, but brings your usual speed and reliability improvements that come with Rust.
+
+While I was at it, I also implemented some way overdue features that were too scary to implement in Ruby!
 
 ### New
-- Huge internal restructuring to make configuration, runtime and processing more resilient
-- Improve error messages with hints
+- Squarkdown now resolves links, rewriting links to Markdown files into links to webpages
+- Improved error messages with hints, diagnostics and line numbers
+- Safer path resolution, with stricter checks to ensure paths remain inside your repository
 
-### Fixes
-- Fix `nil` check in `FileData.new`
+### Rendering
+- `#SQUARK slash` squark for removing content from rendered output
+- Links containing `<sup>↗</sup>` are turned into `<a target="_blank">` links
+
+### Config
+- Favour `squarkup.toml` over `squarkup.json`
+- *Breaking*: `on-no-dir` changed to `on-file-exists`
+  - Available options are `kill`, `skip`, `overwrite`
+  - This is more relevant than the previous "if directory doesn’t exist" – it doesn’t really matter if the directory doesn’t exist, and for a fully generated site it never will.
+- *New*: `format` config options for controlling how text is rendered
+  - `format.preserve-comments`
+  - `format.externalise-links`
+  - `format.mark_invalid-links`
+- Support `/squarkup.toml` alongside `/.squarkdown/squarkup.toml`
+
+
+<br>
 
 
 ## v3.4.3
@@ -63,6 +80,9 @@ Squarkup Schema version: `5.0.9`
 - Fix list and non-list distinguishing for arbitrary fields
 
 
+<br>
+
+
 ## v3.3.3
 
 ### Fixes
@@ -87,6 +107,9 @@ Squarkup Schema version: `5.0.9`
 ### New
 - Squarkdown now accepts values over multiple lines
 - Squarkdown now accepts arbitrary fields in the squark charm after a `---` delimiter
+
+
+<br>
 
 
 ## v3.2.5
@@ -132,6 +155,9 @@ Squarkup Schema version: `5.0.9`
 - Bumped Ruby version from `3.3.5` to `3.4.7`
 
 
+<br>
+
+
 ## v3.1.1
 
 ### Fixes
@@ -142,6 +168,9 @@ Squarkup Schema version: `5.0.9`
 
 ### New
 - The squark charm now supports an `update` field. Use `date` for the original writing/publish date of a page, and `update` for subsequent updates.
+
+
+<br>
 
 
 ## v3.0.4

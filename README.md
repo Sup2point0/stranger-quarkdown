@@ -15,6 +15,9 @@
 
 </div>
 
+> [!Warning]
+> I’m currently rewriting Squarkdown from scratch (yeah, in Rust, lmao). The Ruby implementation is unfortunately in a broken state. Bear with me!
+
 **Stranger Quarkdown** (*Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.io).
 
 Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough/quickstart.md) anywhere in your project repo, then use Squarkdown to automatically export them to `.svx` files in your SvelteKit project directory.
