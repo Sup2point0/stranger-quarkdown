@@ -1,11 +1,12 @@
 use squarkdown::macros::*;
 
+use assertables::*;
 use lazy_static::lazy_static;
 
 use std::fs::{ self, File };
 use std::io::{ self, Read };
 use std::path::{ PathBuf };
-use std::assert_matches;
+use std::process;
 
 
 lazy_static! {
@@ -20,14 +21,26 @@ lazy_static! {
 const BIN: &'static str = env!("CARGO_BIN_EXE_squarkdown");
 
 /// Run Squarkdown from `path`, relative to `tests/`.
-pub fn squarkup_from(path: &str) -> std::process::ExitStatus
+pub fn squarkup_from(path: &str) -> process::ExitStatus
 {
-	let r = std::process::Command::new(BIN)
+	let r = process::Command::new(BIN)
 		.current_dir(TESTS.join(path))
 		.status();
 
-	assert_matches!( r, Ok(..) );
+	assert_ok!( &r );
 	r.unwrap()
+}
+
+pub fn capture_squarkup_from(path: &str) -> String
+{
+	let r = process::Command::new(BIN)
+		.current_dir(TESTS.join(path))
+		.output();
+
+	assert_ok!( &r );
+	let process::Output{ stdout, .. } = r.unwrap();
+
+	str::from_utf8(&stdout).unwrap().to_string()
 }
 
 

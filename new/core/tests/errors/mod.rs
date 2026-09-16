@@ -6,5 +6,6 @@ use assertables::*;
 /// Squarkdown errors on page conflicts with `config.errors.strict = true`.
 #[test] fn conflicts()
 {
-	assert!( !squarkup_from("errors/conflicts").success() );
+	let r = capture_squarkup_from("errors/conflicts");
+	assert_contains!( r, "conflict" );
 }
