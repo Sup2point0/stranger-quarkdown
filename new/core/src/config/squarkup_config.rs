@@ -12,12 +12,16 @@ use std::path::PathBuf;
 pub struct SquarkupConfig
 {
 	pub paths:  PathsConfig,
-	pub out:    OutConfig,
+	pub out: OutConfig,
+
+	/// Rendering customisations.
 	pub format: FormatConfig,
-	pub bases:  BasesConfig,
+
 	pub styles: StylesConfig,
 	pub assets: AssetsConfig,
-	pub fonts:  FontsConfig,
+	pub fonts: FontsConfig,
+
+	/// Error handling strategies.
 	pub errors: ErrorConfig,
 }
 
@@ -31,12 +35,14 @@ pub struct PathsConfig {
 	pub site: PathBuf,
 	
 	/// Source directories from which to start searching for Markdown files.
+	/// 
+	/// `/` is a special entry, treated as 'root-only'; it won’t recurse into any directories. Use this to pick up files like `README.md`, `CHANGELOG.md`, etc.
 	pub sources: Vec<PathBuf>,
 
-	/// Only files whose full path matches against any of these RegEx patterns will be squarked up.
+	/// Only directories whose full path matches against any of these RegEx patterns will be searched.
 	pub include: Vec<regex::Regex>,
 
-	/// Files whose full path matches against any of these RegEx patterns will *not* be squarked up.
+	/// Directories whose full path matches against any of these RegEx patterns will *not* be searched.
 	pub exclude: Vec<regex::Regex>,
 }
 
@@ -69,12 +75,6 @@ pub struct FormatConfig {
 
 	/// Mark hyperlinks to nonexistent pages?
 	pub mark_invalid_links: bool,
-}
-
-#[derive(Clone, Debug)]
-pub struct BasesConfig {
-	pub folder: Option<PathBuf>,
-	pub page_js: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug)]

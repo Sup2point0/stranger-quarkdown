@@ -44,7 +44,6 @@ impl SquarkupConfig
 				externalise_links: false,
 				mark_invalid_links: false,
 			},
-			bases:  BasesConfig  { folder: None, page_js: None },
 			styles: StylesConfig { folder: None, base_file: None },
 			assets: AssetsConfig { folder: None, site_assets_folder: None,
 				extensions: vec![
@@ -180,8 +179,6 @@ impl SquarkupConfig
 				c.mark_invalid_links = Self::try_get_bool(value, "format.mark-invalid-links")?;
 			}) }
 		}
-
-		// BasesConfig
 
 		// StylesConfig
 
