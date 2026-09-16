@@ -1,6 +1,7 @@
-use super::context_stack::*;
+use super::*;
 use crate::core::*;
 use crate::config::*;
+use crate::types::ContextStack;
 use crate::log;
 use crate::utils;
 use crate::colours::*;
@@ -89,7 +90,7 @@ pub(super) struct Renderer<'d>
 	// == MUTABLE == //
 	
 	/// The parsing context stack.
-	pub(super) ctx: ContextStack,
+	pub(super) ctx: ContextStack<RenderCtx>,
 
 	/// Accumulated errors during rendering.
 	pub(super) errors: Vec<SquarkError>,  // TODO use SquarkError::multiple
@@ -182,8 +183,8 @@ impl<'d> Renderer<'d>
 	{
 		
 		match event {
-			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(Ctx::CODE); }
-			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(Ctx::CODE); }
+			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
+			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(RenderCtx::CODE); }
 			_ => (),
 		};
 
@@ -209,13 +210,13 @@ impl<'d> Renderer<'d>
 		match self.ctx.current()
 		{
 			/* Don't transform anything */
-			Ctx::LEAVE{..} => Some(event),
+			RenderCtx::LEAVE{..} => Some(event),
 
 			/* Remove this content */
-			Ctx::SLASH{..} => None,
+			RenderCtx::SLASH{..} => None,
 
 			/* Keep comments only if `preserve_comments: true` */
-			Ctx::COMMENT   => self.config.format.preserve_comments.then_some(event),
+			RenderCtx::COMMENT   => self.config.format.preserve_comments.then_some(event),
 
 			_ => match event
 			{
@@ -250,11 +251,11 @@ impl<'d> Renderer<'d>
 		}
 		else if !self.ctx.is_slash() {
 			if html.starts_with("<!--") {
-				self.ctx.push(Ctx::COMMENT);
+				self.ctx.push(RenderCtx::COMMENT);
 				return Some(self.config.format.preserve_comments)
 			}
 			else if html.ends_with("-->") {
-				self.ctx.force_pop(Ctx::COMMENT);
+				self.ctx.force_pop(RenderCtx::COMMENT);
 				return Some(self.config.format.preserve_comments)
 			}
 		}
@@ -270,8 +271,8 @@ impl<'d> Renderer<'d>
 
 			let squark = match captures.get(1) {
 				Some(m) => match m.as_str().to_ascii_uppercase().as_str() {
-					"LEAVE" => Ctx::LEAVE { key },
-					"SLASH" => Ctx::SLASH { key },
+					"LEAVE" => RenderCtx::LEAVE { key },
+					"SLASH" => RenderCtx::SLASH { key },
 
 					s => {
 						if !self.ctx.is_leave() {
@@ -290,8 +291,8 @@ impl<'d> Renderer<'d>
 				None => unreachable!(),
 			};
 
-			if matches!(self.ctx.current(), Ctx::LEAVE{..})
-			&& !matches!(squark, Ctx::LEAVE{..})
+			if matches!(self.ctx.current(), RenderCtx::LEAVE{..})
+			&& !matches!(squark, RenderCtx::LEAVE{..})
 			{
 				return false;
 			}
