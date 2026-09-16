@@ -3,6 +3,14 @@ use crate::*;
 use assertables::*;
 
 
+/// Squarkdown exits if it finds no files to squarkup.
+#[test] fn none()
+{
+	let (status, out) = capture_squarkup_from("errors/none");
+	assert!( !status.success() );
+	assert_contains!( out, "no files found to squarkup" );
+}
+
 /// Squarkdown errors on 2-page conflicts with `config.errors.strict = true`.
 #[test] fn conflicts()
 {
