@@ -1,9 +1,11 @@
 use super::PageData;
 use crate::core::*;
+use crate::macros::*;
 
 use time::{ UtcDateTime };
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 
 #[derive(Clone, Debug, Default)]
@@ -68,6 +70,33 @@ impl SiteData
 
 		self.pages.insert(key.to_owned(), page_data);
 		self.stats.active_pages += 1;
+	}
+
+	/// Check if there are active pages in the site that conflict (want to export to the same destination folder).
+	pub fn check_conflicts(&self) -> SquarkResult
+	{
+		let mut seen_dests = HashMap::<PathBuf, &PageData>::new();
+
+		for page in self.pages() {
+			let dest = dunce::canonicalize(&page.destination).unwrap();
+
+			if let Some(conflict) = seen_dests.get(&dest) {
+				return Err(SquarkError::Unrecoverable {
+					msg: fmt!(
+						"found conflicting pages: {} and {} both want to export to {}",
+						slash!("{}", conflict.filepath),
+						slash!("{}", page.filepath),
+						slash!("{}", dest),
+					),
+					hint: str!(),
+					debug: vec![],
+				});
+			}
+
+			seen_dests.insert(dest, page);
+		}
+
+		Ok(())
 	}
 }
 

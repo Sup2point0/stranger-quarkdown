@@ -109,6 +109,10 @@ fn squarkup() -> SquarkResult<bool>
 		log::ok!("found {} active files to squarkup", site_data.stats.active_pages);
 	}
 
+	if config.errors.strict {
+		site_data.check_conflicts()?;
+	}
+
 	// == RENDER == //
 	log::is!("rendering...");
 

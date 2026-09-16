@@ -15,13 +15,13 @@ use std::path::{ PathBuf };
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PageData
 {
-	/// Unique identifier for the page.
+	/// The stable unique identifier for the page.
 	pub shard: String,
 
-	/// Location of the original `.md` file this page represents.
+	/// The location of the original `.md` file this page represents.
 	pub filepath: PathBuf,
 	
-	/// Location of the `+page.svx` file to render this page to.
+	/// The folder to render this page's `+page.svx` and `+page.ts` to.
 	pub destination: PathBuf,
 	
 	pub flags: Strings,
