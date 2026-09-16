@@ -14,20 +14,20 @@ enum Extension { TOML, JSON }
 
 
 /// Find, read, load, validate and initialise the user's squarkup configuration, either from `squarkup.toml` or `squarkup.json`.
-pub fn resolve_config(root: PathBuf) -> SquarkResult<SquarkupConfig>
+pub fn resolve_config(root: &Path) -> SquarkResult<SquarkupConfig>
 {
 	log::is!("resolving config...");
 
-	let (filepath, ext) = find_config(&root)?;
+	let (filepath, ext) = find_config(root)?;
 	log::ok!(slash!("found your squarkup config: {B}{}", filepath));
 
 	let config = match ext {
 		Extension::TOML => {
 			log::info!("reading config...");
-			let data = read_toml_config(filepath)?;
+			let data = read_toml_config(&filepath)?;
 			log::info!("read successful!");
 			log::info!("validating config...");
-			SquarkupConfig::try_from_toml(data, &root)
+			SquarkupConfig::try_from_toml(data, root)
 		},
 		Extension::JSON => {
 			unimplemented!()
@@ -80,11 +80,11 @@ fn find_config_from(folder: &Path) -> Option<(PathBuf, Extension)>
 }
 
 /// Read the user's squarkup configuration from `squarkup.toml`.
-fn read_toml_config(filepath: PathBuf) -> SquarkResult<toml::Table>
+fn read_toml_config(filepath: &Path) -> SquarkResult<toml::Table>
 {
 	(|| -> Result<toml::Table, Box<dyn Error>>
 	{
-		let mut file = File::open(&filepath)?;
+		let mut file = File::open(filepath)?;
 
 		let mut content = str!();
 		file.read_to_string(&mut content)?;

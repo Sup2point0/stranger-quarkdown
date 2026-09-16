@@ -10,20 +10,23 @@ use tinyvec::tiny_vec;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
-use std::path::{ PathBuf };
+use std::path::{ Path, PathBuf };
 
 
 // == PUBLIC == //
 
 /// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
-pub fn parse(filepath: PathBuf, config: &SquarkupConfig) -> SquarkResult<Option<PageData>>
+pub fn parse(
+	filepath: impl AsRef<Path>,
+	config: &SquarkupConfig,
+) -> SquarkResult<Option<PageData>>
 {
 	// TODO read until -->
 	let mut file = File::open(&filepath)?;
 	let mut source = str!();
 	file.read_to_string(&mut source)?;
 
-	let parser = CharmParser::new(&source, filepath.clone(), config);
+	let parser = CharmParser::new(&source, filepath.as_ref().to_path_buf(), config);
 	
 	match parser.parse()
 	{
@@ -109,7 +112,7 @@ impl<'d> CharmParser<'d>
 }
 
 /// Parser internals specialised to Squarkdown-Flavoured Markdown.
-impl<'d> CharmParser<'d>
+impl CharmParser<'_>
 {
 	/// Parse the `# Heading` element, extracting the cleaned heading text.
 	pub(super) fn parse_heading(&mut self) -> SquarkResult<String>
@@ -304,8 +307,7 @@ impl<'d> CharmParser<'d>
 						}
 
 						value.clear();
-						continue;
-					},
+					}
 
 					// `|` terminates
 					'|' if can_terminate => break,

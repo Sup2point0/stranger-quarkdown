@@ -109,7 +109,7 @@ impl PageData
 						],
 					});
 				}
-			};
+			}
 		}
 
 		errs.or_else(||
@@ -152,6 +152,7 @@ impl PageData
 
 impl PageData
 {
+	#[must_use]
 	pub fn serialise(self, config: &SquarkupConfig) -> SerialisedPageData
 	{
 		SerialisedPageData {

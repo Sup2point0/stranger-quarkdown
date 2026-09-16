@@ -9,12 +9,14 @@ use std::path::Path;
 /// - `"/base/path/".join("rel/path")` resolves to `/base/path/rel/path`, happy days.
 /// - `"/base/path/".join("/rel/path")` resolves to `/rel/path`.
 ///   - With a leading separator, the latter is treated as an absolute path, overriding the base path.
+#[must_use]
 pub fn to_rel(path: &str) -> &str
 {
 	path.trim_start_matches(['/', '\\'])
 }
 
 /// Display an `absolute` path relative to `base`.
+#[must_use]
 pub fn display_rel(
 	absolute: impl AsRef<Path>,
 	base: impl AsRef<Path>,

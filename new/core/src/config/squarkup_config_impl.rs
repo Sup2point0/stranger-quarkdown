@@ -14,6 +14,7 @@ impl SquarkupConfig
 	/// Construct a `SquarkupConfig` with defaults applied and *resolved* against `root`.
 	/// 
 	/// We can't implement `Default` because paths depend on the project `root`, which is only available at runtime!
+	#[must_use]
 	pub fn init_defaults(root: &Path, site: &Path) -> Self
 	{
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
@@ -154,7 +155,7 @@ impl SquarkupConfig
 
 			if let Some(value) = out.get("file") { catch!(errs => {
 				let raw = Self::try_get_string(value, "out.file", "(filename including `.svx` extension)")?;
-				s.out.file = raw.clone();
+				s.out.file.clone_from(raw);
 			}) }
 
 			if let Some(value) = out.get("data") { catch!(errs => {

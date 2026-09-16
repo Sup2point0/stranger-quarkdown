@@ -49,7 +49,7 @@ fn squarkup() -> SquarkResult<bool>
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
 
-	let config = resolver::resolve_config(project_root)?;
+	let config = resolver::resolve_config(&project_root)?;
 	log::ok!(slash!("found your site: {B}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();

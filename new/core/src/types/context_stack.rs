@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Clone, Default, Debug)]
 pub struct ContextStack<Ctx>
 {
 	base: Ctx,
@@ -10,10 +10,7 @@ impl<Ctx> ContextStack<Ctx>
 	where Ctx: Default + PartialEq + Eq
 {
 	pub fn new() -> Self {
-		Self {
-			base: Ctx::default(),
-			stack: vec![],
-		}
+		Self::default()
 	}
 }
 

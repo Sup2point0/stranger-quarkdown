@@ -146,11 +146,11 @@ impl<'d> Renderer<'d>
 
 	pub(super) fn render_from(&mut self, mut source: String) -> String
 	{
-		source = Self::expand_only(source);
+		source = Self::expand_only(&source);
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser =
-			pd::Parser::new_ext(&source, PARSER_OPTIONS.clone())
+			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
 				.into_offset_iter()
 				.filter_map(|(e, range)| self.process_event(e, range))
 		;
@@ -162,18 +162,18 @@ impl<'d> Renderer<'d>
 	}
 
 	/// Remove `<!-- #SQUARK only?` and `#SQUARK only. -->` to expose their content to the render pipeline.
-	fn expand_only(source: String) -> String
+	fn expand_only(source: &str) -> String
 	{
 		Regex::new(
 			r"(?is)<!--\s*#SQUARK\s+ONLY\?\s+(?-i)(.*?)(?i)#SQUARK\s+ONLY\.\s*-->"
 		).unwrap()
-		.replace_all(&source, "$1")
+		.replace_all(source, "$1")
 		.to_string()
 	}
 }
 
 /// Specific transforms.
-impl<'d> Renderer<'d>
+impl Renderer<'_>
 {
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
@@ -181,7 +181,6 @@ impl<'d> Renderer<'d>
 		range: std::ops::Range<usize>,
 	) -> Option<pd::Event<'e>>
 	{
-		
 		match event {
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
 			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(RenderCtx::CODE); }
@@ -236,7 +235,7 @@ impl<'d> Renderer<'d>
 	/// - `Some(true)` if processing was performed, and the content should be kept.
 	/// - `Some(false)` if processing was performed, and the content should be stripped from the output.
 	/// - `None` if processing was NOT performed, and the caller should forward to another method.
-	fn process_html<'e>(&mut self, html: &pd::CowStr<'e>) -> Option<bool>
+	fn process_html(&mut self, html: &pd::CowStr<'_>) -> Option<bool>
 	{
 		let html = html.trim();
 				

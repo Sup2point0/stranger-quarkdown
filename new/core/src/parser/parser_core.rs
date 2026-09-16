@@ -7,7 +7,7 @@ use std::iter;
 
 
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
-impl<'d> CharmParser<'d>
+impl CharmParser<'_>
 {
 	/// Is the parser currently pointing outside the bounds of the current chunk?
 	pub(super) fn is_out_of_bounds(&self) -> bool
@@ -220,7 +220,7 @@ impl<'d> CharmParser<'d>
 	}
 }
 
-impl<'d> CharmParser<'d>
+impl CharmParser<'_>
 {
 	/// Return the appropriate response for an unexpected end of file.
 	/// 

@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::{ BufWriter, Write };
 
 
-impl<'d> Renderer<'d>
+impl Renderer<'_>
 {
 	/// Render `+page.ts` for supplying page data to SvelteKit.
 	pub(super) fn render_page_ts(&mut self) -> SquarkResult
@@ -21,9 +21,9 @@ impl<'d> Renderer<'d>
 		let file = File::create(self.dest_folder.join("+page.ts"))?;
 		let mut f = BufWriter::new(file);
 
-		f.write(b"import type { PageData } from 'squarkdown';\n\n")?;
-		f.write(b"export default function load(): PageData {\n")?;
-		f.write(b"\treturn {\n")?;
+		f.write_all(b"import type { PageData } from 'squarkdown';\n\n")?;
+		f.write_all(b"export default function load(): PageData {\n")?;
+		f.write_all(b"\treturn {\n")?;
 
 		let data = self.page.clone().serialise(self.config);
 
@@ -55,8 +55,8 @@ impl<'d> Renderer<'d>
 
 		writeln!(f, "\t\tother: {:?},", data.other)?;
 
-		f.write(b"\t};\n")?;
-		f.write(b"}\n")?;
+		f.write_all(b"\t};\n")?;
+		f.write_all(b"}\n")?;
 
 		Ok(())
 	}

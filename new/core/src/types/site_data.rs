@@ -42,14 +42,14 @@ impl Default for SiteStats
 impl SiteData
 {
 	pub fn new() -> Self {
-		Default::default()
+		Self::default()
 	}
 
-	pub fn pages(&self) -> impl Iterator<Item = &PageData>
-	{
+	pub fn pages(&self) -> impl Iterator<Item = &PageData> {
 		self.pages.values()
 	}
 
+	#[must_use]
 	pub fn get_page(&self, key: &str) -> Option<&PageData>
 	{
 		self.pages.get(key)
@@ -73,6 +73,7 @@ impl SiteData
 
 impl SiteData
 {
+	#[must_use]
 	pub fn serialise(self, config: &SquarkupConfig) -> impl serde::Serialize
 	{
 		serde_json::json!({

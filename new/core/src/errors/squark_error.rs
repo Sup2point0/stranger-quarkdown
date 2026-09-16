@@ -44,6 +44,7 @@ pub enum SquarkError
 impl SquarkError
 {
 	/// Construct a [`Self::Unrecoverable`] with only a plain error message.
+	#[must_use]
 	pub fn fatal(msg: &str) -> Self
 	{
 		Self::Unrecoverable {
@@ -56,12 +57,14 @@ impl SquarkError
 	/// Construct an empty [`Self::Multiple`] for aggregating errors.
 	/// 
 	/// Use alongside the [`catch`] macro.
+	#[must_use]
 	pub fn multiple() -> Self
 	{
 		Self::Multiple { errs: vec![] }
 	}
 
 	/// Construct a [`Self::External`] with only a plain error message.
+	#[must_use]
 	pub fn external(e: impl std::error::Error + 'static) -> Self
 	{
 		Self::External {
@@ -78,6 +81,7 @@ impl SquarkError
 	/// Some errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
 	/// 
 	/// Other errors are 'unrecoverable' because they invalidate how everything works down the line. For instance, a missing required field.
+	#[must_use]
 	pub fn is_fatal(&self) -> bool
 	{
 		match self
@@ -89,7 +93,7 @@ impl SquarkError
 				=> true,
 
 			Self::Multiple{ errs }
-				=> errs.iter().any(|err| err.is_fatal()),
+				=> errs.iter().any(SquarkError::is_fatal),
 		}
 	}
 
@@ -109,6 +113,7 @@ impl SquarkError
 impl SquarkError
 {
 	/// Is this a [`SquarkError::Multiple`] error with no aggregated errors?
+	#[must_use]
 	pub fn is_empty(&self) -> bool
 	{
 		if let Self::Multiple { errs } = self && errs.is_empty() {
@@ -118,11 +123,41 @@ impl SquarkError
 		}
 	}
 
+	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return `t`.
+	/// 
+	/// ```rust
+	/// # use squarkdown::core::*;
+	/// fn may_fail() -> SquarkResult<usize>
+	/// {
+	///    let errs = SquarkError::multiple();
+	/// 
+	///    // If an error were present, `Err(errs)` is returned.
+	///    // errs.push(SquarkError::...)
+	/// 
+	///    // With no aggregated errors, `Ok(1)` is returned.
+	///    errs.or(1)
+	/// }
+	/// ```
 	pub fn or<T>(self, t: T) -> SquarkResult<T>
 	{
 		self.or_else(|| t)
 	}
 
+	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return the lazily evaluated `f`.
+	/// 
+	/// ```rust
+	/// # use squarkdown::core::*;
+	/// fn may_fail() -> SquarkResult<String>
+	/// {
+	///    let errs = SquarkError::multiple();
+	/// 
+	///    // If an error were present, `Err(errs)` is returned.
+	///    // errs.push(SquarkError::...)
+	/// 
+	///    // With no aggregated errors, `Ok("sup")` is returned.
+	///    errs.or_else(|| "sup".to_string())
+	/// }
+	/// ```
 	pub fn or_else<T>(self, f: impl FnOnce() -> T) -> SquarkResult<T>
 	{
 		if self.is_empty() {
