@@ -102,6 +102,17 @@ impl SquarkupConfig
 
 			Self::for_string_array(paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
 				catch!(errs => {
+					if dir.contains("/../")
+					|| dir.starts_with("..")
+					|| dir.ends_with("..")
+					{
+						return Err(SquarkError::Unrecoverable {
+							msg: fmt!("a source folder you specified is invalid: {W}{dir}"),
+							hint: fmt!("for safety, {W}..{G} traversal is not allowed in {W}paths.sources"),
+							debug: vec![],
+						});
+					}
+
 					s.paths.sources.push(Self::try_resolve_folder(
 						root, dir, "a source folder you specified",
 						fmt!("{Y}paths.sources{G} folders are relative from your project root"),
@@ -398,30 +409,66 @@ impl SquarkupConfig
 
 // == TESTS == //
 
-#[cfg(test)]
-use std::assert_matches;
+#[cfg(test)] use crate::utils::testing::*;
+
+#[cfg(test)] use assertables::*;
+
+#[cfg(test)] use std::assert_matches;
+
 
 #[cfg(test)]
 fn load_config(source: &str) -> SquarkResult<SquarkupConfig>
 {
 	let toml = str!(source).parse::<toml::Table>().unwrap();
-	SquarkupConfig::try_from_toml(toml, &PathBuf::new())
+	SquarkupConfig::try_from_toml(toml, &TESTS)
+}
+
+
+#[cfg(test)]
+mod paths {
+	use super::*;
+
+	#[test] fn reject_nonexistent_sources() {
+		for source in [
+			"[paths]\nsources = ['nonexistent']",
+			"[paths]\nsources = ['test-project/nonexistent']",
+		] {
+			let e = load_config(source).unwrap_err();
+			assert_contains!( e, "doesn't exist" );
+		}
+	}
+
+	#[test] fn reject_sources_with_up() {
+		for source in [
+			"[paths]\nsources = ['..']",
+			"[paths]\nsources = ['../']",
+			"[paths]\nsources = ['/..']",
+			"[paths]\nsources = ['/../']",
+			"[paths]\nsources = ['../illegal']",
+			"[paths]\nsources = ['/../illegal']",
+			"[paths]\nsources = ['still/../illegal']",
+		] {
+			let e = load_config(source).unwrap_err();
+			assert_contains!( e, "paths.sources" );
+			assert_contains!( e, ".." );
+		}
+	}
 }
 
 #[cfg(test)]
 mod error_handling {
 	use super::*;
 
-	#[test] fn reject()
-	{
+	#[test] fn reject() {
 		for source in [
 			"[errors]\non-error = 0",
 			"[errors]\non-error = false",
 			"[errors]\non-error = 'x'",
 			"[errors]\non-error = \"y\"",
-		]
-		{
-			assert_matches!(load_config(source), Err(..));
+		] {
+			let r = load_config(source);
+			assert_err!( &r );
+			assert_contains!( r.unwrap_err(), "errors.on-error" );
 		}
 	}
 }

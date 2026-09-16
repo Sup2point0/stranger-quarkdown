@@ -111,10 +111,10 @@ pub struct ErrorConfig {
 #[derive(EnumStringify)] #[enum_stringify(case = "kebab")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ErrorAction {
-	/// Log the error, recover and continue.
+	/// Log the error, recover and continue. For when you don't want one bad file to bring down the whole build.
 	WARN,
 
-	/// Crash Squarkdown and exit.
+	/// Crash Squarkdown and exit. Any error is deadly!
 	KILL,
 }
 

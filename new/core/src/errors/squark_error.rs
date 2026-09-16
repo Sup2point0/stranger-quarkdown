@@ -5,12 +5,25 @@ use crate::{
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 
 
+/// The global error type used throughout the squarkup pipeline.
+/// 
+/// Squarkdown needs to handle errors in many different ways:
+/// 
+/// - Some errors are mission-critical, and Squarkdown can't continue properly if it encounters them.
+/// - Some errors are undesirable, but localised, so Squarkdown can still recover from them.
+/// - If Squarkdown encounters multiple errors, it aggregates them and presses on to do a best-effort job.
+/// - Squarkdown interfaces with many external APIs, which all return their own errors.
+/// 
+/// How errors are handled depends on the user's `config.errors.on-error`.
 #[derive(Debug)]
 pub enum SquarkError
 {
+	/// The current operation can be abandoned.
+	/// 
+	/// Currently only used in the parser for speculative parsing.
 	ABANDON,
 
-	/// A non-fatal error.
+	/// A non-fatal error which Squarkdown can recover from, sorta like a warning.
 	/// 
 	/// Handling depends on `config.errors.on_error`.
 	Recoverable {
@@ -19,7 +32,7 @@ pub enum SquarkError
 		debug: Vec<String>,
 	},
 
-	/// A fatal error that crashes Squarkdown, irrespective of `config.errors.on_error`.
+	/// A fatal error that crashes Squarkdown, irrespective of `config.errors.on_error`, sorta like a panic.
 	Unrecoverable {
 		msg: String,
 		hint: String,
@@ -166,7 +179,23 @@ impl SquarkError
 			Err(self)
 		}
 	}
+
+	#[cfg(test)]
+	pub fn contains(&self, pat: &str) -> bool
+	{
+		match self
+		{
+			Self::ABANDON | Self::External{..} => false,
+
+			Self::Recoverable{ msg, hint, .. } | Self::Unrecoverable{ msg, hint, .. }
+				=> msg.contains(pat) || hint.contains(pat),
+
+			Self::Multiple { errs }
+				=> errs.iter().any(|err| err.contains(pat)),
+		}
+	}
 }
+
 
 macro_rules! impl_from_error {
 	($error_type:path) =>
@@ -180,3 +209,26 @@ macro_rules! impl_from_error {
 }
 
 impl_from_error!(std::io::Error);
+
+
+pub trait CollectSquark<T>: Iterator<Item = SquarkResult<T>> + Sized
+{
+	fn collect_squark(self) -> SquarkResult<Vec<T>>
+	{
+		let mut vals = vec![];
+		let mut errs = SquarkError::multiple();
+
+		for each in self {
+			match each {
+				Ok(val)  => { vals.push(val); }
+				Err(err) => { errs.push(err); }
+			}
+		}
+
+		errs.or(vals)
+	}
+}
+
+impl<I, T> CollectSquark<T> for I
+	where I: Iterator<Item = SquarkResult<T>>
+{}
