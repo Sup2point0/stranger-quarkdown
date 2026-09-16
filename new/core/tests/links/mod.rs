@@ -7,6 +7,7 @@ use assertables::*;
 #[test] fn basic()
 {
 	clear_files("links/basic").unwrap();
+
 	assert!( squarkup_from("links/basic").success() );
 
 	let main = read_file("links/basic/main/+page.svx");
@@ -21,6 +22,7 @@ use assertables::*;
 #[test] fn nested()
 {
 	clear_files("links/nested").unwrap();
+
 	assert!( squarkup_from("links/nested").success() );
 
 	let main = read_file("links/nested/main/+page.svx");
@@ -41,6 +43,7 @@ use assertables::*;
 #[test] fn external()
 {
 	clear_files("links/external").unwrap();
+
 	assert!( squarkup_from("links/external").success() );
 
 	let main = read_file("links/external/main/+page.svx");
@@ -52,6 +55,7 @@ use assertables::*;
 #[test] fn anchors()
 {
 	clear_files("links/anchors").unwrap();
+
 	assert!( squarkup_from("links/anchors").success() );
 	
 	let main = read_file("links/anchors/main/+page.svx");
@@ -63,15 +67,24 @@ use assertables::*;
 /// Squarkdown crashes when encountering links to nonexistent files.
 #[test] fn broken_crash()
 {
-	// TODO check specific error
 	clear_files("links/broken").unwrap();
-	assert!( !squarkup_from("links/broken").success() );
+
+	let (status, out) = capture_squarkup_from("links/broken");
+	assert!( !status.success() );
+	assert_contains!( out, "broken link" );
+	assert_contains!( out, "(side.md)" );
+	assert_contains!( out, "(./side.md)" );
+	assert_contains!( out, "(nested/side.md)" );
+	assert_contains!( out, "(./nested/side.md)" );
 }
 
 /// With `linked-file-inactive: error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crash()
 {
-	// TODO check specific error
 	clear_files("links/inactive-crash").unwrap();
-	assert!( !squarkup_from("links/inactive-crash").success() );
+
+	let (status, out) = capture_squarkup_from("links/inactive-crash");
+	assert!( !status.success() );
+	assert_contains!( out, "inactive page" );
+	assert_contains!( out, "(./inactive.md)" );
 }

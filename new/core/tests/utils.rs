@@ -31,16 +31,20 @@ pub fn squarkup_from(path: &str) -> process::ExitStatus
 	r.unwrap()
 }
 
-pub fn capture_squarkup_from(path: &str) -> String
+/// Run Squarkdown from `path`, relative to `tests/`, capturing what it prints to stdout for querying.
+pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 {
 	let r = process::Command::new(BIN)
 		.current_dir(TESTS.join(path))
 		.output();
 
 	assert_ok!( &r );
-	let process::Output{ stdout, .. } = r.unwrap();
+	let process::Output{ status, stdout, .. } = r.unwrap();
 
-	str::from_utf8(&stdout).unwrap().to_string()
+	let out = str::from_utf8(&stdout).unwrap().to_string();
+	print!("{out}");
+
+	(status, out)
 }
 
 
