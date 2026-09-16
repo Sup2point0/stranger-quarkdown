@@ -71,8 +71,9 @@ fn squarkup() -> SquarkResult<bool>
 				site_data.add_page(page);
 				
 				log::info!(slash!(
-					"found active file: {GREY1}{}",
-					filepath.strip_prefix(&config.paths.root).unwrap().to_path_buf()
+					"found active file: {}/{GREY1}{}",
+					filepath.parent().unwrap().strip_prefix(&config.paths.root).unwrap().to_path_buf(),
+					filepath.file_name().unwrap().to_string_lossy(),
 				));
 			}
 		});

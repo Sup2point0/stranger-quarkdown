@@ -7,16 +7,21 @@ use crate::macros::*;
 use std::path::PathBuf;
 
 
-/// Find all candidate files for squarkup in the user's project repo, as specified by their `config.paths.sources`, `.include_patterns` and `.exclude_patterns`.
+/// Find all candidate files for squarkup in the user's project repo, as specified by their `config.paths.sources`, `.include` and `.exclude`.
 pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<PathBuf>>
 {
-	// TODO root-only
-
 	// if only we had `yield` generators syntax...
 	config.paths.sources.iter().flat_map(|source| {
 		log::info!(slash!("searching from: {}", *source));
 
-		walkdir::WalkDir::new(config.paths.root.join(source))
+		/* NOTE: "/" is a special case that means 'root-only', without recursing into directories */
+		let walker = if *source == config.paths.root {
+			walkdir::WalkDir::new(&config.paths.root).max_depth(1)
+		} else {
+			walkdir::WalkDir::new(config.paths.root.join(source))
+		};
+
+		walker
 			.into_iter()
 
 			// skip ignored folders and files

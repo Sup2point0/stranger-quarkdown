@@ -3,7 +3,7 @@ repo = "Squarkdown"
 [paths]
 site = "/site/"
 sources = [
-	# "/",
+	"/",
 	"/docs/",
 	"/.squarkdown/content/",
 ]
@@ -27,6 +27,7 @@ queries = [
 ]
 
 [errors]
-on-error = "kill"
+on-error = "warn"
 file-already-exists = "overwrite"
-linked-file-inactive = "link-to-github"
+# linked-file-inactive = "link-to-github"
+linked-file-inactive = "error"
