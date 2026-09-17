@@ -12,17 +12,18 @@ use assertables::*;
 }
 
 /// Squarkdown errors on 2-page conflicts with `config.errors.strict = true`.
-#[test] fn conflicts()
+#[test] fn conflicts_crashes()
 {
 	let (status, out) = capture_squarkup_from("errors/conflicts");
 	assert!( !status.success() );
 	assert_contains!( out, "conflict" );
 	assert_contains!( out, "left.md" );
 	assert_contains!( out, "right.md" );
+	assert!( !TEST_SITE.join("errors/conflicts/top").exists() );
 }
 
 /// Squarkdown errors on 3-page conflicts with `config.errors.strict = true`.
-#[test] fn many_conflicts()
+#[test] fn many_conflicts_crashes()
 {
 	let (status, out) = capture_squarkup_from("errors/many-conflicts");
 	assert!( !status.success() );
@@ -30,4 +31,5 @@ use assertables::*;
 	assert_contains!( out, "1.md" );
 	assert_contains!( out, "2.md" );
 	assert_contains!( out, "3.md" );
+	assert!( !TEST_SITE.join("errors/many-conflicts/nested/top").exists() );
 }

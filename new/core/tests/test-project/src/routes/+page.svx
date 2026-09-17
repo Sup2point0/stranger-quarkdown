@@ -1,9 +1,5 @@
 # Squarkdown Tests
 
-### Errors
-- [errors/conflicts/top](errors/conflicts/top)
-- [errors/many-conflicts/nested/top](errors/many-conflicts/nested/top)
-
 ### Links
 - [links/basic/main](links/basic/main)
 - [links/basic/side](links/basic/side)

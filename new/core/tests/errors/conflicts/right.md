@@ -3,4 +3,4 @@
 | dest = top
 -->
 
-This file conflicts with [left](left.md).
+This page conflicts with [left](left.md).

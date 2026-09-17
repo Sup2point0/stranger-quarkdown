@@ -65,7 +65,7 @@ use assertables::*;
 }
 
 /// Squarkdown crashes when encountering links to nonexistent files.
-#[test] fn broken_crash()
+#[test] fn broken_crashes()
 {
 	clear_files("links/broken").unwrap();
 
@@ -79,7 +79,7 @@ use assertables::*;
 }
 
 /// With `inactive-link: error`, Squarkdown crashes when encountering links to inactive pages.
-#[test] fn inactive_crash()
+#[test] fn inactive_crashes()
 {
 	clear_files("links/inactive-crash").unwrap();
 
