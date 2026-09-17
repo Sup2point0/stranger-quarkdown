@@ -1,0 +1,12 @@
+repo = "Squarkdown Tests"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/page-ts/long/"
+page-ts = true
+field-names = "long"
+
+[errors]
+on-error = "kill"
