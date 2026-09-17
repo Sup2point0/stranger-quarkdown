@@ -193,10 +193,10 @@ macro_rules! impl_field_repr
 	($field:ident => $both:literal) => {
 		impl_field_repr!($field => $both, $both);
 	};
-	($field:ident => $long:literal, $short:literal) =>
+	($field:ident => $full:literal, $short:literal) =>
 	{
-		pub fn $field(&self, long: bool) -> &str {
-			if long {$long} else {$short}
+		pub fn $field(&self, short: bool) -> &str {
+			if short {$short} else {$full}
 		}
 	};
 }

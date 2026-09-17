@@ -36,7 +36,7 @@ impl SquarkupConfig
 				folder: dir!(site / "src/routes/"),
 				file: str!("+page.svx"),
 				page_ts: true,
-				long_fields: true,
+				shorter_fields: false,
 				data: None,
 			},
 			format: FormatConfig {
@@ -186,11 +186,9 @@ impl SquarkupConfig
 				s.out.page_ts = Self::try_get_bool(value, "out.page-ts")?;
 			}) }
 
-			// TODO FIXME
-			// if let Some(value) = out.get("field-format") { catch!(errs => {
-			// 	let raw = Self::try_get_string(value, "out.field-format", "(valid values are 'long' and 'short')")?;
-
-			// }) }
+			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
+				s.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
+			}) }
 
 			if let Some(value) = out.get("data") { catch!(errs => {
 				let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;

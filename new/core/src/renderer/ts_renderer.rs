@@ -25,36 +25,36 @@ impl Renderer<'_>
 		f.write_all(b"export default function load(): PageData {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
-		let data = self.page.clone().serialise(self.config);
-		let long = self.config.out.long_fields;
+		let d = self.page.clone().serialise(self.config);
+		let s = self.config.out.shorter_fields;
 
-		writeln!(f, "\t\t{}: {:?},", data.filepath(long),    data.filepath)?;
-		writeln!(f, "\t\t{}: {:?},", data.destination(long), data.destination)?;
-		writeln!(f, "\t\t{}: {},",   data.flags(long),       data.flags)?;
+		writeln!(f, "\t\t{}: {:?},", d.filepath(s),    d.filepath)?;
+		writeln!(f, "\t\t{}: {:?},", d.destination(s), d.destination)?;
+		writeln!(f, "\t\t{}: {},",   d.flags(s),       d.flags)?;
 
-		if let Some(title) = &data.title {
-			writeln!(f, "\t\t{}: {:?},", data.title(long), title)?;
+		if let Some(title) = &d.title {
+			writeln!(f, "\t\t{}: {title:?},", d.title(s))?;
 		}
-		if let Some(description) = &data.description {
-			writeln!(f, "\t\t{}: {:?},", data.description(long), description)?;
+		if let Some(description) = &d.description {
+			writeln!(f, "\t\t{}: {description:?},", d.description(s))?;
 		}
-		if let Some(heading) = &data.heading {
-			writeln!(f, "\t\t{}: {:?},", data.heading(long), heading)?;
+		if let Some(heading) = &d.heading {
+			writeln!(f, "\t\t{}: {heading:?},", d.heading(s))?;
 		}
-		if let Some(caption) = &data.caption {
-			writeln!(f, "\t\t{}: {:?},", data.caption(long), caption)?;
-		}
-
-		writeln!(f, "\t\ttags: {:?},", data.tags)?;
-
-		if let Some(release_date) = data.release_date {
-			writeln!(f, "\t\t{}: {:?},", data.release_date(long), release_date)?;
-		}
-		if let Some(last_updated) = data.last_updated {
-			writeln!(f, "\t\t{}: {:?},", data.last_updated(long), last_updated)?;
+		if let Some(caption) = &d.caption {
+			writeln!(f, "\t\t{}: {caption:?},", d.caption(s))?;
 		}
 
-		writeln!(f, "\t\t{}: {:?},", data.other(long), data.other)?;
+		writeln!(f, "\t\ttags: {:?},", d.tags)?;
+
+		if let Some(release_date) = d.release_date {
+			writeln!(f, "\t\t{}: {release_date:?},", d.release_date(s))?;
+		}
+		if let Some(last_updated) = d.last_updated {
+			writeln!(f, "\t\t{}: {last_updated:?},", d.last_updated(s))?;
+		}
+
+		writeln!(f, "\t\t{}: {:?},", d.other(s), d.other)?;
 
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;

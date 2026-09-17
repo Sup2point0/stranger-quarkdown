@@ -61,8 +61,10 @@ pub struct OutConfig {
 	/// Should `+page.ts` files be exported?
 	pub page_ts: bool,
 
-	/// Should data 
-	pub long_fields: bool,
+	/// Should fields in exported `+page.ts` use more compact identifiers?
+	/// 
+	/// For instance, `description` is shortened to `desc`, and `last_updated` is shortened to `update`.
+	pub shorter_fields: bool,
 
 	// TODO rename site-data-path
 	/// Where to export site data, including the (expected) `.json` extension.
