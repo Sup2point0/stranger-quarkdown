@@ -3,7 +3,7 @@ site = "../../test-project/"
 
 [out]
 folder = "src/routes/page-ts/short/"
-page-ts = true
+render-page-ts = true
 shorter-fields = true
 
 [errors]

@@ -35,7 +35,7 @@ impl SquarkupConfig
 			out: OutConfig {
 				folder: dir!(site / "src/routes/"),
 				file: str!("+page.svx"),
-				page_ts: true,
+				render_page_ts: true,
 				shorter_fields: false,
 				data: None,
 			},
@@ -182,8 +182,8 @@ impl SquarkupConfig
 				s.out.file.clone_from(raw);
 			}) }
 
-			if let Some(value) = out.get("page-ts") { catch!(errs => {
-				s.out.page_ts = Self::try_get_bool(value, "out.page-ts")?;
+			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
+				s.out.render_page_ts = Self::try_get_bool(value, "out.render-page-ts")?;
 			}) }
 
 			if let Some(value) = out.get("shorter-fields") { catch!(errs => {

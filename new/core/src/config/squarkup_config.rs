@@ -57,9 +57,8 @@ pub struct OutConfig {
 	/// The file name for exported files, including the (expected) `.svx` extension.
 	pub file: String,
 
-	// TODO rename -> `render-page-ts`
 	/// Should `+page.ts` files be exported?
-	pub page_ts: bool,
+	pub render_page_ts: bool,
 
 	/// Should fields in exported `+page.ts` use more compact identifiers?
 	/// 
