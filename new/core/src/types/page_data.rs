@@ -187,3 +187,31 @@ pub struct SerialisedPageData
 	pub last_updated: Option<Date>,
 	pub other: HashMap<String, Strings>,
 }
+
+macro_rules! impl_field_repr
+{
+	($field:ident => $both:literal) => {
+		impl_field_repr!($field => $both, $both);
+	};
+	($field:ident => $long:literal, $short:literal) =>
+	{
+		pub fn $field(&self, long: bool) -> &str {
+			if long {$long} else {$short}
+		}
+	};
+}
+
+impl SerialisedPageData
+{
+	impl_field_repr!(filepath     => "filepath",     "path");
+	impl_field_repr!(destination  => "destination",  "dest");
+	impl_field_repr!(flags        => "flags");
+	impl_field_repr!(title        => "title");
+	impl_field_repr!(description  => "description",  "desc");
+	impl_field_repr!(heading      => "heading",      "head");
+	impl_field_repr!(caption      => "caption",      "capt");
+	impl_field_repr!(tags         => "tags");
+	impl_field_repr!(release_date => "release_date", "date");
+	impl_field_repr!(last_updated => "last_updated", "update");
+	impl_field_repr!(other        => "other",        "other");
+}

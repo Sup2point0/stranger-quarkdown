@@ -26,34 +26,35 @@ impl Renderer<'_>
 		f.write_all(b"\treturn {\n")?;
 
 		let data = self.page.clone().serialise(self.config);
+		let long = self.config.out.long_fields;
 
-		writeln!(f, "\t\tfilepath: {:?},", data.filepath)?;
-		writeln!(f, "\t\tdestination: {:?},", data.destination)?;
-		writeln!(f, "\t\tflags: {:?},", data.flags.into_vec())?;
+		writeln!(f, "\t\t{}: {:?},", data.filepath(long),    data.filepath)?;
+		writeln!(f, "\t\t{}: {:?},", data.destination(long), data.destination)?;
+		writeln!(f, "\t\t{}: {},",   data.flags(long),       data.flags)?;
 
-		if let Some(title) = data.title {
-			writeln!(f, "\t\ttitle: {:?},", title)?;
+		if let Some(title) = &data.title {
+			writeln!(f, "\t\t{}: {:?},", data.title(long), title)?;
 		}
-		if let Some(description) = data.description {
-			writeln!(f, "\t\tdescription: {:?},", description)?;
+		if let Some(description) = &data.description {
+			writeln!(f, "\t\t{}: {:?},", data.description(long), description)?;
 		}
-		if let Some(heading) = data.heading {
-			writeln!(f, "\t\theading: {:?},", heading)?;
+		if let Some(heading) = &data.heading {
+			writeln!(f, "\t\t{}: {:?},", data.heading(long), heading)?;
 		}
-		if let Some(caption) = data.caption {
-			writeln!(f, "\t\tcaption: {:?},", caption)?;
+		if let Some(caption) = &data.caption {
+			writeln!(f, "\t\t{}: {:?},", data.caption(long), caption)?;
 		}
 
 		writeln!(f, "\t\ttags: {:?},", data.tags)?;
 
 		if let Some(release_date) = data.release_date {
-			writeln!(f, "\t\trelease_date: {:?},", release_date)?;
+			writeln!(f, "\t\t{}: {:?},", data.release_date(long), release_date)?;
 		}
 		if let Some(last_updated) = data.last_updated {
-			writeln!(f, "\t\tlast_updated: {:?},", last_updated)?;
+			writeln!(f, "\t\t{}: {:?},", data.last_updated(long), last_updated)?;
 		}
 
-		writeln!(f, "\t\tother: {:?},", data.other)?;
+		writeln!(f, "\t\t{}: {:?},", data.other(long), data.other)?;
 
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;
