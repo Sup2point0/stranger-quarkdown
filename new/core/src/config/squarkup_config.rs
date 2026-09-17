@@ -53,7 +53,6 @@ pub struct OutConfig {
 	/// `dest` paths in files are relative to this folder.
 	pub folder: PathBuf,
 
-	// TODO rename file-name
 	/// The file name for exported files, including the (expected) `.svx` extension.
 	pub file_name: String,
 
@@ -65,7 +64,6 @@ pub struct OutConfig {
 	/// For instance, `description` is shortened to `desc`, and `last_updated` is shortened to `update`.
 	pub shorter_fields: bool,
 
-	// TODO rename site-data-path
 	/// Where to export site data, including the (expected) `.json` extension.
 	/// 
 	/// If absent, site data is not exported.

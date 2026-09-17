@@ -68,13 +68,20 @@ fn find_config_from(folder: &Path) -> Option<(PathBuf, Extension)>
 		return Some((file, Extension::TOML));
 	}
 	
+	let file = folder.join("squarkdown.toml");
+	if file.exists() && file.is_file() {
+		return Some((file, Extension::TOML));
+	}
+	
 	let file = folder.join("squarkup.json");
 	if file.exists() && file.is_file() {
 		return Some((file, Extension::JSON));
 	}
-
-	// TODO: funny messages on close matches
-	// if glob::glob(folder.join(""))
+	
+	let file = folder.join("squarkdown.json");
+	if file.exists() && file.is_file() {
+		return Some((file, Extension::JSON));
+	}
 
 	None
 }
