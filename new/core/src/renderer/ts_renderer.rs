@@ -22,7 +22,7 @@ impl Renderer<'_>
 		let mut f = BufWriter::new(file);
 
 		f.write_all(b"import type { PageData } from 'squarkdown';\n\n")?;
-		f.write_all(b"export default function load(): PageData {\n")?;
+		f.write_all(b"export function load(): PageData {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
 		let d = self.page.clone().serialise(self.config);
