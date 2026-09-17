@@ -1,5 +1,3 @@
-repo = "Squarkdown Tests"
-
 [paths]
 site = "../../test-project/"
 

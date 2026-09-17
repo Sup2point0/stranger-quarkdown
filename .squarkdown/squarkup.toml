@@ -1,5 +1,3 @@
-repo = "Squarkdown"
-
 [paths]
 site = "/site/"
 sources = [
