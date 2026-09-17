@@ -115,7 +115,7 @@ impl<'d> Renderer<'d>
 			site,
 			config,
 			errors: vec![],
-			dest_file: dest_folder.join(&config.out.file),
+			dest_file: dest_folder.join(&config.out.file_name),
 			dest_folder,
 			ctx: ContextStack::new(),
 			erasing_heading: true,
@@ -127,7 +127,7 @@ impl<'d> Renderer<'d>
 		log::info!(
 			"rendering to: {GREY1}{}{GREY}/{}",
 			utils::display_rel(&self.dest_folder, &self.config.paths.root),
-			self.config.out.file,
+			self.config.out.file_name,
 		);
 
 		let mut file = File::open(&self.page.filepath)?;

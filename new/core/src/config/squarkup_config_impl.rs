@@ -34,7 +34,7 @@ impl SquarkupConfig
 			},
 			out: OutConfig {
 				folder: dir!(site / "src/routes/"),
-				file: str!("+page.svx"),
+				file_name: str!("+page.svx"),
 				render_page_ts: true,
 				shorter_fields: false,
 				data: None,
@@ -177,9 +177,9 @@ impl SquarkupConfig
 				s.out.folder = dir;
 			}) }
 
-			if let Some(value) = out.get("file") { catch!(errs => {
-				let raw = Self::try_get_string(value, "out.file", "(filename including `.svx` extension)")?;
-				s.out.file.clone_from(raw);
+			if let Some(value) = out.get("file-name") { catch!(errs => {
+				let raw = Self::try_get_string(value, "out.file-name", "(filename including `.svx` extension)")?;
+				s.out.file_name.clone_from(raw);
 			}) }
 
 			if let Some(value) = out.get("render-page-ts") { catch!(errs => {

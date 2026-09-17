@@ -55,7 +55,7 @@ pub struct OutConfig {
 
 	// TODO rename file-name
 	/// The file name for exported files, including the (expected) `.svx` extension.
-	pub file: String,
+	pub file_name: String,
 
 	/// Should `+page.ts` files be exported?
 	pub render_page_ts: bool,
