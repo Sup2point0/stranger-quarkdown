@@ -53,12 +53,18 @@ pub struct OutConfig {
 	/// `dest` paths in files are relative to this folder.
 	pub folder: PathBuf,
 
+	// TODO rename file-name
 	/// The file name for exported files, including the (expected) `.svx` extension.
 	pub file: String,
 
+	// TODO rename -> `render-page-ts`
 	/// Should `+page.ts` files be exported?
 	pub page_ts: bool,
 
+	/// Should data 
+	pub long_fields: bool,
+
+	// TODO rename site-data-path
 	/// Where to export site data, including the (expected) `.json` extension.
 	/// 
 	/// If absent, site data is not exported.
