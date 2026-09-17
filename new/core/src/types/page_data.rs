@@ -58,7 +58,7 @@ impl PageData
 		if let Some(dest) = Self::take1(&mut fields, "destination", "dest") {
 			destination = config.out.folder.join(utils::to_rel(&dest));
 
-			if !destination.starts_with(&config.paths.root) {
+			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {
 					msg: str!(slash!("cannot export a file to: {}", destination)),
 					hint: fmt!("a file's destination directory must remain under the root directory of your project"),
