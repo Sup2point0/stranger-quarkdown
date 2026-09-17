@@ -81,7 +81,7 @@ impl SiteData
 			let Ok(dest) = dunce::canonicalize(&page.destination) else { continue };
 
 			if let Some(conflict) = seen_dests.get(&dest) {
-				return Err(SquarkError::Unrecoverable {
+				return Err(SquarkError::Recoverable {
 					msg: fmt!(
 						"found conflicting pages: {W}{}{R} and {W}{}{R} both want to export to {W}{}",
 						utils::display_rel(&conflict.filepath, &config.paths.root),

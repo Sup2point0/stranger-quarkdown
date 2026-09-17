@@ -110,7 +110,16 @@ fn squarkup() -> SquarkResult<bool>
 	}
 
 	if config.errors.strict {
-		site_data.check_conflicts(&config)?;
+		if let Err(e) = site_data.check_conflicts(&config) {
+			match config.errors.on_error {
+				ErrorAction::KILL => return Err(e),
+				ErrorAction::WARN => {
+					log::line();
+					print_error(e);
+					log::line()
+				}
+			}
+		}
 	}
 
 	// == RENDER == //
@@ -119,13 +128,13 @@ fn squarkup() -> SquarkResult<bool>
 	for page in site_data.pages() {
 		let r = renderer::render(page, &site_data, &config);
 
-		if let Err(err) = r {
-			if err.is_fatal()  || config.errors.on_error == ErrorAction::KILL {
-				return Err(err);
+		if let Err(e) = r {
+			if e.is_fatal() || config.errors.on_error == ErrorAction::KILL {
+				return Err(e);
 			}
 			else {
 				log::line();
-				print_error(err);
+				print_error(e);
 				log::line();
 			}
 		}
