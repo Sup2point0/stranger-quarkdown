@@ -14,7 +14,7 @@ use assertables::*;
 	assert_contains!( main, "filepath: \"main.md\"" );
 	assert_contains!( main, "destination: \"main\"" );
 	assert_contains!( main, "flags: []" );
-	assert_contains!( main, "title: \"long\"" );
+	assert_contains!( main, "title: \"Long\"" );
 	assert_contains!( main, "description: \"This page" );
 	assert_contains!( main, "heading: \"Main\"" );
 	assert_contains!( main, "tags: [\"1\", \"2\", \"3\"]" );
@@ -29,12 +29,12 @@ use assertables::*;
 	assert!( squarkup_from("page_ts/short").success() );
 
 	let main = read_file("page-ts/short/main/+page.ts");
-	assert_contains!( main, "filepath: \"main.md\"" );
-	assert_contains!( main, "destination: \"main\"" );
+	assert_contains!( main, "path: \"main.md\"" );
+	assert_contains!( main, "dest: \"main\"" );
 	assert_contains!( main, "flags: []" );
-	assert_contains!( main, "title: \"short\"" );
-	assert_contains!( main, "description: \"This page" );
-	assert_contains!( main, "heading: \"Main\"" );
+	assert_contains!( main, "title: \"Short\"" );
+	assert_contains!( main, "desc: \"This page" );
+	assert_contains!( main, "head: \"Main\"" );
 	assert_contains!( main, "tags: [\"1\", \"2\", \"3\"]" );
 	assert_contains!( main, "other: {}" );
 }

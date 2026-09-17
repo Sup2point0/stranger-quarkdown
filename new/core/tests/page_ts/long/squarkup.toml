@@ -4,7 +4,7 @@ site = "../../test-project/"
 [out]
 folder = "src/routes/page-ts/long/"
 page-ts = true
-field-names = "long"
+shorter-fields = false
 
 [errors]
 on-error = "kill"
