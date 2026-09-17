@@ -69,7 +69,7 @@ pub struct OutConfig {
 	/// Where to export site data, including the (expected) `.json` extension.
 	/// 
 	/// If absent, site data is not exported.
-	pub data: Option<PathBuf>,
+	pub site_data_path: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug)]

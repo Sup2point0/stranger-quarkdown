@@ -37,7 +37,7 @@ impl SquarkupConfig
 				file_name: str!("+page.svx"),
 				render_page_ts: true,
 				shorter_fields: false,
-				data: None,
+				site_data_path: None,
 			},
 			format: FormatConfig {
 				preserve_heading: false,
@@ -190,10 +190,10 @@ impl SquarkupConfig
 				s.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
 			}) }
 
-			if let Some(value) = out.get("data") { catch!(errs => {
-				let raw = Self::try_get_string(value, "out.data", "(filepath including `.json` extension)")?;
+			if let Some(value) = out.get("site-data-path") { catch!(errs => {
+				let raw = Self::try_get_string(value, "out.site-data-path", "(filepath including `.json` extension)")?;
 				let path = site.join(utils::to_rel(raw));
-				s.out.data = Some(path);
+				s.out.site_data_path = Some(path);
 			}) }
 		}
 

@@ -132,7 +132,7 @@ fn squarkup() -> SquarkResult<bool>
 	}
 
 	// == SITE DATA == //
-	if let Some(ref dest) = config.out.data {
+	if let Some(ref dest) = config.out.site_data_path {
 		log::is!("saving site data...");
 
 		let data_raw = site_data.serialise(&config);
