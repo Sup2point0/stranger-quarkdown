@@ -122,6 +122,21 @@ impl<'d> Renderer<'d>
 
 	fn render_page_svx(mut self) -> SquarkResult
 	{	
+		if self.dest_file.exists()
+		{
+			match self.config.errors.file_already_exists {
+				FileAction::OVERWRITE => (),
+				FileAction::ERROR => return Err(SquarkError::Recoverable {
+					msg: fmt!("cannot overwrite existing file: {W}"),
+					hint: fmt!("Squarkdown will not overwrite files since you set {W}errors.file-already-exists{G} to {W}error"),
+					debug: vec![
+						str!(slash!("while rendering: {}", self.page.filepath)),
+					],
+				}),
+				FileAction::SKIP => return Err(SquarkError::ABANDON),
+			}
+		}
+		
 		log::info!(
 			"rendering to: {GREY1}{}{GREY}/{}",
 			utils::display_rel(&self.dest_folder, &self.config.paths.root),
