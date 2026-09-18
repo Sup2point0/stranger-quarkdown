@@ -1,0 +1,10 @@
+[paths]
+site = "../../test-project/"
+sources = ["included"]
+
+[out]
+folder = "src/routes/sources/fixed/"
+
+[errors]
+strict = false
+on-error = "kill"

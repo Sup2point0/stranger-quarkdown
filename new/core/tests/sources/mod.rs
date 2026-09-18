@@ -14,6 +14,17 @@ use assertables::*;
 	assert!( !TEST_SITE.join("sources/root-only/ignore").exists() );
 }
 
+/// Squarkdown respects `paths.sources`.
+#[test] fn fixed()
+{
+	clear_files("sources/fixed").unwrap();
+	assert!( squarkup_from("sources/fixed").success() );
+
+	let main = read_file("sources/fixed/main/+page.svx");
+	assert_contains!( main, "squarkup" );
+	assert!( !TEST_SITE.join("sources/fixed/ignore").exists() );
+}
+
 /// Squarkdown applies `paths.exclude` patterns.
 #[test] fn exclude()
 {
