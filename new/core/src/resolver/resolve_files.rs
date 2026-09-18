@@ -28,21 +28,21 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 			.into_iter()
 
 			// skip ignored folders and files
-			.filter_entry(|e| should_include_path(e, config))
+			.filter_entry(|e| should_include(e, config))
 
 			// yield `SquarkError::External` errors, not walkdir errors
 			.map(|e| e.map_err(err!()))
 
 			// don't yield folders, only yield files
-			.filter(|e| !e.as_ref().is_ok_and(|entry| entry.path().is_dir()))
+			.filter(|e| !e.as_ref().is_ok_and(|entry| entry.file_type().is_dir()))
 
 			// yield paths, not walkdir entries
-			.map(|e| e.map(|entry| entry.path().to_path_buf()))
+			.map(|e| e.map(|entry| entry.into_path()))
 	})
 }
 
 /// Should `entry` be squarked up (file) or searched (folder), according to the user's squarkup `config`?
-fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
+fn should_include(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 {
 	let path = entry.path();
 	let path_str = path.to_slash().expect("path should not contain non-Unicode characters");
@@ -55,7 +55,7 @@ fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bo
 		}
 	}
 
-	if path.is_file() && !config.paths.include.is_empty() {
+	if entry.file_type().is_file() && !config.paths.include.is_empty() {
 		for pattern in &config.paths.include {
 			if pattern.is_match(&path_str) {
 				return true;
