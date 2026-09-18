@@ -154,39 +154,54 @@ impl PageData
 impl PageData
 {
 	#[must_use]
-	pub fn serialise(self, config: &SquarkupConfig) -> SerialisedPageData
+	pub fn serialise<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
 	{
 		SerialisedPageData {
-			filepath:     utils::display_rel(self.filepath, &config.paths.root),
-			destination:  utils::display_rel(self.destination, &config.out.folder),
-			flags:        self.flags,
-			title:        self.title,
-			description:  self.description,
-			heading:      self.heading,
-			caption:      self.caption,
-			tags:         self.tags,
-			release_date: self.release_date,
-			last_updated: self.last_updated,
-			other:        self.other,
+			filepath:     utils::display_rel(&self.filepath, &config.paths.root),
+			destination:  utils::display_rel(&self.destination, &config.out.folder),
+			flags:        &self.flags,
+			title:        &self.title,
+			description:  &self.description,
+			heading:      &self.heading,
+			caption:      &self.caption,
+			tags:         &self.tags,
+			release_date: &self.release_date,
+			last_updated: &self.last_updated,
+			other:        &self.other,
 		}
 	}
 }
 
 
 #[derive(serde::Serialize)]
-pub struct SerialisedPageData
+pub struct SerialisedPageData<'s>
 {
 	pub filepath: String,
 	pub destination: String,
-	pub flags: Strings,
-	pub title: Option<String>,
-	pub description: Option<String>,
-	pub heading: Option<String>,
-	pub caption: Option<String>,
-	pub tags: Vec<String>,
-	pub release_date: Option<Date>,
-	pub last_updated: Option<Date>,
-	pub other: HashMap<String, Strings>,
+	pub flags: &'s Strings,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub title: &'s Option<String>,
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub description: &'s Option<String>,
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub heading: &'s Option<String>,
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub caption: &'s Option<String>,
+	
+	pub tags: &'s [String],
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub release_date: &'s Option<Date>,
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub last_updated: &'s Option<Date>,
+
+	#[serde(skip_serializing_if = "HashMap::is_empty")]
+	pub other: &'s HashMap<String, Strings>,
 }
 
 macro_rules! impl_field_repr
@@ -202,7 +217,7 @@ macro_rules! impl_field_repr
 	};
 }
 
-impl SerialisedPageData
+impl SerialisedPageData<'_>
 {
 	impl_field_repr!(filepath     => "filepath",     "path");
 	impl_field_repr!(destination  => "destination",  "dest");

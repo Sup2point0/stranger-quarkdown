@@ -9,11 +9,12 @@ sources = [
 [out]
 folder = "src/routes/(docs)/(dyna)/"
 file = "+page.svx"
-data = "src/site.json"
+site-data-path = "src/site.json"
 
 [format]
 preserve-comments = true
 externalise-links = true
+mark-invalid-links = true
 
 [styles]
 folder = "src/styles/"

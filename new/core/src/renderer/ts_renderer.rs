@@ -30,7 +30,7 @@ impl Renderer<'_>
 		f.write_all(b"export function load(): PageData {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
-		let d = self.page.clone().serialise(self.config);
+		let d = self.page.serialise(self.config);
 		let s = self.config.out.shorter_fields;
 
 		writeln!(f, "\t\t{}: {:?},", d.filepath(s),    d.filepath)?;

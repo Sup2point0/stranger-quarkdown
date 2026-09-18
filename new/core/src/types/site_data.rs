@@ -27,8 +27,8 @@ pub struct SiteData
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct SiteStats
 {
-	pub built_on: UtcDateTime,
 	pub active_pages: usize,
+	pub built_on: UtcDateTime,
 }
 
 impl Default for SiteStats
@@ -106,15 +106,15 @@ impl SiteData
 	pub fn serialise(self, config: &SquarkupConfig) -> impl serde::Serialize
 	{
 		serde_json::json!({
+			"stats": self.stats,
 			"pages":
-				self.pages.into_iter()
+				self.pages.iter()
 				.map(|(key, page)|
 					(key, page.serialise(config))
 				)
 				.collect::<HashMap<_, _>>(),
 
 			"tags": self.tags,
-			"stats": self.stats,
 		})
 	}
 }

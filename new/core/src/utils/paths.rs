@@ -20,7 +20,7 @@ pub fn to_rel(path: &str) -> &str
 pub fn display_rel(
 	absolute: impl AsRef<Path>,
 	base: impl AsRef<Path>,
-) -> String
+) -> String  // TODO use Cow
 {
 	let relative = pathdiff::diff_paths(absolute, base)
 		.expect("absolute and base path always have common ancestor");
