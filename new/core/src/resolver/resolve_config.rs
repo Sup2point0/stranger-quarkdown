@@ -64,22 +64,22 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 fn find_config_from(folder: &Path) -> Option<(PathBuf, Extension)>
 {
 	let file = folder.join("squarkup.toml");
-	if file.exists() && file.is_file() {
+	if file.is_file() {
 		return Some((file, Extension::TOML));
 	}
 	
 	let file = folder.join("squarkdown.toml");
-	if file.exists() && file.is_file() {
+	if file.is_file() {
 		return Some((file, Extension::TOML));
 	}
 	
 	let file = folder.join("squarkup.json");
-	if file.exists() && file.is_file() {
+	if file.is_file() {
 		return Some((file, Extension::JSON));
 	}
 	
 	let file = folder.join("squarkdown.json");
-	if file.exists() && file.is_file() {
+	if file.is_file() {
 		return Some((file, Extension::JSON));
 	}
 
