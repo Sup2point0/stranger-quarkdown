@@ -25,6 +25,7 @@ queries = [
 ]
 
 [errors]
+strict = true
 on-error = "warn"
 file-already-exists = "overwrite"
 # inactive-link = "link-to-github"

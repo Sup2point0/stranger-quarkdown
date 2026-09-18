@@ -8,6 +8,9 @@ opt-level = 3
 lto = true
 strip = true
 
+[profile.dev]
+debug = "line-tables-only"
+
 [dependencies]
 enum-display = "0.2.1"
 enum_stringify = "0.6.5"

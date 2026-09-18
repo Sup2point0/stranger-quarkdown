@@ -44,8 +44,6 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 /// Should `entry` be squarked up (file) or searched (folder), according to the user's squarkup `config`?
 fn should_include_path(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 {
-	// TODO symlinks?
-
 	let path = entry.path();
 	let path_str = path.to_slash().expect("path should not contain non-Unicode characters");
 

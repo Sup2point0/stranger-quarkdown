@@ -110,7 +110,9 @@ fn squarkup() -> SquarkResult<bool>
 	}
 
 	if config.errors.strict {
-		if let Err(e) = site_data.check_conflicts(&config) {
+		let r = site_data.check_conflicts(&config);
+
+		if let Err(e) = r {
 			match config.errors.on_error {
 				ErrorAction::KILL => return Err(e),
 				ErrorAction::WARN => {
