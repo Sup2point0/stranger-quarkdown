@@ -65,8 +65,7 @@ fn squarkup() -> SquarkResult<bool>
 
 		catch!(errs => {
 			let filepath = filepath?;
-
-			let r = parser::parse(filepath.clone(), &config)?;
+			let r = parser::parse(&filepath, &config)?;
 			
 			if let Some(page) = r {
 				site_data.add_page(page);
