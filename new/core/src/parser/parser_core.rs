@@ -187,7 +187,7 @@ impl CharmParser<'_>
 	{
 		ctx!(self, ParseCtx::IDENT =>
 		{
-			let mut chars = vec![];
+			let mut out = str!();
 
 			if let Some('-') = self.current() {
 				return Err(SquarkError::Unrecoverable {
@@ -210,11 +210,11 @@ impl CharmParser<'_>
 			while let Some(c) = self.current()
 				&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
 			{
-				chars.push(c);
+				out.push(c);
 				self.advance()?;
 			}
 			
-			Ok(chars.into_iter().collect())
+			Ok(out)
 		})
 	}
 }
