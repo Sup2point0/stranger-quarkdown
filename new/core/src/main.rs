@@ -79,14 +79,7 @@ fn squarkup() -> SquarkResult<bool>
 		});
 	}
 
-	if !errs.is_fine() {
-		if errs.is_fatal() || config.errors.on_error == ErrorAction::KILL {
-			return Err(errs);
-		}
-		log::line();
-		log::error(errs);
-		log::line();
-	}
+	errs.depends(&config)?;
 	
 	if tried == 0 {
 		return Err(SquarkError::Unrecoverable {
@@ -110,16 +103,9 @@ fn squarkup() -> SquarkResult<bool>
 
 	if config.errors.strict {
 		let r = site_data.check_conflicts(&config);
-
+		
 		if let Err(e) = r {
-			match config.errors.on_error {
-				ErrorAction::KILL => return Err(e),
-				ErrorAction::WARN => {
-					log::line();
-					log::error(e);
-					log::line()
-				}
-			}
+			e.depends(&config)?;
 		}
 	}
 
@@ -130,12 +116,7 @@ fn squarkup() -> SquarkResult<bool>
 		let r = renderer::render(page, &site_data, &config);
 
 		if let Err(e) = r {
-			if e.is_fatal() || config.errors.on_error == ErrorAction::KILL {
-				return Err(e);
-			}
-			log::line();
-			log::error(e);
-			log::line();
+			e.depends(&config)?;
 		}
 	}
 

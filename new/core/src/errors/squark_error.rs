@@ -182,15 +182,34 @@ impl SquarkError
 		}
 	}
 
-	/// Propagate a non-empty [`SquarkError`], depending on `config`.
+	/// Propagate a non-empty [`SquarkError`] depending on `config`.
 	/// 
 	/// ```ignore
-	/// fn may_fail(config: &SquarkupConfig) -> SquarkResult<String>
+	/// fn may_fail(config: &SquarkupConfig) -> SquarkResult
+	/// {
+	///    let err = try_something();
+	/// 
+	///    // For a recoverable error:
+	///    // - If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
+	///    // - If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
+	///    err.depends(config)
+	/// }
+	/// ```
+	pub fn depends(self, config: &SquarkupConfig) -> SquarkResult
+	{
+		self.or_depends((), config)
+	}
+
+	/// Propagate a non-empty [`SquarkError`] depending on `config`, otherwise return `t`.
+	/// 
+	/// ```ignore
+	/// fn may_fail(config: &SquarkupConfig) -> SquarkResult<usize>
 	/// {
 	///    let err = SquarkError::Recoverable {..};
 	/// 
-	///    // If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
-	///    // If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
+	///    // For a recoverable error:
+	///    // - If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
+	///    // - If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
 	///    err.or_depends(2, config)
 	/// }
 	/// ```
@@ -199,14 +218,14 @@ impl SquarkError
 		if self.is_fine() {
 			Ok(t)
 		}
-		else if config.errors.on_error == ErrorAction::WARN {
+		else if self.is_fatal() || config.errors.on_error == ErrorAction::KILL {
+			Err(self)
+		}
+		else {
 			log::line();
 			log::error(self);
 			log::line();
 			Ok(t)
-		}
-		else {
-			Err(self)
 		}
 	}
 
