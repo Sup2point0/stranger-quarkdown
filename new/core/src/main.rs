@@ -3,6 +3,7 @@ use squarkdown::core::*;
 use squarkdown::colours::*;
 
 use std::fs::File;
+use std::io::BufWriter;
 use std::process::ExitCode;
 use std::time::Instant;
 
@@ -124,7 +125,7 @@ fn squarkup() -> SquarkResult
 		log::is!("saving site data...");
 
 		let data_raw = site_data.serialise(&config);
-		let file = File::create(dest)?;
+		let file = BufWriter::new(File::create(dest)?);
 		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
 
 		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
