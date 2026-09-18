@@ -17,9 +17,14 @@ impl Renderer<'_>
 			"rendering to: {GREY1}{}{GREY}/+page.ts",
 			utils::display_rel(&self.dest_folder, &self.config.paths.root),
 		);
+		
+		let dest = self.dest_folder.join("+page.ts");
+		
+		if dest.exists() {
+			self.err_exists()?;
+		}
 
-		let file = File::create(self.dest_folder.join("+page.ts"))?;
-		let mut f = BufWriter::new(file);
+		let mut f = BufWriter::new(File::create(dest)?);
 
 		f.write_all(b"import type { PageData } from 'squarkdown';\n\n")?;
 		f.write_all(b"export function load(): PageData {\n")?;

@@ -77,6 +77,7 @@ lazy_static!
 pub(super) struct Renderer<'d>
 {
 	// == IMMUTABLE == //
+	
 	pub(super) page: &'d PageData,
 
 	pub(super) site: &'d SiteData,
@@ -120,21 +121,10 @@ impl<'d> Renderer<'d>
 		}
 	}
 
-	fn render_page_svx(mut self) -> SquarkResult
-	{	
-		if self.dest_file.exists()
-		{
-			match self.config.errors.file_already_exists {
-				FileAction::OVERWRITE => (),
-				FileAction::ERROR => return Err(SquarkError::Recoverable {
-					msg: fmt!("cannot overwrite existing file: {W}"),
-					hint: fmt!("Squarkdown will not overwrite files since you set {W}errors.file-already-exists{G} to {W}error"),
-					debug: vec![
-						str!(slash!("while rendering: {}", self.page.filepath)),
-					],
-				}),
-				FileAction::SKIP => return Err(SquarkError::ABANDON),
-			}
+	pub(super) fn render_page_svx(mut self) -> SquarkResult
+	{
+		if self.dest_file.exists() {
+			self.err_exists()?;
 		}
 		
 		log::info!(
@@ -448,6 +438,25 @@ impl Renderer<'_>
 					]
 				});
 			}
+		}
+	}
+}
+
+impl Renderer<'_>
+{
+	pub(super) fn err_exists(&self) -> SquarkResult
+	{
+		match self.config.errors.file_already_exists
+		{
+			FileAction::OVERWRITE => Ok(()),
+			FileAction::ERROR => Err(SquarkError::Recoverable {
+				msg: fmt!("cannot overwrite existing file: {W}"),
+				hint: fmt!("Squarkdown will not overwrite files since you set {W}errors.file-already-exists{G} to {W}error"),
+				debug: vec![
+					str!(slash!("while rendering: {}", self.page.filepath)),
+				],
+			}),
+			FileAction::SKIP => Err(SquarkError::ABANDON),
 		}
 	}
 }
