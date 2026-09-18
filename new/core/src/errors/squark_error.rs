@@ -260,6 +260,7 @@ macro_rules! impl_from_error {
 impl_from_error!(std::io::Error);
 
 
+// TODO needed?
 pub trait CollectSquark<T>: Iterator<Item = SquarkResult<T>> + Sized
 {
 	fn collect_squark(self) -> SquarkResult<Vec<T>>

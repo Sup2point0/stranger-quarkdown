@@ -8,7 +8,6 @@ pub enum RenderCtx
 	#[default]
 	MARKDOWN,
 
-	HEADING,
 	COMMENT,
 	CODE,
 	LEAVE { key: Option<String> },

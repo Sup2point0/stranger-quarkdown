@@ -37,10 +37,10 @@ pub struct CharmParser<'d>
 	pub(super) is_live: bool,
 
 	/// Accumulated errors during parsing.
-	pub errors: SquarkError,
+	pub(super) errors: SquarkError,
 
 	/// Context stack of what the parser is doing, for error diagnostics.
-	pub ctx: ContextStack<ParseCtx>,
+	pub(super) ctx: ContextStack<ParseCtx>,
 }
 
 /// The public parser interface.
@@ -287,6 +287,7 @@ impl CharmParser<'_>
 					'|' if can_terminate => break,
 
 					// `-->` terminates
+					// TODO preview() is expensive
 					'-' if can_terminate && self.preview().starts_with("-->") => break,
 
 					_ => {

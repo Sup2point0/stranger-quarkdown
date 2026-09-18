@@ -11,7 +11,7 @@ use std::io::{ BufWriter, Write };
 impl Renderer<'_>
 {
 	/// Render `+page.ts` for supplying page data to SvelteKit.
-	pub(super) fn render_page_ts(&mut self) -> SquarkResult
+	pub(super) fn render_page_ts(&self) -> SquarkResult
 	{
 		log::info!(
 			"rendering to: {GREY1}{}{GREY}/+page.ts",

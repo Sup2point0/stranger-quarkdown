@@ -352,7 +352,7 @@ impl SquarkupConfig
 		value: &'d toml::Value,
 		setting: &str,
 		hint: &'static str,
-	) -> SquarkResult<&'d Vec<toml::Value>>
+	) -> SquarkResult<&'d [toml::Value]>
 	{
 		match value {
 			toml::Value::Array(v) => Ok(v),

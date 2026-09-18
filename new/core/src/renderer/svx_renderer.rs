@@ -242,13 +242,14 @@ impl Renderer<'_>
 		}
 	}
 
+	// TODO use `KEEP`, `ERASE`, `UNHANDLED` enum
 	/// Process HTML content – specifically comments, to check for `<!-- #SQUARK -->`s.
 	/// 
 	/// Returns:
 	/// - `Some(true)` if processing was performed, and the content should be kept.
 	/// - `Some(false)` if processing was performed, and the content should be erased from the output.
 	/// - `None` if processing was NOT performed, and the caller should forward to another method.
-	fn process_html(&mut self, html: &pd::CowStr<'_>) -> Option<bool>
+	fn process_html(&mut self, html: &str) -> Option<bool>
 	{
 		let html = html.trim();
 				
@@ -282,10 +283,9 @@ impl Renderer<'_>
 			let key = captures.get(3).map(|k| k.as_str().to_owned());
 
 			let squark = match captures.get(1) {
-				Some(m) => match m.as_str().to_ascii_uppercase().as_str() {
-					"LEAVE" => RenderCtx::LEAVE { key },
-					"SLASH" => RenderCtx::SLASH { key },
-
+				Some(m) => match m.as_str() {
+					s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
+					s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
 					s => {
 						if !self.ctx.is_leave() {
 							self.errors.push(SquarkError::Recoverable {

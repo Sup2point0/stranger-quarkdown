@@ -41,7 +41,7 @@ fn main() -> ExitCode
 /// - `Ok(true)` if squarkup was attempted and was successful
 /// - `Err(msg)` if squarkup was attempted but failed
 /// - `Ok(false)` if no squarkup was attempted
-fn squarkup() -> SquarkResult<bool>
+fn squarkup() -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
 
@@ -133,5 +133,5 @@ fn squarkup() -> SquarkResult<bool>
 		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
 	}
 	
-	Ok(true)
+	Ok(())
 }
