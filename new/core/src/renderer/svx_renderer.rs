@@ -116,6 +116,17 @@ impl<'d> Renderer<'d>
 
 		let output = self.render_from(source);
 
+		if *self.ctx.current() != RenderCtx::MARKDOWN {
+			self.errors.push(SquarkError::Recoverable {
+				msg: str!("warning: unterminated rendering context"),
+				hint: str!("this may be a bug in the Squarkdown renderering engine!"),
+				debug: vec![
+					// TODO standardise `show_ctx_stack()`
+					fmt!("{:?}", self.ctx.stack()),
+				],
+			});
+		}
+
 		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
 			let mut target = File::create(&self.dest_file)?;
 			target.write_all(output.as_bytes())?;
