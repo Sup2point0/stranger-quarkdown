@@ -198,6 +198,20 @@ impl SquarkupConfig
 			if let Some(value) = out.get("site-data-path") { catch!(errs => {
 				let raw = Self::try_get_string(value, "out.site-data-path", "(filepath including `.json` extension)")?;
 				let path = site.join(utils::to_rel(raw));
+
+				// TODO cleanup with helper?
+				let folder = path.parent().expect("site directory always has a parent folder");
+				
+				if !folder.exists() {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),
+						hint: fmt!("{W}out.site-data-path{G} is a filepath relative to your site directory"),
+						debug: vec![
+							str!(slash!("{GREY1}{}{GREY} is not a valid directory", path))
+						],
+					});
+				}
+
 				s.out.site_data_path = Some(path);
 			}) }
 		}
@@ -382,16 +396,16 @@ impl SquarkupConfig
 				msg: fmt!("the folder you specified {location} doesn't exist!"),
 				hint,
 				debug: vec![
-					slash!("`{}` is not a valid directory", path),
+					slash!("{GREY1}{}{GREY} is not a valid directory", path),
 				],
 			})
 		}
 		else if !path.is_dir() {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("{location} is not a folder"),
+				msg: fmt!("the folder you specified {location} is not a folder"),
 				hint: str!(),
 				debug: vec![
-					slash!("`{}` is not a folder", path),
+					slash!("{GREY1}{}{GREY} is not a folder", path),
 				],
 			})
 		}
