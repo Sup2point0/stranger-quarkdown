@@ -5,4 +5,5 @@ site = "../../test-project/"
 folder = "src/routes/render/dest/"
 
 [errors]
+strict = false
 on-error = "kill"

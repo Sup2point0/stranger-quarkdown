@@ -7,4 +7,5 @@ render-page-ts = true
 shorter-fields = true
 
 [errors]
+strict = false
 on-error = "kill"

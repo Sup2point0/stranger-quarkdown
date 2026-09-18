@@ -8,5 +8,6 @@ folder = "src/routes/links/external/"
 externalise-links = true
 
 [errors]
+strict = false
 on-error = "kill"
 inactive-link = "error"
