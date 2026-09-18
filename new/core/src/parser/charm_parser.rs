@@ -7,34 +7,8 @@ use crate::macros::*;
 
 use tinyvec::tiny_vec;
 
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::Read;
-use std::path::{ Path, PathBuf };
-
-
-// == PUBLIC == //
-
-/// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
-pub fn parse(
-	filepath: impl AsRef<Path>,
-	config: &SquarkupConfig,
-) -> SquarkResult<Option<PageData>>
-{
-	// TODO read until -->
-	let mut file = File::open(&filepath)?;
-	let mut source = str!();
-	file.read_to_string(&mut source)?;
-
-	let parser = CharmParser::new(&source, filepath.as_ref().to_path_buf(), config);
-	
-	match parser.parse()
-	{
-		Ok(page) => Ok(Some(page)),
-		Err(SquarkError::ABANDON) => Ok(None),
-		Err(e) => Err(e)
-	}
-}
+use std::collections::{ HashMap };
+use std::path::{ PathBuf };
 
 
 // == IMPLEMENTATION == //
