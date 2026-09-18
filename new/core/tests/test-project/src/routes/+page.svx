@@ -1,5 +1,25 @@
 # Squarkdown Tests
 
+
+## Resolve
+
+### Sources
+- [sources/root-only/main](sources/root-only/main)
+
+
+## Render
+
+### Render
+- [render/dest/1](render/dest/1)
+- [render/dest/nest/2](render/dest/nest/2)
+- [render/dest/nest/nest/3](render/dest/nest/nest/3)
+- [render/dest/nest/nest/nest/4](render/dest/nest/nest/nest/4)
+- [render/dest/nest/nest/nest/nest/5](render/dest/nest/nest/nest/nest/5)
+
+### `+page.ts`
+- [page-ts/long]
+- [page-ts/short]
+
 ### Links
 - [links/basic/main](links/basic/main)
 - [links/basic/side](links/basic/side)

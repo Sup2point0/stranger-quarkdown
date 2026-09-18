@@ -1,0 +1,10 @@
+[paths]
+site = "../../test-project/"
+sources = ["/"]
+
+[out]
+folder = "src/routes/sources/root-only/"
+
+[errors]
+strict = false
+on-error = "kill"
