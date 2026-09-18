@@ -33,3 +33,15 @@ use assertables::*;
 	assert_contains!( out, "3.md" );
 	assert!( !TESTS.join("errors/many-conflicts/nested/top").exists() );
 }
+
+#[test] fn file_already_exists_crashes()
+{
+	let (status, out) = capture_squarkup_from("errors/already");
+	assert!( !status.success() );
+	assert_contains!( out, "cannot overwrite" );
+
+	let svx = read_file("errors/already/main/+page.svx");
+	let ts  = read_file("errors/already/main/+page.ts");
+	assert_contains!( svx, "shouldn't be overwrriten" );
+	assert_contains!( ts,  "Don't overwrite me" );
+}

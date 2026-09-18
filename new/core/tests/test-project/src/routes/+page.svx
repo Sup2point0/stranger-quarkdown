@@ -4,7 +4,12 @@
 ## Resolve
 
 ### Sources
+- [sources/fixed/main](sources/fixed/main)
 - [sources/root-only/main](sources/root-only/main)
+- [sources/include/main](sources/include/main)
+- [sources/exclude/main](sources/exclude/main)
+- [sources/exclude/nested/side](sources/exclude/nested/side)
+- [sources/exclude/nested/bad/but/keep](sources/exclude/nested/bad/but/keep)
 
 
 ## Render

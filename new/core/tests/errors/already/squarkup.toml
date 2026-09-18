@@ -1,0 +1,10 @@
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/errors/already/"
+
+[errors]
+strict = false
+on-error = "kill"
+file-already-exists = "error"
