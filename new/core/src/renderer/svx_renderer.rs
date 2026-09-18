@@ -150,14 +150,14 @@ impl<'d> Renderer<'d>
 		{
 			let level = *level;
 
-			while let Some(..) = parser.next_if(|(e, _range)| {
+			while parser.next_if(|(e, _range)| {
 				if let pd::Event::End(pd::TagEnd::Heading(lv)) = e
 				&& *lv == level {
 					false
 				} else {
 					true
 				}
-			})
+			}).is_some()
 			{}
 
 			parser.next();
@@ -165,7 +165,7 @@ impl<'d> Renderer<'d>
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
-			// .inspect(|e| { dbg!(e); })
+			.inspect(|e| { dbg!(e); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -383,7 +383,7 @@ impl Renderer<'_>
 				]
 			});
 			return;
-		};
+		}
 
 		// 2. find where the target file will be exported to
 		let key = utils::display_rel(&their_source_path, &self.config.paths.root);
@@ -455,6 +455,17 @@ impl Renderer<'_>
 #[cfg(test)] use super::test_utils::*;
 
 #[cfg(test)] use indoc::indoc;
+
+
+// #[test] fn playground() {
+// 	test_preserves_for(|_| {
+
+// 	}, &[
+// 		indoc! {"
+// 			[link<sup>↗</sup>](https://sup2point0.github.io)
+// 		"}
+// 	]);
+// }
 
 
 #[cfg(test)]

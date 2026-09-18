@@ -48,7 +48,7 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 
 	if let Some(out) = find_config_from(root) {
 		return Ok(out);
-	};
+	}
 
 	Err(SquarkError::Unrecoverable {
 		msg: str!("could not find your squarkup configuration file"),

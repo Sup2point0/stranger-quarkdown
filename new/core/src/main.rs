@@ -83,7 +83,6 @@ fn squarkup() -> SquarkResult<bool>
 		if errs.is_fatal() || config.errors.on_error == ErrorAction::KILL {
 			return Err(errs);
 		}
-
 		log::line();
 		print_error(errs);
 		log::line();
@@ -134,11 +133,9 @@ fn squarkup() -> SquarkResult<bool>
 			if e.is_fatal() || config.errors.on_error == ErrorAction::KILL {
 				return Err(e);
 			}
-			else {
-				log::line();
-				print_error(e);
-				log::line();
-			}
+			log::line();
+			print_error(e);
+			log::line();
 		}
 	}
 

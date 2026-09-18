@@ -126,7 +126,7 @@ impl CharmParser<'_>
 				}
 				None => return self.err_eof(),
 				_ => (),
-			};
+			}
 			
 			self.advance()?;
 		}

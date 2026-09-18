@@ -1,13 +1,8 @@
-mod svx_renderer;
-use svx_renderer::{ Renderer };
-
+mod svx_renderer; use svx_renderer::{ Renderer };
 mod ts_renderer;
+mod ctx; pub use ctx::{ RenderCtx };
 
-mod ctx;
-pub use ctx::{ RenderCtx };
-
-#[cfg(test)]
-mod test_utils;
+#[cfg(test)] mod test_utils;
 
 
 use crate::core::*;
