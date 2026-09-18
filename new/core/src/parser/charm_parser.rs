@@ -405,8 +405,8 @@ mod partial {
 		],
 		|mut parser, _case| {
 			let r = parser.parse_heading();
-			assert_err!( r );
-			// TODO check error message
+			assert_err!( &r );
+			assert_contains!( r.unwrap_err(), "start heading" );
 		});
 	}
 

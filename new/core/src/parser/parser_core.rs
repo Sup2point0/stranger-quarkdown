@@ -187,7 +187,6 @@ impl CharmParser<'_>
 	{
 		ctx!(self, ParseCtx::IDENT =>
 		{
-			// FIXME require at least 1 character
 			let mut chars = vec![];
 
 			if let Some('-') = self.current() {

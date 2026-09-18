@@ -423,8 +423,9 @@ mod paths {
 			"[paths]\nsources = ['nonexistent']",
 			"[paths]\nsources = ['test-project/nonexistent']",
 		] {
-			let e = load_config(source).unwrap_err();
-			assert_contains!( e, "doesn't exist" );
+			let e = load_config(source);
+			assert_err!( &e );
+			assert_contains!( e.unwrap_err(), "doesn't exist" );
 		}
 	}
 }
@@ -468,8 +469,9 @@ mod error_handling {
 			"[errors]\non-error = 'x'",
 			"[errors]\non-error = \"y\"",
 		] {
-			let e = load_config(source).unwrap_err();
-			assert_contains!( e, "errors.on-error" );
+			let e = load_config(source);
+			assert_err!( &e );
+			assert_contains!( e.unwrap_err(), "errors.on-error" );
 		}
 	}
 }

@@ -165,7 +165,7 @@ impl<'d> Renderer<'d>
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
-			.inspect(|e| { dbg!(e); })
+			// .inspect(|e| { dbg!(e); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
