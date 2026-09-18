@@ -125,15 +125,17 @@ impl SquarkError
 /// Implementations specific to [`SquarkError::Multiple`].
 impl SquarkError
 {
-	/// Is this a [`SquarkError::Multiple`] error with no aggregated errors?
+	/// Is this an empty error that should be ignored?
+	/// 
+	/// This includes:
+	/// 
+	/// - [`SquarkError::Multiple`] error with no aggregated errors
+	/// - [`SquarkError::ABANDON`] to skip an operation
 	#[must_use]
-	pub fn is_empty(&self) -> bool
+	pub fn is_fine(&self) -> bool
 	{
-		if let Self::Multiple { errs } = self && errs.is_empty() {
-			true
-		} else {
-			false
-		}
+		matches!(self, Self::Multiple{ errs } if errs.is_empty())
+		|| matches!(self, Self::ABANDON)
 	}
 
 	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return `t`.
@@ -173,7 +175,7 @@ impl SquarkError
 	/// ```
 	pub fn or_else<T>(self, f: impl FnOnce() -> T) -> SquarkResult<T>
 	{
-		if self.is_empty() {
+		if self.is_fine() {
 			Ok(f())
 		} else {
 			Err(self)

@@ -79,7 +79,7 @@ fn squarkup() -> SquarkResult<bool>
 		});
 	}
 
-	if !errs.is_empty() {
+	if !errs.is_fine() {
 		if errs.is_fatal() || config.errors.on_error == ErrorAction::KILL {
 			return Err(errs);
 		}
