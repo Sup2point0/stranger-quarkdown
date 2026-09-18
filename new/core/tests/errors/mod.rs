@@ -42,6 +42,6 @@ use assertables::*;
 
 	let svx = read_file("errors/already/main/+page.svx");
 	let ts  = read_file("errors/already/main/+page.ts");
-	assert_contains!( svx, "shouldn't be overwrriten" );
+	assert_contains!( svx, "shouldn't be overwritten" );
 	assert_contains!( ts,  "Don't overwrite me" );
 }
