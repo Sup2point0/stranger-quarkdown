@@ -133,7 +133,7 @@ impl PageData
 	{
 		fields.remove(short)
 			.or_else(|| fields.remove(long))
-			.map(|t| t.to_vec())
+			.map(|t| t.into_vec())
 	}
 
 	fn take1(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<String>
