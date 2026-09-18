@@ -15,7 +15,7 @@ use regex::Regex;
 
 use std::fs::{ File };
 use std::io::{ Read, Write };
-use std::path::{ PathBuf };
+use std::path::{ Path, PathBuf };
 
 
 // == IMPLEMENTATION == //
@@ -54,7 +54,7 @@ lazy_static!
 pub(super) struct Renderer<'d>
 {
 	// == IMMUTABLE == //
-	
+
 	pub(super) page: &'d PageData,
 
 	pub(super) site: &'d SiteData,
@@ -101,7 +101,7 @@ impl<'d> Renderer<'d>
 	pub(super) fn render_page_svx(mut self) -> SquarkResult
 	{
 		if self.dest_file.exists() {
-			self.err_exists()?;
+			self.err_exists(&self.dest_file)?;
 		}
 		
 		log::info!(
@@ -116,7 +116,7 @@ impl<'d> Renderer<'d>
 
 		let output = self.render_from(source);
 
-		if self.errors.is_empty() || self.config.errors.on_error == ErrorAction::WARN {
+		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
 			let mut target = File::create(&self.dest_file)?;
 			target.write_all(output.as_bytes())?;
 		}
@@ -421,14 +421,14 @@ impl Renderer<'_>
 
 impl Renderer<'_>
 {
-	pub(super) fn err_exists(&self) -> SquarkResult
+	pub(super) fn err_exists(&self, filepath: &Path) -> SquarkResult
 	{
 		match self.config.errors.file_already_exists
 		{
 			FileAction::OVERWRITE => Ok(()),
 			FileAction::ERROR => Err(SquarkError::Recoverable {
-				msg: fmt!("cannot overwrite existing file: {W}"),
-				hint: fmt!("Squarkdown will not overwrite files since you set {W}errors.file-already-exists{G} to {W}error"),
+				msg: str!(slash!("cannot overwrite existing file: {W}", filepath.to_path_buf())),
+				hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'error'"),
 				debug: vec![
 					str!(slash!("while rendering: {}", self.page.filepath)),
 				],

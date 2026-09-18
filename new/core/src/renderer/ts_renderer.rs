@@ -21,7 +21,7 @@ impl Renderer<'_>
 		let dest = self.dest_folder.join("+page.ts");
 		
 		if dest.exists() {
-			self.err_exists()?;
+			self.err_exists(&dest)?;
 		}
 
 		let mut f = BufWriter::new(File::create(dest)?);
