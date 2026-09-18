@@ -13,32 +13,9 @@ use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
 use regex::Regex;
 
-use std::fs::{ self, File };
+use std::fs::{ File };
 use std::io::{ Read, Write };
 use std::path::{ PathBuf };
-
-
-// == PUBLIC == //
-
-/// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
-pub fn render(
-	page: &PageData,
-	site: &SiteData,
-	config: &SquarkupConfig,
-) -> SquarkResult
-{
-	let mut errs = SquarkError::multiple();
-	let mut renderer = Renderer::new(page, site, config);
-
-	if !renderer.dest_folder.exists() {
-		fs::create_dir_all(&renderer.dest_folder)?;
-	}
-
-	catch!(errs => { renderer.render_page_ts()?; });
-	catch!(errs => { renderer.render_page_svx()?; });
-
-	errs.or(())
-}
 
 
 // == IMPLEMENTATION == //
