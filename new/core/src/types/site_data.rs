@@ -78,7 +78,7 @@ impl SiteData
 		let mut seen_dests = HashMap::<PathBuf, &PageData>::new();
 
 		for page in self.pages() {
-			let Ok(dest) = dunce::canonicalize(&page.destination) else { continue };
+			let dest = page.destination.to_owned();
 
 			if let Some(conflict) = seen_dests.get(&dest) {
 				return Err(SquarkError::Recoverable {

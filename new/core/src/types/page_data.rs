@@ -1,6 +1,3 @@
-use time::Date;
-use time::macros::format_description;
-
 use crate::core::*;
 use crate::config::*;
 use crate::types::*;
@@ -8,7 +5,11 @@ use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
-use std::collections::HashMap;
+use path_clean::PathClean;
+use time::Date;
+use time::macros::format_description;
+
+use std::collections::{ HashMap };
 use std::path::{ PathBuf };
 
 
@@ -56,7 +57,7 @@ impl PageData
 		let mut destination = PathBuf::new();
 
 		if let Some(dest) = Self::take1(&mut fields, "destination", "dest") {
-			destination = config.out.folder.join(utils::to_rel(&dest));
+			destination = config.out.folder.join(utils::to_rel(&dest)).clean();
 
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {

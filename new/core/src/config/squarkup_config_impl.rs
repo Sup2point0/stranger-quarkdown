@@ -1,10 +1,11 @@
-use regex::regex;
-
 use super::*;
 use crate::core::*;
 use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
+
+use path_clean::PathClean;
+use regex::regex;
 
 use std::path::{ Path, PathBuf };
 
@@ -369,7 +370,7 @@ impl SquarkupConfig
 			})
 		}
 		else {
-			Ok(path)
+			Ok(path.clean())
 		}
 	}
 
