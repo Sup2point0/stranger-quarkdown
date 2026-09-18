@@ -506,6 +506,29 @@ mod heading {
 				"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
 			], "# Heading\n\nThe quick brown fox jumps over the lazy dog");
 		}
+
+		#[test] fn medium() {
+			test_expected_for(|c| c.format.preserve_heading = true, &[
+				("## Level 2\nsup",  "## Level 2\n\nsup",),
+				("### Level 3\nsup", "### Level 3\n\nsup"),
+				("# Break\n\nsup",   "# Break\n\nsup", ),
+				("# Space \n\nsup",  "# Space\n\nsup",),
+				("#  Space\n\nsup",  "# Space\n\nsup",),
+				("#  Space \n\nsup", "# Space\n\nsup"),
+			]);
+		}
+
+		#[test] fn hard() {
+			test_preserves_for(|c| c.format.preserve_heading = true, &[
+				indoc! {"
+					sup, world!
+
+					## Not a Heading
+
+					sup, world!
+				"}
+			]);
+		}
 	}
 }
 
