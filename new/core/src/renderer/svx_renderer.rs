@@ -95,8 +95,6 @@ pub(super) struct Renderer<'d>
 
 	/// Accumulated errors during rendering.
 	pub(super) errors: Vec<SquarkError>,  // TODO use SquarkError::multiple
-
-	pub(super) erasing_heading: bool,
 }
 
 /// Core interface.
@@ -118,7 +116,6 @@ impl<'d> Renderer<'d>
 			dest_file: dest_folder.join(&config.out.file_name),
 			dest_folder,
 			ctx: ContextStack::new(),
-			erasing_heading: true,
 		}
 	}
 
@@ -152,12 +149,34 @@ impl<'d> Renderer<'d>
 	{
 		source = Self::expand_only(&source);
 
-		// TODO maybe `flat_map` to support context-tracking `only`?
-		let parser =
+		let mut parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
-				.into_offset_iter()
-				// .inspect(|e| { dbg!(e); })
-				.filter_map(|(e, range)| self.process_event(e, range))
+			.into_offset_iter()
+			.peekable()
+		;
+
+		if !self.config.format.preserve_heading
+		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
+		{
+			let level = *level;
+
+			while let Some(..) = parser.next_if(|(e, _range)| {
+				if let pd::Event::End(pd::TagEnd::Heading(lv)) = e
+				&& *lv == level {
+					false
+				} else {
+					true
+				}
+			})
+			{}
+
+			parser.next();
+		}
+
+		// TODO maybe `flat_map` to support context-tracking `only`?
+		let parser = parser
+			// .inspect(|e| { dbg!(e); })
+			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
 		let mut out = str!();
@@ -189,16 +208,6 @@ impl Renderer<'_>
 		match event {
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
 			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.force_pop(RenderCtx::CODE); }
-
-			pd::Event::Start(pd::Tag::Heading{..}) => { self.ctx.push(RenderCtx::HEADING); }
-			pd::Event::End(pd::TagEnd::Heading(..)) => {
-				self.ctx.force_pop(RenderCtx::HEADING);
-				self.erasing_heading = false;
-				if !self.config.format.preserve_heading {
-					return None;
-				}
-			}
-
 			_ => (),
 		};
 
@@ -228,9 +237,6 @@ impl Renderer<'_>
 
 			/* Erase this content */
 			RenderCtx::SLASH{..} => None,
-
-			/* Erase heading */
-			RenderCtx::HEADING if self.erasing_heading && !self.config.format.preserve_heading => None,
 
 			/* Keep comments only if `preserve_comments: true` */
 			RenderCtx::COMMENT => self.config.format.preserve_comments.then_some(event),
@@ -449,6 +455,18 @@ mod plain {
 			"sup,\nworld!",
 		])
 	}
+
+	#[test] fn medium() {
+		test_preserves(&[
+			indoc! {"
+				sup, world!
+
+				## Section
+
+				sup, world!
+			"},
+		]);
+	}
 }
 
 #[cfg(test)]
@@ -464,6 +482,17 @@ mod heading {
 				"# Heading\n\nThe quick brown fox jumps over the lazy dog",
 				"# Heading\n\n\nThe quick brown fox jumps over the lazy dog",
 			], "The quick brown fox jumps over the lazy dog")
+		}
+
+		#[test] fn medium() {
+			test_expect(&[
+				"## Level 2\nsup",
+				"### Level 3\nsup",
+				"# Break\n\nsup",
+				"# Space \n\nsup",
+				"#  Space\n\nsup",
+				"#  Space \n\nsup",
+			], "sup")
 		}
 	}
 
