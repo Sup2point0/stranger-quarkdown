@@ -1,0 +1,13 @@
+[paths]
+site = "../../test-project/"
+exclude = [
+	'/[_.]',
+	'bad\d',
+]
+
+[out]
+folder = "src/routes/sources/exclude/"
+
+[errors]
+strict = false
+on-error = "kill"
