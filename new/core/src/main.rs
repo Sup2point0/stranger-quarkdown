@@ -1,6 +1,5 @@
 use squarkdown::*;
 use squarkdown::core::*;
-use squarkdown::config::*;
 use squarkdown::colours::*;
 
 use std::fs::File;
@@ -112,15 +111,13 @@ fn squarkup() -> SquarkResult
 	// == RENDER == //
 	log::is!("rendering...");
 
-	let mut errs = SquarkError::multiple();
-
 	for page in site_data.pages() {
-		catch!(errs => {
-			renderer::render(page, &site_data, &config)?;
-		});
-	}
+		let r = renderer::render(page, &site_data, &config);
 
-	errs.depends(&config)?;
+		if let Err(e) = r {
+			e.depends(&config)?;
+		}
+	}
 
 	// == SITE DATA == //
 	if let Some(ref dest) = config.out.site_data_path {

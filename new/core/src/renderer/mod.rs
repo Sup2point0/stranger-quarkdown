@@ -19,7 +19,7 @@ pub fn render(
 ) -> SquarkResult
 {
 	let mut errs = SquarkError::multiple();
-	let mut renderer = Renderer::new(page, site, config);
+	let renderer = Renderer::new(page, site, config);
 
 	if !renderer.dest_folder.exists() {
 		fs::create_dir_all(&renderer.dest_folder)?;
