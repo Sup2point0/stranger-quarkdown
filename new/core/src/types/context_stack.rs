@@ -5,18 +5,15 @@ pub struct ContextStack<Ctx>
 	stack: Vec<Ctx>,
 }
 
-/// Constructors
 impl<Ctx> ContextStack<Ctx>
-	where Ctx: Default + PartialEq + Eq
+	where Ctx: Default
 {
 	pub fn new() -> Self {
 		Self::default()
 	}
 }
 
-/// Implementation
 impl<Ctx> ContextStack<Ctx>
-	where Ctx: Default + PartialEq + Eq
 {
 	pub fn stack(&self) -> &[Ctx] {
 		&self.stack
@@ -30,7 +27,11 @@ impl<Ctx> ContextStack<Ctx>
 	pub fn push(&mut self, ctx: Ctx) {
 		self.stack.push(ctx);
 	}
+}
 
+impl<Ctx> ContextStack<Ctx>
+	where Ctx: Default + PartialEq + Eq
+{
 	// TODO use result when forced
 	/// Pop `ctx` from the stack as deep as possible, regardless of the current context.
 	/// 
