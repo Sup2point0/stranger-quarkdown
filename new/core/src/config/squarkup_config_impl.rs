@@ -160,11 +160,6 @@ impl SquarkupConfig
 					}
 				}) }
 			}) }
-
-			// FIXME??
-			// if let Some(true) = Self::get_bool(&paths, "paths", "default-exclude", "", &mut errs) {
-			// 	s.paths.exclude.clear();
-			// }
 		}
 
 		// OutConfig
@@ -190,6 +185,13 @@ impl SquarkupConfig
 			}) }
 
 			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
+				if s.out.render_page_ts == false {
+					return Err(SquarkError::Recoverable {
+						msg: str!("warning: setting {W}out.shorter-fields{R} when {W}out.render-page-ts{R} is disabled does nothing!"),
+						hint: str!("did you mean to enable {Y}out.render-page-ts{G} = {W}true{G}?"),
+						debug: vec![],
+					});
+				}
 				s.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
 			}) }
 
