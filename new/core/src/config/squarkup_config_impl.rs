@@ -242,7 +242,8 @@ impl SquarkupConfig
 				s.errors.strict = Self::try_get_bool(value, "errors.strict")?;
 			}) }
 
-			if let Some(value) = errors.get("on-error") { catch!(errs => {
+			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
+			if let Some(value) = errors.get("on-error") {
 				let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
 
 				if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
@@ -254,7 +255,7 @@ impl SquarkupConfig
 						debug: vec![fmt!("you provided {value}")],
 					});
 				}
-			}) }
+			}
 			
 			if let Some(value) = errors.get("file-already-exists") { catch!(errs => {
 				let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
@@ -285,7 +286,8 @@ impl SquarkupConfig
 			}) }
 		}
 
-		errs.or(s)
+		let _ = errs.or_depends((), &s)?;
+		Ok(s)
 	}
 }
 
@@ -422,8 +424,8 @@ mod paths {
 
 	#[test] fn reject_nonexistent_sources() {
 		for source in [
-			"[paths]\nsources = ['nonexistent']",
-			"[paths]\nsources = ['test-project/nonexistent']",
+			"[paths]\nsources = ['nonexistent']\n\n[errors]\non-error='kill'",
+			"[paths]\nsources = ['test-project/nonexistent']\n\n[errors]\non-error='kill'",
 		] {
 			let e = load_config(source);
 			assert_err!( &e );
