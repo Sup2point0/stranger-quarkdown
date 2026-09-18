@@ -7,6 +7,7 @@ use crate::macros::*;
 use path_clean::PathClean;
 use regex::regex;
 
+use std::os::windows::raw;
 use std::path::{ Path, PathBuf };
 
 
@@ -107,33 +108,22 @@ impl SquarkupConfig
 				hints!("write your config like this: {W}```\n\n\t[paths]\nsources = ['/']\n\n```")
 			)?;
 
-			/* NOTE: We're eagerly clearing defaults... */
-			s.paths.sources.clear();
+			if let Some(value) = paths.get("sources") { catch!(errs => {
+				let values = Self::try_get_array(value, "paths.sources", "(of folders relative to your project root)")?;
 
-			Self::for_string_array(paths, "paths", "sources", "(filepaths relative to your project root)", &mut errs, |dir, errs| {
-				catch!(errs => {
-					if dir.contains("/../")
-					|| dir.starts_with("..")
-					|| dir.ends_with("..")
-					{
-						return Err(SquarkError::Unrecoverable {
-							msg: fmt!("a source folder you specified is invalid: {W}{dir}"),
-							hint: fmt!("for safety, {W}..{G} traversal is not allowed in {W}paths.sources"),
-							debug: vec![],
-						});
-					}
+				if !values.is_empty() {
+					s.paths.sources.clear();
+				}
 
-					s.paths.sources.push(Self::try_resolve_folder(
-						root, dir, "a source folder you specified",
+				for value in values {
+					let raw = Self::try_get_string(value, "paths.sources", "(entry in an array)")?;
+					let dir = Self::try_resolve_folder(
+						root, raw, "a source folder you specified",
 						fmt!("{Y}paths.sources{G} folders are relative from your project root"),
-					)?);
-				});
-			});
-
-			/* NOTE: ...if it turns out `paths.sources` was unset or empty, we'll reinstate the default full-project */
-			if s.paths.sources.is_empty() {
-				s.paths.sources.push(PathBuf::new());
-			}
+					)?;
+					s.paths.sources.push(dir);
+				}
+			}) }
 
 			Self::for_string_array(paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
 				match regex::Regex::new(pattern) {
@@ -334,6 +324,26 @@ impl SquarkupConfig
 			v => Err(SquarkError::Unrecoverable {
 				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
 				hint: fmt!("{Y}{setting}{G} must be a boolean"),
+				debug: vec![
+					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
+				],
+			}),
+		}
+	}
+
+	/// Try to extract the array from `data` for `setting`.
+	fn try_get_array<'d>(
+		value: &'d toml::Value,
+		setting: &str,
+		hint: &'static str,
+	) -> SquarkResult<&'d Vec<toml::Value>>
+	{
+		match value {
+			toml::Value::Array(v) => Ok(v),
+			
+			v => Err(SquarkError::Unrecoverable {
+				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
+				hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
 				debug: vec![
 					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
 				],
