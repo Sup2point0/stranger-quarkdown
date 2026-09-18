@@ -9,7 +9,6 @@ lto = true
 strip = true
 
 [dependencies]
-dunce = "1.0.5"
 enum-display = "0.2.1"
 enum_stringify = "0.6.5"
 glob = "0.3.4"

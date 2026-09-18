@@ -8,6 +8,7 @@ use crate::colours::*;
 use crate::macros::*;
 
 use lazy_static::lazy_static;
+use path_clean::PathClean;
 use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
 use regex::Regex;
@@ -378,9 +379,9 @@ impl Renderer<'_>
 		let own_source_folder = self.page.filepath.parent()
 			.expect("active files are always inside a folder");
 
-		let their_source_path = own_source_folder.join(their_file_name);
+		let their_source_path = own_source_folder.join(their_file_name).clean();
 
-		let Ok(their_source_path) = dunce::canonicalize(&their_source_path) else {
+		if !their_source_path.exists() {
 			return self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found broken link: {W}({dest_url})"),
 				hint: str!(),
