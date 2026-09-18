@@ -10,7 +10,7 @@ use crate::core::*;
 use crate::macros::*;
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{ BufReader, BufRead };
 use std::path::Path;
 
 
@@ -20,10 +20,20 @@ pub fn parse(
 	config: &SquarkupConfig,
 ) -> SquarkResult<Option<PageData>>
 {
-	// TODO read until -->
-	let mut file = File::open(&filepath)?;
+	/* Read up until we see a `-->` terminating the charm squark */
+	let mut reader = BufReader::new(File::open(&filepath)?);
+	let mut chunk = str!();
 	let mut source = str!();
-	file.read_to_string(&mut source)?;
+
+	loop {
+		chunk.clear();
+		reader.read_line(&mut chunk)?;
+		source.push_str(&chunk);
+
+		if chunk.contains("-->") {
+			break;
+		}
+	}
 
 	let parser = CharmParser::new(&source, filepath.as_ref().to_path_buf(), config);
 	
