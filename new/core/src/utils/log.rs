@@ -1,6 +1,7 @@
 #![allow(unused)]
 
-use super::colours::*;
+use crate::core::*;
+use crate::colours::*;
 
 use std::fmt::Display;
 
@@ -48,3 +49,37 @@ pub fn log_info(msg: impl Display) { println!(" {}› {}",       GREY, msg); }
 pub fn log_ok(msg:   impl Display) { println!(" {}✓ {}",       C, msg); }
 pub fn log_bad(msg:  impl Display) { println!(" {}× {}",       R, msg); }
 pub fn log_hint(msg: impl Display) { println!(" {}= hint: {}", G, msg); }
+
+
+/// Print `err`, with surrounding line delimiters.
+pub fn error(err: SquarkError)
+{
+	match err
+	{
+		SquarkError::Recoverable{ msg, hint, debug }
+		| SquarkError::Unrecoverable{ msg, hint, debug }
+		=> {
+			bad!(msg);
+			
+			for each in debug {
+				info!(each);
+			}
+
+			if !hint.is_empty() {
+				hint!(hint);
+			}
+		}
+		SquarkError::Multiple{ errs } => {
+			for (i, err) in errs.into_iter().enumerate() {
+				if i != 0 { line(); }
+				error(err);
+			}
+		}
+		SquarkError::External{ err, msg } => {
+			bad!(msg);
+			line();
+			println!("{R}{err}");
+		}
+		SquarkError::ABANDON => (),
+	}
+}

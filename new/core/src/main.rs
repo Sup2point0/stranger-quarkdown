@@ -26,7 +26,7 @@ fn main() -> ExitCode
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
-			print_error(e);
+			log::error(e);
 			log::line();
 			println!("{R}squarkup failed! {GREY}{:.2?} ms\n{W}", t.as_secs_f64() * 1000.0);
 			ExitCode::FAILURE
@@ -84,7 +84,7 @@ fn squarkup() -> SquarkResult<bool>
 			return Err(errs);
 		}
 		log::line();
-		print_error(errs);
+		log::error(errs);
 		log::line();
 	}
 	
@@ -116,7 +116,7 @@ fn squarkup() -> SquarkResult<bool>
 				ErrorAction::KILL => return Err(e),
 				ErrorAction::WARN => {
 					log::line();
-					print_error(e);
+					log::error(e);
 					log::line()
 				}
 			}
@@ -134,7 +134,7 @@ fn squarkup() -> SquarkResult<bool>
 				return Err(e);
 			}
 			log::line();
-			print_error(e);
+			log::error(e);
 			log::line();
 		}
 	}
@@ -151,34 +151,4 @@ fn squarkup() -> SquarkResult<bool>
 	}
 	
 	Ok(true)
-}
-
-fn print_error(err: SquarkError)
-{
-	match err
-	{
-		SquarkError::Recoverable{ msg, hint, debug }
-		| SquarkError::Unrecoverable{ msg, hint, debug }
-		=> {
-			log::bad!(msg);
-			for each in debug {
-				log::info!(each);
-			}
-			if !hint.is_empty() {
-				log::hint!(hint);
-			}
-		}
-		SquarkError::Multiple{ errs } => {
-			for (i, err) in errs.into_iter().enumerate() {
-				if i != 0 { log::line(); }
-				print_error(err);
-			}
-		}
-		SquarkError::External{ err, msg } => {
-			log::bad!(msg);
-			log::line();
-			println!("{R}{err}");
-		}
-		SquarkError::ABANDON => (),
-	}
 }
