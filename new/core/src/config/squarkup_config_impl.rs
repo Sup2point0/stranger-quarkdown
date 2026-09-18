@@ -5,9 +5,8 @@ use crate::colours::*;
 use crate::macros::*;
 
 use path_clean::PathClean;
-use regex::regex;
+use regex::{ Regex, regex };
 
-use std::os::windows::raw;
 use std::path::{ Path, PathBuf };
 
 
@@ -121,33 +120,46 @@ impl SquarkupConfig
 						root, raw, "a source folder you specified",
 						fmt!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
+					// TODO check rooted
 					s.paths.sources.push(dir);
 				}
 			}) }
 
-			Self::for_string_array(paths, "paths", "include", "(RegEx patterns)", &mut errs, |pattern, errs| {
-				match regex::Regex::new(pattern) {
-					Ok(compiled) => s.paths.include.push(compiled),
-					Err(e) => {
-						errs.push(SquarkError::External {
+			if let Some(value) = paths.get("include") { catch!(errs => {
+				let values = Self::try_get_array(value, "paths.include", "(of RegEx patterns)")?;
+
+				if !values.is_empty() {
+					s.paths.include.clear();
+				}
+
+				for value in values { catch!(errs => {
+					let pattern = Self::try_get_string(value, "paths.include", "(entry in an array)")?;
+
+					match Regex::new(pattern) {
+						Ok(compiled) => s.paths.include.push(compiled),
+						Err(e) => return Err(SquarkError::External {
 							err: bx!(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
-						});
+						})
 					}
-				}
-			});
+				}) }
+			}) }
 
-			Self::for_string_array(paths, "paths", "exclude", "(RegEx patterns)", &mut errs, |pattern, errs| {
-				match regex::Regex::new(pattern) {
-					Ok(compiled) => s.paths.exclude.push(compiled),
-					Err(e) => {
-						errs.push(SquarkError::External {
+			if let Some(value) = paths.get("exclude") { catch!(errs => {
+				let values = Self::try_get_array(value, "paths.exclude", "(of RegEx patterns)")?;
+
+				for value in values { catch!(errs => {
+					let pattern = Self::try_get_string(value, "paths.exclude", "(entry in an array)")?;
+
+					match Regex::new(pattern) {
+						Ok(compiled) => s.paths.exclude.push(compiled),
+						Err(e) => return Err(SquarkError::External {
 							err: bx!(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
-						});
+						})
 					}
-				}
-			});
+				}) }
+			}) }
 
 			// FIXME??
 			// if let Some(true) = Self::get_bool(&paths, "paths", "default-exclude", "", &mut errs) {
@@ -381,73 +393,6 @@ impl SquarkupConfig
 		}
 		else {
 			Ok(path.clean())
-		}
-	}
-
-	fn for_string_array(
-		data: &toml::Value,
-		category: &'static str,
-		field: &'static str,
-		hint: &'static str,
-		errs: &mut SquarkError,
-		mut callback: impl FnMut(&String, &mut SquarkError),
-	)
-	{
-		match Self::get_string_array(data, category, field, hint)
-		{
-			Ok(None) => (),
-			Ok(Some(values)) => for value in values {
-				match Self::require_string_entry(value, category, field, hint) {
-					Ok(value) => callback(value, errs),
-					Err(e) => { errs.push(e); }
-				}
-			}
-			Err(e) => { errs.push(e); }
-		}
-	}
-
-	/// Validate that `data[field]` is an array.
-	fn get_string_array<'d>(
-		data: &'d toml::Value,
-		category: &'static str,
-		field: &'static str,
-		hint: &'static str,
-	) -> SquarkResult<Option<&'d Vec<toml::Value>>>
-	{
-		match data.get(field)
-		{
-			Some(toml::Value::Array(values)) => Ok(Some(values)),
-			None => Ok(None),
-
-			Some(v) => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for {Y}{category}.{field}{R}"),
-				hint: fmt!("{Y}{category}.{field}{G} must be an array of strings {GREY}{hint}"),
-				debug: vec![
-					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-				],
-			}),
-		}
-	}
-
-	/// Validate that `data` is a string in an array, for `category.field`.
-	fn require_string_entry<'d>(
-		data: &'d toml::Value,
-		category: &'static str,
-		field: &'static str,
-		hint: &'static str,
-	) -> SquarkResult<&'d String>
-	{
-		match data
-		{
-			toml::Value::String(value) => Ok(value),
-
-			v => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for an entry of {Y}{category}.{field}{R}"),
-				hint: fmt!("{Y}{category}.{field}{G} entries must be strings {GREY}{hint}"),
-				debug: vec![
-					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-				],
-			}),
 		}
 	}
 }
