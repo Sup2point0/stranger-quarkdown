@@ -53,9 +53,10 @@ fn squarkup() -> SquarkResult<bool>
 	log::ok!(slash!("found your site: {B}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();
+	
+	// == PARSE == //
 	log::is!("finding files to squarkup...");
 
-	// == PARSE == //
 	let mut errs = SquarkError::multiple();
 	let mut tried = 0;
 	
@@ -84,14 +85,14 @@ fn squarkup() -> SquarkResult<bool>
 	if tried == 0 {
 		return Err(SquarkError::Unrecoverable {
 			msg: str!("no files found to squarkup"),
-			hint: fmt!("check your {W}paths.sources{G} is configured correctly?"),
+			hint: fmt!("check your {W}paths.sources{G}, {W}paths.include{G}, {W}paths.exclude{G} are configured correctly?"),
 			debug: vec![],
 		});
 	}
 	else if site_data.stats.active_pages == 0 {
 		return Err(SquarkError::Unrecoverable {
 			msg: str!("no active files found"),
-			hint: fmt!("check your fields have {W}<!-- #SQUARK live!{G} under their heading"),
+			hint: fmt!("check your files have {W}<!-- #SQUARK live!{G} under their heading"),
 			debug: vec![
 				fmt!("parsed {tried} files"),
 			],
@@ -112,13 +113,15 @@ fn squarkup() -> SquarkResult<bool>
 	// == RENDER == //
 	log::is!("rendering...");
 
-	for page in site_data.pages() {
-		let r = renderer::render(page, &site_data, &config);
+	let mut errs = SquarkError::multiple();
 
-		if let Err(e) = r {
-			e.depends(&config)?;
-		}
+	for page in site_data.pages() {
+		catch!(errs => {
+			renderer::render(page, &site_data, &config)?;
+		});
 	}
+
+	errs.depends(&config)?;
 
 	// == SITE DATA == //
 	if let Some(ref dest) = config.out.site_data_path {
