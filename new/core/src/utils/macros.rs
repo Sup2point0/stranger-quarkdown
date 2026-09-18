@@ -15,17 +15,23 @@ macro_rules! fmt {
 #[macro_export]
 macro_rules! slash {
 	($msg:literal, $path:expr) => {
-		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
-			fmt!($msg, normalised)
-		} else {
-			fmt!($msg, $path.display())
+		{
+			let path: &std::path::Path = &$path;
+
+			match path_slash::PathExt::to_slash(path) {
+				Some(p) => format!($msg, p),
+				None    => format!($msg, path.display()),
+			}
 		}
 	};
 	($msg:literal, $path:expr, $($args:tt)*) => {
-		if let Some(normalised) = path_slash::PathBufExt::to_slash(&$path) {
-			fmt!($msg, normalised, $($args)*)
-		} else {
-			fmt!($msg, $path.display(), $($args)*)
+		{
+			let path: &std::path::Path = &$path;
+
+			match path_slash::PathExt::to_slash(path) {
+				Some(p) => format!($msg, p, $($args)*),
+				None    => format!($msg, path.display(), $($args)*),
+			}
 		}
 	};
 } pub use slash;
@@ -36,13 +42,6 @@ macro_rules! to {
 	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
 	($($args:tt)*) => { || format!($($args)*) };
 } pub use to;
-
-/// Lazily produce a string for an error path.
-#[macro_export]
-macro_rules! when {
-	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
-	($($args:tt)*) => { || format!($($args)*) };
-} pub use when;
 
 /// Lazily produce a string for an error path.
 #[macro_export]
