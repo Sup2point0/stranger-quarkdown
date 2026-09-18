@@ -1,0 +1,10 @@
+[paths]
+site = "../../test-project/"
+include = ['/~[^/]+\.md']
+
+[out]
+folder = "src/routes/sources/include/"
+
+[errors]
+strict = false
+on-error = "kill"

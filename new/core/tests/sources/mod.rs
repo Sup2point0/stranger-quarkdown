@@ -25,7 +25,18 @@ use assertables::*;
 	assert!( !TEST_SITE.join("sources/fixed/ignore").exists() );
 }
 
-/// Squarkdown applies `paths.exclude` patterns.
+/// Squarkdown respects `paths.include` patterns.
+#[test] fn include()
+{
+	clear_files("sources/include").unwrap();
+	assert!( squarkup_from("sources/include").success() );
+
+	let main = read_file("sources/include/main/+page.svx");
+	assert_contains!( main, "squarkup" );
+	assert!( !TEST_SITE.join("sources/include/ignore").exists() );
+}
+
+/// Squarkdown respects `paths.exclude` patterns.
 #[test] fn exclude()
 {
 	clear_files("sources/exclude").unwrap();
