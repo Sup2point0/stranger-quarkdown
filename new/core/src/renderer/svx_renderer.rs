@@ -34,8 +34,8 @@ pub fn render(
 		fs::create_dir_all(&renderer.dest_folder)?;
 	}
 
-	catch!(errs => { renderer.render()?; });
 	catch!(errs => { renderer.render_page_ts()?; });
+	catch!(errs => { renderer.render_page_svx()?; });
 
 	errs.or(())
 }
@@ -95,7 +95,7 @@ pub(super) struct Renderer<'d>
 	pub(super) ctx: ContextStack<RenderCtx>,
 
 	/// Accumulated errors during rendering.
-	pub(super) errors: Vec<SquarkError>,  // TODO use SquarkError::multiple
+	pub(super) errors: SquarkError,
 }
 
 /// Core interface.
@@ -113,14 +113,14 @@ impl<'d> Renderer<'d>
 			page,
 			site,
 			config,
-			errors: vec![],
+			errors: SquarkError::multiple(),
 			dest_file: dest_folder.join(&config.out.file_name),
 			dest_folder,
 			ctx: ContextStack::new(),
 		}
 	}
 
-	fn render(&mut self) -> SquarkResult
+	fn render_page_svx(mut self) -> SquarkResult
 	{	
 		log::info!(
 			"rendering to: {GREY1}{}{GREY}/{}",
@@ -139,11 +139,7 @@ impl<'d> Renderer<'d>
 			target.write_all(output.as_bytes())?;
 		}
 
-		if self.errors.is_empty() {
-			Ok(())
-		} else {
-			Err(SquarkError::Multiple { errs: self.errors.drain(..).collect() })
-		}
+		self.errors.or(())
 	}
 
 	pub(super) fn render_from(&mut self, mut source: String) -> String
@@ -363,7 +359,9 @@ impl Renderer<'_>
 	{
 		/* We only rewrite relative links to Markdown files */
 		if !dest_url.contains(".md")
-		|| dest_url.starts_with("http") {
+		|| dest_url.contains("://")
+		|| dest_url.starts_with("http")
+		|| dest_url.starts_with("mailto:") {
 			return;
 		}
 
@@ -382,7 +380,7 @@ impl Renderer<'_>
 		let their_source_path = own_source_folder.join(their_file_name).clean();
 
 		if !their_source_path.exists() {
-			return self.errors.push(SquarkError::Recoverable {
+			self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found broken link: {W}({dest_url})"),
 				hint: str!(),
 				debug: vec![
@@ -391,6 +389,7 @@ impl Renderer<'_>
 					str!(slash!("resolved to: {}", their_source_path)),
 				]
 			});
+			return;
 		};
 
 		// 2. find where the target file will be exported to
