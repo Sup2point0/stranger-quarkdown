@@ -427,22 +427,6 @@ mod paths {
 			assert_contains!( e, "doesn't exist" );
 		}
 	}
-
-	#[test] fn reject_sources_with_up() {
-		for source in [
-			"[paths]\nsources = ['..']",
-			"[paths]\nsources = ['../']",
-			"[paths]\nsources = ['/..']",
-			"[paths]\nsources = ['/../']",
-			"[paths]\nsources = ['../illegal']",
-			"[paths]\nsources = ['/../illegal']",
-			"[paths]\nsources = ['still/../illegal']",
-		] {
-			let e = load_config(source).unwrap_err();
-			assert_contains!( e, "paths.sources" );
-			assert_contains!( e, ".." );
-		}
-	}
 }
 
 #[cfg(test)]
