@@ -20,17 +20,18 @@ pub fn parse(
 	config: &SquarkupConfig,
 ) -> SquarkResult<Option<PageData>>
 {
-	/* Read up until we see a `-->` terminating the charm squark */
 	let mut reader = BufReader::new(File::open(&filepath)?);
-	let mut chunk = str!();
 	let mut source = str!();
-
+	
+	/* Read up until we see a `-->` terminating the charm squark */
 	loop {
-		chunk.clear();
-		reader.read_line(&mut chunk)?;
-		source.push_str(&chunk);
+		let i = source.len();
 
-		if chunk.contains("-->") {
+		if reader.read_line(&mut source)? == 0 {
+			break;
+		};
+
+		if source[i..].contains("-->") {
 			break;
 		}
 	}
