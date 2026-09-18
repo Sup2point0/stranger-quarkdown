@@ -28,10 +28,10 @@ pub fn resolve_config(root: &Path) -> SquarkResult<SquarkupConfig>
 			log::info!("read successful!");
 			log::info!("validating config...");
 			SquarkupConfig::try_from_toml(data, root)
-		},
+		}
 		Extension::JSON => {
 			unimplemented!()
-		},
+		}
 	}?;
 
 	log::ok!("config looks good, all set!");

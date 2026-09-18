@@ -1,11 +1,13 @@
-use crate::{
-	macros::*,
-};
+use crate::config::*;
+use crate::log;
+use crate::macros::*;
 
+
+/// An operation which may error with a [`SquarkError`].
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 
 
-/// The global error type used throughout the squarkup pipeline.
+/// The global error type of [`SquarkResult`], used throughout the squarkup pipeline.
 /// 
 /// Squarkdown needs to handle errors in many different ways:
 /// 
@@ -20,7 +22,7 @@ pub enum SquarkError
 {
 	/// The current operation can be abandoned.
 	/// 
-	/// Currently only used in the parser for speculative parsing.
+	/// This is used in the parser for speculative parsing, and elsewhere for skipping files.
 	ABANDON,
 
 	/// A non-fatal error which Squarkdown can recover from, sorta like a warning.
@@ -140,8 +142,7 @@ impl SquarkError
 
 	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return `t`.
 	/// 
-	/// ```rust
-	/// # use squarkdown::core::*;
+	/// ```ignore
 	/// fn may_fail() -> SquarkResult<usize>
 	/// {
 	///    let errs = SquarkError::multiple();
@@ -160,8 +161,7 @@ impl SquarkError
 
 	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return the lazily evaluated `f`.
 	/// 
-	/// ```rust
-	/// # use squarkdown::core::*;
+	/// ```ignore
 	/// fn may_fail() -> SquarkResult<String>
 	/// {
 	///    let errs = SquarkError::multiple();
@@ -178,6 +178,34 @@ impl SquarkError
 		if self.is_fine() {
 			Ok(f())
 		} else {
+			Err(self)
+		}
+	}
+
+	/// Propagate a non-empty [`SquarkError`], depending on `config`.
+	/// 
+	/// ```ignore
+	/// fn may_fail(config: &SquarkupConfig) -> SquarkResult<String>
+	/// {
+	///    let err = SquarkError::Recoverable {..};
+	/// 
+	///    // If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
+	///    // If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
+	///    err.or_depends(2, config)
+	/// }
+	/// ```
+	pub fn or_depends<T>(self, t: T, config: &SquarkupConfig) -> SquarkResult<T>
+	{
+		if self.is_fine() {
+			Ok(t)
+		}
+		else if config.errors.on_error == ErrorAction::WARN {
+			log::line();
+			log::error(self);
+			log::line();
+			Ok(t)
+		}
+		else {
 			Err(self)
 		}
 	}
