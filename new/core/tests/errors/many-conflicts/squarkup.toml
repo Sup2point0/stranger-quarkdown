@@ -1,8 +1,8 @@
 [paths]
-site = "../../test-project/"
+site = "."
 
 [out]
-folder = "src/routes/errors/many-conflicts/"
+folder = "."
 
 [errors]
 strict = true
