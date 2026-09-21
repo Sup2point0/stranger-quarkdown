@@ -1,6 +1,6 @@
 //! This module provides utility constants for unit tests.
 
-use crate::core::*;
+use crate::prelude::*;
 
 use lazy_static::lazy_static;
 use path_macro::path;

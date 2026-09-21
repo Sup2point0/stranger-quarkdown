@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::core::*;
+use crate::prelude::*;
 use crate::colours::*;
 
 use std::fmt::Display;

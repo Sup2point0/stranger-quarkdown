@@ -12,7 +12,7 @@ pub mod utils;
 pub use utils::{ log, colours, macros };
 
 /// Central Squarkdown types packaged for convenience.
-pub mod core
+pub mod prelude
 {
 	pub use super::config::{ SquarkupConfig };
 	pub use super::parser::{ CharmParser };

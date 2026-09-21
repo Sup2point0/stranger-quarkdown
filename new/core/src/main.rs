@@ -1,5 +1,5 @@
 use squarkdown::*;
-use squarkdown::core::*;
+use squarkdown::prelude::*;
 use squarkdown::colours::*;
 
 use std::fs::File;
