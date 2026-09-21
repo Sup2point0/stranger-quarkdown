@@ -1,3 +1,4 @@
+/// A first-in last-out stack for tracking contexts, with an always-active base context.
 #[derive(Clone, Default, Debug)]
 pub struct ContextStack<Ctx>
 {

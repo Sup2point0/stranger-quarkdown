@@ -12,12 +12,16 @@ use std::path::PathBuf;
 pub struct SquarkupConfig
 {
 	pub paths:  PathsConfig,
+
+	/// Options for output.
 	pub out: OutConfig,
 
 	/// Rendering customisations.
 	pub format: FormatConfig,
 
 	pub styles: StylesConfig,
+
+	/// Options for asset copying.
 	pub assets: AssetsConfig,
 	pub fonts: FontsConfig,
 

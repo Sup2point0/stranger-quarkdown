@@ -1,3 +1,5 @@
+//! This module implements the parser for the charm squark, which turns `<!-- #SQUARK -->` metadata into a [`PageData`] object.
+
 mod parser_core;
 mod charm_parser; pub use charm_parser::{ CharmParser };
 mod shared; use shared::{ ctx };

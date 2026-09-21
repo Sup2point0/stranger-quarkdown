@@ -469,10 +469,20 @@ mod assets {
 	#[test] fn accept() {
 		let c = load_config(indoc! {"
 			[assets]
-			folder = '.test-assets'
+			folder = 'static'
 		"}).unwrap().assets;
 
-		assert_eq!( c.folder, Some(path!(*TESTS / ".test-assets")) );
+		assert_eq!( c.folder, Some(path!(*TESTS / "static")) );
+	}
+
+	#[test] fn reject() {
+		let e = load_config(indoc! {"
+			[assets]
+			folder = 'nonexistent'
+		"});
+
+		assert_err!( &e );
+		assert_contains!( e.unwrap_err(), "assets.folder" );
 	}
 }
 
