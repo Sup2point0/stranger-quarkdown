@@ -64,13 +64,13 @@ impl SquarkupConfig
 
 	/// Construct a `SquarkupConfig` from TOML `data`, with values fully validated.
 	/// 
-	/// Returns `Err(SquarkError::Multiple)` only if nonzero errors are encountered.
+	/// Returns [`SquarkError::Multiple`] if any validation errors are encountered.
 	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
 		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with *user-friendly*, *aggregated* error messages (rather than just a schema violation) we have to handroll it all ourselves */
 
 		/* NOTE:
-			We're treating an invalid config as fatal, so `errors.on_error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything *destructive*, tho)
+			We're treating an invalid config as fatal, so `errors.on-error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything *destructive*, tho)
 			
 			However, better than repeatedly failing with fatal errors is to report all of them at once, so *if possible*, we'll still process the entire config and aggregate any errors we encounter in `errs`, only returning `Err()` once we reach the end.
 		*/
@@ -86,12 +86,12 @@ impl SquarkupConfig
 		if let Some(paths) = data.get("paths")
 		{
 			Self::check_is_table(paths, "paths",
-				hints!("try setting {W}```\n\n\t[paths]\n\tsite = '/your-site/'\n\n```")
+				hints!("try setting {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
 			)?;
 
 			if let Some(value) = paths.get("site") {
 				let dir = Self::try_get_string(value, "paths.site", "(filepath relative to your project root)")?;
-				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", fmt!("{W}paths.site{G} is relative to your project root"))?;
+				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
 			}
 		}
 
@@ -104,7 +104,7 @@ impl SquarkupConfig
 		if let Some(paths) = data.get("paths")
 		{
 			Self::check_is_table(paths, "paths",
-				hints!("write your config like this: {W}```\n\n\t[paths]\nsources = ['/']\n\n```")
+				hints!("write your config like this: {W}```\n\t[paths]\n\tsources = ['/']\n```")
 			)?;
 
 			if let Some(value) = paths.get("sources") { catch!(errs => {
@@ -118,7 +118,7 @@ impl SquarkupConfig
 					let raw = Self::try_get_string(value, "paths.sources", "(entry in an array)")?;
 					let dir = Self::try_resolve_folder(
 						root, raw, "a source folder you specified",
-						fmt!("{Y}paths.sources{G} folders are relative from your project root"),
+						hints!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
 					// TODO check rooted
 					s.paths.sources.push(dir);
@@ -166,12 +166,12 @@ impl SquarkupConfig
 		if let Some(out) = data.get("out")
 		{
 			Self::check_is_table(out, "out",
-				hints!("write your config like this: {W}```\n\n\t[out]\nfile = '+page.svx'\n\n```")
+				hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
 			)?;
 
 			if let Some(value) = out.get("folder") { catch!(errs => {
-				let raw = Self::try_get_string(value, "out.folder", "(folder relative to your site folder)")?;
-				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", fmt!("{W}out.folder{G} is relative to your site folder"))?;
+				let raw = Self::try_get_string(value, "out.folder", "(folder relative to your SvelteKit site)")?;
+				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
 				s.out.folder = dir;
 			}) }
 
@@ -220,7 +220,7 @@ impl SquarkupConfig
 		if let Some(format) = data.get("format")
 		{
 			Self::check_is_table(format, "format",
-				hints!("write your config like this: {W}```\n\n\t[format]\n\npreserve-comments = true\n\n```")
+				hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
 			)?;
 
 			let c = &mut s.format;
@@ -242,6 +242,19 @@ impl SquarkupConfig
 		// StylesConfig
 
 		// AssetsConfig
+		if let Some(assets) = data.get("assets")
+		{
+			Self::check_is_table(assets, "assets",
+				hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
+			)?;
+
+			if let Some(value) = assets.get("folder") { catch!(errs => {
+				let dir = Self::try_get_string(value, "assets.folder", "(folder relative to your project root)")?;
+				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{W}assets.folder{G} is relative to your project root"))?;
+
+				s.assets.folder = Some(folder);
+			}) }
+		}
 
 		// FontsConfig
 
@@ -249,7 +262,7 @@ impl SquarkupConfig
 		if let Some(errors) = data.get("errors")
 		{
 			Self::check_is_table(errors, "errors",
-				hints!("write your config like this: {W}```\n\n\t[errors]\n\non-error = 'kill'\n\n```")
+				hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
 			)?;
 			
 			if let Some(value) = errors.get("strict") { catch!(errs => {
@@ -386,7 +399,7 @@ impl SquarkupConfig
 		root: &Path,
 		dir: &str,
 		location: &'static str,
-		hint: String,
+		hint: impl FnOnce() -> String,
 	) -> SquarkResult<PathBuf>
 	{
 		let path = root.join(utils::to_rel(dir));
@@ -394,7 +407,7 @@ impl SquarkupConfig
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {
 				msg: fmt!("the folder you specified {location} doesn't exist!"),
-				hint,
+				hint: hint(),
 				debug: vec![
 					slash!("{GREY1}{}{GREY} is not a valid directory", path),
 				],
@@ -438,13 +451,27 @@ mod paths {
 
 	#[test] fn reject_nonexistent_sources() {
 		for source in [
-			"[paths]\nsources = ['nonexistent']\n\n[errors]\non-error='kill'",
-			"[paths]\nsources = ['test-project/nonexistent']\n\n[errors]\non-error='kill'",
+			"[paths]\nsources = ['nonexistent']\n\t[errors]\non-error='kill'",
+			"[paths]\nsources = ['test-project/nonexistent']\n\t[errors]\non-error='kill'",
 		] {
 			let e = load_config(source);
 			assert_err!( &e );
 			assert_contains!( e.unwrap_err(), "doesn't exist" );
 		}
+	}
+}
+
+#[cfg(test)]
+mod assets {
+	use super::*;
+
+	#[test] fn accept() {
+		let c = load_config(indoc! {"
+			[assets]
+			folder = '.test-assets'
+		"}).unwrap().assets;
+
+		assert_eq!( c.folder, Some(dir!(TESTS / ".test-assets")) );
 	}
 }
 
