@@ -24,7 +24,10 @@ lazy_static! {
 		= path!(std::env::current_dir().unwrap() / "tests");
 	
 	pub static ref TEST_SITE: PathBuf
-		= path!(*TESTS / "test-project/src/routes");
+		= path!(*TESTS / "test-project");
+	
+	pub static ref TEST_ROUTES: PathBuf
+		= path!(*TEST_SITE / "src/routes");
 }
 
 
@@ -77,7 +80,7 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 /// Recursively delete all files under `path`, except `.gitkeep`.
 pub fn clear_files(path: &str) -> io::Result<()>
 {
-	let path = path!(*TEST_SITE / path);
+	let path = path!(*TEST_ROUTES / path);
 	if !path.exists() {
 		panic!("{}", slash!("no folder found at: {}", path));
 	}
@@ -100,7 +103,7 @@ pub fn clear_files(path: &str) -> io::Result<()>
 /// Read the content of the file at `path`, relative to `tests/test-project/src/routes/`.
 pub fn read_file(path: &str) -> String
 {
-	let path = path!(*TEST_SITE / path);
+	let path = path!(*TEST_ROUTES / path);
 	if !path.exists() {
 		panic!("{}", slash!("no file found at: {}", path));
 	}

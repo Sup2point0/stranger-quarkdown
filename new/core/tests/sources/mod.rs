@@ -12,7 +12,7 @@ use path_macro::path;
 
 	let main = read_file("sources/root-only/main/+page.svx");
 	assert_contains!( main, "squarkup" );
-	assert_not!( path!(*TEST_SITE / "sources/root-only/ignore").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/root-only/ignore").exists() );
 }
 
 /// Squarkdown respects `paths.sources`.
@@ -23,7 +23,7 @@ use path_macro::path;
 
 	let main = read_file("sources/fixed/main/+page.svx");
 	assert_contains!( main, "squarkup" );
-	assert_not!( path!(*TEST_SITE / "sources/fixed/ignore").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/fixed/ignore").exists() );
 }
 
 /// Squarkdown respects `paths.include` patterns.
@@ -34,7 +34,7 @@ use path_macro::path;
 
 	let main = read_file("sources/include/main/+page.svx");
 	assert_contains!( main, "squarkup" );
-	assert_not!( path!(*TEST_SITE / "sources/include/ignore").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/include/ignore").exists() );
 }
 
 /// Squarkdown respects `paths.exclude` patterns.
@@ -48,11 +48,11 @@ use path_macro::path;
 	assert_contains!( main, "squarkup" );
 	assert_contains!( side, "squarkup" );
 
-	assert_not!( path!(*TEST_SITE / "sources/exclude/ignore").exists() );
-	assert_not!( path!(*TEST_SITE / "sources/exclude/nested/ignore").exists() );
-	assert_not!( path!(*TEST_SITE / "sources/exclude/nested/bad1").exists() );
-	assert_not!( path!(*TEST_SITE / "sources/exclude/nested/bad2").exists() );
-	assert_not!( path!(*TEST_SITE / "sources/exclude/nested/bad3").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/exclude/ignore").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/exclude/nested/ignore").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/exclude/nested/bad1").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/exclude/nested/bad2").exists() );
+	assert_not!( path!(*TEST_ROUTES / "sources/exclude/nested/bad3").exists() );
 	
 	let main = read_file("sources/exclude/nested/bad/but/keep/+page.svx");
 	assert_contains!( main, "squarkup" );
