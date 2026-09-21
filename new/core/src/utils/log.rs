@@ -78,7 +78,7 @@ pub fn error(err: SquarkError)
 		SquarkError::External{ err, msg } => {
 			bad!(msg);
 			line();
-			println!("{R}{err}");
+			println!("{R}{err:?}");
 		}
 		SquarkError::ABANDON => (),
 	}

@@ -32,14 +32,14 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 			// skip ignored folders and files
 			.filter_entry(|e| should_include(e, config))
 
-			// yield `SquarkError::External` errors, not walkdir errors
-			.map(|e| e.map_err(err!()))
-
 			// don't yield folders, only yield files
 			.filter(|e| !e.as_ref().is_ok_and(|entry| entry.file_type().is_dir()))
 
 			// yield paths, not walkdir entries
-			.map(|e| e.map(|entry| entry.into_path()))
+			.map(|entry| match entry {
+				Ok(e) => Ok(e.into_path()),
+				Err(e) => Err(SquarkError::external(e)),
+			})
 	})
 }
 
