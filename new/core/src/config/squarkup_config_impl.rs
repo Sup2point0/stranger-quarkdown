@@ -3,8 +3,9 @@ use crate::core::*;
 use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
-
 use path_clean::PathClean;
+
+use path_macro::path;
 use regex::{ Regex, regex };
 
 use std::path::{ Path, PathBuf };
@@ -34,7 +35,7 @@ impl SquarkupConfig
 				],
 			},
 			out: OutConfig {
-				folder: dir!(site / "src/routes/"),
+				folder: path!(site / "src/routes/"),
 				file_name: str!("+page.svx"),
 				render_page_ts: true,
 				shorter_fields: false,

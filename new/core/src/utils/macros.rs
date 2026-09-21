@@ -72,7 +72,7 @@ macro_rules! bx {
 #[macro_export]
 macro_rules! dir {
 	($base:literal $(/ $part:expr)*) => { $base$(.join($part))* };
-	($base:ident $($field:ident).* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
+	($base:ident $(.$field:ident)* $(/ $part:expr)*) => { $base$(.$field)*$(.join($part))* };
 } pub use dir;
 
 #[macro_export]
@@ -103,6 +103,9 @@ macro_rules! catch
 		if let Err(e) = (|| -> SquarkResult<_> { $eval; Ok(()) })() {
 			$errs.push(e);
 		}
+	};
+	($($body:tt)*) => {
+		(|| -> SquarkResult<_> { $($body)*; Ok(()) })()
 	};
 } pub use catch;
 
