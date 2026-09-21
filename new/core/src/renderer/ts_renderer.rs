@@ -4,6 +4,8 @@ use crate::log;
 use crate::utils;
 use crate::colours::*;
 
+use path_macro::path;
+
 use std::fs::File;
 use std::io::{ BufWriter, Write };
 
@@ -18,7 +20,7 @@ impl Renderer<'_>
 			utils::display_rel(&self.dest_folder, &self.config.paths.root),
 		);
 		
-		let dest = self.dest_folder.join("+page.ts");
+		let dest = path!(self.dest_folder / "+page.ts");
 		
 		if dest.exists() {
 			self.err_exists(&dest)?;

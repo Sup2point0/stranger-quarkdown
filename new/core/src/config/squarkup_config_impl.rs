@@ -198,7 +198,7 @@ impl SquarkupConfig
 
 			if let Some(value) = out.get("site-data-path") { catch!(errs => {
 				let raw = Self::try_get_string(value, "out.site-data-path", "(filepath including `.json` extension)")?;
-				let path = site.join(utils::to_rel(raw));
+				let path = path!(site / utils::to_rel(raw));
 
 				// TODO cleanup with helper?
 				let folder = path.parent().expect("site directory always has a parent folder");
@@ -403,7 +403,7 @@ impl SquarkupConfig
 		hint: impl FnOnce() -> String,
 	) -> SquarkResult<PathBuf>
 	{
-		let path = root.join(utils::to_rel(dir));
+		let path = path!(root / utils::to_rel(dir));
 
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {

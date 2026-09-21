@@ -6,6 +6,7 @@ use crate::colours::*;
 use crate::macros::*;
 
 use path_clean::PathClean;
+use path_macro::path;
 use time::Date;
 use time::macros::format_description;
 
@@ -57,7 +58,7 @@ impl PageData
 		let mut destination = PathBuf::new();
 
 		if let Some(dest) = Self::take1(&mut fields, "destination", "dest") {
-			destination = config.out.folder.join(utils::to_rel(&dest)).clean();
+			destination = path!(config.out.folder / utils::to_rel(&dest)).clean();
 
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {

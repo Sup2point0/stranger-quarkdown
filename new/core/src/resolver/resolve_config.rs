@@ -3,6 +3,8 @@ use crate::log;
 use crate::colours::*;
 use crate::macros::*;
 
+use path_macro::path;
+
 use std::error::Error;
 use std::fs::{ File };
 use std::io::{ Read };
@@ -63,22 +65,22 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 
 fn find_config_from(folder: &Path) -> Option<(PathBuf, Extension)>
 {
-	let file = folder.join("squarkup.toml");
+	let file = path!(folder / "squarkup.toml");
 	if file.is_file() {
 		return Some((file, Extension::TOML));
 	}
 	
-	let file = folder.join("squarkdown.toml");
+	let file = path!(folder / "squarkdown.toml");
 	if file.is_file() {
 		return Some((file, Extension::TOML));
 	}
 	
-	let file = folder.join("squarkup.json");
+	let file = path!(folder / "squarkup.json");
 	if file.is_file() {
 		return Some((file, Extension::JSON));
 	}
 	
-	let file = folder.join("squarkdown.json");
+	let file = path!(folder / "squarkdown.json");
 	if file.is_file() {
 		return Some((file, Extension::JSON));
 	}

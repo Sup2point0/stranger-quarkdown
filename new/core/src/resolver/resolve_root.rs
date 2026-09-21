@@ -2,6 +2,8 @@ use crate::core::*;
 use crate::colours::*;
 use crate::macros::*;
 
+use path_macro::path;
+
 use std::path::PathBuf;
 
 
@@ -15,13 +17,13 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 	let cwd = std::env::current_dir().map_err(err!())?;
 
 	for dir in cwd.ancestors() {
-		if all!(dir.join(".squarkdown") => .exists(), .is_dir()) {
+		if path!(dir / ".squarkdown").is_dir() {
 			return Ok(dir.to_owned());
 		}
-		if all!(dir.join("squarkup.toml") => .exists(), .is_file()) {
+		if path!(dir / "squarkup.toml").is_file() {
 			return Ok(dir.to_owned());
 		}
-		if all!(dir.join("squarkup.json") => .exists(), .is_file()) {
+		if path!(dir / "squarkup.json").is_file() {
 			return Ok(dir.to_owned());
 		}
 

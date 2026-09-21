@@ -2,6 +2,7 @@ use crate::core::*;
 use crate::log;
 use crate::macros::*;
 
+use path_macro::path;
 use path_slash::PathExt;
 
 use std::path::PathBuf;
@@ -16,11 +17,12 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 		/* NOTE: "/" is a special case that means 'root-only', without recursing into directories */
 		let walker = {
 			if *source == config.paths.root {
-				log::info!(slash!("searching non-recursively from: {}", *source));
+				log::info!(slash!("searching non-recursively from: {}", config.paths.root));
 				walkdir::WalkDir::new(&config.paths.root).max_depth(1)
 			} else {
-				log::info!(slash!("searching recursively from: {}", *source));
-				walkdir::WalkDir::new(config.paths.root.join(source))
+				let path = path!(config.paths.root / source);
+				log::info!(slash!("searching recursively from: {}", path));
+				walkdir::WalkDir::new(path)
 			}
 		};
 

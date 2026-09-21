@@ -9,6 +9,7 @@ use crate::macros::*;
 
 use lazy_static::lazy_static;
 use path_clean::PathClean;
+use path_macro::path;
 use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
 use regex::Regex;
@@ -85,14 +86,14 @@ impl<'d> Renderer<'d>
 		config: &'d SquarkupConfig,
 	) -> Self
 	{
-		let dest_folder = config.out.folder.join(&page.destination);
+		let dest_folder = path!(config.out.folder / page.destination);
 
 		Self {
 			page,
 			site,
 			config,
 			errors: SquarkError::multiple(),
-			dest_file: dest_folder.join(&config.out.file_name),
+			dest_file: path!(dest_folder / config.out.file_name),
 			dest_folder,
 			ctx: ContextStack::new(),
 		}
@@ -370,7 +371,7 @@ impl Renderer<'_>
 		let own_source_folder = self.page.filepath.parent()
 			.expect("active files are always inside a folder");
 
-		let their_source_path = own_source_folder.join(their_file_name).clean();
+		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
 		if !their_source_path.exists() {
 			self.errors.push(SquarkError::Recoverable {
