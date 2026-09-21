@@ -1,10 +1,13 @@
 use crate::core::*;
+use crate::macros::*;
+
+use path_macro::path;
 
 use std::path::PathBuf;
 
 
 /// Find all assets to copy to SvelteKit's `static/` directory, as specified by the user's `config.assets.folder`, `.site-assets-folder` and `.extensions`.
-pub fn resolve_raw_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<PathBuf>>
+pub fn resolve_raw_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<(PathBuf, PathBuf)>>
 {
 	config.assets.folder.iter().flat_map(|assets_folder|
 	{
@@ -18,7 +21,13 @@ pub fn resolve_raw_assets(config: &SquarkupConfig) -> impl Iterator<Item = Squar
 
 			// yield paths, not walkdir entries
 			.map(|entry| match entry {
-				Ok(e) => Ok(e.into_path()),
+				Ok(e) => {
+					let path = e.into_path();
+					let path_rel = path.strip_prefix(&config.paths.root).map_err(err!())?;
+					let dest = path!(config.paths.site / "static" / path_rel);
+
+					Ok((path, dest))
+				},
 				Err(e) => Err(SquarkError::external(e)),
 			})
 	})

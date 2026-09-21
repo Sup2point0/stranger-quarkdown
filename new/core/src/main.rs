@@ -45,6 +45,8 @@ fn squarkup() -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
 
+	let args: Vec<String> = std::env::args().collect();
+
 	// == SETUP == //
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
@@ -57,13 +59,12 @@ fn squarkup() -> SquarkResult
 	// == PARSE == //
 	log::is!("finding files to squarkup...");
 
-	let mut errs = SquarkError::multiple();
 	let mut tried = 0;
 	
 	for filepath in resolver::resolve_files(&config) {
 		tried += 1;
 
-		catch!(errs => {
+		let r = catch! {
 			let filepath = filepath?;
 			let r = parser::parse(&filepath, &config)?;
 			
@@ -76,10 +77,12 @@ fn squarkup() -> SquarkResult
 					filepath.file_name().unwrap().to_string_lossy(),
 				));
 			}
-		});
-	}
+		};
 
-	errs.depends(&config)?;
+		if let Err(e) = r {
+			e.depends(&config)?;
+		}
+	}
 	
 	if tried == 0 {
 		return Err(SquarkError::Unrecoverable {
@@ -101,6 +104,7 @@ fn squarkup() -> SquarkResult
 		log::ok!("found {} active files to squarkup", site_data.stats.active_pages);
 	}
 
+	// == CHECK == //
 	if config.errors.strict {
 		let r = site_data.check_conflicts(&config);
 		
@@ -117,6 +121,25 @@ fn squarkup() -> SquarkResult
 
 		if let Err(e) = r {
 			e.depends(&config)?;
+		}
+	}
+
+	// == ASSETS == //
+	if args.iter().any(|arg| arg == "assets") {
+		log::is!("copying assets...");
+
+		for paths in resolver::resolve_raw_assets(&config) {
+			let r = catch! {
+				let (source_path, dest_path) = paths?;
+				log::info!(slash!("copying {}", source_path));
+
+				std::fs::create_dir_all(&dest_path)?;
+				std::fs::copy(&source_path, &dest_path)?;
+			};
+
+			if let Err(e) = r {
+				e.depends(&config)?;
+			}
 		}
 	}
 
