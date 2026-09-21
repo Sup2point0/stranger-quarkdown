@@ -1,3 +1,5 @@
+//! This module provides utility constants for unit tests.
+
 use crate::core::*;
 
 use lazy_static::lazy_static;
@@ -20,11 +22,3 @@ lazy_static!
 
 	pub static ref TEST_SITE: SiteData = SiteData::new();
 }
-
-
-#[macro_export]
-macro_rules! assert_not {
-	($($tokens:tt)*) => {
-		assert!( !($($tokens)*) )
-	};
-} pub use assert_not;

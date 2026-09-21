@@ -10,6 +10,15 @@ use std::path::{ PathBuf };
 use std::process;
 
 
+#[macro_export]
+macro_rules! assert_not {
+	($($tokens:tt)*) => {
+		assert!( !($($tokens)*) )
+	};
+}
+
+
+
 lazy_static! {
 	pub static ref TESTS: PathBuf
 		= path!(std::env::current_dir().unwrap() / "tests");
@@ -25,7 +34,7 @@ const BIN: &'static str = env!("CARGO_BIN_EXE_squarkdown");
 pub fn squarkup_from(path: &str) -> process::ExitStatus
 {
 	let r = process::Command::new(BIN)
-		.current_dir(path!(TESTS / path))
+		.current_dir(path!(*TESTS / path))
 		.status();
 
 	assert_ok!( &r );
@@ -52,7 +61,7 @@ macro_rules! squarkup {
 pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 {
 	let r = process::Command::new(BIN)
-		.current_dir(path!(TESTS / path))
+		.current_dir(path!(*TESTS / path))
 		.output();
 
 	assert_ok!( &r );
@@ -68,7 +77,7 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 /// Recursively delete all files under `path`, except `.gitkeep`.
 pub fn clear_files(path: &str) -> io::Result<()>
 {
-	let path = path!(TEST_SITE / path);
+	let path = path!(*TEST_SITE / path);
 	if !path.exists() {
 		panic!("{}", slash!("no folder found at: {}", path));
 	}
@@ -76,13 +85,13 @@ pub fn clear_files(path: &str) -> io::Result<()>
 		panic!("{}", slash!("{} is not a folder", path))
 	}
 	
-	if !dir!(path / ".gitkeep").exists() {
+	if !path!(path / ".gitkeep").exists() {
 		panic!("{}", slash!("danger: {} does not contain a .gitkeep file", path))
 	}
 
 	fs::remove_dir_all(&path)?;
 	fs::create_dir(&path)?;
-	File::create(dir!(path / ".gitkeep"))?;
+	File::create(path!(path / ".gitkeep"))?;
 
 	Ok(())
 }
@@ -91,7 +100,7 @@ pub fn clear_files(path: &str) -> io::Result<()>
 /// Read the content of the file at `path`, relative to `tests/test-project/src/routes/`.
 pub fn read_file(path: &str) -> String
 {
-	let path = path!(TEST_SITE / path);
+	let path = path!(*TEST_SITE / path);
 	if !path.exists() {
 		panic!("{}", slash!("no file found at: {}", path));
 	}
