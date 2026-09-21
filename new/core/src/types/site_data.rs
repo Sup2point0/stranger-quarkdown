@@ -27,6 +27,7 @@ pub struct SiteData
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct SiteStats
 {
+	pub checked_files: usize,
 	pub active_pages: usize,
 	pub built_on: UtcDateTime,
 }
@@ -35,8 +36,9 @@ impl Default for SiteStats
 {
 	fn default() -> Self {
 		Self {
-			built_on: UtcDateTime::now(),
+			checked_files: 0,
 			active_pages: 0,
+			built_on: UtcDateTime::now(),
 		}
 	}
 }

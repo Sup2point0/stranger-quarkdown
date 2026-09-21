@@ -62,7 +62,7 @@ fn squarkup() -> SquarkResult
 	let mut tried = 0;
 	
 	for filepath in resolver::resolve_files(&config) {
-		tried += 1;
+		site_data.stats.checked_files += 1;
 
 		let r = catch! {
 			let filepath = filepath?;
@@ -84,7 +84,7 @@ fn squarkup() -> SquarkResult
 		}
 	}
 	
-	if tried == 0 {
+	if site_data.stats.checked_files == 0 {
 		return Err(SquarkError::Unrecoverable {
 			msg: str!("no files found to squarkup"),
 			hint: fmt!("check your {W}paths.sources{G}, {W}paths.include{G}, {W}paths.exclude{G} are configured correctly?"),
@@ -96,7 +96,7 @@ fn squarkup() -> SquarkResult
 			msg: str!("no active files found"),
 			hint: fmt!("check your files have {W}<!-- #SQUARK live!{G} under their heading"),
 			debug: vec![
-				fmt!("parsed {tried} files"),
+				fmt!("parsed {} files", site_data.stats.checked_files),
 			],
 		});
 	}
