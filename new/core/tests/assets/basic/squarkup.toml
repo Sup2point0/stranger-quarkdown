@@ -1,0 +1,9 @@
+[paths]
+site = "../../test-project/"
+
+[assets]
+folder = ".assets/"
+
+[errors]
+strict = false
+on-error = "kill"

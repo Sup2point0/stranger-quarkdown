@@ -2,6 +2,7 @@ use squarkdown::macros::*;
 
 use assertables::*;
 use lazy_static::lazy_static;
+use path_macro::path;
 
 use std::fs::{ self, File };
 use std::io::{ self, Read };
@@ -11,10 +12,10 @@ use std::process;
 
 lazy_static! {
 	pub static ref TESTS: PathBuf
-		= std::env::current_dir().unwrap().join("tests");
+		= path!(std::env::current_dir().unwrap() / "tests");
 	
 	pub static ref TEST_SITE: PathBuf
-		= TESTS.join("test-project/src/routes");
+		= path!(*TESTS / "test-project/src/routes");
 }
 
 
