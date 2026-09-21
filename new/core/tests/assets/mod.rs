@@ -15,6 +15,6 @@ use std::fs;
 		fs::remove_file(&path).unwrap();
 	}
 
-	assert!( squarkup_from("assets/basic").success() );
+	assert!( squarkup!("assets/basic", "--assets").success() );
 	assert!( path.exists() )
 }

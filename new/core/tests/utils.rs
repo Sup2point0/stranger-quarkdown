@@ -32,6 +32,22 @@ pub fn squarkup_from(path: &str) -> process::ExitStatus
 	r.unwrap()
 }
 
+#[macro_export]
+macro_rules! squarkup {
+	($path:literal $(, $arg:literal)*) => {
+		{
+			let bin = env!("CARGO_BIN_EXE_squarkdown");
+			let r = std::process::Command::new(bin)
+				.current_dir(TESTS.join($path))
+				$( .arg($arg) )*
+				.status();
+
+			assertables::assert_ok!( &r );
+			r.unwrap()
+		}
+	};
+}
+
 /// Run Squarkdown from `path`, relative to `tests/`, capturing what it prints to stdout for querying.
 pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 {

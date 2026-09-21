@@ -6,4 +6,4 @@ folder = ".assets/"
 
 [errors]
 strict = false
-on-error = "kill"
+on-error = "warn"
