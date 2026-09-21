@@ -15,39 +15,37 @@ fn main() -> ExitCode
 	log::line();
 
 	let t_init = Instant::now();
-	let status = squarkup();
+	let r = squarkup();
 	let t = t_init.elapsed();
+	let perf = t.as_secs_f64() * 1000.0;
+
 	log::line();
 
-	match status
+	match r
 	{
-		Ok(_) => {
-			println!("{P}squarkup finished! {GREY}{:.2?} ms{W}", t.as_secs_f64() * 1000.0);
+		Ok(()) => {
+			println!("{P}squarkup finished! {GREY}{perf:.2?} ms{W}", );
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
 			log::error(e);
 			log::line();
-			println!("{R}squarkup failed! {GREY}{:.2?} ms\n{W}", t.as_secs_f64() * 1000.0);
+			println!("{R}squarkup failed! {GREY}{perf:.2?} ms\n{W}");
 			ExitCode::FAILURE
 		},
 	}
 }
 
-/// Run squarkup on the user's project.
+/// Run Squarkdown on the user's project.
 /// 
-/// Returns:
-/// 
-/// - `Ok(true)` if squarkup was attempted and was successful
-/// - `Err(msg)` if squarkup was attempted but failed
-/// - `Ok(false)` if no squarkup was attempted
+/// This includes squarkup as well as extras like fonts and assets preprocessing.
 fn squarkup() -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
 
+	// == SETUP == //
 	let args: Vec<String> = std::env::args().collect();
 
-	// == SETUP == //
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
 
@@ -55,11 +53,10 @@ fn squarkup() -> SquarkResult
 	log::ok!(slash!("found your site: {B}{}", config.paths.site));
 
 	let mut site_data = SiteData::new();
-	
-	// == PARSE == //
-	log::is!("finding files to squarkup...");
 
-	let mut tried = 0;
+	// == PARSE == //
+
+	log::is!("finding files to squarkup...");
 	
 	for filepath in resolver::resolve_files(&config) {
 		site_data.stats.checked_files += 1;
@@ -85,55 +82,70 @@ fn squarkup() -> SquarkResult
 	}
 	
 	if site_data.stats.checked_files == 0 {
-		return Err(SquarkError::Unrecoverable {
+		SquarkError::Recoverable {
 			msg: str!("no files found to squarkup"),
 			hint: fmt!("check your {W}paths.sources{G}, {W}paths.include{G}, {W}paths.exclude{G} are configured correctly?"),
 			debug: vec![],
-		});
+		}.depends(&config)?;
 	}
 	else if site_data.stats.active_pages == 0 {
-		return Err(SquarkError::Unrecoverable {
+		SquarkError::Recoverable {
 			msg: str!("no active files found"),
 			hint: fmt!("check your files have {W}<!-- #SQUARK live!{G} under their heading"),
 			debug: vec![
 				fmt!("parsed {} files", site_data.stats.checked_files),
 			],
-		});
+		}.depends(&config)?;
 	}
 	else {
 		log::ok!("found {} active files to squarkup", site_data.stats.active_pages);
-	}
 
-	// == CHECK == //
-	if config.errors.strict {
-		let r = site_data.check_conflicts(&config);
-		
-		if let Err(e) = r {
-			e.depends(&config)?;
+		// == CHECK == //
+		if config.errors.strict {
+			let r = site_data.check_conflicts(&config);
+			
+			if let Err(e) = r {
+				e.depends(&config)?;
+			}
 		}
-	}
 
-	// == RENDER == //
-	log::is!("rendering...");
+		// == RENDER == //
+		log::is!("rendering...");
 
-	for page in site_data.pages() {
-		let r = renderer::render(page, &site_data, &config);
+		for page in site_data.pages() {
+			let r = renderer::render(page, &site_data, &config);
 
-		if let Err(e) = r {
-			e.depends(&config)?;
+			if let Err(e) = r {
+				e.depends(&config)?;
+			}
+		}
+
+		// == SITE DATA == //
+		if let Some(ref dest) = config.out.site_data_path {
+			log::is!("saving site data...");
+
+			let data_raw = site_data.serialise(&config);
+			let file = BufWriter::new(File::create(dest)?);
+			serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
+
+			log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
 		}
 	}
 
 	// == ASSETS == //
-	if args.iter().any(|arg| arg == "assets") {
+	if args.iter().any(|arg| arg == "--assets") {
 		log::is!("copying assets...");
 
 		for paths in resolver::resolve_raw_assets(&config) {
 			let r = catch! {
 				let (source_path, dest_path) = paths?;
-				log::info!(slash!("copying {}", source_path));
+				log::info!(slash!("found asset: {GREY1}{}", source_path));
 
-				std::fs::create_dir_all(&dest_path)?;
+				if let Some(parent) = dest_path.parent() {
+					std::fs::create_dir_all(parent)?;
+				}
+
+				log::info!(slash!("copying to: {GREY1}{}", dest_path));
 				std::fs::copy(&source_path, &dest_path)?;
 			};
 
@@ -141,17 +153,6 @@ fn squarkup() -> SquarkResult
 				e.depends(&config)?;
 			}
 		}
-	}
-
-	// == SITE DATA == //
-	if let Some(ref dest) = config.out.site_data_path {
-		log::is!("saving site data...");
-
-		let data_raw = site_data.serialise(&config);
-		let file = BufWriter::new(File::create(dest)?);
-		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
-
-		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
 	}
 	
 	Ok(())
