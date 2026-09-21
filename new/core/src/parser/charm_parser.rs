@@ -326,6 +326,7 @@ impl CharmParser<'_>
 
 #[cfg(test)] use assertables::*;
 #[cfg(test)] use indoc::indoc;
+#[cfg(test)] use path_macro::path;
 
 
 #[cfg(test)]
@@ -346,7 +347,7 @@ mod full {
 		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let file_data = parser.parse().unwrap();
 		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
+		assert_eq!( file_data.destination, path!(*TESTS / "src/routes/test") );
 	}
 
 	#[test] fn parse_basic_cr()
@@ -361,7 +362,7 @@ mod full {
 		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 		let file_data = parser.parse().unwrap();
 		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, dir!(TESTS / "src/routes/test") );
+		assert_eq!( file_data.destination, path!(*TESTS / "src/routes/test") );
 	}
 }
 

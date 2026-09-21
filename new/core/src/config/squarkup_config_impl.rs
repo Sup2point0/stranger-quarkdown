@@ -472,7 +472,7 @@ mod assets {
 			folder = '.test-assets'
 		"}).unwrap().assets;
 
-		assert_eq!( c.folder, Some(dir!(TESTS / ".test-assets")) );
+		assert_eq!( c.folder, Some(path!(*TESTS / ".test-assets")) );
 	}
 }
 

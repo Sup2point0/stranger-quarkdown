@@ -1,5 +1,4 @@
 use crate::*;
-use squarkdown::utils::testing::assert_not;
 
 use assertables::*;
 use path_macro::path;
@@ -21,7 +20,7 @@ use path_macro::path;
 	assert_contains!( out, "conflicting" );
 	assert_contains!( out, "left.md" );
 	assert_contains!( out, "right.md" );
-	assert_not!( path!(TESTS / "errors/conflicts/top").exists() );
+	assert_not!( path!(*TESTS / "errors/conflicts/top").exists() );
 }
 
 /// Squarkdown errors on 3-page conflicts with `config.errors.strict = true`.
@@ -33,7 +32,7 @@ use path_macro::path;
 	assert_contains!( out, "1.md" );
 	assert_contains!( out, "2.md" );
 	assert_contains!( out, "3.md" );
-	assert_not!( path!(TESTS / "errors/many-conflicts/nested/top").exists() );
+	assert_not!( path!(*TESTS / "errors/many-conflicts/nested/top").exists() );
 }
 
 #[test] fn file_already_exists_crashes()

@@ -44,7 +44,7 @@ pub fn resolve_config(root: &Path) -> SquarkResult<SquarkupConfig>
 /// Find the location of the user's squarkup configuration, in `(.squarkdown/)?squarkup.(toml|json)`.
 fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 {
-	if let Some(out) = find_config_from(&dir!(root / ".squarkdown/")) {
+	if let Some(out) = find_config_from(&path!(root / ".squarkdown/")) {
 		return Ok(out);
 	}
 
@@ -58,7 +58,7 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 		debug: vec![fmt!(
 			"looked in {W}{}{GREY} and {W}{}",
 			root.display(),
-			dir!(root / ".squarkdown/").display(),
+			path!(root / ".squarkdown/").display(),
 		)],
 	})
 }
