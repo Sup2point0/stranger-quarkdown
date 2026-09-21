@@ -9,13 +9,12 @@ use std::fs;
 /// Squarkdown copies assets to `static/`.
 #[test] fn basic()
 {
-	let path = path!(*TEST_ROUTES / "static" / "basic.svg");
+	let path = path!(*TEST_SITE / "static" / "basic.svg");
 
 	if path.exists() {
 		fs::remove_file(&path).unwrap();
 	}
 
 	assert!( squarkup!("assets/basic", "--assets").success() );
-	dbg!(&path);
 	assert!( path.is_file() )
 }
