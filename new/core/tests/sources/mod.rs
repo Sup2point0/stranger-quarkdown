@@ -1,6 +1,8 @@
 use crate::*;
+use squarkdown::utils::testing::assert_not;
 
 use assertables::*;
+use path_macro::path;
 
 
 /// Squarkdown exports files to the right place.
@@ -11,7 +13,7 @@ use assertables::*;
 
 	let main = read_file("sources/root-only/main/+page.svx");
 	assert_contains!( main, "squarkup" );
-	assert!( !TEST_SITE.join("sources/root-only/ignore").exists() );
+	assert_not!( path!(TEST_SITE / "sources/root-only/ignore").exists() );
 }
 
 /// Squarkdown respects `paths.sources`.
@@ -22,7 +24,7 @@ use assertables::*;
 
 	let main = read_file("sources/fixed/main/+page.svx");
 	assert_contains!( main, "squarkup" );
-	assert!( !TEST_SITE.join("sources/fixed/ignore").exists() );
+	assert_not!( path!(TEST_SITE / "sources/fixed/ignore").exists() );
 }
 
 /// Squarkdown respects `paths.include` patterns.
@@ -33,7 +35,7 @@ use assertables::*;
 
 	let main = read_file("sources/include/main/+page.svx");
 	assert_contains!( main, "squarkup" );
-	assert!( !TEST_SITE.join("sources/include/ignore").exists() );
+	assert_not!( path!(TEST_SITE / "sources/include/ignore").exists() );
 }
 
 /// Squarkdown respects `paths.exclude` patterns.
@@ -47,11 +49,11 @@ use assertables::*;
 	assert_contains!( main, "squarkup" );
 	assert_contains!( side, "squarkup" );
 
-	assert!( !TEST_SITE.join("sources/exclude/ignore").exists() );
-	assert!( !TEST_SITE.join("sources/exclude/nested/ignore").exists() );
-	assert!( !TEST_SITE.join("sources/exclude/nested/bad1").exists() );
-	assert!( !TEST_SITE.join("sources/exclude/nested/bad2").exists() );
-	assert!( !TEST_SITE.join("sources/exclude/nested/bad3").exists() );
+	assert_not!( path!(TEST_SITE / "sources/exclude/ignore").exists() );
+	assert_not!( path!(TEST_SITE / "sources/exclude/nested/ignore").exists() );
+	assert_not!( path!(TEST_SITE / "sources/exclude/nested/bad1").exists() );
+	assert_not!( path!(TEST_SITE / "sources/exclude/nested/bad2").exists() );
+	assert_not!( path!(TEST_SITE / "sources/exclude/nested/bad3").exists() );
 	
 	let main = read_file("sources/exclude/nested/bad/but/keep/+page.svx");
 	assert_contains!( main, "squarkup" );

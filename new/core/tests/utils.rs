@@ -25,7 +25,7 @@ const BIN: &'static str = env!("CARGO_BIN_EXE_squarkdown");
 pub fn squarkup_from(path: &str) -> process::ExitStatus
 {
 	let r = process::Command::new(BIN)
-		.current_dir(TESTS.join(path))
+		.current_dir(path!(TESTS / path))
 		.status();
 
 	assert_ok!( &r );
@@ -52,7 +52,7 @@ macro_rules! squarkup {
 pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 {
 	let r = process::Command::new(BIN)
-		.current_dir(TESTS.join(path))
+		.current_dir(path!(TESTS / path))
 		.output();
 
 	assert_ok!( &r );
@@ -68,7 +68,7 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 /// Recursively delete all files under `path`, except `.gitkeep`.
 pub fn clear_files(path: &str) -> io::Result<()>
 {
-	let path = TEST_SITE.join(path);
+	let path = path!(TEST_SITE / path);
 	if !path.exists() {
 		panic!("{}", slash!("no folder found at: {}", path));
 	}
@@ -91,7 +91,7 @@ pub fn clear_files(path: &str) -> io::Result<()>
 /// Read the content of the file at `path`, relative to `tests/test-project/src/routes/`.
 pub fn read_file(path: &str) -> String
 {
-	let path = TEST_SITE.join(path);
+	let path = path!(TEST_SITE / path);
 	if !path.exists() {
 		panic!("{}", slash!("no file found at: {}", path));
 	}
