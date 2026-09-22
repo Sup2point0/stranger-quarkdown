@@ -71,7 +71,7 @@
       "properties":
       {
         "preserve-heading": {
-          "title": "",
+          "title": "Preserve Page Heading",
           "type": "boolean"
         },
         "preserve-comments": {
@@ -85,6 +85,27 @@
         "mark-invalid-links": {
           "title": "Mark Invalid Links",
           "type": "boolean"
+        }
+      }
+    },
+
+    "assets": {
+      "title": "Assets Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "folder": {
+          "title": "Assets Folder",
+          "type": "string"
+        },
+        "site-assets-folder": {
+          "title": "Site Assets Folder",
+          "type": "string"
+        },
+        "extensions": {
+          "title": "Asset File Extensions",
+          "type": "array",
+          "items": {"type": "string"}
         }
       }
     },

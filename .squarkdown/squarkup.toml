@@ -1,3 +1,12 @@
+#:schema ../new/core/src/config/schema.json
+
+[errors]
+strict = true
+on-error = "warn"
+file-already-exists = "overwrite"
+# inactive-link = "link-to-github"
+inactive-link = "error"
+
 [paths]
 site = "/site/"
 sources = [
@@ -8,7 +17,7 @@ sources = [
 
 [out]
 folder = "src/routes/(docs)/(dyna)/"
-file = "+page.svx"
+file-name = "+page.svx"
 site-data-path = "src/site.json"
 
 [format]
@@ -16,18 +25,19 @@ preserve-comments = true
 externalise-links = true
 mark-invalid-links = true
 
-[styles]
-folder = "src/styles/"
-base-file = "article.scss"
+# [styles]
+# folder = "src/styles/"
+# base-file = "article.scss"
 
-[fonts]
-queries = [
-	"Sora:wght@100..800"
+[assets]
+folder = ".assets/"
+site-assets-folder = ".assets/site/"
+extensions = [
+	"svg",
+	"ttf"
 ]
 
-[errors]
-strict = true
-on-error = "warn"
-file-already-exists = "overwrite"
-# inactive-link = "link-to-github"
-inactive-link = "error"
+# [fonts]
+# queries = [
+# 	"Sora:wght@100..800"
+# ]
