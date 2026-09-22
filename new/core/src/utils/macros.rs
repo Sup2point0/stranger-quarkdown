@@ -70,17 +70,17 @@ macro_rules! strings {
 		tiny_vec!([String; 4])
 	};
 	($($values:expr),* $(,)?) => {
-		tiny_vec!( [String; 4] => $(str!($values)),* )
+		tiny_vec!( [String; 4] => $(String::from($values)),* )
 	};
 } pub use strings;
 
 
 // == ERRORS == //
 
-/// Lazily produce a `SquarkError::External`.
+/// Lazily produce a `SquarkError::External`, optionally with a `when` attached.
 #[macro_export]
 macro_rules! err {
-	() => { |e| $crate::errors::SquarkError::external(e) }
+	() => { |e| $crate::errors::SquarkError::external(e) };
 } pub use err;
 
 
@@ -97,18 +97,3 @@ macro_rules! catch
 		(|| -> SquarkResult<_> { $($body)*; Ok(()) })()
 	};
 } pub use catch;
-
-#[macro_export]
-macro_rules! all
-{
-	($obj:expr =>
-		$( . $method:ident ( $($args:expr),* $(,)? ) ),*
-		$(,)?
-	) =>
-	{
-		{
-			let obj = $obj;
-			$( obj.$method( $($args),* ) )&&*
-		}
-	}
-} pub use all;

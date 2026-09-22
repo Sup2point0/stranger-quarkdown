@@ -2,6 +2,8 @@ use crate::config::*;
 use crate::log;
 use crate::macros::*;
 
+use std::borrow::Cow;
+
 
 /// An operation which may error with a [`SquarkError`].
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
@@ -45,46 +47,36 @@ pub enum SquarkError
 	/// 
 	/// Handling depends on `config::errors::on_error`.
 	Multiple {
+		when: Cow<'static, str>,
 		errs: Vec<SquarkError>,
 	},
 
 	/// A fatal error that crashes Squarkdown, caused by external factors such as a file read failure.
 	External {
-		err: Box<dyn std::error::Error>,
 		msg: String,
+		err: Box<dyn std::error::Error>,
 	},
 }
 
 /// Constructors
 impl SquarkError
 {
-	/// Construct a [`Self::Unrecoverable`] with only a plain error message.
-	#[must_use]
-	pub fn fatal(msg: &str) -> Self
-	{
-		Self::Unrecoverable {
-			msg: msg.to_owned(),
-			hint: str!(),
-			debug: vec![],
-		}
-	}
-
 	/// Construct an empty [`Self::Multiple`] for aggregating errors.
 	/// 
 	/// Use alongside the [`catch`] macro.
 	#[must_use]
-	pub fn multiple() -> Self
+	pub fn multiple(when: impl Into<Cow<'static, str>>) -> Self
 	{
-		Self::Multiple { errs: vec![] }
+		Self::Multiple { when: when.into(), errs: vec![] }
 	}
 
 	/// Construct a [`Self::External`] with only a plain error message.
 	#[must_use]
-	pub fn external(e: impl std::error::Error + 'static) -> Self
+	pub fn external(error: impl std::error::Error + 'static) -> Self
 	{
 		Self::External {
-			err: bx!(e),
 			msg: str!("unexpected external error"),
+			err: bx!(error),
 		}
 	}
 }
@@ -107,7 +99,7 @@ impl SquarkError
 			Self::Unrecoverable{..} | Self::External{..}
 				=> true,
 
-			Self::Multiple{ errs }
+			Self::Multiple{ errs, .. }
 				=> errs.iter().any(SquarkError::is_fatal),
 		}
 	}
@@ -115,7 +107,7 @@ impl SquarkError
 	/// Add an error to a [`Self::Multiple`] instance.
 	pub fn push(&mut self, error: SquarkError) -> bool
 	{
-		if let Self::Multiple{ errs } = self {
+		if let Self::Multiple{ errs, .. } = self {
 			errs.push(error);
 			true
 		} else {
@@ -136,7 +128,7 @@ impl SquarkError
 	#[must_use]
 	pub fn is_fine(&self) -> bool
 	{
-		matches!(self, Self::Multiple{ errs } if errs.is_empty())
+		matches!(self, Self::Multiple{ errs, .. } if errs.is_empty())
 		|| matches!(self, Self::ABANDON)
 	}
 
@@ -145,7 +137,7 @@ impl SquarkError
 	/// ```ignore
 	/// fn may_fail() -> SquarkResult<usize>
 	/// {
-	///    let errs = SquarkError::multiple();
+	///    let errs = SquarkError::multiple("example");
 	/// 
 	///    // If an error were present, `Err(errs)` is returned.
 	///    // errs.push(SquarkError::...)
@@ -164,7 +156,7 @@ impl SquarkError
 	/// ```ignore
 	/// fn may_fail() -> SquarkResult<String>
 	/// {
-	///    let errs = SquarkError::multiple();
+	///    let errs = SquarkError::multiple("example");
 	/// 
 	///    // If an error were present, `Err(errs)` is returned.
 	///    // errs.push(SquarkError::...)
@@ -239,8 +231,8 @@ impl SquarkError
 			Self::Recoverable{ msg, hint, .. } | Self::Unrecoverable{ msg, hint, .. }
 				=> msg.contains(pat) || hint.contains(pat),
 
-			Self::Multiple { errs }
-				=> errs.iter().any(|err| err.contains(pat)),
+			Self::Multiple { when, errs }
+				=> when.contains(pat) || errs.iter().any(|err| err.contains(pat)),
 		}
 	}
 }
@@ -258,27 +250,3 @@ macro_rules! impl_from_error {
 }
 
 impl_from_error!(std::io::Error);
-
-
-// TODO needed?
-pub trait CollectSquark<T>: Iterator<Item = SquarkResult<T>> + Sized
-{
-	fn collect_squark(self) -> SquarkResult<Vec<T>>
-	{
-		let mut vals = vec![];
-		let mut errs = SquarkError::multiple();
-
-		for each in self {
-			match each {
-				Ok(val)  => { vals.push(val); }
-				Err(err) => { errs.push(err); }
-			}
-		}
-
-		errs.or(vals)
-	}
-}
-
-impl<I, T> CollectSquark<T> for I
-	where I: Iterator<Item = SquarkResult<T>>
-{}

@@ -53,7 +53,7 @@ impl PageData
 		config: &SquarkupConfig,
 	) -> SquarkResult<Self>
 	{
-		let mut errs = SquarkError::multiple();
+		let mut errs = SquarkError::multiple(slash!("initialising {}", filepath));
 
 		let mut destination = PathBuf::new();
 
@@ -62,11 +62,11 @@ impl PageData
 
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {
-					msg: str!(slash!("cannot export a file to: {}", destination)),
+					msg: slash!("cannot export a file to: {}", destination),
 					hint: fmt!("a file's destination directory must remain under the root directory of your project"),
 					debug: vec![
-						str!(slash!("your project's root directory is: {}", config.paths.root)),
-						str!(slash!("in file: {}", filepath)),
+						slash!("your project's root directory is: {}", config.paths.root),
+						slash!("in file: {}", filepath),
 					],
 				});
 			}
@@ -76,7 +76,7 @@ impl PageData
 				msg: fmt!("missing field: {W}dest"),
 				hint: fmt!("active pages must specify where they should be rendered to"),
 				debug: vec![
-					str!(slash!("in file: {}", filepath)),
+					slash!("in file: {}", filepath),
 				],
 			});
 		}
@@ -107,7 +107,7 @@ impl PageData
 						msg: fmt!("invalid value for {W}cleanse{R}: {W}{raw}"),
 						hint: fmt!("valid values are {W}angles{G}, {W}braces{G}, {W}comments{G}, {W}line-breaks"),
 						debug: vec![
-							str!(slash!("in file: {}", filepath)),
+							slash!("in file: {}", filepath),
 						],
 					});
 				}

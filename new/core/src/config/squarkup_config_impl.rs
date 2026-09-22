@@ -75,7 +75,7 @@ impl SquarkupConfig
 			
 			However, better than repeatedly failing with fatal errors is to report all of them at once, so *if possible*, we'll still process the entire config and aggregate any errors we encounter in `errs`, only returning `Err()` once we reach the end.
 		*/
-		let mut errs = SquarkError::multiple();
+		let mut errs = SquarkError::multiple("loading squarkup config");
 
 		/* NOTE:
 			We first separately read `paths.site` because many *defaults* depend on it, so we need it before calling `::init_defaults()`.
@@ -208,7 +208,7 @@ impl SquarkupConfig
 						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),
 						hint: fmt!("{W}out.site-data-path{G} is a filepath relative to your site directory"),
 						debug: vec![
-							str!(slash!("{GREY1}{}{GREY} is not a valid directory", path))
+							slash!("{GREY1}{}{GREY} is not a valid directory", path)
 						],
 					});
 				}

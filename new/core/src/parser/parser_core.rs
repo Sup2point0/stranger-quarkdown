@@ -78,7 +78,7 @@ impl CharmParser<'_>
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
-						debug: self.show_ctx_stack(),
+						debug: self.ctx.printed(),
 					});
 				}
 				None => return self.err_eof(),
@@ -121,7 +121,7 @@ impl CharmParser<'_>
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
-						debug: self.show_ctx_stack(),
+						debug: self.ctx.printed(),
 					});
 				}
 				None => return self.err_eof(),
@@ -193,7 +193,7 @@ impl CharmParser<'_>
 				return Err(SquarkError::Unrecoverable {
 					msg: fmt!("illegal input: {}", self.preview()),
 					hint: fmt!("identifiers cannot start with {W}'-'"),
-					debug: self.show_ctx_stack(),
+					debug: self.ctx.printed(),
 				});
 			}
 
@@ -203,7 +203,7 @@ impl CharmParser<'_>
 				return Err(SquarkError::Unrecoverable {
 					msg: fmt!("expected identifier, but found: {W}{}", self.preview()),
 					hint: fmt!("identifiers cannot start with {W}{c:?}"),
-					debug: self.show_ctx_stack(),
+					debug: self.ctx.printed(),
 				});
 			}
 
@@ -230,7 +230,7 @@ impl CharmParser<'_>
 	{
 		let msg = str!("unexpected end of file");
 		let hint = str!();
-		let debug = self.show_ctx_stack();
+		let debug = self.ctx.printed();
 
 		let err = if self.is_live {
 			SquarkError::Unrecoverable { msg, hint, debug }
@@ -239,15 +239,6 @@ impl CharmParser<'_>
 		};
 
 		Err(err)
-	}
-
-	/// Build the debug diagnostics for printing errors.
-	pub(super) fn show_ctx_stack(&self) -> Vec<String>
-	{
-		(
-			iter::once(slash!("in: {GREY1}{}", self.filepath))
-			.chain(self.ctx.stack().iter().rev().map(ToString::to_string))
-		).collect()
 	}
 }
 

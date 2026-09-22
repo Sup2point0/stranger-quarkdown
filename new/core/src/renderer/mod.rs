@@ -18,7 +18,7 @@ pub fn render(
 	config: &SquarkupConfig,
 ) -> SquarkResult
 {
-	let mut errs = SquarkError::multiple();
+	let mut errs = SquarkError::multiple(slash!("rendering {}", page.filepath));
 	let renderer = Renderer::new(page, site, config);
 
 	if !renderer.dest_folder.exists() {

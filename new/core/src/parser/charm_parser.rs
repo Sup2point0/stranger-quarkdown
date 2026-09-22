@@ -49,13 +49,15 @@ impl<'d> CharmParser<'d>
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
 	pub fn new(source: &str, filepath: PathBuf, config: &'d SquarkupConfig) -> Self
 	{
+		let errors = SquarkError::multiple(slash!("parsing {}", &filepath));
+
 		Self {
 			config,
 			filepath,
 			source: source.chars().collect(),
 			i: 0,
 			is_live: false,
-			errors: SquarkError::multiple(),
+			errors,
 			ctx: ContextStack::new(),
 		}
 	}
@@ -165,7 +167,7 @@ impl CharmParser<'_>
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("invalid flag: {}", self.preview()),
 						hint: fmt!("flags must end in {W}!{G}, like: {W}{ident}!"),
-						debug: self.show_ctx_stack(),
+						debug: self.ctx.printed(),
 					});
 					
 					// TODO recover

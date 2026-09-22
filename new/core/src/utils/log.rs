@@ -34,6 +34,13 @@ use std::fmt::Display;
 	($($args:tt)*) => { $crate::log::log_bad(format_args!($($args)*)) };
 } pub use bad;
 
+/// Log a generic informative message with no special colouring, which can be quickly skimmed past.
+#[macro_export] macro_rules! debug {
+	($msg:literal) => { $crate::log::log_debug(format_args!($msg)) };
+	($var:expr)    => { $crate::log::log_debug(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::log::log_debug(format_args!($($args)*)) };
+} pub use debug;
+
 /// Log a hint to the user that may help them fix an error.
 #[macro_export] macro_rules! hint {
 	($msg:literal) => { $crate::log::log_hint(format_args!($msg)) };
@@ -44,11 +51,12 @@ use std::fmt::Display;
 
 pub fn line() { println!("{GREY}────────────────────────"); }
 
-pub fn log_is(msg:   impl Display) { println!(" {}› {}{}",     GREY, Y, msg); }
-pub fn log_info(msg: impl Display) { println!(" {}› {}",       GREY, msg); }
-pub fn log_ok(msg:   impl Display) { println!(" {}✓ {}",       C, msg); }
-pub fn log_bad(msg:  impl Display) { println!(" {}× {}",       R, msg); }
-pub fn log_hint(msg: impl Display) { println!(" {}= hint: {}", G, msg); }
+pub fn log_is(msg:    impl Display) { println!(" {}› {}{}",     GREY, Y, msg); }
+pub fn log_info(msg:  impl Display) { println!(" {}› {}",       GREY,    msg); }
+pub fn log_ok(msg:    impl Display) { println!(" {}✓ {}",       C,       msg); }
+pub fn log_bad(msg:   impl Display) { println!(" {}× {}",       R,       msg); }
+pub fn log_debug(msg: impl Display) { println!(" {}| {}",       GREY,    msg); }
+pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {}", G,       msg); }
 
 
 /// Print `err`, with surrounding line delimiters.
@@ -69,17 +77,20 @@ pub fn error(err: SquarkError)
 				hint!(hint);
 			}
 		}
-		SquarkError::Multiple{ errs } => {
-			for (i, err) in errs.into_iter().enumerate() {
+
+		SquarkError::Multiple{ when, errs } => {
+			for (i, mut err) in errs.into_iter().enumerate() {
 				if i != 0 { line(); }
 				error(err);
 			}
 		}
+
 		SquarkError::External{ err, msg } => {
 			bad!(msg);
 			line();
 			println!("{R}{err:?}");
 		}
+
 		SquarkError::ABANDON => (),
 	}
 }

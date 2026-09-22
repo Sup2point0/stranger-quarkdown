@@ -92,7 +92,7 @@ impl<'d> Renderer<'d>
 			page,
 			site,
 			config,
-			errors: SquarkError::multiple(),
+			errors: SquarkError::multiple(slash!("rendering {}", page.filepath)),
 			dest_file: path!(dest_folder / config.out.file_name),
 			dest_folder,
 			ctx: ContextStack::new(),
@@ -293,7 +293,7 @@ impl Renderer<'_>
 								msg: fmt!("unknown twin squark: {W}{s}"),
 								hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
 								debug: vec![
-									str!(slash!("in: {GREY1}{}", self.page.filepath)),
+									slash!("in: {GREY1}{}", self.page.filepath),
 									fmt!("context stack: {:?}", self.ctx.stack()),
 								],
 							});
@@ -379,8 +379,8 @@ impl Renderer<'_>
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
-					str!(slash!("in: {GREY1}{}", self.page.filepath)),
-					str!(slash!("resolved to: {}", their_source_path)),
+					slash!("in: {GREY1}{}", self.page.filepath),
+					slash!("resolved to: {}", their_source_path),
 				]
 			});
 			return;
@@ -422,7 +422,7 @@ impl Renderer<'_>
 					hint: str!(),
 					debug: vec![
 						// TODO add line number
-						str!(slash!("in: {GREY1}{}", self.page.filepath)),
+						slash!("in: {GREY1}{}", self.page.filepath),
 						fmt!("resolved to: {GREY1}{key}"),
 					]
 				});
@@ -439,10 +439,10 @@ impl Renderer<'_>
 		{
 			FileAction::OVERWRITE => Ok(()),
 			FileAction::ERROR => Err(SquarkError::Recoverable {
-				msg: str!(slash!("cannot overwrite existing file: {W}{}", filepath)),
+				msg: slash!("cannot overwrite existing file: {W}{}", filepath),
 				hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'error'"),
 				debug: vec![
-					str!(slash!("while rendering: {}", self.page.filepath)),
+					slash!("while rendering: {}", self.page.filepath),
 				],
 			}),
 			FileAction::SKIP => Err(SquarkError::ABANDON),
