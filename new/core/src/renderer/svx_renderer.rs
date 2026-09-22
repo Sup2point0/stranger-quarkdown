@@ -14,6 +14,7 @@ use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
 use regex::{ Regex, regex };
 
+use std::borrow::{ Cow };
 use std::fs::{ File };
 use std::io::{ Read, Write };
 use std::path::{ Path, PathBuf };
@@ -180,12 +181,10 @@ impl<'d> Renderer<'d>
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone()).unwrap();
 
 		// strip charm squark
-		let out =
-			regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\n-->")
-			.replace(&out, "$1")
-			.to_string();
-
-		out
+		match regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\n-->").replace(&out, "$1") {
+			Cow::Borrowed(..) => out,
+			Cow::Owned(out) => out,
+		}
 	}
 
 	/// Remove `<!-- #SQUARK only?` and `#SQUARK only. -->` to expose their content to the render pipeline.
