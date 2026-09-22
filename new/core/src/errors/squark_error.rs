@@ -214,9 +214,7 @@ impl SquarkError
 			Err(self)
 		}
 		else {
-			log::line();
 			log::error(self);
-			log::line();
 			Ok(t)
 		}
 	}

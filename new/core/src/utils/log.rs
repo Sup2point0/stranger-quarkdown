@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use crate::colours::*;
 
+use std::borrow::Cow;
 use std::fmt::Display;
 
 
@@ -62,35 +63,46 @@ pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {}", G,       msg); }
 /// Print `err`, with surrounding line delimiters.
 pub fn error(err: SquarkError)
 {
-	match err
+	fn go(err: SquarkError, when: Option<&Cow<'static, str>>)
 	{
-		SquarkError::Recoverable{ msg, hint, debug }
-		| SquarkError::Unrecoverable{ msg, hint, debug }
-		=> {
-			bad!(msg);
-			
-			for each in debug {
-				info!(each);
+		match err
+		{
+			SquarkError::Recoverable{ msg, hint, debug }
+			| SquarkError::Unrecoverable{ msg, hint, debug }
+			=> {
+				if let Some(when) = when {
+					println!("{GREY}while {when}:");
+				}
+
+				bad!(msg);
+				
+				for each in debug {
+					info!(each);
+				}
+
+				if !hint.is_empty() {
+					hint!(hint);
+				}
 			}
 
-			if !hint.is_empty() {
-				hint!(hint);
+			SquarkError::Multiple{ when, errs } => {
+				for (i, mut err) in errs.into_iter().enumerate() {
+					if i != 0 { line(); }
+					go(err, Some(&when));
+				}
 			}
-		}
 
-		SquarkError::Multiple{ when, errs } => {
-			for (i, mut err) in errs.into_iter().enumerate() {
-				if i != 0 { line(); }
-				error(err);
+			SquarkError::External{ err, msg } => {
+				bad!(msg);
+				line();
+				println!("{R}{err:?}");
 			}
-		}
 
-		SquarkError::External{ err, msg } => {
-			bad!(msg);
-			line();
-			println!("{R}{err:?}");
+			SquarkError::ABANDON => (),
 		}
-
-		SquarkError::ABANDON => (),
 	}
+
+	line();
+	go(err, None);
+	line();
 }

@@ -19,17 +19,15 @@ fn main() -> ExitCode
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
-	log::line();
-
 	match r
 	{
 		Ok(()) => {
+			log::line();
 			println!("{P}squarkup finished! {GREY}{perf:.2?} ms{W}");
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
 			log::error(e);
-			log::line();
 			println!("{R}squarkup failed! {GREY}{perf:.2?} ms\n{W}");
 			ExitCode::FAILURE
 		},

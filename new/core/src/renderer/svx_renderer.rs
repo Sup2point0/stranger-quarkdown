@@ -379,8 +379,7 @@ impl Renderer<'_>
 				hint: str!(),
 				debug: vec![
 					// TODO add line number
-					slash!("in: {GREY1}{}", self.page.filepath),
-					slash!("resolved to: {}", their_source_path),
+					slash!("resolved to: {GREY1}{}", their_source_path),
 				]
 			});
 			return;
@@ -422,7 +421,6 @@ impl Renderer<'_>
 					hint: str!(),
 					debug: vec![
 						// TODO add line number
-						slash!("in: {GREY1}{}", self.page.filepath),
 						fmt!("resolved to: {GREY1}{key}"),
 					]
 				});
