@@ -3,6 +3,11 @@
 | dest = main
 -->
 
-This link to [side](side.md#section) should also be rewritten to `side#section`.
+This link to [later](#later) should be rewritten to `#later`.
 
-This link to [side](./side.md#section) should be rewritten to `side#section`.
+
+## Later
+
+This link to [side](side.md#section) should be rewritten to `side#section`.
+
+This link to [side](./side.md#section) should also be rewritten to `side#section`.

@@ -60,8 +60,21 @@ use assertables::*;
 	
 	let main = read_file("links/anchors/main/+page.svx");
 	let side = read_file("links/anchors/side/+page.svx");
+	assert_contains!( main, "[later](#later)" );
 	assert_contains!( main, "[side](side#section)" );
 	assert_contains!( side, "[main](main)" );
+}
+
+/// Squarkdown resolves links with titles (`path/to/page.md 'title'`) while keeping the title.
+#[test] fn titles()
+{
+	clear_files("links/titles").unwrap();
+
+	assert!( squarkup_from("links/titles").success() );
+	
+	let main = read_file("links/titles/main/+page.svx");
+	assert_contains!( main, "[main](main \"self\")" );
+	assert_contains!( main, "[GitHub](https://github.com/Sup2point0/stranger-quarkdown \"squarkdown\")" );
 }
 
 /// Squarkdown crashes when encountering links to nonexistent files.

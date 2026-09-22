@@ -1,0 +1,10 @@
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/links/titles/"
+
+[errors]
+strict = false
+on-error = "kill"
+inactive-link = "error"
