@@ -1,0 +1,122 @@
+{
+  "version":     "6.0.0",
+  "title":       "Squarkup Configuration Schema",
+  "description": "Shared schema for your `squarkup.toml` or `squarkup.json`",
+
+  "additionalProperties": false,
+
+  "properties":
+  {
+    "paths": {
+      "output": "Paths",
+      "additionalProperties": false,
+      "properties":
+      {
+        "site": {
+          "title": "Site Directory",
+          "type": "string"
+        },
+
+        "sources": {
+          "title": "Source Directories",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+
+        "include": {
+          "title": "Include Patterns",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+
+        "exclude": {
+          "title": "Exclude Patterns",
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+
+    "out": {
+      "title": "Output Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "folder": {
+          "title": "Destination Folder",
+          "type": "string"
+        },
+        "file-name": {
+          "title": "SVX Filename",
+          "type": "string"
+        },
+        "render-page-ts": {
+          "title": "Enable `+page.ts` Rendering",
+          "type": "boolean"
+        },
+        "shorter-fields": {
+          "title": "Shorter Field Names",
+          "type": "boolean"
+        },
+        "site-data-path": {
+          "title": "Site Data Filepath",
+          "type": "string"
+        }
+      }
+    },
+
+    "format": {
+      "title": "Rendering Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "preserve-heading": {
+          "title": "",
+          "type": "boolean"
+        },
+        "preserve-comments": {
+          "title": "Preserve Comments",
+          "type": "boolean"
+        },
+        "externalise-links": {
+          "title": "Externalise Links",
+          "type": "boolean"
+        },
+        "mark-invalid-links": {
+          "title": "Mark Invalid Links",
+          "type": "boolean"
+        }
+      }
+    },
+
+    "errors": {
+      "title": "Error Handling",
+      "additionalProperties": false,
+      "properties":
+      {
+        "strict": {
+          "title": "Enable Safety Checks",
+          "type": "boolean"
+        },
+
+        "on-error": {
+          "title": "Error Handling",
+          "type": "string",
+          "enum": ["warn", "kill"]
+        },
+
+        "file-already-exists": {
+          "title": "File Conflict Handling",
+          "type": "string",
+          "enum": ["overwrite", "error", "skip"]
+        },
+
+        "inactive-link": {
+          "title": "Inactive Link Handling",
+          "type": "string",
+          "enum": ["strip-extension", "link-to-github", "error"]
+        }
+      }
+    }
+  }
+}
