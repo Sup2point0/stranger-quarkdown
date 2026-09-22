@@ -1,0 +1,10 @@
+[paths]
+site = "../../test-project/"
+
+[assets]
+folder = ".assets/"
+site-assets-folder = ".assets/site/"
+
+[errors]
+strict = false
+on-error = "warn"

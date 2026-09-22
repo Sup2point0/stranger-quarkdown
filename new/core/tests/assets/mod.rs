@@ -1,6 +1,5 @@
 use crate::*;
 
-use assertables::*;
 use path_macro::path;
 
 use std::fs;
@@ -16,5 +15,18 @@ use std::fs;
 	}
 
 	assert!( squarkup!("assets/basic", "--assets").success() );
+	assert!( path.is_file() )
+}
+
+/// Squarkdown copies site assets directly to the root of `static/`.
+#[test] fn site()
+{
+	let path = path!(*TEST_SITE / "static" / "site.svg");
+
+	if path.exists() {
+		fs::remove_file(&path).unwrap();
+	}
+
+	assert!( squarkup!("assets/site", "--assets").success() );
 	assert!( path.is_file() )
 }
