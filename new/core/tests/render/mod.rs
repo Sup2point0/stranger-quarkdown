@@ -20,3 +20,13 @@ use assertables::*;
 	assert_contains!( f4, "Four" );
 	assert_contains!( f5, "Five" );
 }
+
+/// Squarkdown strips the charm squark even when `config.format.preserve-comments` is enabled.
+#[test] fn strip_charm()
+{
+	clear_files("render/strip-charm").unwrap();
+	assert!( squarkup_from("render/strip-charm").success() );
+
+	let main = read_file("render/strip-charm/main/+page.svx");
+	assert_not_contains!( main, "#SQUARK" );
+}

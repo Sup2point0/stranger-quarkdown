@@ -2,10 +2,12 @@
 
 [paths]
 site = "../../test-project/"
-sources = ["/"]
 
 [out]
-folder = "src/routes/sources/root-only/"
+folder = "src/routes/render/strip-charm/"
+
+[format]
+preserve-comments = true
 
 [errors]
 strict = false
