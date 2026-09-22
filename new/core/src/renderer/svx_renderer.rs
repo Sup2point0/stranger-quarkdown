@@ -12,7 +12,7 @@ use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
-use regex::{ Regex, regex };
+use regex::regex;
 
 use std::borrow::{ Cow };
 use std::fs::{ File };
@@ -39,16 +39,6 @@ lazy_static!
 			list_token: '-',
 			..cmark::Options::default()
 		};
-
-	/// The RegEx pattern for twin squarks.
-	/// 
-	/// - Group 1 is the squark (`leave`, `slash`)
-	/// - Group 2 is either `?` (open) or `.` (close).
-	/// - Group 3, if present, is an alphanumeric identifier for the section.
-	pub static ref TWIN_SQUARK: Regex
-		= Regex::new(
-			r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
-		).unwrap();
 }
 
 
@@ -137,9 +127,9 @@ impl<'d> Renderer<'d>
 		self.errors.or(())
 	}
 
-	pub(super) fn render_from(&mut self, mut source: String) -> String
+	pub(super) fn render_from(&mut self, source: String) -> String
 	{
-		source = Self::expand_only(&source);
+		let source = Self::expand_only(&source);
 
 		let mut parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
@@ -188,17 +178,16 @@ impl<'d> Renderer<'d>
 	}
 
 	/// Remove `<!-- #SQUARK only?` and `#SQUARK only. -->` to expose their content to the render pipeline.
-	fn expand_only(source: &str) -> String
+	fn expand_only(source: &str) -> Cow<'_, str>
 	{
-		Regex::new(
+		regex!(
 			r"(?is)<!--\s*#SQUARK\s+ONLY\?\s+(?-i)(.*?)(?i)#SQUARK\s+ONLY\.\s*-->"
-		).unwrap()
+		)
 		.replace_all(source, "$1")
-		.to_string()
 	}
 }
 
-/// Specific transforms.
+/// Specific transforms
 impl Renderer<'_>
 {
 	/// Transform a single `pulldown-cmark` event.
@@ -291,7 +280,16 @@ impl Renderer<'_>
 	/// Attempt to process squarks inside `html`, returning `true` if a squark was matched (and so the comment should be removed).
 	fn process_comment(&mut self, html: &str) -> bool
 	{
-		if let Some(captures) = TWIN_SQUARK.captures(html) {
+		/// The RegEx pattern for twin squarks.
+		/// 
+		/// - Group 1 is the squark (`leave`, `slash`)
+		/// - Group 2 is either `?` (open) or `.` (close).
+		/// - Group 3, if present, is an alphanumeric identifier for the section.
+		if let Some(captures) =
+			regex!(
+				r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
+			).captures(html)
+		{
 			let key = captures.get(3).map(|k| k.as_str().to_owned());
 
 			let squark = match captures.get(1) {
@@ -440,6 +438,7 @@ impl Renderer<'_>
 	}
 }
 
+/// Core utilities
 impl Renderer<'_>
 {
 	pub(super) fn err_exists(&self, filepath: &Path) -> SquarkResult
