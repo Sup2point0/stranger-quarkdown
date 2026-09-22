@@ -4,7 +4,7 @@ macro_rules! ctx
 		{
 			$self.ctx.push($ctx);
 			let r = { $body };
-			$self.ctx.force_pop($ctx);
+			$self.ctx.try_pop($ctx)?;
 			r
 		}
 	};

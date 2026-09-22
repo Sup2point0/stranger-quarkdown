@@ -1,3 +1,7 @@
+use crate::prelude::*;
+use crate::macros::*;
+
+
 /// A first-in last-out stack for tracking contexts, with an always-active base context.
 #[derive(Clone, Default, Debug)]
 pub struct ContextStack<Ctx>
@@ -31,33 +35,44 @@ impl<Ctx> ContextStack<Ctx>
 }
 
 impl<Ctx> ContextStack<Ctx>
-	where Ctx: Default + PartialEq + Eq
+	where Ctx: PartialEq + Eq + std::fmt::Debug
 {
-	// TODO use result when forced
-	/// Pop `ctx` from the stack as deep as possible, regardless of the current context.
+	/// Pop `ctx` from the stack, as deep as possible.
 	/// 
-	/// For instance, when seeing a `-->`, this should completely terminate a comment context, which might look like:
+	/// If there are multiple consecutive occurrences of `ctx`, this pops all of them. For instance, popping `SLASH` from `[LEAVE, SLASH, SLASH]` results in `[LEAVE]`.
 	/// 
-	/// ```ts
-	/// [COMMENT]       // normal
-	/// [COMMENT, ...]  // unclosed, but we don't care cuz it's a comment
-	/// [COMMENT, COMMENT]  // user used <!-- <!--
-	/// ```
-	/// 
-	/// If `ctx` is not present in the context stack, this is a no-op.
-	pub fn force_pop(&mut self, ctx: Ctx) -> bool
+	/// Errors if `ctx` is not the current context.
+	pub fn try_pop(&mut self, ctx: Ctx) -> SquarkResult
 	{
-		if let Some(idx) = self.stack.iter().rposition(|c| *c == ctx) {
-			self.stack.truncate(idx);
-		} else {
-			return false;
+		if *self.current() != ctx {
+			return Err(SquarkError::Recoverable {
+				msg: fmt!("failed to pop context: {ctx:?}"),
+				hint: str!("contexts must always be balanced"),
+				debug: vec![],
+			});
 		}
 
 		while *self.current() == ctx {
 			self.stack.pop();
 		}
 
-		true
+		Ok(())
+	}
+}
+
+impl<Ctx> ContextStack<Ctx>
+	where Ctx: std::fmt::Display
+{
+	/// Print the stack, top-down from the last pushed context.
+	pub fn printed(&self) -> Vec<String>
+	{
+		self.prints().collect()
+	}
+
+	/// Print the stack, top-down from the last pushed context.
+	pub fn prints(&self) -> impl Iterator<Item = String>
+	{
+		self.stack().iter().rev().map(ToString::to_string)
 	}
 }
 
@@ -66,43 +81,56 @@ impl<Ctx> ContextStack<Ctx>
 
 #[cfg(test)] use crate::renderer::RenderCtx;
 
+#[cfg(test)] use assertables::*;
 
-#[test] fn force_pop_easy()
-{
-	let mut ctx = ContextStack::new();
 
-	ctx.push(RenderCtx::LEAVE { key: None });
+#[cfg(test)]
+mod try_pop {
+	use super::*;
 
-	ctx.push(RenderCtx::SLASH { key: None });
-	ctx.push(RenderCtx::ONLY);
-	ctx.force_pop(RenderCtx::SLASH { key: None });
-	assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
-}
+	#[test] fn basic()
+	{
+		let mut ctx = ContextStack::new();
+		ctx.push(RenderCtx::LEAVE { key: None });
+		ctx.push(RenderCtx::SLASH { key: None });
 
-#[test] fn force_pop_medium()
-{
-	let mut ctx = ContextStack::new();
-	ctx.push(RenderCtx::LEAVE { key: None });
+		let r = ctx.try_pop(RenderCtx::SLASH { key: None });
+		assert_ok!( &r );
+		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
+	}
 
-	ctx.push(RenderCtx::SLASH { key: None });
-	ctx.push(RenderCtx::ONLY);
-	ctx.push(RenderCtx::SLASH { key: None });
-	ctx.force_pop(RenderCtx::SLASH { key: None });
-	assert_eq!( *ctx.current(), RenderCtx::ONLY );
-	
-	ctx.force_pop(RenderCtx::SLASH { key: None });
-	assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
-}
+	#[test] fn multiple()
+	{
+		let mut ctx = ContextStack::new();
+		ctx.push(RenderCtx::LEAVE { key: None });
+		ctx.push(RenderCtx::SLASH { key: None });
+		ctx.push(RenderCtx::SLASH { key: None });
 
-#[test] fn force_pop_hard()
-{
-	let mut ctx = ContextStack::new();
-	ctx.push(RenderCtx::LEAVE { key: None });
+		let r = ctx.try_pop(RenderCtx::SLASH { key: None });
+		assert_ok!( &r );
+		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
+	}
 
-	ctx.push(RenderCtx::SLASH { key: None });
-	ctx.push(RenderCtx::ONLY);
-	ctx.push(RenderCtx::ONLY);
+	#[test] fn stops()
+	{
+		let mut ctx = ContextStack::new();
+		ctx.push(RenderCtx::LEAVE { key: None });
+		ctx.push(RenderCtx::SLASH { key: None });
+		ctx.push(RenderCtx::LEAVE { key: None });
 
-	ctx.force_pop(RenderCtx::LEAVE { key: None });
-	assert_eq!( *ctx.current(), RenderCtx::MARKDOWN );
+		let r = ctx.try_pop(RenderCtx::LEAVE { key: None });
+		assert_ok!( &r );
+		assert_eq!( *ctx.current(), RenderCtx::SLASH { key: None } );
+	}
+
+	#[test] fn fails()
+	{
+		let mut ctx = ContextStack::new();
+		ctx.push(RenderCtx::LEAVE { key: None });
+		ctx.push(RenderCtx::SLASH { key: None });
+
+		let r = ctx.try_pop(RenderCtx::LEAVE { key: None });
+		assert_err!( &r );
+		assert_eq!( *ctx.current(), RenderCtx::SLASH { key: None } );
+	}
 }

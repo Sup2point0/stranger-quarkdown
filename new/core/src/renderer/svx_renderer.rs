@@ -198,7 +198,7 @@ impl Renderer<'_>
 	{
 		match event {
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
-			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.force_pop(RenderCtx::CODE); }
+			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(RenderCtx::CODE).expect("contexts are always balanced"); }
 			_ => (),
 		};
 
@@ -269,7 +269,7 @@ impl Renderer<'_>
 				return Some(self.config.format.preserve_comments)
 			}
 			else if html.ends_with("-->") {
-				self.ctx.force_pop(RenderCtx::COMMENT);
+				self.ctx.try_pop(RenderCtx::COMMENT).expect("contexts are always balanced");
 				return Some(self.config.format.preserve_comments)
 			}
 		}
@@ -314,12 +314,12 @@ impl Renderer<'_>
 				Some(m) => match m.as_str() {
 					"?" => self.ctx.push(squark),
 					"." => {
-						let did_pop = self.ctx.force_pop(squark);
+						let r = self.ctx.try_pop(squark);
 
-						if !did_pop {
+						if let Err(..) = r {
 							self.errors.push(SquarkError::Recoverable {
 								msg: fmt!("unpaired closing squark: {W}{html}"),
-								hint: fmt!(""),
+								hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
 								debug: vec![
 									fmt!("context stack: {:?}", self.ctx)
 								],
@@ -439,7 +439,7 @@ impl Renderer<'_>
 		{
 			FileAction::OVERWRITE => Ok(()),
 			FileAction::ERROR => Err(SquarkError::Recoverable {
-				msg: str!(slash!("cannot overwrite existing file: {W}{}", filepath.to_path_buf())),
+				msg: str!(slash!("cannot overwrite existing file: {W}{}", filepath)),
 				hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'error'"),
 				debug: vec![
 					str!(slash!("while rendering: {}", self.page.filepath)),
