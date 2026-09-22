@@ -7,23 +7,33 @@ use std::path::PathBuf;
 
 
 /// Find all assets to copy to SvelteKit's `static/` directory, as specified by the user's `config.assets.folder`, `.site-assets-folder` and `.extensions`.
-pub fn resolve_raw_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<(PathBuf, PathBuf)>>
+/// 
+/// Returns an iterator of `(source, dest)` pairs.
+pub fn resolve_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<(PathBuf, PathBuf)>>
 {
 	config.assets.folder.iter().flat_map(move |assets_folder|
 	{
 		walkdir::WalkDir::new(assets_folder)
 			.into_iter()
 
-			// don't yield folders, only yield files
 			.filter(|e|
 				!e.as_ref().is_ok_and(|entry| should_exclude(entry, config))
 			)
 
-			// yield paths, not walkdir entries
 			.map(move |entry| match entry {
 				Ok(e) => {
 					let path = e.into_path();
-					let path_rel = path.strip_prefix(assets_folder).map_err(err!())?;
+
+					let path_rel = path.strip_prefix({
+						if let Some(site_assets_folder) = &config.assets.site_assets_folder
+						&& path.starts_with(site_assets_folder)
+						{
+							site_assets_folder
+						} else {
+							assets_folder
+						}
+					}).map_err(err!())?;
+
 					let dest = path!(config.paths.site / "static" / path_rel);
 
 					Ok((path, dest))
@@ -41,12 +51,9 @@ fn should_exclude(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 
 	let path = entry.path();
 
-	if let Some(site_assets_folder) = &config.assets.site_assets_folder
-	&& path.starts_with(site_assets_folder) {
-		return true;
+	if let Some(ext_os) = path.extension() {
+		return config.assets.extensions.iter().any(|ext| **ext == *ext_os);
 	}
-
-	// TODO check extensions
 
 	false
 }

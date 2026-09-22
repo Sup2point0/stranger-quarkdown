@@ -136,7 +136,7 @@ fn squarkup() -> SquarkResult
 	if args.iter().any(|arg| arg == "--assets") {
 		log::is!("copying assets...");
 
-		for paths in resolver::resolve_raw_assets(&config) {
+		for paths in resolver::resolve_assets(&config) {
 			let r = catch! {
 				let (source_path, dest_path) = paths?;
 				log::info!(slash!("found asset: {GREY1}{}", source_path));
