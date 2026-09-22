@@ -251,9 +251,16 @@ impl SquarkupConfig
 
 			if let Some(value) = assets.get("folder") { catch!(errs => {
 				let dir = Self::try_get_string(value, "assets.folder", "(folder relative to your project root)")?;
-				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{W}assets.folder{G} is relative to your project root"))?;
+				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
 
 				s.assets.folder = Some(folder);
+			}) }
+
+			if let Some(value) = assets.get("site-assets-folder") { catch!(errs => {
+				let dir = Self::try_get_string(value, "assets.site-assets-folder", "(folder relative to your project root)")?;
+				let folder = Self::try_resolve_folder(root, dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
+
+				s.assets.site_assets_folder = Some(folder);
 			}) }
 		}
 
