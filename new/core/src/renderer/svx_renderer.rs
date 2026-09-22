@@ -12,7 +12,7 @@ use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
-use regex::Regex;
+use regex::{ Regex, regex };
 
 use std::fs::{ File };
 use std::io::{ Read, Write };
@@ -146,11 +146,14 @@ impl<'d> Renderer<'d>
 			.peekable()
 		;
 
+		/* NOTE: Would love to extract these into their own isolated methods, but the required type annotations are too complex =( */
+
+		// skip heading
 		if !self.config.format.preserve_heading
 		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
 		{
 			let level = *level;
-
+			
 			while parser.next_if(|(e, _range)| {
 				if let pd::Event::End(pd::TagEnd::Heading(lv)) = e
 				&& *lv == level {
@@ -159,8 +162,11 @@ impl<'d> Renderer<'d>
 					true
 				}
 			}).is_some()
-			{}
+			{
+				continue;
+			}
 
+			// consume the `End(Heading)`
 			parser.next();
 		}
 
@@ -172,6 +178,12 @@ impl<'d> Renderer<'d>
 
 		let mut out = str!();
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone()).unwrap();
+
+		// strip charm squark
+		let out =
+			regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\n-->")
+			.replace(&out, "$1")
+			.to_string();
 
 		out
 	}
@@ -461,7 +473,8 @@ impl Renderer<'_>
 
 // 	}, &[
 // 		indoc! {"
-// 			[link<sup>↗</sup>](https://sup2point0.github.io)
+// 			<!-- #SQUARK
+// 			-->
 // 		"}
 // 	]);
 // }
