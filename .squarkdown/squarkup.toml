@@ -30,8 +30,8 @@ mark-invalid-links = true
 # base-file = "article.scss"
 
 [assets]
-folder = ".assets/"
-site-assets-folder = ".assets/site/"
+folder = "/.assets/"
+site-assets-folder = "/.assets/site/"
 extensions = [
 	"svg",
 	"ttf"
