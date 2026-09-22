@@ -3,7 +3,7 @@
 mod parser_core;
 mod charm_parser; pub use charm_parser::{ CharmParser };
 mod shared; use shared::{ ctx };
-mod ctx; pub use ctx::{ ParseCtx };
+mod ctx; pub(crate) use ctx::{ ParseCtx };
 
 #[cfg(test)] mod test_utils;
 

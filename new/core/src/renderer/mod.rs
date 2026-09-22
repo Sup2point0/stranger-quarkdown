@@ -1,6 +1,6 @@
 mod svx_renderer; use svx_renderer::{ Renderer };
 mod ts_renderer;
-mod ctx; pub use ctx::{ RenderCtx };
+mod ctx; pub(crate) use ctx::{ RenderCtx };
 
 #[cfg(test)] mod test_utils;
 

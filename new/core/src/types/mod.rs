@@ -8,7 +8,7 @@ mod site_data;
 pub use site_data::{ SiteData, SiteStats };
 
 mod context_stack;
-pub use context_stack::ContextStack;
+pub use context_stack::{ ContextStack };
 
 
 use tinyvec::TinyVec;
