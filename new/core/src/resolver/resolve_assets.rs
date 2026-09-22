@@ -3,7 +3,7 @@ use crate::macros::*;
 
 use path_macro::path;
 
-use std::path::PathBuf;
+use std::path::{ Path, PathBuf };
 
 
 /// Find all assets to copy to SvelteKit's `static/` directory, as specified by the user's `config.assets.folder`, `.site-assets-folder` and `.extensions`.
@@ -23,19 +23,7 @@ pub fn resolve_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkRes
 			.map(move |entry| match entry {
 				Ok(e) => {
 					let path = e.into_path();
-
-					let path_rel = path.strip_prefix({
-						if let Some(site_assets_folder) = &config.assets.site_assets_folder
-						&& path.starts_with(site_assets_folder)
-						{
-							site_assets_folder
-						} else {
-							assets_folder
-						}
-					}).map_err(err!())?;
-
-					let dest = path!(config.paths.site / "static" / path_rel);
-
+					let dest = resolve_dest(&path, assets_folder, config)?;
 					Ok((path, dest))
 				},
 				Err(e) => Err(SquarkError::external(e)),
@@ -51,9 +39,31 @@ fn should_exclude(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 
 	let path = entry.path();
 
-	if let Some(ext_os) = path.extension() {
-		return config.assets.extensions.iter().any(|ext| **ext == *ext_os);
+	if let Some(extension) = path.extension() {
+		return config.assets.extensions.iter().all(|ext| **ext != *extension);
 	}
 
 	false
+}
+
+fn resolve_dest(
+	path: &Path,
+	assets_folder: &Path,
+	config: &SquarkupConfig,
+) -> SquarkResult<PathBuf>
+{
+	let base = {
+		if let Some(site_assets_folder) = &config.assets.site_assets_folder
+		&& path.starts_with(site_assets_folder)
+		{
+			site_assets_folder
+		} else {
+			assets_folder
+		}
+	};
+
+	let path_rel = path.strip_prefix(base).map_err(err!())?;
+	let dest = path!(config.paths.site / "static" / path_rel);
+
+	Ok(dest)
 }
