@@ -24,7 +24,7 @@ fn main() -> ExitCode
 	match r
 	{
 		Ok(()) => {
-			println!("{P}squarkup finished! {GREY}{perf:.2?} ms{W}", );
+			println!("{P}squarkup finished! {GREY}{perf:.2?} ms{W}");
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
@@ -70,7 +70,7 @@ fn squarkup() -> SquarkResult
 				
 				log::info!(slash!(
 					"found active file: {}/{GREY1}{}",
-					filepath.parent().unwrap().strip_prefix(&config.paths.root).unwrap().to_path_buf(),
+					filepath.parent().unwrap().strip_prefix(&config.paths.root).unwrap(),
 					filepath.file_name().unwrap().to_string_lossy(),
 				));
 			}
@@ -162,7 +162,7 @@ fn squarkup() -> SquarkResult
 		let file = BufWriter::new(File::create(dest)?);
 		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
 
-		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
+		log::ok!(slash!("saved site data to {B}{}", dest.clone()));
 	}
 	
 	Ok(())

@@ -186,7 +186,7 @@ impl SquarkupConfig
 			}) }
 
 			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
-				if s.out.render_page_ts == false {
+				if !s.out.render_page_ts {
 					return Err(SquarkError::Recoverable {
 						msg: str!("warning: setting {W}out.shorter-fields{R} when {W}out.render-page-ts{R} is disabled does nothing!"),
 						hint: str!("did you mean to enable {Y}out.render-page-ts{G} = {W}true{G}?"),
@@ -321,7 +321,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		let _ = errs.or_depends((), &s)?;
+		errs.or_depends((), &s)?;
 		Ok(s)
 	}
 }

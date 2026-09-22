@@ -31,7 +31,7 @@ pub fn parse(
 
 		if reader.read_line(&mut source)? == 0 {
 			break;
-		};
+		}
 
 		if source[i..].contains("-->") {
 			break;
