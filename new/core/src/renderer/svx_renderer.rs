@@ -92,7 +92,7 @@ impl<'d> Renderer<'d>
 			page,
 			site,
 			config,
-			errors: SquarkError::multiple(slash!("rendering {}", page.filepath)),
+			errors: SquarkError::multiple(str!()),
 			dest_file: path!(dest_folder / config.out.file_name),
 			dest_folder,
 			ctx: ContextStack::new(),

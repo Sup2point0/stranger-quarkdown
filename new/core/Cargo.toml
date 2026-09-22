@@ -14,7 +14,6 @@ debug = "line-tables-only"
 [dependencies]
 enum-display = "0.2.1"
 enum_stringify = "0.6.5"
-kiam = "0.1.1"
 lazy_static = "1.5.0"
 path-clean = "1.0.1"
 path-slash = "0.2.1"

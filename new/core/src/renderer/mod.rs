@@ -6,6 +6,8 @@ mod ctx; pub use ctx::{ RenderCtx };
 
 
 use crate::prelude::*;
+use crate::utils;
+use crate::colours::*;
 use crate::macros::*;
 
 use std::fs;
@@ -18,7 +20,10 @@ pub fn render(
 	config: &SquarkupConfig,
 ) -> SquarkResult
 {
-	let mut errs = SquarkError::multiple(slash!("rendering {}", page.filepath));
+	let mut errs = SquarkError::multiple(
+		fmt!("rendering {B}{}", utils::display_rel(&page.filepath, &config.paths.root))
+	);
+
 	let renderer = Renderer::new(page, site, config);
 
 	if !renderer.dest_folder.exists() {

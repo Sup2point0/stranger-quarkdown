@@ -3,8 +3,6 @@ use crate::prelude::*;
 use crate::colours::*;
 use crate::macros::*;
 
-use std::iter;
-
 
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
 impl CharmParser<'_>

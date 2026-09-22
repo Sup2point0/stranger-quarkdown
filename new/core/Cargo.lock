@@ -126,12 +126,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
-name = "kiam"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb0fc32485e41ae5e9dedd1442f36dec998431adc9f321224c2c5d645f38fdcb"
-
-[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -330,7 +324,6 @@ dependencies = [
  "enum-display",
  "enum_stringify",
  "indoc",
- "kiam",
  "lazy_static",
  "path-clean",
  "path-slash",
