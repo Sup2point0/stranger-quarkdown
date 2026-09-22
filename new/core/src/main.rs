@@ -84,14 +84,14 @@ fn squarkup() -> SquarkResult
 	if site_data.stats.checked_files == 0 {
 		SquarkError::Recoverable {
 			msg: str!("no files found to squarkup"),
-			hint: fmt!("check your {W}paths.sources{G}, {W}paths.include{G}, {W}paths.exclude{G} are configured correctly?"),
+			hint: fmt!("check your {Y}paths.sources{G}, {Y}paths.include{G}, {Y}paths.exclude{G} are configured correctly?"),
 			debug: vec![],
 		}.depends(&config)?;
 	}
 	else if site_data.stats.active_pages == 0 {
 		SquarkError::Recoverable {
 			msg: str!("no active files found"),
-			hint: fmt!("check your files have {W}<!-- #SQUARK live!{G} under their heading"),
+			hint: fmt!("check your files have {Y}<!-- #SQUARK live!{G} under their heading"),
 			debug: vec![
 				fmt!("parsed {} files", site_data.stats.checked_files),
 			],
@@ -119,17 +119,6 @@ fn squarkup() -> SquarkResult
 				e.depends(&config)?;
 			}
 		}
-
-		// == SITE DATA == //
-		if let Some(ref dest) = config.out.site_data_path {
-			log::is!("saving site data...");
-
-			let data_raw = site_data.serialise(&config);
-			let file = BufWriter::new(File::create(dest)?);
-			serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
-
-			log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
-		}
 	}
 
 	// == ASSETS == //
@@ -147,12 +136,33 @@ fn squarkup() -> SquarkResult
 
 				log::info!(slash!("copying to: {GREY1}{}", dest_path));
 				std::fs::copy(&source_path, &dest_path)?;
+
+				site_data.stats.assets += 1;
 			};
 
 			if let Err(e) = r {
 				e.depends(&config)?;
 			}
 		}
+
+		if site_data.stats.assets == 0 {
+			SquarkError::Recoverable {
+				msg: str!("no assets found to copy"),
+				hint: fmt!("check your {Y}assets.folder{G}, {Y}assets.site-assets-folder{G}, {Y}assets.extensions{G} are configured correctly?"),
+				debug: vec![],
+			}.depends(&config)?;
+		}
+	}
+
+	// == SITE DATA == //
+	if let Some(ref dest) = config.out.site_data_path {
+		log::is!("saving site data...");
+
+		let data_raw = site_data.serialise(&config);
+		let file = BufWriter::new(File::create(dest)?);
+		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
+
+		log::ok!(slash!("saved site data to {B}{}", dest.to_path_buf()));
 	}
 	
 	Ok(())
