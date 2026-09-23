@@ -116,12 +116,10 @@ impl CharmParser<'_>
 		to: impl Fn() -> String,
 	) -> SquarkResult
 	{
-		for mut expected in target.chars()
+		for expected in target.chars()
 		{
-			expected.make_ascii_lowercase();
-
 			match self.current() {
-				Some(c) if c.to_ascii_lowercase() != expected => {
+				Some(c) if !c.eq_ignore_ascii_case(&expected) => {
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
@@ -142,11 +140,9 @@ impl CharmParser<'_>
 	{
 		let init = self.i;
 
-		for mut expected in target.chars()
+		for expected in target.chars()
 		{
-			expected.make_ascii_lowercase();
-
-			if self.current().map(|c| c.to_ascii_lowercase()) != Some(expected) {
+			if self.current().is_some_and(|c| c.eq_ignore_ascii_case(&expected)) {
 				self.i = init;
 				return Err(SquarkError::ABANDON);
 			}
@@ -174,8 +170,7 @@ impl CharmParser<'_>
 	{
 		let mut did_consume = false;
 
-		while let Some(c) = self.current()
-			&& matches!(c, ' ' | '\t' | '\n')
+		while self.current().is_some_and(|c| c.is_whitespace())
 		{
 			let _ = self.advance();
 			did_consume = true;
