@@ -142,7 +142,7 @@ impl CharmParser<'_>
 
 		for expected in target.chars()
 		{
-			if self.current().is_some_and(|c| c.eq_ignore_ascii_case(&expected)) {
+			if !self.current().is_some_and(|c| c.eq_ignore_ascii_case(&expected)) {
 				self.i = init;
 				return Err(SquarkError::ABANDON);
 			}
