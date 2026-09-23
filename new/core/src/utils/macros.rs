@@ -77,10 +77,10 @@ macro_rules! strings {
 
 // == ERRORS == //
 
-/// Lazily produce a `SquarkError::External`, optionally with a `when` attached.
+/// Lazily produce a `SquarkError::External`.
 #[macro_export]
 macro_rules! err {
-	() => { |e| $crate::errors::SquarkError::external(e) };
+	() => { |e| $crate::types::SquarkError::external(e) };
 } pub use err;
 
 
