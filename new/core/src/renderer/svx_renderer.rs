@@ -7,7 +7,6 @@ use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
-use lazy_static::lazy_static;
 use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark as pd;
@@ -18,28 +17,27 @@ use std::borrow::{ Cow };
 use std::fs::{ self, File };
 use std::io::{ Write };
 use std::path::{ Path, PathBuf };
+use std::sync::{ LazyLock };
 
 
 // == IMPLEMENTATION == //
 
-lazy_static!
-{
-	/// Options for parsing with `pulldown-cmark`.
-	pub static ref PARSER_OPTIONS: pd::Options =
-		  pd::Options::ENABLE_GFM
-		| pd::Options::ENABLE_TABLES
-		| pd::Options::ENABLE_FOOTNOTES
-		| pd::Options::ENABLE_TASKLISTS
-	;
+/// Options for parsing with `pulldown-cmark`.
+pub static PARSER_OPTIONS: LazyLock<pd::Options> = LazyLock::new(||
+	  pd::Options::ENABLE_GFM
+	| pd::Options::ENABLE_TABLES
+	| pd::Options::ENABLE_FOOTNOTES
+	| pd::Options::ENABLE_TASKLISTS
+);
 
-	/// Options for rendering with `pulldown-cmark-to-cmark`.
-	pub static ref RENDER_OPTIONS: cmark::Options<'static>
-		= cmark::Options {
-			code_block_token_count: 3,
-			list_token: '-',
-			..cmark::Options::default()
-		};
-}
+/// Options for rendering with `pulldown-cmark-to-cmark`.
+pub static RENDER_OPTIONS: LazyLock<cmark::Options<'static>> = LazyLock::new(||
+	cmark::Options {
+		code_block_token_count: 3,
+		list_token: '-',
+		..cmark::Options::default()
+	}
+);
 
 
 /// Mutable state for tracking rendering context and errors.
