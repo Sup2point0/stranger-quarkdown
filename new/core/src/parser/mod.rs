@@ -1,12 +1,19 @@
 //! This module implements the parser for the charm squark, which turns `<!-- #SQUARK -->` metadata into a [`PageData`] object.
 
 mod parser_core;
-mod charm_parser; pub use charm_parser::{ CharmParser };
-mod shared; use shared::{ ctx };
-mod ctx; pub(crate) use ctx::{ ParseCtx };
 
-#[cfg(test)] mod test_utils;
+mod charm_parser;
+pub use charm_parser::{ CharmParser };
 
+mod ctx;
+pub(crate) use ctx::{ ParseCtx };
+pub(super) use ctx::{ ctx };
+
+#[cfg(test)]
+mod test_utils;
+
+
+// == PUBLIC == //
 
 use crate::prelude::*;
 use crate::macros::*;

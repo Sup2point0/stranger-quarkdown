@@ -253,7 +253,7 @@ impl Renderer<'_>
 	fn process_html(&mut self, html: &str) -> Option<bool>
 	{
 		let html = html.trim();
-				
+		
 		if html.starts_with("<!--") && html.ends_with("-->") {
 			return Some(
 				if self.process_comment(html) || self.ctx.is_slash() {

@@ -1,9 +1,18 @@
-mod svx_renderer; use svx_renderer::{ Renderer };
+//! This module implements the renderer, which outputs `+page.svx` and `+page.ts` files.
+
+mod svx_renderer;
+use svx_renderer::{ Renderer };
+
 mod ts_renderer;
-mod ctx; pub(crate) use ctx::{ RenderCtx };
 
-#[cfg(test)] mod test_utils;
+mod ctx;
+pub(crate) use ctx::{ RenderCtx };
 
+#[cfg(test)]
+mod test_utils;
+
+
+// == PUBLIC == //
 
 use crate::prelude::*;
 use crate::utils;
