@@ -301,10 +301,7 @@ impl Renderer<'_>
 							self.errors.push(SquarkError::Recoverable {
 								msg: fmt!("unknown twin squark: {W}{s}"),
 								hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
-								debug: vec![
-									slash!("in: {GREY1}{}", self.page.filepath),
-									fmt!("context stack: {:?}", self.ctx.stack()),
-								],
+								debug: self.ctx.printed(),
 							});
 						}
 						return false;
@@ -313,9 +310,7 @@ impl Renderer<'_>
 				None => unreachable!(),
 			};
 
-			if matches!(self.ctx.current(), RenderCtx::LEAVE{..})
-			&& !matches!(squark, RenderCtx::LEAVE{..})
-			{
+			if self.ctx.is_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
 				return false;
 			}
 

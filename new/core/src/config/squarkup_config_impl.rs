@@ -330,7 +330,11 @@ impl SquarkupConfig
 impl SquarkupConfig
 {
 	/// Validate that `data` is a TOML table.
-	fn check_is_table(data: &toml::Value, setting: &str, hint: impl FnOnce() -> String) -> SquarkResult
+	fn check_is_table(
+		data: &toml::Value,
+		setting: &str,
+		hint: impl FnOnce() -> String,
+	) -> SquarkResult
 	{
 		if matches!(data, toml::Value::Table(..)) {
 			Ok(())
