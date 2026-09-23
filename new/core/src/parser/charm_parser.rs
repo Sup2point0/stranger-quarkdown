@@ -289,13 +289,14 @@ impl CharmParser<'_>
 					'|' if can_terminate => break,
 
 					// `-->` terminates
-					// TODO preview() is expensive
-					'-' if can_terminate && self.preview().starts_with("-->") => break,
+					'-' if can_terminate
+						&& self.source[self.i..].starts_with(&['-', '-', '>'])
+						=> break,
 
 					_ => {
-						can_terminate = utils::is_whitespace(c);
+						can_terminate = c.is_whitespace();
 						
-						if utils::is_whitespace(c) {
+						if can_terminate {
 							value.push(' ');
 						} else {
 							value.push(c);
