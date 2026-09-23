@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 use path_macro::path;
 
 use std::fs::{ self, File };
-use std::io::{ self, Read };
+use std::io;
 use std::path::{ PathBuf };
 use std::process;
 
@@ -16,7 +16,6 @@ macro_rules! assert_not {
 		assert!( !($($tokens)*) )
 	};
 }
-
 
 
 lazy_static! {
