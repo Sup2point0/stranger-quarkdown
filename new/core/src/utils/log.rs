@@ -77,7 +77,9 @@ pub fn error(err: SquarkError)
 				bad!(msg);
 				
 				for each in debug {
-					debug!(each);
+					if !each.is_empty() {
+						debug!(each);
+					}
 				}
 
 				if !hint.is_empty() {
