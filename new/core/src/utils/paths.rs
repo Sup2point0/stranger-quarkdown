@@ -28,5 +28,5 @@ pub fn display_rel(
 	let slashed = path_slash::PathBufExt::to_slash(&relative)
 		.expect("Squarkdown only supports Unicode paths");
 
-	slashed.to_string()
+	slashed.into_owned()
 }
