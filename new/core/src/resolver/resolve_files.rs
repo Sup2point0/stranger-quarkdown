@@ -35,11 +35,10 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 			// don't yield folders, only yield files
 			.filter(|e| !e.as_ref().is_ok_and(|entry| entry.file_type().is_dir()))
 
-			// yield paths, not walkdir entries
-			.map(|entry| match entry {
-				Ok(e) => Ok(e.into_path()),
-				Err(e) => Err(SquarkError::external(e)),
-			})
+			.map(|e| e
+				.map(walkdir::DirEntry::into_path)
+				.map_err(SquarkError::external)
+			)
 	})
 }
 
@@ -47,23 +46,14 @@ pub fn resolve_files(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResu
 fn should_include(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 {
 	let path = entry.path();
-	let path_str = path.to_slash().expect("path should not contain non-Unicode characters");
+	let path_str = path.to_slash().expect("Squarkdown does not support non-Unicode filepaths");
 
-	if !config.paths.exclude.is_empty() {
-		for pattern in &config.paths.exclude {
-			if pattern.is_match(&path_str) {
-				return false;
-			}
-		}
+	if config.paths.exclude.iter().any(|p| p.is_match(&path_str)) {
+		return false;
 	}
 
 	if entry.file_type().is_file() && !config.paths.include.is_empty() {
-		for pattern in &config.paths.include {
-			if pattern.is_match(&path_str) {
-				return true;
-			}
-		}
-		return false;
+		return config.paths.include.iter().any(|p| p.is_match(&path_str));
 	}
 
 	true
