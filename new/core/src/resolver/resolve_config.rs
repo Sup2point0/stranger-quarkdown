@@ -6,8 +6,7 @@ use crate::macros::*;
 use path_macro::path;
 
 use std::error::Error;
-use std::fs::{ File };
-use std::io::{ Read };
+use std::fs;
 use std::path::{ PathBuf, Path };
 
 
@@ -93,11 +92,7 @@ fn read_toml_config(filepath: &Path) -> SquarkResult<toml::Table>
 {
 	(|| -> Result<toml::Table, Box<dyn Error>>
 	{
-		let mut file = File::open(filepath)?;
-
-		let mut content = str!();
-		file.read_to_string(&mut content)?;
-
+		let content = fs::read_to_string(filepath)?;
 		let data = content.parse::<toml::Table>()?;
 		Ok(data)
 	})

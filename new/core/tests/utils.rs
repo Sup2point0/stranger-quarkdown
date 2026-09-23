@@ -108,10 +108,5 @@ pub fn read_file(path: &str) -> String
 		panic!("{}", slash!("no file found at: {}", path));
 	}
 
-	let mut file = File::open(path).unwrap();
-
-	let mut out = str!();
-	file.read_to_string(&mut out).unwrap();
-
-	out
+	fs::read_to_string(path).unwrap()
 }

@@ -15,8 +15,8 @@ use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 
 use std::borrow::{ Cow };
-use std::fs::{ File };
-use std::io::{ Read, Write };
+use std::fs::{ self, File };
+use std::io::{ Write };
 use std::path::{ Path, PathBuf };
 
 
@@ -102,10 +102,7 @@ impl<'d> Renderer<'d>
 			self.config.out.file_name,
 		);
 
-		let mut file = File::open(&self.page.filepath)?;
-		let mut source = str!();
-		file.read_to_string(&mut source)?;
-
+		let source = fs::read_to_string(&self.page.filepath)?;
 		let output = self.render_from(source);
 
 		if *self.ctx.current() != RenderCtx::MARKDOWN {
