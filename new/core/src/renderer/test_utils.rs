@@ -38,7 +38,7 @@ pub(super) fn test_expect_for(
 
 	for source in cases {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-		let output = renderer.render_from(source.trim().to_owned());
+		let output = renderer.render_from(source.trim());
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}
 }
@@ -60,7 +60,7 @@ pub(super) fn test_expected_for(
 
 	for (source, expected) in cases {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-		let output = renderer.render_from(source.trim().to_owned());
+		let output = renderer.render_from(source.trim());
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
 	}
 }

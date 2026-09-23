@@ -101,7 +101,7 @@ impl<'d> Renderer<'d>
 		);
 
 		let source = fs::read_to_string(&self.page.filepath)?;
-		let output = self.render_from(source);
+		let output = self.render_from(&source);
 
 		if *self.ctx.current() != RenderCtx::MARKDOWN {
 			self.errors.push(SquarkError::Recoverable {
@@ -122,7 +122,7 @@ impl<'d> Renderer<'d>
 		self.errors.or(())
 	}
 
-	pub(super) fn render_from(&mut self, source: String) -> String
+	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
 		let source = Self::expand_only(&source);
 
