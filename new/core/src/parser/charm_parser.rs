@@ -289,9 +289,7 @@ impl CharmParser<'_>
 					'|' if can_terminate => break,
 
 					// `-->` terminates
-					'-' if can_terminate
-						&& self.source[self.i..].starts_with(&['-', '-', '>'])
-						=> break,
+					'-' if can_terminate && self.lookahead("-->") => break,
 
 					_ => {
 						can_terminate = c.is_whitespace();

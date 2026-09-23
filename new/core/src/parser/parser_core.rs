@@ -62,6 +62,12 @@ impl CharmParser<'_>
 
 		Ok(())
 	}
+
+	/// Check that `needle` is upcoming without consuming.
+	pub(super) fn lookahead(&self, needle: &str) -> bool
+	{
+		needle.char_indices().all(|(i, c)| self.source[self.i + i] == c)
+	}
 	
 	/// Consume exactly `target`, erroring on failure.
 	pub(super) fn eat(&mut self,
