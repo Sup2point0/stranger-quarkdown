@@ -1,16 +1,16 @@
 # Main
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
-This image link should be rewritten to `/link.png`.
+This image link should be rewritten to `/link.jpg`.
 
-![test](.assets/link.png)
+![test](.assets/link.jpg)
 
 
-This image link should also be rewritten to `/link.png`.
+This image link should also be rewritten to `/link.jpg`.
 
-![test](./.assets/link.png)
+![test](./.assets/link.jpg)
 
 
 This image link should be rewritten to `/nested/linked.jpg`.

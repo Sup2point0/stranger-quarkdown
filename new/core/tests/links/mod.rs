@@ -110,5 +110,5 @@ use assertables::*;
 
 	assert!( squarkup!("links/assets", "--assets").success() );
 	
-	let main = read_file("links/assets/main/+page.svx");
+	let main = read_file("links/assets/+page.svx");
 }

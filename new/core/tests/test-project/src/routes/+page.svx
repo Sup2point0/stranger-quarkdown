@@ -22,8 +22,8 @@
 - [render/dest/nest/nest/nest/nest/5](render/dest/nest/nest/nest/nest/5)
 
 ### `+page.ts`
-- [page-ts/long]
-- [page-ts/short]
+- [page-ts/long](page-ts/long/main)
+- [page-ts/short](page-ts/short/main)
 
 ### Links
 - [links/basic/main](links/basic/main)
@@ -34,3 +34,5 @@
 - [links/external/main](links/external/main)
 - [links/anchors/main](links/anchors/main)
 - [links/anchors/side](links/anchors/side)
+
+- [links/assets](links/assets)
