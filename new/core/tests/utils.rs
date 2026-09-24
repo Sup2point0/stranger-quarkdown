@@ -76,7 +76,7 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 }
 
 
-/// Recursively delete all files under `path`, except `.gitkeep`.
+/// Recursively delete all files under `TEST_ROUTES / path`, except `.gitkeep`.
 pub fn clear_files(path: &str) -> io::Result<()>
 {
 	let path = path!(*TEST_ROUTES / path);

@@ -1,0 +1,12 @@
+#:schema ../../../src/config/schema.json
+
+[paths]
+site = "../../test-project/"
+
+[assets]
+folder = "."
+extensions = ["png", "jpg", "svg"]
+
+[errors]
+strict = false
+on-error = "warn"
