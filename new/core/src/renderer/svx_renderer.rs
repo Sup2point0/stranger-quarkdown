@@ -1,7 +1,6 @@
 use super::*;
-use crate::prelude::*;
 use crate::config::*;
-use crate::types::ContextStack;
+use crate::types::*;
 use crate::log;
 use crate::utils;
 use crate::colours::*;
@@ -155,7 +154,7 @@ impl<'d> Renderer<'d>
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
-			.inspect(|e| { dbg!(e); })
+			// .inspect(|e| { dbg!(e); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -228,6 +227,10 @@ impl Renderer<'_>
 			{
 				pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) => {
 					self.process_link(dest_url);
+					Some(event)
+				}
+				pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) => {
+					self.process_image(dest_url);
 					Some(event)
 				}
 				_ => Some(event),
@@ -349,6 +352,7 @@ impl Renderer<'_>
 			return;
 		}
 
+		// TODO can avoid `.to_string()`?
 		let mut their_file_name = dest_url.to_string();
 		let mut anchor: Option<String> = None;
 
@@ -417,6 +421,42 @@ impl Renderer<'_>
 			}
 		}
 	}
+
+	fn process_image(&mut self, dest_url: &mut pd::CowStr)
+	{
+		if dest_url.contains("://")
+		|| dest_url.starts_with("http") {
+			return;
+		}
+
+		// 1. find where the asset file lives, relative to the current file
+		let own_source_folder = self.page.filepath.parent()
+			.expect("active files are always inside a folder");
+
+		let their_source_path = path!(own_source_folder / **dest_url).clean();
+
+		// 2. check it's an asset file
+		if !their_source_path.exists() {
+			self.errors.push(SquarkError::Recoverable {
+				msg: fmt!("found broken asset link: {W}({dest_url})"),
+				hint: str!(),
+				debug: vec![
+					// TODO add line number
+					slash!("resolved to: {GREY1}{}", their_source_path),
+				]
+			});
+			return;
+		}
+
+		let Some(extension) = their_source_path.extension() else { return };
+
+		if !self.config.assets.extensions.iter().any(|ext| **ext == *extension) {
+			return;
+		}
+
+		// 3. resolve to site link
+		
+	}
 }
 
 /// Core utilities
@@ -447,15 +487,15 @@ impl Renderer<'_>
 #[cfg(test)] use indoc::indoc;
 
 
-#[test] fn playground() {
-	test_preserves_for(|_| {
+// #[test] fn playground() {
+// 	test_preserves_for(|_| {
 
-	}, &[
-		indoc! {"
-			![asset](./asset.png)
-		"}
-	]);
-}
+// 	}, &[
+// 		indoc! {"
+// 			![asset](./asset.png)
+// 		"}
+// 	]);
+// }
 
 
 #[cfg(test)]
