@@ -21,6 +21,49 @@ use assertables::*;
 	assert_contains!( f5, "Five" );
 }
 
+/// Squarkdown preserves basic Markdown syntax.
+#[test] fn markdown()
+{
+	clear_files("render/markdown").unwrap();
+	assert!( squarkup_from("render/markdown").success() );
+
+	let main = read_file("render/markdown/main/+page.svx");
+
+	assert_contains!( main, "\n## Level 2\n" );
+	assert_contains!( main, "\n### Level 3\n" );
+	assert_contains!( main, "\n#### Level 4\n" );
+
+	assert_contains!( main, " *italic* " );
+	assert_contains!( main, " **bold** " );
+	assert_contains!( main, " ~~strikethrough~~ " );
+	assert_contains!( main, " ***italic bold*** " );
+	assert_contains!( main, " *~~italic strikethrough~~* " );
+	assert_contains!( main, " **~~bold strikethrough~~**." );
+
+	assert_contains!( main, "\n- item 1\n" );
+	assert_contains!( main, "\n- item 2\n" );
+	assert_contains!( main, "\n- item 3\n" );
+
+	assert_contains!( main, "\n  - item 1.1\n" );
+	assert_contains!( main, "\n  - item 1.2\n" );
+	assert_contains!( main, "\n    - item 1.2.1\n" );
+	assert_contains!( main, "\n    - item 1.2.2\n" );
+	assert_contains!( main, "\n    - item 1.2.3\n" );
+	assert_contains!( main, "\n  - item 1.3\n" );
+
+	assert_contains!( main, "\n1. one\n" );
+	assert_contains!( main, "\n1. two\n" );
+	assert_contains!( main, "\n1. three\n" );
+
+	assert_contains!( main, "\nimplicit  \nbreak\n" );
+	assert_contains!( main, "\nexplicit   \nbreak\n" );
+
+	assert_contains!( main, "\n---\n" );
+
+	assert_contains!( main, "\n > \n > Quote\n" );
+	assert_contains!( main, "\n > \n > Multi\n > Line\n > \n > Quote" );
+}
+
 /// Squarkdown strips the charm squark even when `config.format.preserve-comments` is enabled.
 #[test] fn strip_charm()
 {

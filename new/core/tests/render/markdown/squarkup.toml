@@ -1,0 +1,11 @@
+#:schema ../../../src/config/schema.json
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/render/markdown/"
+
+[errors]
+strict = false
+on-error = "kill"
