@@ -107,10 +107,7 @@ impl<'d> Renderer<'d>
 			self.errors.push(SquarkError::Recoverable {
 				msg: str!("warning: unterminated rendering context"),
 				hint: str!("this may be a bug in the Squarkdown renderering engine!"),
-				debug: vec![
-					// TODO standardise `show_ctx_stack()`
-					fmt!("{:?}", self.ctx.stack()),
-				],
+				debug: self.ctx.printed(),
 			});
 		}
 
@@ -158,7 +155,7 @@ impl<'d> Renderer<'d>
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
-			// .inspect(|e| { dbg!(e); })
+			.inspect(|e| { dbg!(e); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -317,9 +314,7 @@ impl Renderer<'_>
 						self.errors.push(SquarkError::Recoverable {
 							msg: fmt!("unpaired closing squark: {W}{html}"),
 							hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
-							debug: vec![
-								fmt!("context stack: {:?}", self.ctx)
-							],
+							debug: self.ctx.printed(),
 						});
 					}
 				}
@@ -452,16 +447,15 @@ impl Renderer<'_>
 #[cfg(test)] use indoc::indoc;
 
 
-// #[test] fn playground() {
-// 	test_preserves_for(|_| {
+#[test] fn playground() {
+	test_preserves_for(|_| {
 
-// 	}, &[
-// 		indoc! {"
-// 			<!-- #SQUARK
-// 			-->
-// 		"}
-// 	]);
-// }
+	}, &[
+		indoc! {"
+			![asset](./asset.png)
+		"}
+	]);
+}
 
 
 #[cfg(test)]
