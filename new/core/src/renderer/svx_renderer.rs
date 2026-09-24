@@ -285,49 +285,45 @@ impl Renderer<'_>
 				r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
 			).captures(html)
 		{
+			let m1 = captures.get(1).expect("required by pattern");
+			let m2 = captures.get(2).expect("required by pattern");
 			let key = captures.get(3).map(|k| k.as_str().to_owned());
 
-			let squark = match captures.get(1) {
-				Some(m) => match m.as_str() {
-					s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
-					s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
-					s => {
-						if !self.ctx.is_leave() {
-							self.errors.push(SquarkError::Recoverable {
-								msg: fmt!("unknown twin squark: {W}{s}"),
-								hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
-								debug: self.ctx.printed(),
-							});
-						}
-						return false;
+			let squark = match m1.as_str() {
+				s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
+				s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
+				s => {
+					if !self.ctx.is_leave() {
+						self.errors.push(SquarkError::Recoverable {
+							msg: fmt!("unknown twin squark: {W}{s}"),
+							hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
+							debug: self.ctx.printed(),
+						});
 					}
+					return false;
 				}
-				None => unreachable!(),
 			};
 
 			if self.ctx.is_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
 				return false;
 			}
 
-			match captures.get(2) {
-				Some(m) => match m.as_str() {
-					"?" => self.ctx.push(squark),
-					"." => {
-						let r = self.ctx.try_pop(squark);
+			match m2.as_str() {
+				"?" => self.ctx.push(squark),
+				"." => {
+					let r = self.ctx.try_pop(squark);
 
-						if let Err(..) = r {
-							self.errors.push(SquarkError::Recoverable {
-								msg: fmt!("unpaired closing squark: {W}{html}"),
-								hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
-								debug: vec![
-									fmt!("context stack: {:?}", self.ctx)
-								],
-							});
-						}
+					if r.is_err() {
+						self.errors.push(SquarkError::Recoverable {
+							msg: fmt!("unpaired closing squark: {W}{html}"),
+							hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
+							debug: vec![
+								fmt!("context stack: {:?}", self.ctx)
+							],
+						});
 					}
-					_ => unreachable!(),
 				}
-				None => unreachable!(),
+				_ => unreachable!("pattern only allows ? and ."),
 			}
 
 			return true;
