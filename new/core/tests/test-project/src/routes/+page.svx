@@ -4,10 +4,10 @@
 ## Resolve
 
 ### Sources
-- [sources/fixed/main](sources/fixed/main)
-- [sources/root-only/main](sources/root-only/main)
-- [sources/include/main](sources/include/main)
-- [sources/exclude/main](sources/exclude/main)
+- [sources/fixed](sources/fixed)
+- [sources/root-only](sources/root-only)
+- [sources/include](sources/include)
+- [sources/exclude](sources/exclude)
 - [sources/exclude/nested/side](sources/exclude/nested/side)
 - [sources/exclude/nested/bad/but/keep](sources/exclude/nested/bad/but/keep)
 
@@ -31,7 +31,7 @@
 - [links/nested/main](links/nested/main)
 - [links/nested/more](links/nested/more)
 - [links/nested/nested/side](links/nested/nested/side)
-- [links/external/main](links/external/main)
+- [links/external](links/external)
 - [links/anchors/main](links/anchors/main)
 - [links/anchors/side](links/anchors/side)
 - 

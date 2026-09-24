@@ -1,6 +1,6 @@
-# Main
+# Include Patterns are Respected
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
 This page should be considered for squarkup.

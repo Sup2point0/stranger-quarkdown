@@ -1,6 +1,6 @@
-# Main
+# Exclude Patterns are Applied
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
 This page should be considered for squarkup.

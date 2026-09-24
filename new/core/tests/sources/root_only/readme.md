@@ -1,6 +1,6 @@
-# Main
+# `/` only Searches from Project Root
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
 This page should be considered for squarkup.

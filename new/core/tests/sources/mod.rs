@@ -10,7 +10,7 @@ use path_macro::path;
 	clear_files("sources/root-only").unwrap();
 	assert!( squarkup_from("sources/root_only").success() );
 
-	let main = read_file("sources/root-only/main/+page.svx");
+	let main = read_file("sources/root-only/+page.svx");
 	assert_contains!( main, "squarkup" );
 	assert_not!( path!(*TEST_ROUTES / "sources/root-only/ignore").exists() );
 }
@@ -21,7 +21,7 @@ use path_macro::path;
 	clear_files("sources/fixed").unwrap();
 	assert!( squarkup_from("sources/fixed").success() );
 
-	let main = read_file("sources/fixed/main/+page.svx");
+	let main = read_file("sources/fixed/+page.svx");
 	assert_contains!( main, "squarkup" );
 	assert_not!( path!(*TEST_ROUTES / "sources/fixed/ignore").exists() );
 }
@@ -32,7 +32,7 @@ use path_macro::path;
 	clear_files("sources/include").unwrap();
 	assert!( squarkup_from("sources/include").success() );
 
-	let main = read_file("sources/include/main/+page.svx");
+	let main = read_file("sources/include/+page.svx");
 	assert_contains!( main, "squarkup" );
 	assert_not!( path!(*TEST_ROUTES / "sources/include/ignore").exists() );
 }
@@ -43,7 +43,7 @@ use path_macro::path;
 	clear_files("sources/exclude").unwrap();
 	assert!( squarkup_from("sources/exclude").success() );
 
-	let main = read_file("sources/exclude/main/+page.svx");
+	let main = read_file("sources/exclude/+page.svx");
 	let side = read_file("sources/exclude/nested/side/+page.svx");
 	assert_contains!( main, "squarkup" );
 	assert_contains!( side, "squarkup" );
