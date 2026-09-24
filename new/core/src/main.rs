@@ -52,8 +52,40 @@ fn squarkup() -> SquarkResult
 
 	let mut site_data = SiteData::new();
 
-	// == PARSE == //
+	// == ASSETS == //
+	if args.iter().any(|arg| arg == "--assets") {
+		log::is!("copying assets...");
 
+		for paths in resolver::resolve_assets(&config) {
+			let r = catch! {
+				let (source_path, dest_path) = paths?;
+				log::info!(slash!("found asset: {GREY1}{}", source_path));
+
+				if let Some(parent) = dest_path.parent() {
+					std::fs::create_dir_all(parent)?;
+				}
+
+				log::info!(slash!("copying to: {GREY1}{}", dest_path));
+				std::fs::copy(&source_path, &dest_path)?;
+
+				site_data.stats.assets += 1;
+			};
+
+			if let Err(e) = r {
+				e.depends(&config)?;
+			}
+		}
+
+		if site_data.stats.assets == 0 {
+			SquarkError::Recoverable {
+				msg: str!("no assets found to copy"),
+				hint: fmt!("check your {Y}assets.folder{G}, {Y}assets.site-assets-folder{G}, {Y}assets.extensions{G} are configured correctly?"),
+				debug: vec![],
+			}.depends(&config)?;
+		}
+	}
+
+	// == PARSE == //
 	log::is!("finding files to squarkup...");
 	
 	for filepath in resolver::resolve_files(&config) {
@@ -116,39 +148,6 @@ fn squarkup() -> SquarkResult
 			if let Err(e) = r {
 				e.depends(&config)?;
 			}
-		}
-	}
-
-	// == ASSETS == //
-	if args.iter().any(|arg| arg == "--assets") {
-		log::is!("copying assets...");
-
-		for paths in resolver::resolve_assets(&config) {
-			let r = catch! {
-				let (source_path, dest_path) = paths?;
-				log::info!(slash!("found asset: {GREY1}{}", source_path));
-
-				if let Some(parent) = dest_path.parent() {
-					std::fs::create_dir_all(parent)?;
-				}
-
-				log::info!(slash!("copying to: {GREY1}{}", dest_path));
-				std::fs::copy(&source_path, &dest_path)?;
-
-				site_data.stats.assets += 1;
-			};
-
-			if let Err(e) = r {
-				e.depends(&config)?;
-			}
-		}
-
-		if site_data.stats.assets == 0 {
-			SquarkError::Recoverable {
-				msg: str!("no assets found to copy"),
-				hint: fmt!("check your {Y}assets.folder{G}, {Y}assets.site-assets-folder{G}, {Y}assets.extensions{G} are configured correctly?"),
-				debug: vec![],
-			}.depends(&config)?;
 		}
 	}
 
