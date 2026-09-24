@@ -4,7 +4,7 @@
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/links/broken/"
+folder = "src/routes/links/broken-crash/"
 
 [errors]
 strict = false

@@ -80,9 +80,9 @@ use assertables::*;
 /// Squarkdown crashes when encountering links to nonexistent files.
 #[test] fn broken_crashes()
 {
-	clear_files("links/broken").unwrap();
+	clear_files("links/broken-crash").unwrap();
 
-	let (status, out) = capture_squarkup_from("links/broken");
+	let (status, out) = capture_squarkup_from("links/broken-crash");
 	assert!( !status.success() );
 	assert_contains!( out, "broken link" );
 	assert_contains!( out, "(side.md)" );
