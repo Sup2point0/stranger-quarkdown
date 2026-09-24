@@ -479,7 +479,7 @@ impl Renderer<'_>
 			return;
 		};
 
-		let dest = slash!("{}", path_rel);
+		let dest = slash!("/{}", path_rel);
 
 		*dest_url = pd::CowStr::Boxed(Box::from(dest));
 	}
