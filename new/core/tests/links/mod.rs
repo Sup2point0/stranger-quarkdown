@@ -46,7 +46,7 @@ use assertables::*;
 
 	assert!( squarkup_from("links/external").success() );
 
-	let main = read_file("links/external/main/+page.svx");
+	let main = read_file("links/external/+page.svx");
 	assert_contains!( main, "[GitHub](https://github.com/Sup2point0/stranger-quarkdown)" );
 	// assert_contains!( main, "<a target=\"_blank\" href=\"https://svelte.dev\">Svelte</a>" );
 }
@@ -72,8 +72,8 @@ use assertables::*;
 
 	assert!( squarkup_from("links/titles").success() );
 	
-	let main = read_file("links/titles/main/+page.svx");
-	assert_contains!( main, "[main](main \"self\")" );
+	let main = read_file("links/titles/+page.svx");
+	assert_contains!( main, "[self](titles \"self\")" );
 	assert_contains!( main, "[GitHub](https://github.com/Sup2point0/stranger-quarkdown \"squarkdown\")" );
 }
 
@@ -111,4 +111,7 @@ use assertables::*;
 	assert!( squarkup!("links/assets", "--assets").success() );
 	
 	let main = read_file("links/assets/+page.svx");
+	assert_contains!( main, "![test](/link.jpg)" );
+	assert_contains!( main, "![test](/nested/linked.jpg)" );
+	assert_not_contains!( main, ".assets" );
 }

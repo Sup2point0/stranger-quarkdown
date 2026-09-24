@@ -1,6 +1,6 @@
-# Main
+# External Links are not Rewritten
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
 This external link to [GitHub](https://github.com/Sup2point0/stranger-quarkdown) should *not* be rewritten.

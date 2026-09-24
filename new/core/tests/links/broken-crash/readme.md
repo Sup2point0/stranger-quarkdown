@@ -1,6 +1,6 @@
 # Main
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
 This link to [side](side.md) is broken.
