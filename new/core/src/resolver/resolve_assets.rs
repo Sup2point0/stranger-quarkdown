@@ -43,7 +43,7 @@ fn should_exclude(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 		return config.assets.extensions.iter().all(|ext| **ext != *extension);
 	}
 
-	false
+	true
 }
 
 fn resolve_dest(
