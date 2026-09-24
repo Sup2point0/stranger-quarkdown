@@ -51,7 +51,7 @@ use assertables::*;
 	// assert_contains!( main, "<a target=\"_blank\" href=\"https://svelte.dev\">Svelte</a>" );
 }
 
-/// Squarkdown resolves links with anchors (`path/to/page.md#anchor`) while keeping the anchor.
+/// Squarkdown rewrites links with anchors (`path/to/page.md#anchor`) while keeping the anchor.
 #[test] fn anchors()
 {
 	clear_files("links/anchors").unwrap();
@@ -65,7 +65,7 @@ use assertables::*;
 	assert_contains!( side, "[main](main)" );
 }
 
-/// Squarkdown resolves links with titles (`path/to/page.md 'title'`) while keeping the title.
+/// Squarkdown rewrites links with titles (`path/to/page.md 'title'`) while keeping the title.
 #[test] fn titles()
 {
 	clear_files("links/titles").unwrap();
@@ -100,4 +100,15 @@ use assertables::*;
 	assert!( !status.success() );
 	assert_contains!( out, "inactive page" );
 	assert_contains!( out, "(./inactive.md)" );
+}
+
+
+/// Squarkdown rewrites links to asset files.
+#[test] fn assets()
+{
+	clear_files("links/assets").unwrap();
+
+	assert!( squarkup!("links/assets", "--assets").success() );
+	
+	let main = read_file("links/assets/main/+page.svx");
 }
