@@ -7,8 +7,11 @@
 
   "scripts":
   {
-    "dev": "vite",
-      "devx": "vite --open"
+    "dev":    "vite",
+      "devx": "vite --open",
+    
+    "build":    "vite build",
+      "buildx": "cargo test && vite build"
   },
 
   "devDependencies":
