@@ -68,12 +68,12 @@ impl SquarkupConfig
 	/// Returns [`SquarkError::Multiple`] if any validation errors are encountered.
 	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
-		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with *user-friendly*, *aggregated* error messages (rather than just a schema violation) we have to handroll it all ourselves */
+		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with _user-friendly_, _aggregated_ error messages (rather than just a schema violation) we have to handroll it all ourselves */
 
 		/* NOTE:
-			We're treating an invalid config as fatal, so `errors.on-error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything *destructive*, tho)
+			We're treating an invalid config as fatal, so `errors.on-error` doesn't apply here. Better to make sure Squarkdown does exactly what the user asks, rather than proceed with misconfigured settings (not that Squarkdown does anything _destructive_, tho)
 			
-			However, better than repeatedly failing with fatal errors is to report all of them at once, so *if possible*, we'll still process the entire config and aggregate any errors we encounter in `errs`, only returning `Err()` once we reach the end.
+			However, better than repeatedly failing with fatal errors is to report all of them at once, so _if possible_, we'll still process the entire config and aggregate any errors we encounter in `errs`, only returning `Err()` once we reach the end.
 		*/
 		let mut errs = SquarkError::multiple("loading squarkup config");
 
@@ -98,8 +98,62 @@ impl SquarkupConfig
 
 		// now start with defaults...
 		let mut s = Self::init_defaults(root, &site);
-
 		// ...then apply the user's non-defaults on top of it
+
+		// ErrorConfig
+		if let Some(errors) = data.get("errors")
+		{
+			Self::check_is_table(errors, "errors",
+				hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
+			)?;
+			
+			if let Some(value) = errors.get("strict") { catch!(errs => {
+				s.errors.strict = Self::try_get_bool(value, "errors.strict")?;
+			}) }
+
+			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
+			if let Some(value) = errors.get("on-error") {
+				let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
+
+				if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
+					s.errors.on_error = opt;
+				} else {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.on-error"),
+						hint: fmt!("valid values are {W}'warn'{G} (default) or {W}'kill'"),
+						debug: vec![fmt!("you provided {value}")],
+					});
+				}
+			}
+			
+			if let Some(value) = errors.get("file-already-exists") { catch!(errs => {
+				let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
+
+				if let Ok(opt) = FileAction::try_from(raw.as_str()) {
+					s.errors.file_already_exists = opt;
+				} else {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
+						hint: fmt!("valid values are {W}'overwrite'{G} (default), {W}'error'{G}, {W}'skip'"),
+						debug: vec![fmt!("you provided {value}")],
+					});
+				}
+			}) }
+			
+			if let Some(value) = errors.get("inactive-link") { catch!(errs => {
+				let raw = Self::try_get_string(value, "errors.inactive-link", "(a missing file handling strategy)")?;
+
+				if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
+					s.errors.inactive_link = opt;
+				} else {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("unknown setting for {Y}errors.inactive-link"),
+						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
+						debug: vec![fmt!("you provided {value}")],
+					});
+				}
+			}) }
+		}
 
 		// PathsConfig
 		if let Some(paths) = data.get("paths")
@@ -265,61 +319,6 @@ impl SquarkupConfig
 		}
 
 		// FontsConfig
-
-		// ErrorConfig
-		if let Some(errors) = data.get("errors")
-		{
-			Self::check_is_table(errors, "errors",
-				hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
-			)?;
-			
-			if let Some(value) = errors.get("strict") { catch!(errs => {
-				s.errors.strict = Self::try_get_bool(value, "errors.strict")?;
-			}) }
-
-			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
-			if let Some(value) = errors.get("on-error") {
-				let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
-
-				if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
-					s.errors.on_error = opt;
-				} else {
-					return Err(SquarkError::Unrecoverable {
-						msg: fmt!("unknown setting for {Y}errors.on-error"),
-						hint: fmt!("valid values are {W}'warn'{G} (default) or {W}'kill'"),
-						debug: vec![fmt!("you provided {value}")],
-					});
-				}
-			}
-			
-			if let Some(value) = errors.get("file-already-exists") { catch!(errs => {
-				let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
-
-				if let Ok(opt) = FileAction::try_from(raw.as_str()) {
-					s.errors.file_already_exists = opt;
-				} else {
-					return Err(SquarkError::Unrecoverable {
-						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
-						hint: fmt!("valid values are {W}'overwrite'{G} (default), {W}'error'{G}, {W}'skip'"),
-						debug: vec![fmt!("you provided {value}")],
-					});
-				}
-			}) }
-			
-			if let Some(value) = errors.get("inactive-link") { catch!(errs => {
-				let raw = Self::try_get_string(value, "errors.inactive-link", "(a missing file handling strategy)")?;
-
-				if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
-					s.errors.inactive_link = opt;
-				} else {
-					return Err(SquarkError::Unrecoverable {
-						msg: fmt!("unknown setting for {Y}errors.inactive-link"),
-						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
-						debug: vec![fmt!("you provided {value}")],
-					});
-				}
-			}) }
-		}
 
 		errs.or_depends((), &s)?;
 		Ok(s)
