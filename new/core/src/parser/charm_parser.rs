@@ -271,8 +271,7 @@ impl CharmParser<'_>
 			{
 				match c {
 					// ` / ` flushes current value
-					'/' if can_terminate && utils::is_whitespace(self.peek()
-						.expect("safe from newline termination")) =>
+					'/' if can_terminate && self.peek().is_some_and(char::is_whitespace) =>
 					{
 						let _ = self.advance();  // safe from if check
 						self.eat_whitespace();

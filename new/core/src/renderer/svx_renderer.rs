@@ -13,8 +13,7 @@ use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 
 use std::borrow::{ Cow };
-use std::fs::{ self, File };
-use std::io::{ Write };
+use std::fs;
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
@@ -109,8 +108,7 @@ impl<'d> Renderer<'d>
 		}
 
 		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
-			let mut target = File::create(&self.dest_file)?;
-			target.write_all(output.as_bytes())?;
+			fs::write(&self.dest_file, output)?;
 		}
 
 		self.errors.or(())

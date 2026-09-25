@@ -86,16 +86,16 @@ pub fn error(err: SquarkError)
 			}
 
 			SquarkError::Multiple{ when, errs } => {
-				for (i, mut err) in errs.into_iter().enumerate() {
+				let when = {
+					if when.is_empty() { parent_when }
+					else               { Some(&when) }
+				};
+
+				for (i, err) in errs.into_iter().enumerate() {
 					if i != 0 {
 						line();
 					}
-
-					if when.is_empty() {
-						go(err, parent_when);
-					} else {
-						go(err, Some(&when));
-					}
+					go(err, when);
 				}
 			}
 
