@@ -143,7 +143,7 @@ fn squarkup() -> SquarkResult
 
 		let data_raw = site_data.serialise(&config);
 		let file = BufWriter::new(File::create(dest)?);
-		serde_json::to_writer_pretty(file, &data_raw).map_err(err!())?;
+		serde_json::to_writer_pretty(file, &data_raw)?;
 
 		log::ok!(slash!("saved site data to {B}{}", dest.clone()));
 	}

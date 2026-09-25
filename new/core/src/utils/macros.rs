@@ -77,13 +77,6 @@ macro_rules! strings {
 
 // == ERRORS == //
 
-/// Lazily produce a `SquarkError::External`.
-#[macro_export]
-macro_rules! err {
-	() => { |e| $crate::types::SquarkError::external(e) };
-} pub use err;
-
-
 /// Scope `?` try fallbacks to a local scope, instead of the entire containing function.
 #[macro_export]
 macro_rules! catch

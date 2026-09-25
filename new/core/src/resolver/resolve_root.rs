@@ -14,7 +14,7 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 {
 	let mut checked = vec![];
 
-	let cwd = std::env::current_dir().map_err(err!())?;
+	let cwd = std::env::current_dir()?;
 
 	for dir in cwd.ancestors() {
 		if path!(dir / ".squarkdown").is_dir() {

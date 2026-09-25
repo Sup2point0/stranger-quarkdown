@@ -62,7 +62,7 @@ fn resolve_dest(
 		}
 	};
 
-	let path_rel = path.strip_prefix(base).map_err(err!())?;
+	let path_rel = path.strip_prefix(base)?;
 	let dest = path!(config.paths.site / "static" / path_rel);
 
 	Ok(dest)
