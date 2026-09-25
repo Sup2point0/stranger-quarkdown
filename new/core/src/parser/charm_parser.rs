@@ -364,186 +364,198 @@ mod full {
 mod partial {
 	use super::*;
 
-	#[test] fn parse_heading_matches_single_line()
-	{
-		test_expected(&[
-			("# ",            ""),
-			("# Sup",         "Sup"),
-			("# Suppety Sup", "Suppety Sup"),
-		],
-		|mut parser, expected| {
-			let r = parser.parse_heading();
-			assert_ok!( &r );
-			assert_eq!( r.unwrap(), str!(*expected) );
-		});
+	mod parse_heading {
+		use super::*;
+
+		#[test] fn matches_single_line()
+		{
+			test_expected(&[
+				("# ",            ""),
+				("# Sup",         "Sup"),
+				("# Suppety Sup", "Suppety Sup"),
+			],
+			|mut parser, expected| {
+				let r = parser.parse_heading();
+				assert_ok!( &r );
+				assert_eq!( r.unwrap(), str!(*expected) );
+			});
+		}
+
+		#[test] fn matches_multi_line()
+		{
+			test_expected(&[
+				("# \nDECOY",            ""),
+				("# Sup\nDECOY",         "Sup"),
+				("# Suppety Sup\nDECOY", "Suppety Sup"),
+			],
+			|mut parser, expected| {
+				let r = parser.parse_heading();
+				assert_ok!( &r );
+				assert_eq!( r.unwrap(), str!(*expected) );
+			});
+		}
+
+		#[test] fn fails()
+		{
+			test_exact(&[
+				" ",
+				"Sup",
+				"Don't Do It",
+			],
+			|mut parser, _case| {
+				let r = parser.parse_heading();
+				assert_err!( &r );
+				assert_contains!( r.unwrap_err(), "start heading" );
+			});
+		}
 	}
 
-	#[test] fn parse_heading_matches_multi_line()
-	{
-		test_expected(&[
-			("# \nDECOY",            ""),
-			("# Sup\nDECOY",         "Sup"),
-			("# Suppety Sup\nDECOY", "Suppety Sup"),
-		],
-		|mut parser, expected| {
-			let r = parser.parse_heading();
-			assert_ok!( &r );
-			assert_eq!( r.unwrap(), str!(*expected) );
-		});
-	}
-
-	#[test] fn parse_heading_fails()
-	{
-		test_exact(&[
-			" ",
-			"Sup",
-			"Don't Do It",
-		],
-		|mut parser, _case| {
-			let r = parser.parse_heading();
-			assert_err!( &r );
-			assert_contains!( r.unwrap_err(), "start heading" );
-		});
-	}
-
-	#[test] fn parse_charm_squark_no_fields()
-	{
-		let source = "<!-- #SQUARK live! -->";
-		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-
-		let (flags, fields) = parser.parse_charm_squark().unwrap();
-		assert_eq!( flags, strings!() );
-		assert_eq!( fields, HashMap::new() );
-	}
-
-	#[test] fn parse_charm_squark_one_field()
-	{
-		let source = indoc! {"
-			<!-- #SQUARK live!
-			| dest = test
-			-->
-		"};
-
-		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let (flags, fields) = parser.parse_charm_squark().unwrap();
-
-		assert_eq!( flags, strings![] );
-
-		assert_eq!( fields, HashMap::from([
-			(str!("dest"), strings!["test"]),
-		]));
-	}
-
-	#[test] fn parse_charm_squark_one_field_many_flags()
-	{
-		let source = indoc! {"
-			<!-- #SQUARK live! feat! dev!
-			| dest = test
-			-->
-		"};
-
-		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let (flags, fields) = parser.parse_charm_squark().unwrap();
-
-		assert_eq!( flags, strings!["feat", "dev"] );
-
-		assert_eq!( fields, HashMap::from([
-			(str!("dest"), strings!["test"]),
-		]));
-	}
-
-	#[test] fn parse_charm_squark_many_fields()
-	{
-		let source = indoc! {"
-			<!-- #SQUARK live!
-			| dest = test
-			| head = tests
-			| title = testing
-			-->
-		"};
-
-		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let (flags, fields) = parser.parse_charm_squark().unwrap();
-
-		assert_eq!( flags, strings![] );
+	mod parse_charm_squark {
+		use super::*;
 		
-		assert_eq!( fields, HashMap::from([
-			(str!("dest"), strings!["test"]),
-			(str!("head"), strings!["tests"]),
-			(str!("title"), strings!["testing"]),
-		]));
+		#[test] fn no_fields()
+		{
+			let source = "<!-- #SQUARK live! -->";
+			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+
+			let (flags, fields) = parser.parse_charm_squark().unwrap();
+			assert_eq!( flags, strings!() );
+			assert_eq!( fields, HashMap::new() );
+		}
+
+		#[test] fn one_field()
+		{
+			let source = indoc! {"
+				<!-- #SQUARK live!
+				| dest = test
+				-->
+			"};
+
+			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+			let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+			assert_eq!( flags, strings![] );
+
+			assert_eq!( fields, HashMap::from([
+				(str!("dest"), strings!["test"]),
+			]));
+		}
+
+		#[test] fn one_field_many_flags()
+		{
+			let source = indoc! {"
+				<!-- #SQUARK live! feat! dev!
+				| dest = test
+				-->
+			"};
+
+			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+			let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+			assert_eq!( flags, strings!["feat", "dev"] );
+
+			assert_eq!( fields, HashMap::from([
+				(str!("dest"), strings!["test"]),
+			]));
+		}
+
+		#[test] fn many_fields()
+		{
+			let source = indoc! {"
+				<!-- #SQUARK live!
+				| dest = test
+				| head = tests
+				| title = testing
+				-->
+			"};
+
+			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+			let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+			assert_eq!( flags, strings![] );
+			
+			assert_eq!( fields, HashMap::from([
+				(str!("dest"), strings!["test"]),
+				(str!("head"), strings!["tests"]),
+				(str!("title"), strings!["testing"]),
+			]));
+		}
+
+		#[test] fn many_fields_values()
+		{
+			let source = indoc! {"
+				<!-- #SQUARK live!
+				| dest = test
+				| tags = prot / deut / trit
+				-->
+			"};
+
+			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+			let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+			assert_eq!( flags, strings![] );
+			
+			assert_eq!( fields, HashMap::from([
+				(str!("dest"), strings!["test"]),
+				(str!("tags"), strings!["prot", "deut", "trit"]),
+			]));
+		}
+
+		#[test] fn many_flags_fields_values()
+		{
+			let source = indoc! {"
+				<!-- #SQUARK live! feat! dev!
+				| dest = test
+				| tags = prot / deut / trit
+				-->
+			"};
+
+			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
+			let (flags, fields) = parser.parse_charm_squark().unwrap();
+
+			assert_eq!( flags, strings!["feat", "dev"] );
+			
+			assert_eq!( fields, HashMap::from([
+				(str!("dest"), strings!["test"]),
+				(str!("tags"), strings!["prot", "deut", "trit"]),
+			]));
+		}
 	}
 
-	#[test] fn parse_charm_squark_many_fields_values()
-	{
-		let source = indoc! {"
-			<!-- #SQUARK live!
-			| dest = test
-			| tags = prot / deut / trit
-			-->
-		"};
+	mod parse_flags {
+		use super::*;
 
-		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let (flags, fields) = parser.parse_charm_squark().unwrap();
-
-		assert_eq!( flags, strings![] );
+		#[test] fn matches()
+		{
+			test_expected(&[
+				("live!", vec![str!("live")]),
+				("one! two!", vec![str!("one"), str!("two")]),
+				("kebab-case! snake_case!", vec![str!("kebab-case"), str!("snake_case")]),
+			],
+			|mut parser, expected_flags| {
+				let flags = parser.parse_flags().unwrap();
+				assert_eq!( flags.as_slice(), expected_flags );
+			});
+		}
 		
-		assert_eq!( fields, HashMap::from([
-			(str!("dest"), strings!["test"]),
-			(str!("tags"), strings!["prot", "deut", "trit"]),
-		]));
-	}
-
-	#[test] fn parse_charm_squark_many_flags_fields_values()
-	{
-		let source = indoc! {"
-			<!-- #SQUARK live! feat! dev!
-			| dest = test
-			| tags = prot / deut / trit
-			-->
-		"};
-
-		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let (flags, fields) = parser.parse_charm_squark().unwrap();
-
-		assert_eq!( flags, strings!["feat", "dev"] );
-		
-		assert_eq!( fields, HashMap::from([
-			(str!("dest"), strings!["test"]),
-			(str!("tags"), strings!["prot", "deut", "trit"]),
-		]));
-	}
-
-	#[test] fn parse_flags_matches()
-	{
-		test_expected(&[
-			("live!", vec![str!("live")]),
-			("one! two!", vec![str!("one"), str!("two")]),
-			("kebab-case! snake_case!", vec![str!("kebab-case"), str!("snake_case")]),
-		],
-		|mut parser, expected_flags| {
-			let flags = parser.parse_flags().unwrap();
-			assert_eq!( flags.as_slice(), expected_flags );
-		});
-	}
-	
-	#[test] fn parse_flags_fails()
-	{
-		test_expected(&[
-			("live! ignore\n",     vec!["live"]),
-			("live!\nignore\n",    vec!["live"]),
-			("live! \nignore\n",   vec!["live"]),
-			("live!\n ignore\n",   vec!["live"]),
-			("one! ignore two!\n", vec!["one", "two"]),
-			(
-				"kebab-case! ignore-me snake_case! ignore_me\n",
-				vec!["kebab-case", "snake_case"]
-			),
-		],
-		|mut parser, expected_flags| {
-			let flags = parser.parse_flags().unwrap();
-			assert_eq!( flags.as_slice(), expected_flags );
-		});
+		#[test] fn fails()
+		{
+			test_expected(&[
+				("live! ignore\n",     vec!["live"]),
+				("live!\nignore\n",    vec!["live"]),
+				("live! \nignore\n",   vec!["live"]),
+				("live!\n ignore\n",   vec!["live"]),
+				("one! ignore two!\n", vec!["one", "two"]),
+				(
+					"kebab-case! ignore-me snake_case! ignore_me\n",
+					vec!["kebab-case", "snake_case"]
+				),
+			],
+			|mut parser, expected_flags| {
+				let flags = parser.parse_flags().unwrap();
+				assert_eq!( flags.as_slice(), expected_flags );
+			});
+		}
 	}
 
 	#[test] fn parse_fields_usual()
@@ -573,8 +585,8 @@ mod partial {
 	#[test] fn parse_field()
 	{
 		test_expected(&[
-			("| field = value", ("field", vec!["value"])),
-			("| field = one / two", ("field", vec!["one", "two"])),
+			("| field = value",       ("field", vec!["value"])),
+			("| field = one / two",   ("field", vec!["one", "two"])),
 			("| field = / one / two", ("field", vec!["one", "two"])),
 		],
 		|mut parser, (key, targets)| {
@@ -585,108 +597,112 @@ mod partial {
 		});
 	}
 
-	#[test] fn parse_values_one_usual()
-	{
-		test_exact(&[
-			"success\n| field = value",
-			"success\n-->",
-		],
-		|mut parser, _case| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!("success")) );
-			assert_eq!( values.next(), None );
-		});
-	}
+	mod parse_values {
+		use super::*;
 
-	#[test] fn parse_values_many_usual()
-	{
-		test_exact(&[
-			"one / two / three\n| field = value",
-			"one / two / three\n-->",
-		],
-		|mut parser, _case| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!("one")) );
-			assert_eq!( values.next(), Some(str!("two")) );
-			assert_eq!( values.next(), Some(str!("three")) );
-			assert_eq!( values.next(), None );
-		});
-	}
+		#[test] fn one_usual()
+		{
+			test_exact(&[
+				"success\n| field = value",
+				"success\n-->",
+			],
+			|mut parser, _case| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!("success")) );
+				assert_eq!( values.next(), None );
+			});
+		}
 
-	#[test] fn parse_values_one_multi_line()
-	{
-		test_exact(&[
-			"suc\ncess |",
-			"suc\n cess |",
-			"suc \ncess |",
-			"suc \n cess |",
-		],
-		|mut parser, _case| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!("suc cess")) );
-			assert_eq!( values.next(), None );
-		});
-	}
+		#[test] fn many_usual()
+		{
+			test_exact(&[
+				"one / two / three\n| field = value",
+				"one / two / three\n-->",
+			],
+			|mut parser, _case| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!("one")) );
+				assert_eq!( values.next(), Some(str!("two")) );
+				assert_eq!( values.next(), Some(str!("three")) );
+				assert_eq!( values.next(), None );
+			});
+		}
 
-	#[test] fn parse_values_many_multi_line()
-	{
-		test_exact(&[
-			"one\n / two\n / three |",
-			"one\n/ two\n/ three |",
-			"one / \ntwo / \nthree |",
-			"one /\ntwo /\nthree |",
-			"one\n / \ntwo\n / \nthree |",
-			"one\n/\ntwo\n/\nthree |",
-		],
-		|mut parser, _case| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!("one")) );
-			assert_eq!( values.next(), Some(str!("two")) );
-			assert_eq!( values.next(), Some(str!("three")) );
-			assert_eq!( values.next(), None );
-		});
-	}
+		#[test] fn one_multi_line()
+		{
+			test_exact(&[
+				"suc\ncess |",
+				"suc\n cess |",
+				"suc \ncess |",
+				"suc \n cess |",
+			],
+			|mut parser, _case| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!("suc cess")) );
+				assert_eq!( values.next(), None );
+			});
+		}
 
-	#[test] fn parse_values_one_weird()
-	{
-		test_exact(&[
-			"success\n  | field = value",
-			"success \n| field = value",
-			"success \n  | field = value",
-		],
-		|mut parser, _case| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!("success")) );
-			assert_eq!( values.next(), None );
-		});
-	}
+		#[test] fn many_multi_line()
+		{
+			test_exact(&[
+				"one\n / two\n / three |",
+				"one\n/ two\n/ three |",
+				"one / \ntwo / \nthree |",
+				"one /\ntwo /\nthree |",
+				"one\n / \ntwo\n / \nthree |",
+				"one\n/\ntwo\n/\nthree |",
+			],
+			|mut parser, _case| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!("one")) );
+				assert_eq!( values.next(), Some(str!("two")) );
+				assert_eq!( values.next(), Some(str!("three")) );
+				assert_eq!( values.next(), None );
+			});
+		}
 
-	#[test] fn parse_values_one_bad()
-	{
-		test_expected(&[
-			("not/good |", "not/good"),
-			("not /good |", "not /good"),
-			("not/ good |", "not/ good"),
-		],
-		|mut parser, expected| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!(*expected)) );
-			assert_eq!( values.next(), None );
-		});
-	}
+		#[test] fn one_weird()
+		{
+			test_exact(&[
+				"success\n  | field = value",
+				"success \n| field = value",
+				"success \n  | field = value",
+			],
+			|mut parser, _case| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!("success")) );
+				assert_eq!( values.next(), None );
+			});
+		}
 
-	#[test] fn parse_values_many_weird()
-	{
-		test_exact(&[
-			"one / two |",
-			"one / / two |",
-			"one / /\n/ two |",
-		],
-		|mut parser, _case| {
-			let mut values = parser.parse_values().unwrap().into_iter();
-			assert_eq!( values.next(), Some(str!("one")) );
-			assert_eq!( values.next(), Some(str!("two")) );
-			assert_eq!( values.next(), None );
-		});
+		#[test] fn one_bad()
+		{
+			test_expected(&[
+				("not/good |", "not/good"),
+				("not /good |", "not /good"),
+				("not/ good |", "not/ good"),
+			],
+			|mut parser, expected| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!(*expected)) );
+				assert_eq!( values.next(), None );
+			});
+		}
+
+		#[test] fn many_weird()
+		{
+			test_exact(&[
+				"one / two |",
+				"one / / two |",
+				"one / /\n/ two |",
+			],
+			|mut parser, _case| {
+				let mut values = parser.parse_values().unwrap().into_iter();
+				assert_eq!( values.next(), Some(str!("one")) );
+				assert_eq!( values.next(), Some(str!("two")) );
+				assert_eq!( values.next(), None );
+			});
+		}
 	}
 }
