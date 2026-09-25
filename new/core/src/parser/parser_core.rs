@@ -21,9 +21,9 @@ impl CharmParser<'_>
 		self.source.get(self.i).copied()
 	}
 
-	/// Peek the next character in the line immediately after the current character.
+	/// Peek the next character in the source immediately after the current character.
 	/// 
-	/// Returns `None` if the parser is at the end of a line (since loading in the next line would require flushing the buffer).
+	/// Returns `None` if the parser is at the end of its source.
 	pub(super) fn peek(&self) -> Option<char>
 	{
 		self.source.get(self.i + 1).copied()

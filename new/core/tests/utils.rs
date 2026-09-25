@@ -18,19 +18,23 @@ macro_rules! assert_not {
 }
 
 
-lazy_static! {
+lazy_static!
+{
+	/// The `/tests/` directory.
 	pub static ref TESTS: PathBuf
 		= path!(std::env::current_dir().unwrap() / "tests");
 	
+	/// The `/tests/test-project/` directory.
 	pub static ref TEST_SITE: PathBuf
 		= path!(*TESTS / "test-project");
 	
+	/// The `/tests/test-project/src/routes/` directory.
 	pub static ref TEST_ROUTES: PathBuf
 		= path!(*TEST_SITE / "src/routes");
 }
 
 
-const BIN: &'static str = env!("CARGO_BIN_EXE_squarkdown");
+const BIN: &str = env!("CARGO_BIN_EXE_squarkdown");
 
 /// Run Squarkdown from `path`, relative to `tests/`.
 pub fn squarkup_from(path: &str) -> process::ExitStatus
@@ -69,7 +73,7 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 	assert_ok!( &r );
 	let process::Output{ status, stdout, .. } = r.unwrap();
 
-	let out = str::from_utf8(&stdout).unwrap().to_string();
+	let out = String::from_utf8(stdout).unwrap();
 	print!("{out}");
 
 	(status, out)

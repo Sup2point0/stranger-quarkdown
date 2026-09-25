@@ -83,7 +83,7 @@ use assertables::*;
 	clear_files("links/broken-crash").unwrap();
 
 	let (status, out) = capture_squarkup_from("links/broken-crash");
-	assert!( !status.success() );
+	assert_not!( status.success() );
 	assert_contains!( out, "broken link" );
 	assert_contains!( out, "(side.md)" );
 	assert_contains!( out, "(./side.md)" );
@@ -97,7 +97,7 @@ use assertables::*;
 	clear_files("links/inactive-crash").unwrap();
 
 	let (status, out) = capture_squarkup_from("links/inactive-crash");
-	assert!( !status.success() );
+	assert_not!( status.success() );
 	assert_contains!( out, "inactive page" );
 	assert_contains!( out, "(./inactive.md)" );
 }

@@ -1,6 +1,3 @@
-use crate::macros::*;
-
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq, enum_stringify::EnumStringify)]
 #[enum_stringify(case = "flat")]
 pub enum CleanseOperation
