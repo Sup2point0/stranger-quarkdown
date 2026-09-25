@@ -83,12 +83,12 @@ impl PageData
 		let heading      = Self::take1(&mut fields, "heading", "head");
 		let title        = Self::take1(&mut fields, "title", "title").or_else(|| heading.clone());
 		
-		// TODO better fallbacks
 		let caption      = Self::take1(&mut fields, "caption", "capt");
 		let description  = Self::take1(&mut fields, "description", "desc").or_else(|| caption.clone());
 
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
 
+		// TODO propagate date parse errors
 		let release_date = Self::take1(&mut fields, "release-date", "date")
 			.and_then(|raw| Self::try_parse_date(&raw));
 
@@ -129,6 +129,7 @@ impl PageData
 		)
 	}
 
+	/// Extract a multi-valued field from `fields`.
 	fn take(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<Vec<String>>
 	{
 		fields.remove(short)
@@ -136,6 +137,7 @@ impl PageData
 			.map(|t| t.into_vec())
 	}
 
+	/// Extract a single-valued field from `fields`.
 	fn take1(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<String>
 	{
 		fields.remove(short)
@@ -145,8 +147,15 @@ impl PageData
 
 	fn try_parse_date(date: &str) -> Option<Date>
 	{
-		Date::parse(date, &format_description!("[year] [month repr:long] [day]"))
-			.or_else(|_| Date::parse(date, &format_description!("[year] [month repr:short] [day]")))
+		let long  = format_description!("[year] [month repr:long] [day]");
+		let short = format_description!("[year] [month repr:short] [day]");
+
+		Err(())
+			.or_else(|_| Date::parse(date, long))
+			.or_else(|_| Date::parse(date, short))
+			.or_else(|_| Date::parse(&fmt!("{date} 1"), long))
+			.or_else(|_| Date::parse(&fmt!("{date} 1"), short))
+			.or_else(|_| Date::parse(&fmt!("{date} January 1"), short))
 			.ok()
 	}
 }
