@@ -11,7 +11,7 @@ use std::time::Instant;
 fn main() -> ExitCode
 {
 	println!();
-	println!("{P}Squarkdown v{}", "4.0");
+	println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 	log::line();
 
 	let t_init = Instant::now();
