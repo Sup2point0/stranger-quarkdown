@@ -29,6 +29,10 @@ impl<Ctx> ContextStack<Ctx>
 		self.stack.last().unwrap_or(&self.base)
 	}
 
+	pub fn is_empty(&self) -> bool {
+		self.stack.is_empty()
+	}
+
 	pub fn push(&mut self, ctx: Ctx) {
 		self.stack.push(ctx);
 	}

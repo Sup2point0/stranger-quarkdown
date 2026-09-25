@@ -100,7 +100,7 @@ impl<'d> Renderer<'d>
 		let source = fs::read_to_string(&self.page.filepath)?;
 		let output = self.render_from(&source);
 
-		if *self.ctx.current() != RenderCtx::MARKDOWN {
+		if !self.ctx.is_empty() {
 			self.errors.push(SquarkError::Recoverable {
 				msg: str!("warning: unterminated rendering context"),
 				hint: str!("this may be a bug in the Squarkdown renderering engine!"),
