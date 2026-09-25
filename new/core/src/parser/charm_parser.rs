@@ -292,16 +292,12 @@ impl CharmParser<'_>
 						can_terminate = c.is_whitespace();
 						
 						if can_terminate {
+							// normalise multiple whitespace into one ' '
 							value.push(' ');
-						} else {
-							value.push(c);
-						}
-
-						// normalise multiple whitespace into one ' '
-						if can_terminate {
 							self.eat_whitespace();
 						} else {
-							self.advance()?
+							value.push(c);
+							self.advance()?;
 						}
 					},
 				}
