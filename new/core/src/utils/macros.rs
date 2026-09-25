@@ -14,23 +14,13 @@ macro_rules! fmt {
 /// Format a string with a single path argument, normalising `\` in the path to `/`.
 #[macro_export]
 macro_rules! slash {
-	($msg:literal, $path:expr) => {
+	( $msg:literal, $path:expr $(, $($args:tt)*)? ) => {
 		{
 			let path: &std::path::Path = &$path;
 
 			match path_slash::PathExt::to_slash(path) {
-				Some(p) => format!($msg, p),
-				None    => format!($msg, path.display()),
-			}
-		}
-	};
-	($msg:literal, $path:expr, $($args:tt)*) => {
-		{
-			let path: &std::path::Path = &$path;
-
-			match path_slash::PathExt::to_slash(path) {
-				Some(p) => format!($msg, p, $($args)*),
-				None    => format!($msg, path.display(), $($args)*),
+				Some(p) => format!($msg, p, $($($args)*)?),
+				None    => format!($msg, path.display(), $($($args)*)?),
 			}
 		}
 	};
