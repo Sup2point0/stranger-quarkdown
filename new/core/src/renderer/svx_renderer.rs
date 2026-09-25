@@ -74,15 +74,13 @@ impl<'d> Renderer<'d>
 		config: &'d SquarkupConfig,
 	) -> Self
 	{
-		let dest_folder = path!(config.out.folder / page.destination);
-
 		Self {
 			page,
 			site,
 			config,
 			errors: SquarkError::multiple(str!()),
-			dest_file: path!(dest_folder / config.out.file_name),
-			dest_folder,
+			dest_file: path!(page.destination / config.out.file_name),
+			dest_folder: page.destination.clone(),
 			ctx: ContextStack::new(),
 		}
 	}
@@ -695,7 +693,7 @@ mod code_blocks {
 				<!-- #SQUARK slash. -->
 				```
 			"},
-			// TODO track only context
+			// FIXME track only context
 			// indoc! {"
 			// 	```md
 			// 	<!-- #SQUARK only?
