@@ -81,7 +81,7 @@ impl<'d> CharmParser<'d>
 		let (flags, mut fields) = self.parse_charm_squark()?;
 		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
 
-		let page = PageData::init(self.filepath.clone(), flags, fields, self.config)?;
+		let page = PageData::init(self.filepath, flags, fields, self.config)?;
 		
 		self.errors.or(page)
 	}
