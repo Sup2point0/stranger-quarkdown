@@ -419,8 +419,6 @@ impl Renderer<'_>
 
 	fn process_image(&mut self, dest_url: &mut pd::CowStr)
 	{
-		let Some(assets_folder) = &self.config.assets.folder else { return };
-
 		if dest_url.contains("://")
 		|| dest_url.starts_with("http") {
 			return;
@@ -450,29 +448,20 @@ impl Renderer<'_>
 		}
 
 		// 3. resolve to site link
-		let base = {
-			if let Some(site_assets_folder) = &self.config.assets.site_assets_folder
-			&& their_source_path.starts_with(site_assets_folder)
-			{
-				site_assets_folder
-			} else {
-				assets_folder
-			}
-		};
+		let Some(their_path_rel) = self.config.assets.rel_path(&their_source_path)
+			else {
+				self.errors.push(SquarkError::Recoverable {
+					msg: fmt!("found link to non-exported asset: {W}({dest_url})"),
+					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
+					debug: vec![
+						// TODO add line number
+						slash!("resolved to: {GREY1}{}", their_source_path),
+					]
+				});
+				return;
+			};
 
-		let Ok(path_rel) = their_source_path.strip_prefix(base) else {
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found link to non-exported asset: {W}({dest_url})"),
-				hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
-				debug: vec![
-					// TODO add line number
-					slash!("resolved to: {GREY1}{}", their_source_path),
-				]
-			});
-			return;
-		};
-
-		let dest = slash!("/{}", path_rel);
+		let dest = slash!("/{}", their_path_rel);
 
 		*dest_url = pd::CowStr::Boxed(Box::from(dest));
 	}

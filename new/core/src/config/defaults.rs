@@ -18,8 +18,8 @@ impl SquarkupConfig
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
 			paths: PathsConfig {
-				root: root.to_path_buf(),
-				site: site.to_path_buf(),
+				root: root.to_owned(),
+				site: site.to_owned(),
 				sources: vec![PathBuf::new()],
 				include: vec![
 					regex!(r"\.md$").clone(),
@@ -44,7 +44,7 @@ impl SquarkupConfig
 				mark_invalid_links: false,
 			},
 			styles: StylesConfig { folder: None, base_file: None },
-			assets: AssetsConfig { folder: None, site_assets_folder: None,
+			assets: AssetsConfig { folder: root.to_owned(), site_assets_folder: None,
 				extensions: vec![
 					str!("png"), str!("jpg"), str!("jpeg"), str!("webp"), str!("svg"),
 				],

@@ -19,4 +19,19 @@ impl AssetsConfig
 		}
 	}
 
+	/// Return `path` relative to either `assets.folder` or `assets.site-assets-folder`.
+	pub fn rel_path<'s>(&'s self, path: &'s Path) -> Option<&'s Path>
+	{
+		let base = {
+			if let Some(s) = &self.site_assets_folder
+			&& path.starts_with(s)
+			{
+				s
+			} else {
+				&self.folder
+			}
+		};
+
+		path.strip_prefix(base).ok()
+	}
 }

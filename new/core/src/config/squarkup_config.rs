@@ -97,7 +97,7 @@ pub struct StylesConfig {
 
 #[derive(Clone, Debug)]
 pub struct AssetsConfig {
-	pub folder: Option<PathBuf>,
+	pub folder: PathBuf,
 	pub site_assets_folder: Option<PathBuf>,
 	pub extensions: Vec<String>,
 }

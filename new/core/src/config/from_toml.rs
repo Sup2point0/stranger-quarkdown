@@ -11,6 +11,7 @@ use regex::{ Regex };
 use std::path::{ Path, PathBuf };
 
 
+/// Loading from `squarkup.toml`
 impl SquarkupConfig
 {
 	/// Construct a `SquarkupConfig` from TOML `data`, with values fully validated.
@@ -256,7 +257,7 @@ impl SquarkupConfig
 				let dir = Self::try_get_string(value, "assets.folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
 
-				s.assets.folder = Some(folder);
+				s.assets.folder = folder;
 			}) }
 
 			if let Some(value) = assets.get("site-assets-folder") { catch!(errs => {
@@ -431,7 +432,7 @@ mod assets {
 			folder = 'static'
 		"}).unwrap().assets;
 
-		assert_eq!( c.folder, Some(path!(*TESTS / "static")) );
+		assert_eq!( c.folder, path!(*TESTS / "static") );
 	}
 
 	#[test] fn reject() {
