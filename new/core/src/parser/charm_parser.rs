@@ -527,10 +527,7 @@ mod partial {
 		],
 		|mut parser, expected_flags| {
 			let flags = parser.parse_flags().unwrap();
-
-			for (found, expected) in flags.into_iter().zip(expected_flags) {
-				assert_eq!( found, *expected );
-			}
+			assert_eq!( flags.as_slice(), expected_flags );
 		});
 	}
 	
@@ -549,10 +546,7 @@ mod partial {
 		],
 		|mut parser, expected_flags| {
 			let flags = parser.parse_flags().unwrap();
-
-			for (found, expected) in flags.into_iter().zip(expected_flags) {
-				assert_eq!( found, *expected );
-			}
+			assert_eq!( flags.as_slice(), expected_flags );
 		});
 	}
 
@@ -591,9 +585,7 @@ mod partial {
 			let (field, values) = parser.parse_field().unwrap();
 			assert_eq!( field, *key );
 
-			for (left, right) in values.into_iter().zip(targets) {
-				assert_eq!( left, *right );
-			}
+			assert_eq!( values.as_slice(), targets );
 		});
 	}
 
