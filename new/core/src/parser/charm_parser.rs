@@ -277,12 +277,10 @@ impl CharmParser<'_>
 						let _ = self.advance();  // safe from if check
 						self.eat_whitespace();
 
-						let trimmed = utils::trim_end(value.clone());
+						let trimmed = utils::trim_end(std::mem::take(&mut value));
 						if !trimmed.is_empty() {
 							values.push(trimmed);
 						}
-
-						value.clear();
 					}
 
 					// `|` terminates
