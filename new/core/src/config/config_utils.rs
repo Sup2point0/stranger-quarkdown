@@ -6,6 +6,7 @@ use std::path::{ Path };
 impl AssetsConfig
 {
 	/// Does `path` have a file extension allowed by `config.assets.extensions`?
+	#[must_use]
 	pub fn has_asset_extension(&self, path: &Path) -> bool
 	{
 		if self.extensions.is_empty() {
@@ -20,6 +21,7 @@ impl AssetsConfig
 	}
 
 	/// Return `path` relative to either `assets.folder` or `assets.site-assets-folder`.
+	#[must_use]
 	pub fn rel_path<'s>(&'s self, path: &'s Path) -> Option<&'s Path>
 	{
 		let base = {

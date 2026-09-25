@@ -170,7 +170,7 @@ impl CharmParser<'_>
 	{
 		let mut did_consume = false;
 
-		while self.current().is_some_and(|c| c.is_whitespace())
+		while self.current().is_some_and(char::is_whitespace)
 		{
 			let _ = self.advance();
 			did_consume = true;

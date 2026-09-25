@@ -116,7 +116,7 @@ impl<'d> Renderer<'d>
 
 	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
-		let source = Self::expand_only(&source);
+		let source = Self::expand_only(source);
 
 		let mut parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
