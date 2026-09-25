@@ -30,14 +30,15 @@ pub fn render(
 ) -> SquarkResult
 {
 	let mut errs = SquarkError::multiple(
-		fmt!("rendering {B}{}", utils::display_rel(&page.filepath, &config.paths.root))
+		fmt!(
+			"rendering {B}{}",
+			utils::display_rel(&page.filepath, &config.paths.root)
+		)
 	);
 
 	let renderer = Renderer::new(page, site, config);
 
-	if !renderer.dest_folder.exists() {
-		fs::create_dir_all(&renderer.dest_folder)?;
-	}
+	fs::create_dir_all(&renderer.dest_folder)?;
 
 	catch!(errs => { renderer.render_page_ts()?; });
 	catch!(errs => { renderer.render_page_svx()?; });

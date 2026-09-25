@@ -278,61 +278,60 @@ impl Renderer<'_>
 		/// - Group 1 is the squark (`leave`, `slash`)
 		/// - Group 2 is either `?` (open) or `.` (close).
 		/// - Group 3, if present, is an alphanumeric identifier for the section.
-		if let Some(captures) =
-			regex!(
-				r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?"
-			).captures(html)
-		{
-			let m1 = captures.get(1).expect("required by pattern");
-			let m2 = captures.get(2).expect("required by pattern");
-			let key = captures.get(3).map(|k| k.as_str().to_owned());
+		let Some(captures) =
+			regex!(r"#(?:squark|SQUARK)\s+([a-zA-Z]+)(\?|\.)(?:\s+\[(\w+)\])?")
+			.captures(html)
+		else {
+			if html.contains("#squark") || html.contains("#SQUARK") {
+				self.errors.push(SquarkError::Recoverable {
+					msg: fmt!("unknown squark pattern: {W}{html}"),
+					hint: fmt!("use squarks like this: {W}<!-- #SQUARK leave? -->"),
+					debug: vec![],
+				});
+			}
+			return false;
+		};
 
-			let squark = match m1.as_str() {
-				s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
-				s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
-				s => {
-					if !self.ctx.is_leave() {
-						self.errors.push(SquarkError::Recoverable {
-							msg: fmt!("unknown twin squark: {W}{s}"),
-							hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
-							debug: self.ctx.printed(),
-						});
-					}
-					return false;
+		let m1 = &captures[1];
+		let m2 = &captures[2];
+		let key = captures.get(3).map(|k| k.as_str().to_owned());
+
+		let squark = match m1 {
+			s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
+			s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
+			s => {
+				if !self.ctx.is_leave() {
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("unknown twin squark: {W}{s}"),
+						hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
+						debug: self.ctx.printed(),
+					});
 				}
-			};
-
-			if self.ctx.is_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
 				return false;
 			}
+		};
 
-			match m2.as_str() {
-				"?" => self.ctx.push(squark),
-				"." => {
-					let r = self.ctx.try_pop(squark);
+		if self.ctx.is_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
+			return false;
+		}
 
-					if r.is_err() {
-						self.errors.push(SquarkError::Recoverable {
-							msg: fmt!("unpaired closing squark: {W}{html}"),
-							hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
-							debug: self.ctx.printed(),
-						});
-					}
+		match m2 {
+			"?" => self.ctx.push(squark),
+			"." => {
+				let r = self.ctx.try_pop(squark);
+
+				if r.is_err() {
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("unpaired closing squark: {W}{html}"),
+						hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
+						debug: self.ctx.printed(),
+					});
 				}
-				_ => unreachable!("pattern only allows ? and ."),
 			}
-
-			return true;
-		}
-		else if html.contains("#squark") || html.contains("#SQUARK") {
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("unknown squark pattern: {W}{html}"),
-				hint: fmt!("use squarks like this: {W}<!-- #SQUARK leave? -->"),
-				debug: vec![],
-			});
+			_ => unreachable!("pattern only allows ? and ."),
 		}
 
-		false
+		true
 	}
 
 	/// Rewrite an internal link that originally points to a Markdown file, such that it points to where *that* Markdown file exports to, using the site map in `self.site`.

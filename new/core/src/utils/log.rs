@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use crate::prelude::*;
 use crate::colours::*;
 

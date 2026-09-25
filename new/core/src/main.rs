@@ -138,14 +138,14 @@ fn squarkup() -> SquarkResult
 	}
 
 	// == SITE DATA == //
-	if let Some(ref dest) = config.out.site_data_path {
+	if let Some(dest) = &config.out.site_data_path {
 		log::is!("saving site data...");
 
 		let data_raw = site_data.serialise(&config);
 		let file = BufWriter::new(File::create(dest)?);
 		serde_json::to_writer_pretty(file, &data_raw)?;
 
-		log::ok!(slash!("saved site data to {B}{}", dest.clone()));
+		log::ok!(slash!("saved site data to {B}{}", dest));
 	}
 	
 	Ok(())
