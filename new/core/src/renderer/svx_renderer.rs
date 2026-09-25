@@ -445,9 +445,7 @@ impl Renderer<'_>
 			return;
 		}
 
-		let Some(extension) = their_source_path.extension() else { return };
-
-		if !self.config.assets.extensions.iter().any(|ext| **ext == *extension) {
+		if !self.config.assets.has_asset_extension(&their_source_path) {
 			return;
 		}
 

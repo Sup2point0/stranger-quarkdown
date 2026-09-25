@@ -16,9 +16,12 @@ pub fn resolve_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkRes
 		walkdir::WalkDir::new(assets_folder)
 			.into_iter()
 
-			.filter(|e|
-				!e.as_ref().is_ok_and(|entry| should_exclude(entry, config))
-			)
+		.filter(|entry| match entry {
+			Err(..) => true,
+			Ok(e) =>
+				e.file_type().is_file()
+				&& config.assets.has_asset_extension(e.path()),
+		})
 
 			.map(move |entry| match entry {
 				Ok(e) => {
