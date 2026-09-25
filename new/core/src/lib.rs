@@ -16,6 +16,5 @@ pub use utils::{ log, colours, macros };
 pub mod prelude
 {
 	pub use super::config::{ SquarkupConfig };
-	pub use super::parser::{ CharmParser };
 	pub use super::types::{ SquarkResult, SquarkError, PageData, SiteData };
 }

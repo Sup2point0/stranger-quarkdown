@@ -184,7 +184,8 @@ impl SquarkError
 	///    // For a recoverable error:
 	///    // - If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
 	///    // - If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
-	///    err.depends(config)
+	///    err.depends(config)?;
+	///    Ok(2)
 	/// }
 	/// ```
 	pub fn depends(self, config: &SquarkupConfig) -> SquarkResult
@@ -202,7 +203,8 @@ impl SquarkError
 	///    // For a recoverable error:
 	///    // - If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
 	///    // - If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
-	///    err.or_depends(2, config)
+	///    err.or_depends(2, config)?;
+	///    Ok(2)
 	/// }
 	/// ```
 	pub fn or_depends<T>(self, t: T, config: &SquarkupConfig) -> SquarkResult<T>

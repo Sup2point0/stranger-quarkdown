@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [profile.release]
-opt-level = 3
 lto = true
 strip = true
 
@@ -35,6 +34,7 @@ lazy_static = "1.5.0"
 
 [lints.clippy]
 partialeq_to_none = "allow"
+upper-case-acronyms = "allow"
 
 # pedantic = { level = "warn", priority = -1 }
 # doc-markdown = "allow"

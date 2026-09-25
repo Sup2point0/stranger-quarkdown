@@ -100,7 +100,7 @@ impl SquarkupConfig
 		let mut s = Self::init_defaults(root, &site);
 		// ...then apply the user's non-defaults on top of it
 
-		// ErrorConfig
+		// == ErrorConfig == //
 		if let Some(errors) = data.get("errors")
 		{
 			Self::check_is_table(errors, "errors",
@@ -155,7 +155,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// PathsConfig
+		// == PathsConfig == //
 		if let Some(paths) = data.get("paths")
 		{
 			Self::check_is_table(paths, "paths",
@@ -175,7 +175,6 @@ impl SquarkupConfig
 						root, raw, "a source folder you specified",
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
-					// TODO check rooted
 					s.paths.sources.push(dir);
 				}
 			}) }
@@ -217,7 +216,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// OutConfig
+		// == OutConfig == //
 		if let Some(out) = data.get("out")
 		{
 			Self::check_is_table(out, "out",
@@ -271,7 +270,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// FormatConfig
+		// == FormatConfig == //
 		if let Some(format) = data.get("format")
 		{
 			Self::check_is_table(format, "format",
@@ -294,9 +293,9 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// StylesConfig
+		// == StylesConfig == //
 
-		// AssetsConfig
+		// == AssetsConfig == //
 		if let Some(assets) = data.get("assets")
 		{
 			Self::check_is_table(assets, "assets",
@@ -318,7 +317,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// FontsConfig
+		// == FontsConfig == //
 
 		errs.or_depends((), &s)?;
 		Ok(s)

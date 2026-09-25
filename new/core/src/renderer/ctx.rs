@@ -3,7 +3,6 @@ use crate::types::ContextStack;
 use enum_display::EnumDisplay;
 
 
-#[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Default, PartialEq, Eq, Debug, EnumDisplay)]
 pub enum RenderCtx
 {

@@ -35,7 +35,7 @@ impl<Ctx> ContextStack<Ctx>
 }
 
 impl<Ctx> ContextStack<Ctx>
-	where Ctx: PartialEq + Eq + std::fmt::Debug
+	where Ctx: PartialEq + std::fmt::Debug
 {
 	/// Pop `ctx` from the stack, as deep as possible.
 	/// 

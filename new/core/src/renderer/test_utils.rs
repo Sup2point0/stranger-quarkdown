@@ -12,7 +12,7 @@ pub(super) fn test_preserves(cases: &[&str])
 
 /// Run the renderer over `cases`, checking that the rendered output is exactly identical to the input.
 pub(super) fn test_preserves_for(
-	change_config: impl FnOnce(&mut SquarkupConfig) -> (),
+	change_config: impl FnOnce(&mut SquarkupConfig),
 	cases: &[&str],
 )
 {
@@ -28,7 +28,7 @@ pub(super) fn test_expect(cases: &[&str], expected: &str)
 
 /// Apply `change_config`, then run the renderer over `cases`, checking that each input renders to its expected output.
 pub(super) fn test_expect_for(
-	change_config: impl FnOnce(&mut SquarkupConfig) -> (),
+	change_config: impl FnOnce(&mut SquarkupConfig),
 	cases: &[&str],
 	expected: &str,
 )
@@ -51,7 +51,7 @@ pub(super) fn test_expected(cases: &[(&str, &str)])
 
 /// Apply `change_config`, then run the renderer over `cases`, checking that each input renders to its expected output.
 pub(super) fn test_expected_for(
-	change_config: impl FnOnce(&mut SquarkupConfig) -> (),
+	change_config: impl FnOnce(&mut SquarkupConfig),
 	cases: &[(&str, &str)],
 )
 {
