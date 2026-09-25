@@ -57,7 +57,7 @@ fn squarkup() -> SquarkResult
 		log::is!("copying assets...");
 
 		for paths in resolver::resolve_assets(&config) {
-			let r = catch! {
+			catch! {
 				let (source_path, dest_path) = paths?;
 				log::info!(slash!("found asset: {GREY1}{}", source_path));
 
@@ -69,11 +69,7 @@ fn squarkup() -> SquarkResult
 				std::fs::copy(&source_path, &dest_path)?;
 
 				site_data.stats.assets += 1;
-			};
-
-			if let Err(e) = r {
-				e.depends(&config)?;
-			}
+			}.or_else(|e| e.depends(&config))?;
 		}
 
 		if site_data.stats.assets == 0 {
@@ -91,7 +87,7 @@ fn squarkup() -> SquarkResult
 	for filepath in resolver::resolve_files(&config) {
 		site_data.stats.checked_files += 1;
 
-		let r = catch! {
+		catch! {
 			let filepath = filepath?;
 			let r = parser::parse(&filepath, &config)?;
 			
@@ -104,11 +100,7 @@ fn squarkup() -> SquarkResult
 					filepath.file_name().unwrap().to_string_lossy(),
 				));
 			}
-		};
-
-		if let Err(e) = r {
-			e.depends(&config)?;
-		}
+		}.or_else(|e| e.depends(&config))?;
 	}
 	
 	if site_data.stats.checked_files == 0 {
@@ -132,22 +124,16 @@ fn squarkup() -> SquarkResult
 
 		// == CHECK == //
 		if config.errors.strict {
-			let r = site_data.check_conflicts(&config);
-			
-			if let Err(e) = r {
-				e.depends(&config)?;
-			}
+			site_data.check_conflicts(&config)
+				.or_else(|e| e.depends(&config))?;
 		}
 
 		// == RENDER == //
 		log::is!("rendering...");
 
 		for page in site_data.pages() {
-			let r = renderer::render(page, &site_data, &config);
-
-			if let Err(e) = r {
-				e.depends(&config)?;
-			}
+			renderer::render(page, &site_data, &config)
+				.or_else(|e| e.depends(&config))?;
 		}
 	}
 
