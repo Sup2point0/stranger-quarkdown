@@ -1,0 +1,25 @@
+{
+  "name": "stranger-quarkdown",
+  "author": "Sup#2.0",
+  "version": "4.0.0-alpha.0",
+  "license": "MIT",
+
+  "description": "Markdown preprocessing for SvelteKit projects",
+  "keywords": [
+    "squark",
+    "squarkdown"
+  ],
+
+  "homepage": "https://github.com/Sup2point0/stranger-quarkdown#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sup2point0/stranger-quarkdown.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sup2point0/stranger-quarkdown/issues"
+  },
+
+  "scripts": {
+    "prepublishOnly": "nu build.nu"
+  }
+}
