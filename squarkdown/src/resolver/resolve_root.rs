@@ -17,13 +17,12 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 	let cwd = std::env::current_dir()?;
 
 	for dir in cwd.ancestors() {
-		if path!(dir / ".squarkdown").is_dir() {
-			return Ok(dir.to_owned());
-		}
-		if path!(dir / "squarkup.toml").is_file() {
-			return Ok(dir.to_owned());
-		}
-		if path!(dir / "squarkup.json").is_file() {
+		if path!(dir / ".squarkdown").is_dir()
+		|| path!(dir / "squarkup.toml").is_file()
+		|| path!(dir / "squarkup.json").is_file()
+		|| path!(dir / "squarkdown.toml").is_file()
+		|| path!(dir / "squarkdown.json").is_file()
+		{
 			return Ok(dir.to_owned());
 		}
 
