@@ -1,0 +1,57 @@
+name: Site
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/site.yaml'
+      - 'site/package-lock.json'
+      - 'npm/package.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: './site/'
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v7
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@v7
+        with:
+          cache: 'npm'
+          cache-dependency-path: './site/package-lock.json'
+
+      - name: '› npm install'
+        run: |
+          npm install stranger-quarkdown@latest
+
+      - name: '› npm run buildx'
+        run: |
+          npm run buildx
+
+      - name: 'Upload Artifact'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './site/build/'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 'Deploy'
+        id: deployment
+        uses: actions/deploy-pages@v5
