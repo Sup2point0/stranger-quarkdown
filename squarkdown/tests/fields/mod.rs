@@ -6,11 +6,11 @@ use assertables::*;
 /// Squarkdown renders `+page.ts` with long field names.
 #[test] fn long()
 {
-	clear_files("page-ts/long").unwrap();
+	clear_files("fields/long").unwrap();
 
 	assert!( squarkup_from("page_ts/long").success() );
 
-	let main = read_file("page-ts/long/main/+page.ts");
+	let main = read_file("fields/long/main/+page.ts");
 	assert_contains!( main, "filepath: \"main.md\"" );
 	assert_contains!( main, "destination: \"main\"" );
 	assert_contains!( main, "flags: []" );
@@ -28,11 +28,11 @@ use assertables::*;
 /// Squarkdown renders `+page.ts` with short field names.
 #[test] fn short()
 {
-	clear_files("page-ts/short").unwrap();
+	clear_files("fields/short").unwrap();
 
 	assert!( squarkup_from("page_ts/short").success() );
 
-	let main = read_file("page-ts/short/main/+page.ts");
+	let main = read_file("fields/short/main/+page.ts");
 	assert_contains!( main, "path: \"main.md\"" );
 	assert_contains!( main, "dest: \"main\"" );
 	assert_contains!( main, "flags: []" );
