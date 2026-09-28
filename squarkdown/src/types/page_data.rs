@@ -99,8 +99,8 @@ impl PageData
 			release_date_raw = Some(raw);
 		}
 
-		let mut last_update = None;
-		let mut last_update_raw = None;
+		let mut last_update = release_date;
+		let mut last_update_raw = release_date_raw.clone();
 
 		if let Some(raw) = Self::take1(&mut fields, "last-update", "update") {
 			catch!(errs => {
@@ -170,6 +170,7 @@ impl PageData
 	/// Extract a single-valued field from `fields`.
 	fn take1(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<String>
 	{
+		// FIXME dangerous drop if actually a list
 		fields.remove(short)
 			.or_else(|| fields.remove(long))?
 			.into_iter().next()
