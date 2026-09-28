@@ -25,9 +25,9 @@ impl SquarkupConfig
 					regex!(r"\.md$").clone(),
 				],
 				exclude: vec![
-					regex!(r"/\.git/").clone(),
-					regex!(r"/node_modules/").clone(),
-					regex!(r"/.svelte-kit/").clone(),
+					regex!(r"/\.git").clone(),
+					regex!(r"/node_modules").clone(),
+					regex!(r"/\.svelte-kit").clone(),
 				],
 			},
 			out: OutConfig {
