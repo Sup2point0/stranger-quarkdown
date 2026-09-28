@@ -27,7 +27,7 @@ use assertables::*;
 	clear_files("render/markdown").unwrap();
 	assert!( squarkup_from("render/markdown").success() );
 
-	let main = read_file("render/markdown/main/+page.svx");
+	let main = read_file("render/markdown/+page.svx");
 
 	assert_contains!( main, "\n## Level 2\n" );
 	assert_contains!( main, "\n### Level 3\n" );
@@ -70,6 +70,6 @@ use assertables::*;
 	clear_files("render/strip-charm").unwrap();
 	assert!( squarkup_from("render/strip-charm").success() );
 
-	let main = read_file("render/strip-charm/main/+page.svx");
+	let main = read_file("render/strip-charm/+page.svx");
 	assert_not_contains!( main, "#SQUARK" );
 }

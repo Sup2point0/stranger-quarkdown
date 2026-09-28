@@ -4,9 +4,10 @@
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/page-ts/short/"
-render-page-ts = true
-shorter-fields = true
+folder = "src/routes/render/strip-charm/"
+
+[format]
+preserve-comments = true
 
 [errors]
 strict = false

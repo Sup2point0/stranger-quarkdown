@@ -1,6 +1,6 @@
-# Main
+# Extensive Markdown Test
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
 ## Level 2
