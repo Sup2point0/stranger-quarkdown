@@ -35,8 +35,9 @@ pub struct PageData
 	pub tags: Vec<String>,
 
 	pub release_date: Option<Date>,
-	pub last_updated: Option<Date>,
+	pub release_date_display: Option<String>,
 	pub last_update: Option<Date>,
+	pub last_update_display: Option<String>,
 
 	pub cleanse: Vec<CleanseOperation>,
 
@@ -89,17 +90,23 @@ impl PageData
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
 
 		let mut release_date = None;
+		let mut release_date_display = None;
+
 		if let Some(raw) = Self::take1(&mut fields, "release-date", "date") {
 			catch!(errs => {
-				release_date = Some(Self::try_parse_date(raw, "release date")?);
+				release_date = Some(Self::try_parse_date(&raw, "release date")?);
 			});
+			release_date_display = Some(raw);
 		}
 
 		let mut last_update = None;
+		let mut last_update_display = None;
+
 		if let Some(raw) = Self::take1(&mut fields, "last-update", "update") {
 			catch!(errs => {
-				last_update = Some(Self::try_parse_date(raw, "last updated")?);
+				last_update = Some(Self::try_parse_date(&raw, "last updated")?);
 			});
+			last_update_display = Some(raw);
 		}
 
 		let mut cleanse = vec![];
@@ -129,7 +136,8 @@ impl PageData
 				title, description,
 				heading, caption,
 				tags,
-				release_date, last_update,
+				release_date, release_date_display,
+				last_update, last_update_display,
 				cleanse,
 				other: fields,
 			}
@@ -152,14 +160,14 @@ impl PageData
 			.into_iter().next()
 	}
 
-	fn try_parse_date(date: String, field: &str) -> SquarkResult<Date>
+	fn try_parse_date(date: &str, field: &str) -> SquarkResult<Date>
 	{
 		let long  = format_description!("[year] [month repr:long] [day padding:none]");
 		let short = format_description!("[year] [month repr:short] [day padding:none]");
 
 		Err(())
-			.or_else(|_| Date::parse(&date, long))
-			.or_else(|_| Date::parse(&date, short))
+			.or_else(|_| Date::parse(date, long))
+			.or_else(|_| Date::parse(date, short))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), long))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), short))
 			.or_else(|_| Date::parse(&fmt!("{date} January 1"), short))
