@@ -11,8 +11,6 @@ use std::collections::{ HashMap };
 use std::path::{ PathBuf };
 
 
-// == IMPLEMENTATION == //
-
 /// A parser for the charm squark of a file.
 pub struct CharmParser<'d>
 {
@@ -327,36 +325,91 @@ impl CharmParser<'_>
 mod full {
 	use super::*;
 
+	use time::Date;
+
 	// TODO add tests
 
-	#[test] fn parse_basic()
+	fn parse(source: &str) -> PageData
 	{
-		let source = indoc! {"
-			# Test
-			<!-- #SQUARK live!
-			| dest = test
-			-->
-		"};
-
-		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let file_data = parser.parse().unwrap();
-		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, path!(*TESTS / "src/routes/test") );
+		CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse().unwrap()
 	}
 
-	#[test] fn parse_basic_cr()
-	{
-		let source = indoc! {"
-			# Test\r
-			<!-- #SQUARK live!\r
-			| dest = test\r
-			-->
-		"};
+	macro_rules! date {
+		($year:literal, $month:tt, $day:literal) => {
+			Date::from_calendar_date($year, time::Month::$month, $day).unwrap()
+		}
+	}
 
-		let parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let file_data = parser.parse().unwrap();
-		assert_eq!( file_data.heading, Some(str!("Test")) );
-		assert_eq!( file_data.destination, path!(*TESTS / "src/routes/test") );
+	mod easy {
+		use super::*;
+	
+		#[test] fn dest_only() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = test
+				-->
+			"});
+			assert_eq!( page_data.heading, Some(str!("Test")) );
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+		}
+
+		#[test] fn carriage_returns() {
+			let page_data = parse(indoc! {"
+				# Test\r
+				<!-- #SQUARK live!\r
+				| dest = test\r
+				-->
+			"});
+			assert_eq!( page_data.heading, Some(str!("Test")) );
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+		}
+	}
+
+	mod medium {
+		use super::*;
+
+		#[test] fn all_fields() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = test
+				| title = One
+				| desc = Two
+				| head = Three
+				| capt = Four
+				| tags = five / six / seven
+				| date = 2020 April 1
+				| update = 2021 May 31
+				-->
+			"});
+			dbg!(&page_data);
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.title, Some(str!("One")) );
+			assert_eq!( page_data.description, Some(str!("Two")) );
+			assert_eq!( page_data.heading, Some(str!("Three")) );
+			assert_eq!( page_data.caption, Some(str!("Four")) );
+			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
+			assert_eq!( page_data.release_date, Some(date!(2020, April, 1)) );
+			assert_eq!( page_data.last_updated, Some(date!(2021, May, 31)) );
+		}
+	}
+
+	mod dates {
+		use super::*;
+
+		#[test] fn full() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| date = 2000 April 1
+				| update = 2020 February 28
+				-->
+			"});
+			assert_eq!( page_data.release_date, Some(date!(2000, April, 1)) );
+			assert_eq!( page_data.last_updated, Some(date!(2020, February, 28)) );
+		}
 	}
 }
 
@@ -367,8 +420,7 @@ mod partial {
 	mod parse_heading {
 		use super::*;
 
-		#[test] fn matches_single_line()
-		{
+		#[test] fn matches_single_line() {
 			test_expected(&[
 				("# ",            ""),
 				("# Sup",         "Sup"),
@@ -381,8 +433,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn matches_multi_line()
-		{
+		#[test] fn matches_multi_line() {
 			test_expected(&[
 				("# \nDECOY",            ""),
 				("# Sup\nDECOY",         "Sup"),
@@ -395,8 +446,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn fails()
-		{
+		#[test] fn fails() {
 			test_exact(&[
 				" ",
 				"Sup",
@@ -413,8 +463,7 @@ mod partial {
 	mod parse_charm_squark {
 		use super::*;
 		
-		#[test] fn no_fields()
-		{
+		#[test] fn no_fields() {
 			let source = "<!-- #SQUARK live! -->";
 			let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
 
@@ -423,8 +472,7 @@ mod partial {
 			assert_eq!( fields, HashMap::new() );
 		}
 
-		#[test] fn one_field()
-		{
+		#[test] fn one_field() {
 			let source = indoc! {"
 				<!-- #SQUARK live!
 				| dest = test
@@ -441,8 +489,7 @@ mod partial {
 			]));
 		}
 
-		#[test] fn one_field_many_flags()
-		{
+		#[test] fn one_field_many_flags() {
 			let source = indoc! {"
 				<!-- #SQUARK live! feat! dev!
 				| dest = test
@@ -459,8 +506,7 @@ mod partial {
 			]));
 		}
 
-		#[test] fn many_fields()
-		{
+		#[test] fn many_fields() {
 			let source = indoc! {"
 				<!-- #SQUARK live!
 				| dest = test
@@ -481,8 +527,7 @@ mod partial {
 			]));
 		}
 
-		#[test] fn many_fields_values()
-		{
+		#[test] fn many_fields_values() {
 			let source = indoc! {"
 				<!-- #SQUARK live!
 				| dest = test
@@ -501,8 +546,7 @@ mod partial {
 			]));
 		}
 
-		#[test] fn many_flags_fields_values()
-		{
+		#[test] fn many_flags_fields_values() {
 			let source = indoc! {"
 				<!-- #SQUARK live! feat! dev!
 				| dest = test
@@ -525,8 +569,7 @@ mod partial {
 	mod parse_flags {
 		use super::*;
 
-		#[test] fn matches()
-		{
+		#[test] fn matches() {
 			test_expected(&[
 				("live!", vec![str!("live")]),
 				("one! two!", vec![str!("one"), str!("two")]),
@@ -538,8 +581,7 @@ mod partial {
 			});
 		}
 		
-		#[test] fn fails()
-		{
+		#[test] fn fails() {
 			test_expected(&[
 				("live! ignore\n",     vec!["live"]),
 				("live!\nignore\n",    vec!["live"]),
@@ -600,8 +642,7 @@ mod partial {
 	mod parse_values {
 		use super::*;
 
-		#[test] fn one_usual()
-		{
+		#[test] fn one_usual() {
 			test_exact(&[
 				"success\n| field = value",
 				"success\n-->",
@@ -613,8 +654,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn many_usual()
-		{
+		#[test] fn many_usual() {
 			test_exact(&[
 				"one / two / three\n| field = value",
 				"one / two / three\n-->",
@@ -628,8 +668,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn one_multi_line()
-		{
+		#[test] fn one_multi_line() {
 			test_exact(&[
 				"suc\ncess |",
 				"suc\n cess |",
@@ -643,8 +682,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn many_multi_line()
-		{
+		#[test] fn many_multi_line() {
 			test_exact(&[
 				"one\n / two\n / three |",
 				"one\n/ two\n/ three |",
@@ -662,8 +700,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn one_weird()
-		{
+		#[test] fn one_weird() {
 			test_exact(&[
 				"success\n  | field = value",
 				"success \n| field = value",
@@ -676,8 +713,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn one_bad()
-		{
+		#[test] fn one_bad() {
 			test_expected(&[
 				("not/good |", "not/good"),
 				("not /good |", "not /good"),
@@ -690,8 +726,7 @@ mod partial {
 			});
 		}
 
-		#[test] fn many_weird()
-		{
+		#[test] fn many_weird() {
 			test_exact(&[
 				"one / two |",
 				"one / / two |",

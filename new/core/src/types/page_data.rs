@@ -88,12 +88,19 @@ impl PageData
 
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
 
-		// TODO propagate date parse errors
-		let release_date = Self::take1(&mut fields, "release-date", "date")
-			.and_then(|raw| Self::try_parse_date(&raw));
+		let mut release_date = None;
+		if let Some(raw) = Self::take1(&mut fields, "release-date", "date") {
+			catch!(errs => {
+				release_date = Some(Self::try_parse_date(raw, "release date")?);
+			});
+		}
 
-		let last_updated = Self::take1(&mut fields, "last-updated", "update")
-			.and_then(|raw| Self::try_parse_date(&raw));
+		let mut last_updated = None;
+		if let Some(raw) = Self::take1(&mut fields, "last-updated", "update") {
+			catch!(errs => {
+				last_updated = Some(Self::try_parse_date(raw, "last updated")?);
+			});
+		}
 
 		let mut cleanse = vec![];
 
@@ -145,18 +152,22 @@ impl PageData
 			.into_iter().next()
 	}
 
-	fn try_parse_date(date: &str) -> Option<Date>
+	fn try_parse_date(date: String, field: &str) -> SquarkResult<Date>
 	{
-		let long  = format_description!("[year] [month repr:long] [day]");
-		let short = format_description!("[year] [month repr:short] [day]");
+		let long  = format_description!("[year] [month repr:long] [day padding:none]");
+		let short = format_description!("[year] [month repr:short] [day padding:none]");
 
 		Err(())
-			.or_else(|_| Date::parse(date, long))
-			.or_else(|_| Date::parse(date, short))
+			.or_else(|_| Date::parse(&date, long))
+			.or_else(|_| Date::parse(&date, short))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), long))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), short))
 			.or_else(|_| Date::parse(&fmt!("{date} January 1"), short))
-			.ok()
+			.map_err(|_| SquarkError::Recoverable {
+				msg: fmt!("invalid date for {W}{field}{R}: {date}"),
+				hint: str!("dates use the format {W}<year> <month?> <date?>"),
+				debug: vec![]
+			})
 	}
 }
 
