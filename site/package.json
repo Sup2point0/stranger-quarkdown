@@ -8,11 +8,8 @@
     "dev":    "vite",
       "devx": "npm run prep && vite --open",
     
-    "prep":    "npm run squark",
-      "prepx": "npm run squarkx && rake schema",
-    
-    "squark":    "cd .. && rake squark[fonts,scss,--root] && cd site",
-      "squarkx": "cd .. && bundle exec rake squark[fonts,scss,assets,--root] && cd site",
+    "prep":    "npx squarkdown",
+      "prepx": "npx squarkdown --assets && rake schema",
     
     "build":    "vite build",
       "buildx": "npm run prepx && vite build",
@@ -31,6 +28,7 @@
     "remark-footnotes": "2.0.0",
     "remark-numbered-footnote-labels": "1.1.0",
     "sass": "^1.101",
+    "stranger-quarkdown": "^4.0.0-alpha.0",
     "svelte": "^5.56",
     "svelte-preprocess": "^6.0",
     "tslib": "^2.8",
