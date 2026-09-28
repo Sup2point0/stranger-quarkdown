@@ -11,9 +11,11 @@ use path_macro::path;
 use pulldown_cmark as pd;
 use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
+use time::UtcDateTime;
 
 use std::borrow::{ Cow };
-use std::fs;
+use std::fs::{ File };
+use std::io::{ Write };
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
@@ -108,7 +110,17 @@ impl<'d> Renderer<'d>
 		}
 
 		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
-			fs::write(&self.dest_file, output)?;
+			let mut file = File::create(&self.dest_file)?;
+
+			let now = UtcDateTime::now();
+
+			write!(
+				file,
+				"<!-- rendered by Squarkdown on {} {} {} at {:02}:{:02} -->",
+				now.year(), now.month(), now.day(),
+				now.hour(), now.minute(),
+			)?;
+			file.write_all(output.as_bytes())?;
 		}
 
 		self.errors.or(())
@@ -500,7 +512,7 @@ impl Renderer<'_>
 
 // 	}, &[
 // 		indoc! {"
-// 			![asset](./asset.png)
+// 			<!-- line -->
 // 		"}
 // 	]);
 // }
