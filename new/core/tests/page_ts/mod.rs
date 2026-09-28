@@ -18,6 +18,10 @@ use assertables::*;
 	assert_contains!( main, "description: \"This page" );
 	assert_contains!( main, "heading: \"Main\"" );
 	assert_contains!( main, "tags: [\"1\", \"2\", \"3\"]" );
+	assert_contains!( main, "release_date: new Date(2020, 1, 1)" );
+	assert_contains!( main, "release_date_raw: \"2020\"" );
+	assert_contains!( main, "last_update: new Date(2020, 4, 1)" );
+	assert_contains!( main, "last_update_raw: \"2020 April\"" );
 	assert_contains!( main, "other: {}" );
 }
 
@@ -36,5 +40,9 @@ use assertables::*;
 	assert_contains!( main, "desc: \"This page" );
 	assert_contains!( main, "head: \"Main\"" );
 	assert_contains!( main, "tags: [\"1\", \"2\", \"3\"]" );
+	assert_contains!( main, "date: new Date(2020, 1, 1)" );
+	assert_contains!( main, "date_raw: \"2020\"" );
+	assert_contains!( main, "update: new Date(2020, 4, 1)" );
+	assert_contains!( main, "update_raw: \"2020 April\"" );
 	assert_contains!( main, "other: {}" );
 }
