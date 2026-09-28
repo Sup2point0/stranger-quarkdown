@@ -111,7 +111,25 @@ use assertables::*;
 	assert!( squarkup!("links/assets", "--assets").success() );
 	
 	let main = read_file("links/assets/+page.svx");
-	assert_contains!( main, "![test](/link.jpg)" );
-	assert_contains!( main, "![test](/nested/linked.jpg)" );
+	assert_contains!( main, "![one](/link.jpg)" );
+	assert_contains!( main, "![two](/link.jpg)" );
+	assert_contains!( main, "![three](/nested/linked.jpg)" );
+	assert_contains!( main, "![four](/nested/linked.jpg)" );
 	assert_not_contains!( main, ".assets" );
+}
+
+/// Squarkdown rewrites links to site asset files.
+#[test] fn site_assets()
+{
+	clear_files("links/site-assets").unwrap();
+
+	assert!( squarkup!("links/site-assets", "--assets").success() );
+	
+	let main = read_file("links/site-assets/+page.svx");
+	assert_contains!( main, "![one](/link.jpg)" );
+	assert_contains!( main, "![two](/link.jpg)" );
+	assert_contains!( main, "![three](/linked.jpg)" );
+	assert_contains!( main, "![four](/linked.jpg)" );
+	assert_contains!( main, "![five](/nested/linking.jpg)" );
+	assert_contains!( main, "![six](/nested/linking.jpg)" );
 }

@@ -3,21 +3,15 @@
 | dest = .
 -->
 
-This image link should be rewritten to `/link.jpg`.
+These image links should be rewritten to `/link.jpg`.
 
-![test](.assets/link.jpg)
+![one](.assets/link.jpg)
 
-
-This image link should also be rewritten to `/link.jpg`.
-
-![test](./.assets/link.jpg)
+![two](./.assets/link.jpg)
 
 
-This image link should be rewritten to `/nested/linked.jpg`.
+These image links should be rewritten to `/nested/linked.jpg`.
 
-![test](.assets/nested/linked.jpg)
+![three](.assets/nested/linked.jpg)
 
-
-This image link should also be rewritten to `/nested/linked.jpg`.
-
-![test](./.assets/nested/linked.jpg)
+![four](./.assets/nested/linked.jpg)

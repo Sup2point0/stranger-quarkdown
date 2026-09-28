@@ -1,0 +1,16 @@
+#:schema ../../../src/config/schema.json
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/links/site-assets/"
+
+[assets]
+folder = ".assets/"
+site-assets-folder = ".assets/.site/"
+
+[errors]
+strict = false
+on-error = "kill"
+inactive-link = "error"
