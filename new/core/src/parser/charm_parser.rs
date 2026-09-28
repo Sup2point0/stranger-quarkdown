@@ -397,7 +397,7 @@ mod full {
 			assert_eq!( page_data.caption, Some(str!("Four")) );
 			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020, April, 1)) );
-			assert_eq!( page_data.last_updated, Some(date!(2021, May, 31)) );
+			assert_eq!( page_data.last_update, Some(date!(2021, May, 31)) );
 		}
 	}
 
@@ -440,7 +440,7 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.release_date, Some(date!(2000, April, 1)) );
-			assert_eq!( page_data.last_updated, Some(date!(2020, February, 28)) );
+			assert_eq!( page_data.last_update, Some(date!(2020, February, 28)) );
 		}
 	}
 

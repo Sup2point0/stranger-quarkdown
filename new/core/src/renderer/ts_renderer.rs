@@ -57,8 +57,8 @@ impl Renderer<'_>
 		if let Some(release_date) = d.release_date {
 			writeln!(f, "\t\t{}: {release_date:?},", d.release_date(s))?;
 		}
-		if let Some(last_updated) = d.last_updated {
-			writeln!(f, "\t\t{}: {last_updated:?},", d.last_updated(s))?;
+		if let Some(last_update) = d.last_update {
+			writeln!(f, "\t\t{}: {last_update:?},", d.last_update(s))?;
 		}
 
 		writeln!(f, "\t\t{}: {:?},", d.other(s), d.other)?;

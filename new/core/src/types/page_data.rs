@@ -29,7 +29,6 @@ pub struct PageData
 
 	pub title: Option<String>,
 	pub description: Option<String>,
-
 	pub heading: Option<String>,
 	pub caption: Option<String>,
 
@@ -37,6 +36,7 @@ pub struct PageData
 
 	pub release_date: Option<Date>,
 	pub last_updated: Option<Date>,
+	pub last_update: Option<Date>,
 
 	pub cleanse: Vec<CleanseOperation>,
 
@@ -95,10 +95,10 @@ impl PageData
 			});
 		}
 
-		let mut last_updated = None;
-		if let Some(raw) = Self::take1(&mut fields, "last-updated", "update") {
+		let mut last_update = None;
+		if let Some(raw) = Self::take1(&mut fields, "last-update", "update") {
 			catch!(errs => {
-				last_updated = Some(Self::try_parse_date(raw, "last updated")?);
+				last_update = Some(Self::try_parse_date(raw, "last updated")?);
 			});
 		}
 
@@ -129,7 +129,7 @@ impl PageData
 				title, description,
 				heading, caption,
 				tags,
-				release_date, last_updated,
+				release_date, last_update,
 				cleanse,
 				other: fields,
 			}
@@ -186,7 +186,7 @@ impl PageData
 			caption:      &self.caption,
 			tags:         &self.tags,
 			release_date: &self.release_date,
-			last_updated: &self.last_updated,
+			last_update: &self.last_update,
 			other:        &self.other,
 		}
 	}
@@ -218,7 +218,7 @@ pub struct SerialisedPageData<'s>
 	pub release_date: &'s Option<Date>,
 	
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub last_updated: &'s Option<Date>,
+	pub last_update: &'s Option<Date>,
 
 	#[serde(skip_serializing_if = "HashMap::is_empty")]
 	pub other: &'s HashMap<String, Strings>,
@@ -248,6 +248,6 @@ impl SerialisedPageData<'_>
 	impl_field_repr!(caption      => "caption",      "capt"  );
 	impl_field_repr!(tags         => "tags"                  );
 	impl_field_repr!(release_date => "release_date", "date"  );
-	impl_field_repr!(last_updated => "last_updated", "update");
+	impl_field_repr!(last_update => "last_update", "update");
 	impl_field_repr!(other        => "other",        "other" );
 }

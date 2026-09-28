@@ -65,7 +65,7 @@ pub struct OutConfig {
 
 	/// Should fields in exported `+page.ts` use more compact identifiers?
 	/// 
-	/// For instance, `description` is shortened to `desc`, and `last_updated` is shortened to `update`.
+	/// For instance, `description` is shortened to `desc`, and `last_update` is shortened to `update`.
 	pub shorter_fields: bool,
 
 	/// Where to export site data, including the (expected) `.json` extension.
