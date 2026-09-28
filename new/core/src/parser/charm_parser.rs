@@ -137,7 +137,7 @@ impl CharmParser<'_>
 		Ok(())
 	}
 
-	/// Parse the flags in the charm squark and return their identifiers.
+	/// Parse the flags in the charm squark (excluding `live!`) and return their identifiers.
 	/// 
 	/// ```ts
 	/// <!-- #SQUARK live! feat! dev! -->
@@ -409,6 +409,26 @@ mod full {
 			"});
 			assert_eq!( page_data.release_date, Some(date!(2000, April, 1)) );
 			assert_eq!( page_data.last_updated, Some(date!(2020, February, 28)) );
+		}
+	}
+
+	mod unicode {
+		use super::*;
+
+		#[test] fn chinese() {
+			let page_data = parse(indoc! {"
+				# 无名之辈
+				<!-- #SQUARK live!
+				| dest = .
+				| title = 从前有座山
+				| capt = 你是我的小呀小苹果
+				| tags = 一 / 二 / 三 / 四
+				-->
+			"});
+			assert_eq!( page_data.heading, Some(str!("无名之辈")) );
+			assert_eq!( page_data.title, Some(str!("从前有座山")) );
+			assert_eq!( page_data.caption, Some(str!("你是我的小呀小苹果")) );
+			assert_eq!( page_data.tags, vec![str!("一"), str!("二"), str!("三"), str!("四")] );
 		}
 	}
 }
