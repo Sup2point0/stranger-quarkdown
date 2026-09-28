@@ -37,10 +37,11 @@ pub fn render(
 	);
 
 	let renderer = Renderer::new(page, site, config);
-
 	fs::create_dir_all(&renderer.dest_folder)?;
 
-	catch!(errs => { renderer.render_page_ts()?; });
+	if config.out.render_page_ts {
+		catch!(errs => { renderer.render_page_ts()?; });
+	}
 	catch!(errs => { renderer.render_page_svx()?; });
 
 	errs.or(())
