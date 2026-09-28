@@ -23,6 +23,7 @@ pub struct CharmParser<'d>
 
 	// == MUTABLE == //
 
+	/* NOTE: Yeah, a raw `String` or `&str` would be more compact, but for how small the charm squark is anyway, it's not worth all the extra hassle */
 	/// The source text to parse, containing the charm squark.
 	pub(super) source: Vec<char>,
 
@@ -117,6 +118,12 @@ impl CharmParser<'_>
 		self.try_parse_squark_live()?;
 		self.eat_spaces();
 		let flags = self.parse_flags()?;
+
+		if flags.iter().any(|flag| flag == "dead") {
+			self.is_live = false;
+			return Err(SquarkError::ABANDON);
+		}
+
 		self.eat_whitespace();
 		let fields = self.parse_fields()?;
 
@@ -153,7 +160,7 @@ impl CharmParser<'_>
 				&& c != '\n'
 			{
 				/* NOTE: We're assuming `-` starts the terminating `-->`, since identifiers can't start with `-`. However, it could be the user genuinely using an illegal identifier... maybe we can handle that properly in future. */
-				if c == '-' { break; }
+				if self.lookahead("-->") { break; }
 
 				let ident = self.parse_ident()?;
 
@@ -383,7 +390,6 @@ mod full {
 				| update = 2021 May 31
 				-->
 			"});
-			dbg!(&page_data);
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
 			assert_eq!( page_data.title, Some(str!("One")) );
 			assert_eq!( page_data.description, Some(str!("Two")) );
@@ -392,6 +398,32 @@ mod full {
 			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020, April, 1)) );
 			assert_eq!( page_data.last_updated, Some(date!(2021, May, 31)) );
+		}
+	}
+
+	mod dead {
+		use super::*;
+
+		#[test] fn only_dead() {
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK dead!
+				| dest = .
+				-->
+			"};
+			let r = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse();
+			assert_matches!( r, Err(SquarkError::ABANDON) )
+		}
+
+		#[test] fn live_and_dead() {
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK live! dead!
+				| dest = .
+				-->
+			"};
+			let r = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse();
+			assert_matches!( r, Err(SquarkError::ABANDON) )
 		}
 	}
 
@@ -592,6 +624,7 @@ mod partial {
 		#[test] fn matches() {
 			test_expected(&[
 				("live!", vec![str!("live")]),
+				("one!two!", vec![str!("one"), str!("two")]),
 				("one! two!", vec![str!("one"), str!("two")]),
 				("kebab-case! snake_case!", vec![str!("kebab-case"), str!("snake_case")]),
 			],
@@ -616,6 +649,16 @@ mod partial {
 			|mut parser, expected_flags| {
 				let flags = parser.parse_flags().unwrap();
 				assert_eq!( flags.as_slice(), expected_flags );
+			});
+		}
+
+		#[test] fn crashes() {
+			test_expected(&[
+				("live!ignore:ignored", "cannot start with"),
+			],
+			|mut parser, expected_err| {
+				let e = parser.parse_flags().unwrap_err();
+				assert_contains!( e, expected_err );
 			});
 		}
 	}
