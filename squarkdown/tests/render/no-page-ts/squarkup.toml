@@ -4,10 +4,8 @@
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/render/strip-charm/"
-
-[format]
-preserve-comments = true
+folder = "src/routes/render/no-page-ts/"
+render-page-ts = false
 
 [errors]
 strict = false

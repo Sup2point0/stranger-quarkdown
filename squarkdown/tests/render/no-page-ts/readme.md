@@ -1,6 +1,6 @@
-# Main
+# `+page.ts` is Correctly Excluded
 <!-- #SQUARK live!
-| dest = main
+| dest = .
 -->
 
-The charm squark should be stripped even with `format.preserve-comments` enabled!
+This page should have no accompanying `+page.ts` when `out.render-page-ts = false`.

@@ -1,6 +1,7 @@
 use crate::*;
 
 use assertables::*;
+use path_macro::path;
 
 
 /// Squarkdown exports files to the right place.
@@ -72,4 +73,14 @@ use assertables::*;
 
 	let main = read_file("render/strip-charm/+page.svx");
 	assert_not_contains!( main, "#SQUARK" );
+}
+
+/// Squarkdown strips the charm squark even when `config.format.preserve-comments` is enabled.
+#[test] fn no_page_ts()
+{
+	clear_files("render/no-page-ts").unwrap();
+	assert!( squarkup_from("render/no-page-ts").success() );
+
+	assert!( path!(*TEST_ROUTES / "render/no-page-ts/+page.svx").exists() );
+	assert_not!( path!(*TEST_ROUTES / "render/no-page-ts/+page.ts").exists() );
 }
