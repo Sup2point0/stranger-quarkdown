@@ -56,10 +56,10 @@ macro_rules! bx {
 #[macro_export]
 macro_rules! strings {
 	() => {
-		tiny_vec!([String; 4])
+		tiny_vec!([String; 1])
 	};
 	($($values:expr),* $(,)?) => {
-		tiny_vec!( [String; 4] => $(String::from($values)),* )
+		tiny_vec!( [String; 1] => $(String::from($values)),* )
 	};
 } pub use strings;
 

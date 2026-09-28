@@ -18,4 +18,5 @@ pub use context_stack::{ ContextStack };
 
 use tinyvec::TinyVec;
 
-pub(crate) type Strings = TinyVec<[String; 4]>;
+/// A single string on the stack, or many strings on the heap.
+pub(crate) type Strings = TinyVec<[String; 1]>;
