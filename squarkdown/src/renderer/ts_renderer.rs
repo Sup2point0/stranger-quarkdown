@@ -68,7 +68,7 @@ impl Renderer<'_>
 			writeln!(f,
 				"\t\t{}: new Date({}, {}, {}),",
 				d.update(s),
-				v.year(), v.month() as u8, v.day()
+				v.year(), v.month() as u8 - 1, v.day()
 			)?;
 		}
 		if let Some(v) = d.last_update_raw {
