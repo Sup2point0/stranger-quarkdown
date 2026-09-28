@@ -53,7 +53,14 @@ const config = {
       ],
     }),
     sveltePreprocess({
-      scss: scss_config,
+      scss: {
+        includePaths: ["src/styles/"],
+        prependData: `
+          @use 'mixins/~colours' as *;
+          @use 'mixins/~fonts' as *;
+          @use 'mixins/~links' as *;
+        `,
+      }
     }),
   ],
 };

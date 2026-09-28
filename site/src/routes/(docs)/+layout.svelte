@@ -1,6 +1,7 @@
 <script>
 
 import "#styles/essence.scss";
+import "#styles/article.scss";
 import "#styles/prism-tokyo-night.css";
 
 import NavTop from "#parts/nav/nav.bar.svelte";
