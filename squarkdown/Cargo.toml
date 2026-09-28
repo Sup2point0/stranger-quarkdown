@@ -1,7 +1,11 @@
 [package]
 name = "squarkdown"
-version = "4.0.0"
+version = "4.0.0-alpha.0"
 edition = "2024"
+license = "MIT"
+
+description = "Markdown preprocessing for SvelteKit projects"
+repository = "https://github.com/Sup2point0/stranger-quarkdown"
 
 [profile.release]
 lto = true
