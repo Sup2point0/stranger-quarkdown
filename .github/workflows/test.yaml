@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'squarkdown/src/**/*.rs'
+      - 'squarkdown/**/*.rs'
 
 jobs:
   test:
