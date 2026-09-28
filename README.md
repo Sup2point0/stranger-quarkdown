@@ -3,7 +3,7 @@
 ![Stranger Quarkdown: A Successor to Quarkdown](.assets/squark-cover.png)
 
 [![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
-[![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)
+[![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)
 
 </div>
 
@@ -43,31 +43,42 @@ Squarkdown lets you:
 
 ## Quickstart
 
-Install:
-
+### Cargo
 ```bash
+# Install:
 > cargo install squarkdown
+
+# Setup (once per project):
+# > squarkdown init
+# (under development)
+
+# Run:
+> squarkdown
+
+# With extras:
+> squarkdown --assets
 ```
 
-Setup (once per project):
-
+### npm (currently only Windows)
 ```bash
-your-project> squarkdown init
+# Install:
+> npm install stranger-quarkdown
+
+# Setup (once per project):
+# > npx squarkdown init
+# (under development)
+
+# Run:
+> npx squarkdown
+
+# With extras:
+> npx squarkdown --assets
 ```
 
-Run:
+> [!Tip]
+> Use `squarkdown --help` to remind yourself of the above.
 
-```bash
-your-project> squarkdown
-```
-
-With extras:
-
-```bash
-your-project> squarkdown --assets
-```
-
-For more on how it works, how to configure and customise Squarkdown, and the features available, read [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs)!
+For more on how Squarkdown works, how to configure and customise Squarkdown, and the features available, read [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs)!
 
 
 <br>
