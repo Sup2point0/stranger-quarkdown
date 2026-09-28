@@ -14,8 +14,15 @@ fn main() -> ExitCode
 	println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 	log::line();
 
+	let args: Vec<String> = std::env::args().collect();
+
+	if args.iter().any(|arg| arg == "--help") {
+		help();
+		return ExitCode::SUCCESS;
+	}
+
 	let t_init = Instant::now();
-	let r = squarkup();
+	let r = squarkup(args);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -37,13 +44,11 @@ fn main() -> ExitCode
 /// Run Squarkdown on the user's project.
 /// 
 /// This includes squarkup as well as extras like fonts and assets preprocessing.
-fn squarkup() -> SquarkResult
+fn squarkup(args: Vec<String>) -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
 
 	// == SETUP == //
-	let args: Vec<String> = std::env::args().collect();
-
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
 
@@ -149,4 +154,33 @@ fn squarkup() -> SquarkResult
 	}
 	
 	Ok(())
+}
+
+fn help()
+{
+	println!(
+"{W} Setup your project's {Y}squarkup.toml{W}:
+
+{GREY}  › {C}squarkdown {G}init
+
+{W} Run Squarkdown on your project:
+
+{GREY}  › {C}squarkdown
+
+{W} Run Squarkdown on your project, with extras enabled too:
+
+{GREY}  › {C}squarkdown {Y}--assets
+"
+	);
+
+	log::line();
+
+	println!(
+"{W}For detailed guidance, please visit the docs!
+
+{W}  GitHub: {B}https://github.com/Sup2point0/stranger-quarkdown/tree/main/docs
+{W}  site: {B}https://sup2point0.github.io/stranger-quarkdown/docs
+"
+	);
+
 }
