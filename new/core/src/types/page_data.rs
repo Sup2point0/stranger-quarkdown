@@ -181,28 +181,30 @@ impl PageData
 
 impl PageData
 {
+	/// Serialise this page data to JSON with long, unabbreviated field names.
 	#[must_use]
-	pub fn serialise<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
+	pub fn serialised_long<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
 	{
 		SerialisedPageData {
 			filepath:         utils::display_rel(&self.filepath, &config.paths.root),
 			destination:      utils::display_rel(&self.destination, &config.out.folder),
 			flags:            &self.flags,
-			title:            &self.title,
-			description:      &self.description,
-			heading:          &self.heading,
-			caption:          &self.caption,
+			title:            self.title.as_ref(),
+			description:      self.description.as_ref(),
+			heading:          self.heading.as_ref(),
+			caption:          self.caption.as_ref(),
 			tags:             &self.tags,
-			release_date:     &self.release_date,
-			release_date_raw: &self.release_date_raw,
-			last_update:      &self.last_update,
-			last_update_raw:  &self.last_update_raw,
+			release_date:     self.release_date,
+			release_date_raw: self.release_date_raw.as_ref(),
+			last_update:      self.last_update,
+			last_update_raw:  self.last_update_raw.as_ref(),
 			other:            &self.other,
 		}
 	}
 }
 
 
+#[serde_with::skip_serializing_none]
 #[derive(serde::Serialize)]
 pub struct SerialisedPageData<'s>
 {
@@ -210,33 +212,23 @@ pub struct SerialisedPageData<'s>
 	pub destination: String,
 	pub flags: &'s Strings,
 
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub title: &'s Option<String>,
-	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub description: &'s Option<String>,
-	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub heading: &'s Option<String>,
-	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub caption: &'s Option<String>,
+	pub title:       Option<&'s String>,
+	pub description: Option<&'s String>,
+	pub heading:     Option<&'s String>,
+	pub caption:     Option<&'s String>,
 	
 	pub tags: &'s [String],
 	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub release_date: &'s Option<Date>,
+	#[serde(serialize_with = "serialise_date")]
+	pub release_date: Option<Date>,
 	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub release_date_raw: &'s Option<String>,
+	pub release_date_raw: Option<&'s String>,
 	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub last_update: &'s Option<Date>,
+	#[serde(serialize_with = "serialise_date")]
+	pub last_update: Option<Date>,
 	
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub last_update_raw: &'s Option<String>,
+	pub last_update_raw: Option<&'s String>,
 
-	#[serde(skip_serializing_if = "HashMap::is_empty")]
 	pub other: &'s HashMap<String, Strings>,
 }
 
@@ -245,7 +237,7 @@ macro_rules! impl_field_repr
 	($field:ident => $both:literal) => {
 		impl_field_repr!($field => $both, $both);
 	};
-	($field:ident => $full:literal, $short:literal) =>
+	($field:ident => $short:literal, $full:literal) =>
 	{
 		pub fn $field(&self, short: bool) -> &str {
 			if short {$short} else {$full}
@@ -255,17 +247,31 @@ macro_rules! impl_field_repr
 
 impl SerialisedPageData<'_>
 {
-	impl_field_repr!(filepath   => "filepath",         "path"      );
-	impl_field_repr!(dest       => "destination",      "dest"      );
+	impl_field_repr!(filepath   => "path",       "filepath"        );
+	impl_field_repr!(dest       => "dest",       "destination"     );
 	impl_field_repr!(flags      => "flags"                         );
 	impl_field_repr!(title      => "title"                         );
-	impl_field_repr!(desc       => "description",      "desc"      );
-	impl_field_repr!(head       => "heading",          "head"      );
-	impl_field_repr!(capt       => "caption",          "capt"      );
+	impl_field_repr!(desc       => "desc",       "description"     );
+	impl_field_repr!(head       => "head",       "heading"         );
+	impl_field_repr!(capt       => "capt",       "caption"         );
 	impl_field_repr!(tags       => "tags"                          );
-	impl_field_repr!(date       => "release_date",     "date"      );
-	impl_field_repr!(date_raw   => "release_date_raw", "date_raw"  );
-	impl_field_repr!(update     => "last_update",      "update"    );
-	impl_field_repr!(update_raw => "last_update_raw",  "update_raw");
+	impl_field_repr!(date       => "date",       "release_date"    );
+	impl_field_repr!(date_raw   => "date_raw",   "release_date_raw");
+	impl_field_repr!(update     => "update",     "last_update"     );
+	impl_field_repr!(update_raw => "update_raw", "last_update_raw" );
 	impl_field_repr!(other      => "other"                         );
+}
+
+
+fn serialise_date<S>(date: &Option<Date>, serialiser: S) -> Result<S::Ok, S::Error>
+	where S: serde::Serializer
+{
+	let Some(date) = date else {
+		return serialiser.serialize_none();
+	};
+
+	let format = format_description!("[year]-[month]-[day]");
+	let formatted = date.format(format).expect("date serialisation always succeeds");
+
+	serialiser.serialize_str(&fmt!("{}", formatted))
 }
