@@ -35,9 +35,9 @@ pub struct PageData
 	pub tags: Vec<String>,
 
 	pub release_date: Option<Date>,
-	pub release_date_display: Option<String>,
+	pub release_date_raw: Option<String>,
 	pub last_update: Option<Date>,
-	pub last_update_display: Option<String>,
+	pub last_update_raw: Option<String>,
 
 	pub cleanse: Vec<CleanseOperation>,
 
@@ -90,23 +90,23 @@ impl PageData
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
 
 		let mut release_date = None;
-		let mut release_date_display = None;
+		let mut release_date_raw = None;
 
 		if let Some(raw) = Self::take1(&mut fields, "release-date", "date") {
 			catch!(errs => {
 				release_date = Some(Self::try_parse_date(&raw, "release date")?);
 			});
-			release_date_display = Some(raw);
+			release_date_raw = Some(raw);
 		}
 
 		let mut last_update = None;
-		let mut last_update_display = None;
+		let mut last_update_raw = None;
 
 		if let Some(raw) = Self::take1(&mut fields, "last-update", "update") {
 			catch!(errs => {
 				last_update = Some(Self::try_parse_date(&raw, "last updated")?);
 			});
-			last_update_display = Some(raw);
+			last_update_raw = Some(raw);
 		}
 
 		let mut cleanse = vec![];
@@ -136,8 +136,8 @@ impl PageData
 				title, description,
 				heading, caption,
 				tags,
-				release_date, release_date_display,
-				last_update, last_update_display,
+				release_date, release_date_raw,
+				last_update, last_update_raw,
 				cleanse,
 				other: fields,
 			}
@@ -145,7 +145,7 @@ impl PageData
 	}
 
 	/// Extract a multi-valued field from `fields`.
-	fn take(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<Vec<String>>
+	fn take(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<Vec<String>>
 	{
 		fields.remove(short)
 			.or_else(|| fields.remove(long))
@@ -153,7 +153,7 @@ impl PageData
 	}
 
 	/// Extract a single-valued field from `fields`.
-	fn take1(fields: &mut HashMap<String, Strings>, long: &'static str, short: &'static str) -> Option<String>
+	fn take1(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<String>
 	{
 		fields.remove(short)
 			.or_else(|| fields.remove(long))?
@@ -170,7 +170,7 @@ impl PageData
 			.or_else(|_| Date::parse(date, short))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), long))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), short))
-			.or_else(|_| Date::parse(&fmt!("{date} January 1"), short))
+			.or_else(|_| Date::parse(&fmt!("{date} January 1"), long))
 			.map_err(|_| SquarkError::Recoverable {
 				msg: fmt!("invalid date for {W}{field}{R}: {date}"),
 				hint: str!("dates use the format {W}<year> <month?> <date?>"),
@@ -185,17 +185,19 @@ impl PageData
 	pub fn serialise<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
 	{
 		SerialisedPageData {
-			filepath:     utils::display_rel(&self.filepath, &config.paths.root),
-			destination:  utils::display_rel(&self.destination, &config.out.folder),
-			flags:        &self.flags,
-			title:        &self.title,
-			description:  &self.description,
-			heading:      &self.heading,
-			caption:      &self.caption,
-			tags:         &self.tags,
-			release_date: &self.release_date,
-			last_update: &self.last_update,
-			other:        &self.other,
+			filepath:         utils::display_rel(&self.filepath, &config.paths.root),
+			destination:      utils::display_rel(&self.destination, &config.out.folder),
+			flags:            &self.flags,
+			title:            &self.title,
+			description:      &self.description,
+			heading:          &self.heading,
+			caption:          &self.caption,
+			tags:             &self.tags,
+			release_date:     &self.release_date,
+			release_date_raw: &self.release_date_raw,
+			last_update:      &self.last_update,
+			last_update_raw:  &self.last_update_raw,
+			other:            &self.other,
 		}
 	}
 }
@@ -226,7 +228,13 @@ pub struct SerialisedPageData<'s>
 	pub release_date: &'s Option<Date>,
 	
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub release_date_raw: &'s Option<String>,
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub last_update: &'s Option<Date>,
+	
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub last_update_raw: &'s Option<String>,
 
 	#[serde(skip_serializing_if = "HashMap::is_empty")]
 	pub other: &'s HashMap<String, Strings>,
@@ -247,15 +255,17 @@ macro_rules! impl_field_repr
 
 impl SerialisedPageData<'_>
 {
-	impl_field_repr!(filepath     => "filepath",     "path"  );
-	impl_field_repr!(destination  => "destination",  "dest"  );
-	impl_field_repr!(flags        => "flags"                 );
-	impl_field_repr!(title        => "title"                 );
-	impl_field_repr!(description  => "description",  "desc"  );
-	impl_field_repr!(heading      => "heading",      "head"  );
-	impl_field_repr!(caption      => "caption",      "capt"  );
-	impl_field_repr!(tags         => "tags"                  );
-	impl_field_repr!(release_date => "release_date", "date"  );
-	impl_field_repr!(last_update => "last_update", "update");
-	impl_field_repr!(other        => "other",        "other" );
+	impl_field_repr!(filepath   => "filepath",         "path"      );
+	impl_field_repr!(dest       => "destination",      "dest"      );
+	impl_field_repr!(flags      => "flags"                         );
+	impl_field_repr!(title      => "title"                         );
+	impl_field_repr!(desc       => "description",      "desc"      );
+	impl_field_repr!(head       => "heading",          "head"      );
+	impl_field_repr!(capt       => "caption",          "capt"      );
+	impl_field_repr!(tags       => "tags"                          );
+	impl_field_repr!(date       => "release_date",     "date"      );
+	impl_field_repr!(date_raw   => "release_date_raw", "date_raw"  );
+	impl_field_repr!(update     => "last_update",      "update"    );
+	impl_field_repr!(update_raw => "last_update_raw",  "update_raw");
+	impl_field_repr!(other      => "other"                         );
 }
