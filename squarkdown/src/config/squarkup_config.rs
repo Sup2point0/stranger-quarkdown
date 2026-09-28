@@ -7,7 +7,9 @@ use crate::{
 use std::path::PathBuf;
 
 
-/// The user's complete squarkup configuration, loaded from `.squarkdown/squarkup.json`.
+/// The user's complete squarkup configuration.
+/// 
+/// This is loaded from either a `squarkup.toml` or `squarkup.json` file.
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
@@ -43,10 +45,10 @@ pub struct PathsConfig {
 	/// `/` is a special entry, treated as 'root-only'; it won’t recurse into any directories. Use this to pick up files like `README.md`, `CHANGELOG.md`, etc.
 	pub sources: Vec<PathBuf>,
 
-	/// Only directories whose full path matches against any of these RegEx patterns will be searched.
+	/// Only files whose full path matches against any of these RegEx patterns will be searched.
 	pub include: Vec<regex::Regex>,
 
-	/// Directories whose full path matches against any of these RegEx patterns will *not* be searched.
+	/// Files whose full path matches against any of these RegEx patterns will *not* be searched.
 	pub exclude: Vec<regex::Regex>,
 }
 
