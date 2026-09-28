@@ -2,7 +2,7 @@
 
 ![Stranger Quarkdown: A Successor to Quarkdown](.assets/squark-cover.png)
 
-[![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
+[![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
 [![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)
 
 </div>
@@ -11,16 +11,16 @@
 
 <div align="center">
 
-[Quickstart](docs/walkthrough/quickstart.md) · [Docs](docs/) · [Site](https://sup2point0.github.io/stranger-quarkdown/docs)
+[Docs](docs/) · [Quickstart](docs/walkthrough/quickstart.md) · [FAQ](FAQ.md) · [Changelog](CHANGELOG.md) · [Site](https://sup2point0.github.io/stranger-quarkdown/docs)
 
 </div>
 
 > [!Warning]
-> I’m currently rewriting Squarkdown from scratch (yeah, in Rust, lmao). The Ruby implementation is unfortunately in a broken state. Bear with me!
+> Squarkdown has been freshly rewritten in Rust. It’s not quite battle-tested just yet, but it’s almost there!
 
-**Stranger Quarkdown** (*Squarkdown*) is a successor to [*Quarkdown*](https://github.com/Sup2point0/Quarkdown), for integration with [Svelte<sup>↗</sup>](https://svelte.dev), [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.io).
+**Stranger Quarkdown** (*Squarkdown*) is a build tool for [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.io) projects.
 
-Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough/quickstart.md) anywhere in your project repo, then use Squarkdown to automatically export them to `.svx` files in your SvelteKit project directory.
+You write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to mass-export them into `+page.svx` and `+page.ts` files in your SvelteKit project.
 
 
 <br>
@@ -28,60 +28,58 @@ Write content for a site with [Squarkdown-Flavoured Markdown](docs/walkthrough/q
 
 ## Features
 
-### Core
-- Automates several parts of the build process for SvelteKit projects
-- Multiple configuration options and Rake tasks for flexibility
-- Intelligently handles directories for more versatile navigation
+Squarkdown lets you:
 
-### Extra
-- Moves assets from a different folder to the SvelteKit `static/` directory
-- Collects fonts to build the [Google Fonts<sup>↗</sup>](https://fonts.google.com) `<link>` tag
-- Collects global `.scss` files to build an `scss-config.js` file
+- Write Markdown anywhere in your repo, independently of your SvelteKit site
+- Use [Squarkdown-Flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md) syntax to control how Squarkdown renders the content – all hidden inside `<!-- #SQUARK -->` comments, meaning no disruption to the original Markdown preview!
+- Attach metadata to pages that is passed to SvelteKit via `+page.ts`
+- Link between Markdown files without worry; Squarkdown fixes the links for the site
 
-### Future
-- Search root directory without recursively searching every directory
-- Correct internal relative links to correct absolute links in production
+> In my experience, Squarkdown is quite difficult to explain *properly* to people. But it’s a tool I absolutely need – and use in so many projects! – so trust me, it *is* useful ;)
 
 
 <br>
 
 
-## Usage
+## Quickstart
 
-> [!Tip]
-> See [Using Squarkdown in a SvelteKit project](docs/walkthrough/quickstart.md) for a full walkthrough.
-
-Add Squarkdown to your project as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules):
+Install:
 
 ```bash
-project> git submodule add https://github.com/Sup2point0/stranger-quarkdown
+> cargo install squarkdown
 ```
 
-Setup:
+Setup (once per project):
 
 ```bash
-stranger-quarkdown> rake init
+your-project> squarkdown init
 ```
 
 Run:
 
 ```bash
-stranger-quarkdown> rake squark
+your-project> squarkdown
 ```
 
-Squarkdown will look for `.md` files in your repo with a `<!-- #SQUARK live! -->` [squark](docs/reference/squarks.md), and export them to `.svx` files in `src/routes`.
+With extras:
 
-Many additional configurations are available (although the defaults should actually cover most projects!).
+```bash
+your-project> squarkdown --assets
+```
 
-For more, visit [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs).
+For more on how it works, how to configure and customise Squarkdown, and the features available, read [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs)!
 
 
 <br>
 
 
-## Licence
+## Generative AI
 
-MIT. The code’s not even that good, lmao.
+<a href="https://brainmade.org">
+  <img align="right" height="40" src=".github/brainmade-black.svg" />
+</a>
+
+All lovingly handcrafted <3
 
 
 <br>

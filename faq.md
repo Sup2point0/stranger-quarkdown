@@ -5,14 +5,11 @@
 | update = 2026 July 10
 -->
 
-### What is Squarkdown?
-<!-- #SQUARK leave? -->
-See [What is Squarkdown?](docs/walkthrough/what-is-squarkdown.md).
-<!-- #SQUARK leave. -->
+> [!Warning]
+> Most of this information is outdated with the Rust rewrite. I’ll update it soon!
 
-<!-- #SQUARK only?
-See [What is Squarkdown?](/docs/walkthrough/what-is-squarkdown.md).
-     #SQUARK only. -->
+### What is Squarkdown?
+See [What is Squarkdown?](docs/walkthrough/what-is-squarkdown.md).
 
 ### Why does Squarkdown only work with SvelteKit and MDsveX?
 Yeah, Squarkdown was made for a very particular purpose. It’s totally geared towards the technologies I use, but that’s purely because I made it for myself :P

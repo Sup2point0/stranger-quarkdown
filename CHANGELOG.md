@@ -1,7 +1,10 @@
 # Squarkdown Changelog
 
 
-## v4.0 (Next)
+<br>
+
+
+## v4.0 (Alpha)
 
 Squarkdown has been rewritten in Rust. Yeah, I’m sorry, lmao.
 
@@ -10,13 +13,13 @@ This keeps the core semantics and functionality of Squarkdown the same, but brin
 While I was at it, I also implemented some way overdue features that were too scary to implement in Ruby!
 
 ### New
-- Squarkdown now resolves links, rewriting links to Markdown files into links to webpages
+- Squarkdown now resolves links, rewriting internal links to other Markdown files into links to webpages
 - Improved error messages with hints, diagnostics and line numbers
 - Safer path resolution, with stricter checks to ensure paths remain inside your repository
 
 ### Rendering
-- `#SQUARK slash` squark for removing content from rendered output
-- Links containing `<sup>↗</sup>` are turned into `<a target="_blank">` links
+- Squarkdown now uses a proper context-aware linear parsing engine, instead of global RegEx substitutions, so `#SQUARK`s are properly handled inside code blocks!
+- New `#SQUARK slash` squark, for removing content from rendered output
 
 ### Config
 - Favour `squarkup.toml` over `squarkup.json`
@@ -27,7 +30,7 @@ While I was at it, I also implemented some way overdue features that were too sc
   - `format.preserve-comments`
   - `format.externalise-links`
   - `format.mark_invalid-links`
-- Support `/squarkup.toml` alongside `/.squarkdown/squarkup.toml`
+- Support `/squarkup.toml` in project root, not just `/.squarkdown/squarkup.toml`
 
 
 <br>
