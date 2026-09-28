@@ -19,7 +19,24 @@
     "url": "https://github.com/Sup2point0/stranger-quarkdown/issues"
   },
 
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "./bin/",
+    "index.d.ts",
+    "package.json",
+    "LICENCE"
+  ],
+  "exports": {
+    "types": "./index.d.ts"
+  },
+  "bin": {
+    "squarkdown": "bin/squarkdown.exe"
+  },
+  "os": ["win32"],
+  "cpu": ["x64"],
+
   "scripts": {
-    "prepublishOnly": "nu build.nu"
+    "prepublishOnly": "nu publish.nu"
   }
 }
