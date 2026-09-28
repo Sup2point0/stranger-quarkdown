@@ -4,7 +4,7 @@
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/page-ts/short/"
+folder = "src/routes/fields/short/"
 render-page-ts = true
 shorter-fields = true
 
