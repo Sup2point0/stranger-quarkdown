@@ -20,7 +20,7 @@ use assertables::*;
 	assert_contains!( main, "tags: [\"1\", \"2\", \"3\"]" );
 	assert_contains!( main, "release_date: new Date(2020, 1, 1)" );
 	assert_contains!( main, "release_date_raw: \"2020\"" );
-	assert_contains!( main, "last_update: new Date(2020, 4, 1)" );
+	assert_contains!( main, "last_update: new Date(2020, 3, 1)" );
 	assert_contains!( main, "last_update_raw: \"2020 April\"" );
 	assert_contains!( main, "other: {}" );
 }

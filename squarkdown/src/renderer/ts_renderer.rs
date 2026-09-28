@@ -58,7 +58,7 @@ impl Renderer<'_>
 			writeln!(f,
 				"\t\t{}: new Date({}, {}, {}),",
 				d.date(s),
-				v.year(), v.month() as u8, v.day()
+				v.year(), v.month() as u8 - 1, v.day()
 			)?;
 		}
 		if let Some(v) = d.release_date_raw {
