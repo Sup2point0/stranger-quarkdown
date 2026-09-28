@@ -6,8 +6,7 @@
 
   "description": "Markdown preprocessing for SvelteKit projects",
   "keywords": [
-    "squark",
-    "squarkdown"
+    "svelte", "sveltekit", "mdsvex", "markdown", "squarkdown", "squark"
   ],
 
   "homepage": "https://github.com/Sup2point0/stranger-quarkdown#readme",
@@ -22,13 +21,15 @@
   "type": "module",
   "sideEffects": false,
   "files": [
-    "./bin/",
+    "./bin/squarkdown.exe",
     "index.d.ts",
     "package.json",
     "LICENCE"
   ],
   "exports": {
-    "types": "./index.d.ts"
+    ".": {
+      "types": "./index.d.ts"
+    }
   },
   "bin": {
     "squarkdown": "bin/squarkdown.exe"
