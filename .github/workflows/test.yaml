@@ -1,0 +1,20 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'squarkdown/src/**/*.rs'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+          
+      - name: '› cargo test'
+        run: |
+          cd squarkdown
+          cargo test
