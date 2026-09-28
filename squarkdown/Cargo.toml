@@ -7,6 +7,11 @@ license = "MIT"
 description = "Markdown preprocessing for SvelteKit projects"
 repository = "https://github.com/Sup2point0/stranger-quarkdown"
 
+exclude = [
+	"tests/",
+	"src/readme.md"
+]
+
 [profile.release]
 lto = true
 strip = true
