@@ -1,8 +1,8 @@
-!.gitignore
-
 # ignore files, but not folders
 /*
 !/*/
+
+!.gitignore
 
 */*
 !*/.gitkeep
