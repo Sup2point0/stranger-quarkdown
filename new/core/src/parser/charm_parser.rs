@@ -417,7 +417,7 @@ mod full {
 				-->
 			"};
 			let r = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse();
-			assert_matches!( r, Err(SquarkError::ABANDON) )
+			assert_matches!( r, Err(SquarkError::ABANDON) );
 		}
 	}
 
@@ -435,6 +435,22 @@ mod full {
 			"});
 			assert_eq!( page_data.release_date, Some(date!(2000-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2020-02-28)) );
+		}
+
+		#[test] fn reject_update_before_date() {
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| date = 2099 April 1
+				| update = 2067 April 1
+				-->
+			"};
+			let mut config = TEST_CONFIG.clone();
+			config.errors.strict = true;
+			let r = CharmParser::new(source, TEST_FILE.clone(), &config).parse();
+			assert_err!( &r );
+			assert_contains!( r.unwrap_err(), "before" );
 		}
 	}
 

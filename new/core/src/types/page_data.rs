@@ -109,6 +109,21 @@ impl PageData
 			last_update_raw = Some(raw);
 		}
 
+		if config.errors.strict
+		&& let Some(date) = release_date
+		&& let Some(update) = last_update
+		&& update < date
+		{
+			errs.push(SquarkError::Recoverable {
+				msg: fmt!("you provided a {W}last updated{R} date earlier than the {W}release date"),
+				hint: str!("you can’t update a page before you release it!"),
+				debug: vec![
+					fmt!("last updated = {}", last_update_raw.as_ref().unwrap()),
+					fmt!("release date = {}", release_date_raw.as_ref().unwrap()),
+				],
+			});
+		}
+
 		let mut cleanse = vec![];
 
 		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or(vec![]) {
