@@ -143,21 +143,13 @@ impl<'d> Renderer<'d>
 		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
 		{
 			let level = *level;
-			
-			while parser.next_if(|(e, _range)| {
-				if let pd::Event::End(pd::TagEnd::Heading(lv)) = e
-				&& *lv == level {
-					false
-				} else {
-					true
-				}
-			}).is_some()
-			{
-				continue;
-			}
 
-			// consume the `End(Heading)`
-			parser.next();
+			for (event, _range) in parser.by_ref() {
+				if let pd::Event::End(pd::TagEnd::Heading(lv)) = event
+				&& lv == level {
+					break;
+				}
+			}
 		}
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
