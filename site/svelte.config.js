@@ -7,7 +7,6 @@ import remarkIndexFootnotes from "remark-numbered-footnote-labels";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-import scss_config from "./scss-config.js";
 import { remark_alerts } from "./preprocess-alerts.js";
 
 
