@@ -38,7 +38,7 @@ impl SquarkupConfig
 		if let Some(paths) = data.get("paths")
 		{
 			Self::check_is_table(paths, "paths",
-				hints!("try setting {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
+				hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
 			)?;
 
 			if let Some(value) = paths.get("site") {
@@ -109,9 +109,7 @@ impl SquarkupConfig
 		// == PathsConfig == //
 		if let Some(paths) = data.get("paths")
 		{
-			Self::check_is_table(paths, "paths",
-				hints!("write your config like this: {W}```\n\t[paths]\n\tsources = ['/']\n```")
-			)?;
+			/* NOTE: Already `check_is_table()`-d earlier */
 
 			if let Some(value) = paths.get("sources") { catch!(errs => {
 				let values = Self::try_get_array(value, "paths.sources", "(of folders relative to your project root)")?;
@@ -182,6 +180,15 @@ impl SquarkupConfig
 
 			if let Some(value) = out.get("file-name") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
+
+				if raw.contains("/") {
+					return Err(SquarkError::Unrecoverable {
+						msg: fmt!("illegal value for {Y}out.file-name{R}: {W}{raw}"),
+						hint: fmt!("the file name cannot contain {W}/{G}, because that turns into a file path!"),
+						debug: vec![],
+					});
+				}
+
 				s.out.file_name = raw.to_string();
 			}) }
 
@@ -237,8 +244,6 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// == StylesConfig == //
-
 		// == AssetsConfig == //
 		if let Some(assets) = data.get("assets")
 		{
@@ -286,7 +291,7 @@ impl SquarkupConfig
 				msg: fmt!("{Y}{setting}{R} must be a table, not a field"),
 				hint: hint(),
 				debug: vec![
-					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}{GREY}", data.type_str()),
+					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", data.type_str()),
 				],
 			})
 		}
@@ -299,7 +304,8 @@ impl SquarkupConfig
 		hint: &str,
 	) -> SquarkResult<&'d str>
 	{
-		value.as_str().ok_or_else(|| SquarkError::Unrecoverable {
+		value.as_str()
+		.ok_or_else(|| SquarkError::Unrecoverable {
 			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
 			hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
 			debug: vec![
@@ -311,11 +317,12 @@ impl SquarkupConfig
 	/// Try to extract the boolean from `data` for `setting`.
 	fn try_get_bool(value: &toml::Value, setting: &str) -> SquarkResult<bool>
 	{
-		value.as_bool().ok_or_else(|| SquarkError::Unrecoverable {
+		value.as_bool()
+		.ok_or_else(|| SquarkError::Unrecoverable {
 			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
 			hint: fmt!("{Y}{setting}{G} must be a boolean"),
 			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}{GREY}", value.type_str()),
+				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
 			],
 		})
 	}
@@ -325,19 +332,16 @@ impl SquarkupConfig
 		value: &'d toml::Value,
 		setting: &str,
 		hint: &str,
-	) -> SquarkResult<&'d [toml::Value]>
+	) -> SquarkResult<&'d Vec<toml::Value>>
 	{
-		match value {
-			toml::Value::Array(v) => Ok(v),
-			
-			v => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
-				hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
-				debug: vec![
-					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-				],
-			}),
-		}
+		value.as_array()
+		.ok_or_else(|| SquarkError::Unrecoverable {
+			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+			hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
+			debug: vec![
+				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+			],
+		})
 	}
 
 	/// Validate that `root / dir` exists, and is a folder.
