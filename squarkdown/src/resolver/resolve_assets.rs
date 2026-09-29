@@ -13,11 +13,13 @@ pub fn resolve_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkRes
 	walkdir::WalkDir::new(&config.assets.folder)
 		.into_iter()
 
+		.filter_entry(|entry| entry.path() != path!(config.paths.site / "static"))
+
 		.filter(|entry| match entry {
 			Err(..) => true,
 			Ok(e) =>
 				e.file_type().is_file()
-				&& config.assets.has_asset_extension(e.path()),
+				&& config.assets.has_asset_extension(e.path())
 		})
 
 		.map(move |entry| match entry {
