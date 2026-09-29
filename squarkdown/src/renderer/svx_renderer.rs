@@ -16,6 +16,7 @@ use time::UtcDateTime;
 use std::borrow::{ Cow };
 use std::fs::{ File };
 use std::io::{ Write };
+use std::iter::{ Peekable };
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
@@ -136,21 +137,7 @@ impl<'d> Renderer<'d>
 			.peekable()
 		;
 
-		/* NOTE: Would love to extract these into their own isolated methods, but the required type annotations are too complex =( */
-
-		// skip heading
-		if !self.config.format.preserve_heading
-		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
-		{
-			let level = *level;
-
-			for (event, _range) in parser.by_ref() {
-				if let pd::Event::End(pd::TagEnd::Heading(lv)) = event
-				&& lv == level {
-					break;
-				}
-			}
-		}
+		self.skip_heading(&mut parser);
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
@@ -175,6 +162,23 @@ impl<'d> Renderer<'d>
 			r"(?is)<!--\s*#SQUARK\s+ONLY\?\s+(?-i)(.*?)(?i)#SQUARK\s+ONLY\.\s*-->"
 		)
 		.replace_all(source, "$1")
+	}
+
+	/// Advance `parser` to skip over the events that produce the initial page heading.
+	fn skip_heading(&self, parser: &mut Peekable<pd::OffsetIter>)
+	{
+		if !self.config.format.preserve_heading
+		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
+		{
+			let level = *level;
+
+			for (event, _range) in parser.by_ref() {
+				if let pd::Event::End(pd::TagEnd::Heading(lv)) = event
+				&& lv == level {
+					break;
+				}
+			}
+		}
 	}
 }
 
