@@ -16,7 +16,7 @@ use std::path::{ PathBuf };
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PageData
 {
-	/// The stable unique identifier for the page.
+	/// The unique stable identifier for the page.
 	pub shard: String,
 
 	/// The location of the original `.md` file this page represents.
@@ -87,7 +87,7 @@ impl PageData
 		let caption      = Self::take1(&mut fields, "caption", "capt");
 		let description  = Self::take1(&mut fields, "description", "desc").or_else(|| caption.clone());
 
-		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or(vec![]);
+		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or_default();
 
 		let mut release_date = None;
 		let mut release_date_raw = None;
@@ -126,8 +126,8 @@ impl PageData
 
 		let mut cleanse = vec![];
 
-		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or(vec![]) {
-			match raw.clone().try_into()
+		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or_default() {
+			match raw.parse::<CleanseOperation>()
 			{
 				Ok(value) => cleanse.push(value),
 				Err(_) => {
