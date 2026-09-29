@@ -34,7 +34,7 @@ jobs:
 
       - name: '› cargo install squarkdown'
         run: |
-          cargo install squarkdown
+          cargo install squarkdown --version 4.0.0-alpha.0
 
       - name: '› npm run buildx'
         run: |
