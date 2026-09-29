@@ -42,7 +42,7 @@ impl SquarkupConfig
 			)?;
 
 			if let Some(value) = paths.get("site") {
-				let dir = Self::try_get_string(value, "paths.site", "(filepath relative to your project root)")?;
+				let dir = Self::try_get_str(value, "paths.site", "(filepath relative to your project root)")?;
 				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
 			}
 		}
@@ -64,9 +64,9 @@ impl SquarkupConfig
 
 			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
 			if let Some(value) = errors.get("on-error") {
-				let raw = Self::try_get_string(value, "errors.on-error", "(an error handling strategy)")?;
+				let raw = Self::try_get_str(value, "errors.on-error", "(an error handling strategy)")?;
 
-				if let Ok(opt) = ErrorAction::try_from(raw.as_str()) {
+				if let Ok(opt) = ErrorAction::try_from(raw) {
 					s.errors.on_error = opt;
 				} else {
 					return Err(SquarkError::Unrecoverable {
@@ -78,9 +78,9 @@ impl SquarkupConfig
 			}
 			
 			if let Some(value) = errors.get("file-already-exists") { catch!(errs => {
-				let raw = Self::try_get_string(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
+				let raw = Self::try_get_str(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
 
-				if let Ok(opt) = FileAction::try_from(raw.as_str()) {
+				if let Ok(opt) = FileAction::try_from(raw) {
 					s.errors.file_already_exists = opt;
 				} else {
 					return Err(SquarkError::Unrecoverable {
@@ -92,9 +92,9 @@ impl SquarkupConfig
 			}) }
 			
 			if let Some(value) = errors.get("inactive-link") { catch!(errs => {
-				let raw = Self::try_get_string(value, "errors.inactive-link", "(a missing file handling strategy)")?;
+				let raw = Self::try_get_str(value, "errors.inactive-link", "(a missing file handling strategy)")?;
 
-				if let Ok(opt) = LinkRewriteAction::try_from(raw.as_str()) {
+				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
 					s.errors.inactive_link = opt;
 				} else {
 					return Err(SquarkError::Unrecoverable {
@@ -121,7 +121,7 @@ impl SquarkupConfig
 				}
 
 				for value in values {
-					let raw = Self::try_get_string(value, "paths.sources", "(entry in an array)")?;
+					let raw = Self::try_get_str(value, "paths.sources", "(entry in an array)")?;
 					let dir = Self::try_resolve_folder(
 						root, raw, "a source folder you specified",
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
@@ -138,7 +138,7 @@ impl SquarkupConfig
 				}
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_string(value, "paths.include", "(entry in an array)")?;
+					let pattern = Self::try_get_str(value, "paths.include", "(entry in an array)")?;
 
 					match Regex::new(pattern) {
 						Ok(compiled) => s.paths.include.push(compiled),
@@ -154,7 +154,7 @@ impl SquarkupConfig
 				let values = Self::try_get_array(value, "paths.exclude", "(of RegEx patterns)")?;
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_string(value, "paths.exclude", "(entry in an array)")?;
+					let pattern = Self::try_get_str(value, "paths.exclude", "(entry in an array)")?;
 
 					match Regex::new(pattern) {
 						Ok(compiled) => s.paths.exclude.push(compiled),
@@ -175,14 +175,14 @@ impl SquarkupConfig
 			)?;
 
 			if let Some(value) = out.get("folder") { catch!(errs => {
-				let raw = Self::try_get_string(value, "out.folder", "(folder relative to your SvelteKit site)")?;
+				let raw = Self::try_get_str(value, "out.folder", "(folder relative to your SvelteKit site)")?;
 				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
 				s.out.folder = dir;
 			}) }
 
 			if let Some(value) = out.get("file-name") { catch!(errs => {
-				let raw = Self::try_get_string(value, "out.file-name", "(filename including `.svx` extension)")?;
-				s.out.file_name.clone_from(raw);
+				let raw = Self::try_get_str(value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
+				s.out.file_name = raw.to_string();
 			}) }
 
 			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
@@ -194,7 +194,7 @@ impl SquarkupConfig
 			}) }
 
 			if let Some(value) = out.get("site-data-path") { catch!(errs => {
-				let raw = Self::try_get_string(value, "out.site-data-path", "(filepath including `.json` extension)")?;
+				let raw = Self::try_get_str(value, "out.site-data-path", "(filepath including `.json` extension)")?;
 				let path = path!(site / utils::to_rel(raw));
 
 				// TODO cleanup with helper?
@@ -247,14 +247,14 @@ impl SquarkupConfig
 			)?;
 
 			if let Some(value) = assets.get("folder") { catch!(errs => {
-				let dir = Self::try_get_string(value, "assets.folder", "(folder relative to your project root)")?;
+				let dir = Self::try_get_str(value, "assets.folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
 
 				s.assets.folder = folder;
 			}) }
 
 			if let Some(value) = assets.get("site-assets-folder") { catch!(errs => {
-				let dir = Self::try_get_string(value, "assets.site-assets-folder", "(folder relative to your project root)")?;
+				let dir = Self::try_get_str(value, "assets.site-assets-folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
 
 				s.assets.site_assets_folder = Some(folder);
@@ -293,46 +293,38 @@ impl SquarkupConfig
 	}
 
 	/// Try to extract the string from `data` for `setting`.
-	fn try_get_string<'d>(
+	fn try_get_str<'d>(
 		value: &'d toml::Value,
 		setting: &str,
-		hint: &'static str,
-	) -> SquarkResult<&'d String>
+		hint: &str,
+	) -> SquarkResult<&'d str>
 	{
-		match value {
-			toml::Value::String(v) => Ok(v),
-
-			v => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
-				hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
-				debug: vec![
-					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-				],
-			}),
-		}
+		value.as_str().ok_or_else(|| SquarkError::Unrecoverable {
+			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+			hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
+			debug: vec![
+				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+			],
+		})
 	}
 
 	/// Try to extract the boolean from `data` for `setting`.
 	fn try_get_bool(value: &toml::Value, setting: &str) -> SquarkResult<bool>
 	{
-		match value {
-			toml::Value::Boolean(v) => Ok(*v),
-			
-			v => Err(SquarkError::Unrecoverable {
-				msg: fmt!("invalid setting for an entry of {Y}{setting}{R}"),
-				hint: fmt!("{Y}{setting}{G} must be a boolean"),
-				debug: vec![
-					fmt!("you provided {GREY1}{v}{GREY}, which has type: {GREY1}{}{GREY}", v.type_str()),
-				],
-			}),
-		}
+		value.as_bool().ok_or_else(|| SquarkError::Unrecoverable {
+			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+			hint: fmt!("{Y}{setting}{G} must be a boolean"),
+			debug: vec![
+				fmt!("you provided a value of type {GREY1}{}{GREY}", value.type_str()),
+			],
+		})
 	}
 
 	/// Try to extract the array from `data` for `setting`.
 	fn try_get_array<'d>(
 		value: &'d toml::Value,
 		setting: &str,
-		hint: &'static str,
+		hint: &str,
 	) -> SquarkResult<&'d [toml::Value]>
 	{
 		match value {
@@ -352,7 +344,7 @@ impl SquarkupConfig
 	fn try_resolve_folder(
 		root: &Path,
 		dir: &str,
-		location: &'static str,
+		location: &str,
 		hint: impl FnOnce() -> String,
 	) -> SquarkResult<PathBuf>
 	{
