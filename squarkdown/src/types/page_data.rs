@@ -226,7 +226,7 @@ pub struct SerialisedPageData<'s>
 {
 	pub filepath: String,
 	pub destination: String,
-	pub flags: &'s Strings,
+	pub flags: &'s [String],
 
 	pub title:       Option<&'s String>,
 	pub description: Option<&'s String>,

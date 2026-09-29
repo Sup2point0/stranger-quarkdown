@@ -1,6 +1,6 @@
-# Main
-<!-- #SQUARK live!
-| dest = main
+# Long Field Names
+<!-- #SQUARK live! feat! dev!
+| dest = .
 | title = Long
 | desc = This page should use long fields in its exported `+page.ts`
 | tags = 1 / 2 / 3

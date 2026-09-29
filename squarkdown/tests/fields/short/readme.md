@@ -1,6 +1,6 @@
-# Main
-<!-- #SQUARK live!
-| dest = main
+# Short Field Names
+<!-- #SQUARK live! feat! dev!
+| dest = .
 | title = Short
 | desc = This page should use short fields in its exported `+page.ts`
 | tags = 1 / 2 / 3

@@ -37,20 +37,12 @@ impl Renderer<'_>
 
 		writeln!(f, "\t\t{}: {:?},", d.filepath(s), d.filepath)?;
 		writeln!(f, "\t\t{}: {:?},", d.dest(s),     d.destination)?;
-		writeln!(f, "\t\t{}: {},",   d.flags(s),    d.flags)?;
+		writeln!(f, "\t\t{}: {:?},", d.flags(s),    d.flags)?;
 
-		if let Some(v) = &d.title {
-			writeln!(f, "\t\t{}: {v:?},", d.title(s))?;
-		}
-		if let Some(v) = &d.description {
-			writeln!(f, "\t\t{}: {v:?},", d.desc(s))?;
-		}
-		if let Some(v) = &d.heading {
-			writeln!(f, "\t\t{}: {v:?},", d.head(s))?;
-		}
-		if let Some(v) = &d.caption {
-			writeln!(f, "\t\t{}: {v:?},", d.capt(s))?;
-		}
+		if let Some(v) = d.title       { writeln!(f, "\t\t{}: {v:?},", d.title(s))?; }
+		if let Some(v) = d.description { writeln!(f, "\t\t{}: {v:?},", d.desc(s))?; }
+		if let Some(v) = d.heading     { writeln!(f, "\t\t{}: {v:?},", d.head(s))?; }
+		if let Some(v) = d.caption     { writeln!(f, "\t\t{}: {v:?},", d.capt(s))?; }
 
 		writeln!(f, "\t\ttags: {:?},", d.tags)?;
 

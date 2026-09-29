@@ -206,6 +206,8 @@ impl SquarkupConfig
 
 				// TODO cleanup with helper?
 				let folder = path.parent().expect("site directory always has a parent folder");
+
+				// TODO check rooted?
 				
 				if !folder.exists() {
 					return Err(SquarkError::Unrecoverable {
