@@ -43,7 +43,6 @@ impl SquarkupConfig
 				externalise_links: false,
 				mark_invalid_links: false,
 			},
-			styles: StylesConfig { folder: None, base_file: None },
 			assets: AssetsConfig { folder: root.to_owned(), site_assets_folder: None,
 				extensions: vec![
 					str!("png"), str!("jpg"), str!("jpeg"), str!("webp"), str!("svg"),

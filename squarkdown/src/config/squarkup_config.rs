@@ -21,8 +21,6 @@ pub struct SquarkupConfig
 	/// Rendering customisations.
 	pub format: FormatConfig,
 
-	pub styles: StylesConfig,
-
 	/// Options for asset copying.
 	pub assets: AssetsConfig,
 	pub fonts: FontsConfig,
@@ -89,12 +87,6 @@ pub struct FormatConfig {
 
 	/// Mark hyperlinks to nonexistent pages?
 	pub mark_invalid_links: bool,
-}
-
-#[derive(Clone, Debug)]
-pub struct StylesConfig {
-	pub folder: Option<PathBuf>,
-	pub base_file: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug)]
