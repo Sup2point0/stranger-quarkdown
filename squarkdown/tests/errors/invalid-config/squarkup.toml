@@ -1,0 +1,30 @@
+#:schema ../../../src/config/schema.json
+
+[errors]
+strict = true
+on-error = "kill"
+
+[paths]
+# NOTE: This at least needs to be valid, otherwise config loading immediately crashes
+site = "../../test-project/"
+sources = 1
+include = 2
+exclude = 3
+
+[out]
+folder = ["invalid folder"]
+file-name = 4
+render-page-ts = 5
+shorter-fields = 6
+site-data-path = ["invalid site data path"]
+
+[format]
+preserve-heading = 100
+preserve-comments = 200
+externalise-links = 300
+mark-invalid-links = 400
+
+[assets]
+folder = ["invalid assets folder"]
+site-assets-folder = false
+extensions = ["true", false]
