@@ -188,6 +188,7 @@ impl Renderer<'_>
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
 		event: pd::Event<'e>,
+		#[allow(unused)]  // TODO
 		range: std::ops::Range<usize>,
 	) -> Option<pd::Event<'e>>
 	{

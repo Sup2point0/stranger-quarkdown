@@ -43,17 +43,15 @@ macro_rules! hints {
 
 // == STRUCTS == //
 
-#[macro_export]
+#[allow(unused)]
 macro_rules! pair {
 	($t:expr) => { ($t, $t) }
-} pub use pair;
+} pub(crate) use pair;
 
-#[macro_export]
 macro_rules! bx {
 	($t:expr) => { Box::new($t) };
-} pub use bx;
+} pub(crate) use bx;
 
-#[macro_export]
 macro_rules! strings {
 	() => {
 		tiny_vec!([String; 1])
@@ -61,7 +59,7 @@ macro_rules! strings {
 	($($values:expr),* $(,)?) => {
 		tiny_vec!( [String; 1] => $(String::from($values)),* )
 	};
-} pub use strings;
+} pub(crate) use strings;
 
 
 // == ERRORS == //

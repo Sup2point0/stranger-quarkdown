@@ -111,6 +111,7 @@ impl CharmParser<'_>
 	}
 	
 	/// Consume `target` disregarding casing, erroring on failure.
+	#[allow(unused)]
 	pub(super) fn eat_caseless(&mut self,
 		target: &str,
 		to: impl Fn() -> String,
