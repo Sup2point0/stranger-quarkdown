@@ -83,7 +83,9 @@ pub fn error(err: SquarkError)
 
 			SquarkError::Multiple{ when, errs } => {
 				if !already_shown_when && !when.is_empty() {
-					bad!("{} errors while {when}:", err.len());
+					let count = err.len();
+					let plural = if count == 1 {""} else {"s"};
+					bad!("{count} error{plural} while {when}:");
 					line();
 				}
 
