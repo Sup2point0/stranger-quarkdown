@@ -56,7 +56,7 @@ impl<Ctx> ContextStack<Ctx>
 			});
 		}
 
-		while *self.current() == ctx {
+		while self.stack.last() == Some(&ctx) {
 			self.stack.pop();
 		}
 
