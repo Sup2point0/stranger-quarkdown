@@ -1,6 +1,6 @@
 <div align="center">
 
-![Stranger Quarkdown: A Successor to Quarkdown](.assets/squark-cover.png)
+![Stranger Quarkdown: A Successor to Quarkdown](.github/squark-cover.png)
 
 [![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
 [![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)

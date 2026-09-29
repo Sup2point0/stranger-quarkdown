@@ -6,9 +6,6 @@ site.json
 
 # output
 /build/
-/static/*
-!/static/.gitkeep
-!/static/squarkup-schema/
 
 # internal
 /node_modules/
