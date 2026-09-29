@@ -5,8 +5,8 @@ use crate::macros::*;
 
 use time::{ UtcDateTime };
 
-use std::collections::HashMap;
-use std::path::PathBuf;
+use std::collections::{ HashMap };
+use std::path::{ Path };
 
 
 #[derive(Clone, Debug, Default)]
@@ -75,28 +75,27 @@ impl SiteData
 		self.stats.active_pages += 1;
 	}
 
-	/// Check if there are active pages in the site that conflict (want to export to the same destination folder).
+	/// Check if there are conflicting active pages in the site that export to the same destination folder (which would mean one overwrites the other).
 	pub fn check_conflicts(&self, config: &SquarkupConfig) -> SquarkResult
 	{
-		let mut seen_dests = HashMap::<PathBuf, &PageData>::new();
+		let mut seen_dests = HashMap::<&Path, &PageData>::new();
 
 		for page in self.pages() {
-			let dest = page.destination.to_owned();
+			let dest = &page.destination;
 
-			if let Some(conflict) = seen_dests.get(&dest) {
+			if let Some(existing) = seen_dests.insert(dest, page)
+			{
 				return Err(SquarkError::Recoverable {
 					msg: fmt!(
 						"found conflicting pages: {W}{}{R} and {W}{}{R} both want to export to {W}{}",
-						utils::display_rel(&conflict.filepath, &config.paths.root),
+						utils::display_rel(&existing.filepath, &config.paths.root),
 						utils::display_rel(&page.filepath, &config.paths.root),
 						utils::display_rel(dest, &config.paths.site),
 					),
-					hint: str!(),
+					hint: str!("pages must have unique export destinations, otherwise one will overwrite the other"),
 					debug: vec![],
 				});
 			}
-
-			seen_dests.insert(dest, page);
 		}
 
 		Ok(())
