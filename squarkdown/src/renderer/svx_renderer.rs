@@ -203,9 +203,9 @@ impl Renderer<'_>
 			| pd::Event::InlineHtml(ref html)
 			=>
 				match self.process_html(html) {
-					Some(true) => Some(event),
-					Some(false) => None,
-					None => self.process_ctx(event)
+					ProcessAction::KEEP  => Some(event),
+					ProcessAction::ERASE => None,
+					ProcessAction::DEFER => self.process_ctx(event)
 				}
 
 			/* But for everything else, handling will depend on the current context */
@@ -242,42 +242,39 @@ impl Renderer<'_>
 		}
 	}
 
-	// TODO use `KEEP`, `ERASE`, `UNHANDLED` enum
 	/// Process HTML content – specifically comments, to check for `<!-- #SQUARK -->`s.
 	/// 
 	/// Returns:
 	/// - `Some(true)` if processing was performed, and the content should be kept.
 	/// - `Some(false)` if processing was performed, and the content should be erased from the output.
 	/// - `None` if processing was NOT performed, and the caller should forward to another method.
-	fn process_html(&mut self, html: &str) -> Option<bool>
+	fn process_html(&mut self, html: &str) -> ProcessAction
 	{
 		let html = html.trim();
+		let preserve = self.config.format.preserve_comments;
 		
 		if html.starts_with("<!--") && html.ends_with("-->") {
-			return Some(
-				if self.process_comment(html) || self.ctx.is_slash() {
-					false
-				} else {
-					self.config.format.preserve_comments || self.ctx.is_leave()
-				}
-			)
+			if self.process_comment(html) || self.ctx.is_slash() {
+				return ProcessAction::ERASE;
+			} else {
+				return ProcessAction::from(preserve || self.ctx.is_leave());
+			}
 		}
 		else if !self.ctx.is_slash() {
 			if html.starts_with("<!--") {
 				self.ctx.push(RenderCtx::COMMENT);
-				return Some(self.config.format.preserve_comments)
+				return ProcessAction::from(preserve)
 			}
 			else if html.ends_with("-->") {
 				self.ctx.try_pop(RenderCtx::COMMENT).expect("contexts are always balanced");
-				return Some(self.config.format.preserve_comments)
+				return ProcessAction::from(preserve)
 			}
 		}
-
-		None
+		ProcessAction::DEFER
 	}
 
 	/// Attempt to process squarks inside `html`, returning `true` if a squark was matched (and so the comment should be removed).
-	fn process_comment(&mut self, html: &str) -> bool
+	fn process_comment(&mut self, html: &str) -> bool  // TODO maybe use `ProcessAction`?
 	{
 		/// The RegEx pattern for twin squarks.
 		/// 
@@ -492,6 +489,26 @@ impl Renderer<'_>
 			}),
 			FileAction::SKIP => Err(SquarkError::ABANDON),
 		}
+	}
+}
+
+
+/// What a `process_*` function did with its input event.
+enum ProcessAction
+{
+	/// The event was processed, and should be kept.
+	KEEP,
+
+	/// The event was processed, is to be removed from the output.
+	ERASE,
+
+	/// The event was _not_ processed, and should be deferred to a different `process_*` function.
+	DEFER,
+}
+
+impl From<bool> for ProcessAction {
+	fn from(value: bool) -> Self {
+		if value { Self::KEEP } else { Self::ERASE }
 	}
 }
 
