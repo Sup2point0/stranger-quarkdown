@@ -104,6 +104,15 @@ impl SquarkError
 		}
 	}
 
+	pub fn len(&self) -> usize
+	{
+		if let Self::Multiple{ errs, ..} = self {
+			errs.iter().map(Self::len).sum()
+		} else {
+			1
+		}
+	}
+
 	/// Add an error to a [`Self::Multiple`] instance.
 	pub fn push(&mut self, error: SquarkError) -> bool
 	{

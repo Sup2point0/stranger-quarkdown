@@ -61,17 +61,13 @@ pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {}", G,       msg); }
 /// Print `err`, with surrounding line delimiters.
 pub fn error(err: SquarkError)
 {
-	fn go(err: SquarkError, parent_when: Option<&Cow<'static, str>>)
+	fn go(err: &SquarkError, already_shown_when: bool)
 	{
 		match err
 		{
 			SquarkError::Recoverable{ msg, hint, debug }
 			| SquarkError::Unrecoverable{ msg, hint, debug }
 			=> {
-				if let Some(when) = parent_when {
-					println!("{W}while {when}{W}:");
-				}
-
 				bad!(msg);
 				
 				for each in debug {
@@ -86,16 +82,16 @@ pub fn error(err: SquarkError)
 			}
 
 			SquarkError::Multiple{ when, errs } => {
-				let when = {
-					if when.is_empty() { parent_when }
-					else               { Some(&when) }
-				};
+				if !already_shown_when && !when.is_empty() {
+					bad!("{} errors while {when}:", err.len());
+					line();
+				}
 
 				for (i, err) in errs.into_iter().enumerate() {
 					if i != 0 {
 						line();
 					}
-					go(err, when);
+					go(err, true);
 				}
 			}
 
@@ -110,6 +106,6 @@ pub fn error(err: SquarkError)
 	}
 
 	line();
-	go(err, None);
+	go(&err, false);
 	line();
 }
