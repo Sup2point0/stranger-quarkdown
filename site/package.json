@@ -9,7 +9,7 @@
       "devx": "npm run prep && vite --open",
     
     "prep":    "npx squarkdown",
-      "prepx": "npx squarkdown --assets && rake schema",
+      "prepx": "npx squarkdown --assets",
     
     "build":    "vite build",
       "buildx": "npm run prepx && vite build",

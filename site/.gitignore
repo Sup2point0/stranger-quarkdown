@@ -1,18 +1,17 @@
 # squark
-**/(docs)/(dyna)/**/+page.svx
-**/(docs)/(dyna)/**/+page.ts
+**/(dyna)/**/+page.svx
+**/(dyna)/**/+page.ts
 
 site.json
-scss-config.js
 
 # output
-build/
-static/*
-!static/squarkup-schema/
+/build/
+/static/*
+!/static/.gitkeep
+!/static/squarkup-schema/
 
 # internal
-node_modules/
-.svelte-kit/
+/node_modules/
+/.svelte-kit/
 
-**.env**
 vite.config.*.timestamp-*
