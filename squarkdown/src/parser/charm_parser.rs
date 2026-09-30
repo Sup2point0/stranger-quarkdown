@@ -12,7 +12,7 @@ use std::path::{ PathBuf };
 
 
 /// A parser for the charm squark of a file.
-pub struct CharmParser<'d>
+pub(super) struct CharmParser<'d>
 {
 	// == IMMUTABLE == //
 
@@ -435,6 +435,30 @@ mod full {
 			"});
 			assert_eq!( page_data.release_date, Some(date!(2000-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2020-02-28)) );
+		}
+
+		#[test] fn seasons() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| date = 2020 winter
+				| update = 2021 spring
+				-->
+			"});
+			assert_eq!( page_data.release_date, Some(date!(2020-12-01)) );
+			assert_eq!( page_data.last_update, Some(date!(2021-03-01)) );
+			
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| date = 2025 summer
+				| update = 2025 fall
+				-->
+			"});
+			assert_eq!( page_data.release_date, Some(date!(2025-06-01)) );
+			assert_eq!( page_data.last_update, Some(date!(2025-09-01)) );
 		}
 
 		#[test] fn reject_update_before_date() {

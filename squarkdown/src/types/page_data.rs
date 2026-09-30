@@ -178,12 +178,18 @@ impl PageData
 
 	fn try_parse_date(date: &str, field: &str) -> SquarkResult<Date>
 	{
+		let date = date.replace("winter", "December");
+		let date = date.replace("spring", "March");
+		let date = date.replace("summer", "June");
+		let date = date.replace("fall",   "September");
+		let date = date.replace("autumn", "September");
+
 		let long  = format_description!("[year] [month repr:long] [day padding:none]");
 		let short = format_description!("[year] [month repr:short] [day padding:none]");
 
 		Err(())
-			.or_else(|_| Date::parse(date, long))
-			.or_else(|_| Date::parse(date, short))
+			.or_else(|_| Date::parse(&date, long))
+			.or_else(|_| Date::parse(&date, short))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), long))
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), short))
 			.or_else(|_| Date::parse(&fmt!("{date} January 1"), long))

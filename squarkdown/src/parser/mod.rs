@@ -3,7 +3,7 @@
 mod parser_core;
 
 mod charm_parser;
-pub use charm_parser::{ CharmParser };
+use charm_parser::{ CharmParser };
 
 mod ctx;
 pub(crate) use ctx::{ ParseCtx };
