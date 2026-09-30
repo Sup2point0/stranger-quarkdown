@@ -1,5 +1,5 @@
 {
-  "version":     "6.0.0",
+  "version":     "6.0.0-dev",
   "title":       "Squarkup Configuration Schema",
   "description": "Shared schema for your `squarkup.toml` or `squarkup.json`",
 
@@ -60,7 +60,8 @@
         },
         "site-data-path": {
           "title": "Site Data Filepath",
-          "type": "string"
+          "type": "string",
+          "description": "Where to export site data, including the (expected) `.json` extension.\n\nIf absent, site data is not exported."
         }
       }
     },
@@ -90,7 +91,7 @@
     },
 
     "assets": {
-      "title": "Assets Options",
+      "title": "Assets Preprocessing Options",
       "additionalProperties": false,
       "properties":
       {
@@ -104,6 +105,19 @@
         },
         "extensions": {
           "title": "Asset File Extensions",
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+
+    "fonts": {
+      "title": "Google Fonts Injection Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "queries": {
+          "title": "Google Fonts Query Parameters",
           "type": "array",
           "items": {"type": "string"}
         }

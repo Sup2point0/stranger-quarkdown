@@ -21,6 +21,8 @@ pub struct SquarkupConfig
 
 	/// Options for asset copying.
 	pub assets: AssetsConfig,
+
+	/// Options for Google Fonts query injection.
 	pub fonts: FontsConfig,
 
 	/// Error handling strategies.

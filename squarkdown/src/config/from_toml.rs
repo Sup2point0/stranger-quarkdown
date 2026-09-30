@@ -287,6 +287,26 @@ impl SquarkupConfig
 		}
 
 		// == FontsConfig == //
+		if let Some(fonts) = data.get("fonts")
+		{
+			Self::check_is_table(fonts, "fonts",
+				hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
+			)?;
+
+			if let Some(value) = fonts.get("queries") { catch!(errs => {
+				let values = Self::try_get_array(value, "fonts.queries", "(of font query parameters)")?;
+
+				if !values.is_empty() {
+					s.fonts.queries.clear();
+				}
+
+				for value in values { catch!(errs => {
+					let raw = Self::try_get_str(value, "fonts.queries", "(font query parameter)")?;
+					
+					s.fonts.queries.push(raw.to_owned());
+				}) }
+			}) }
+		}
 
 		errs.or_depends((), &s)?;
 		Ok(s)
@@ -416,46 +436,6 @@ fn load_config(source: &str) -> SquarkResult<SquarkupConfig>
 
 
 #[cfg(test)]
-mod paths {
-	use super::*;
-
-	#[test] fn reject_nonexistent_sources() {
-		for source in [
-			"[paths]\nsources = ['nonexistent']\n\t[errors]\non-error='kill'",
-			"[paths]\nsources = ['test-project/nonexistent']\n\t[errors]\non-error='kill'",
-		] {
-			let e = load_config(source);
-			assert_err!( &e );
-			assert_contains!( e.unwrap_err(), "doesn't exist" );
-		}
-	}
-}
-
-#[cfg(test)]
-mod assets {
-	use super::*;
-
-	#[test] fn accept() {
-		let c = load_config(indoc! {"
-			[assets]
-			folder = 'static'
-		"}).unwrap().assets;
-
-		assert_eq!( c.folder, path!(*TESTS / "static") );
-	}
-
-	#[test] fn reject() {
-		let e = load_config(indoc! {"
-			[assets]
-			folder = 'nonexistent'
-		"});
-
-		assert_err!( &e );
-		assert_contains!( e.unwrap_err(), "assets.folder" );
-	}
-}
-
-#[cfg(test)]
 mod error_handling {
 	use super::*;
 
@@ -498,6 +478,61 @@ mod error_handling {
 			assert_err!( &e );
 			assert_contains!( e.unwrap_err(), "errors.on-error" );
 		}
+	}
+}
+
+#[cfg(test)]
+mod paths {
+	use super::*;
+
+	#[test] fn reject_nonexistent_sources() {
+		for source in [
+			"[paths]\nsources = ['nonexistent']\n\t[errors]\non-error='kill'",
+			"[paths]\nsources = ['test-project/nonexistent']\n\t[errors]\non-error='kill'",
+		] {
+			let e = load_config(source);
+			assert_err!( &e );
+			assert_contains!( e.unwrap_err(), "doesn't exist" );
+		}
+	}
+}
+
+#[cfg(test)]
+mod assets {
+	use super::*;
+
+	#[test] fn accept() {
+		let c = load_config(indoc! {"
+			[assets]
+			folder = 'static'
+		"}).unwrap().assets;
+		assert_eq!( c.folder, path!(*TESTS / "static") );
+	}
+
+	#[test] fn reject() {
+		let e = load_config(indoc! {"
+			[assets]
+			folder = 'nonexistent'
+		"});
+		assert_err!( &e );
+		assert_contains!( e.unwrap_err(), "assets.folder" );
+	}
+}
+
+#[cfg(test)]
+mod fonts {
+	use super::*;
+
+	#[test] fn accept() {
+		let c = load_config(indoc! {"
+			[fonts]
+			queries = [
+				'Montserrat',
+				'Rajdhani',
+				'Sora:wght@100..800',
+			]
+		"}).unwrap().fonts;
+		assert_eq!( c.queries, vec!["Montserrat", "Rajdhani", "Sora:wght@100..800"] );
 	}
 }
 
