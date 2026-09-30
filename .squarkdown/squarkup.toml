@@ -27,5 +27,5 @@ mark-invalid-links = true
 
 [fonts]
 queries = [
-	"Sora:wght@100..800"
+	"Sora:wght@100..800",
 ]
