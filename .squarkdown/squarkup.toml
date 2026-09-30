@@ -18,6 +18,8 @@ sources = [
 [out]
 folder = "src/routes/(docs)/(dyna)/"
 file-name = "+page.svx"
+render-page-ts = true
+shorter-fields = false
 site-data-path = "src/site.json"
 
 [format]

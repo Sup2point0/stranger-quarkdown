@@ -11,6 +11,7 @@ use assertables::*;
 	assert!( squarkup_from("fields/long").success() );
 
 	let main = read_file("fields/long/+page.ts");
+	assert_contains!( main, "PageData<\"long\">" );
 	assert_contains!( main, "filepath: \"readme.md\"" );
 	assert_contains!( main, "destination: \"\"" );
 	assert_contains!( main, "flags: [\"feat\", \"dev\"]" );
@@ -33,6 +34,7 @@ use assertables::*;
 	assert!( squarkup_from("fields/short").success() );
 
 	let main = read_file("fields/short/+page.ts");
+	assert_contains!( main, "PageData<\"short\">" );
 	assert_contains!( main, "path: \"readme.md\"" );
 	assert_contains!( main, "dest: \"\"" );
 	assert_contains!( main, "flags: [\"feat\", \"dev\"]" );

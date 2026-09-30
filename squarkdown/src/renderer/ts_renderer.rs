@@ -27,13 +27,14 @@ impl Renderer<'_>
 		}
 
 		let mut f = BufWriter::new(File::create(dest)?);
-
-		f.write_all(b"import type { PageData } from \"squarkdown\";\n\n")?;
-		f.write_all(b"export function load(): PageData {\n")?;
-		f.write_all(b"\treturn {\n")?;
-
 		let d = self.page.serialised_long(self.config);
 		let s = self.config.out.shorter_fields;
+
+		f.write_all(b"import type { PageData } from \"squarkdown\";\n\n")?;
+		f.write_all(b"export function load(): PageData<")?;
+		write!(f, "{}", if s { "\"short\"" } else { "\"long\"" })?;
+		f.write_all(b"> {\n")?;
+		f.write_all(b"\treturn {\n")?;
 
 		writeln!(f, "\t\t{}: {:?},", d.filepath(s), d.filepath)?;
 		writeln!(f, "\t\t{}: {:?},", d.dest(s),     d.destination)?;
