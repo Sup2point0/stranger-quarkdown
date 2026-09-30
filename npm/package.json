@@ -24,6 +24,7 @@
     "./bin/",
     "index.d.ts",
     "package.json",
+    "README.md",
     "LICENCE"
   ],
   "exports": {

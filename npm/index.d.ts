@@ -1,12 +1,16 @@
 /**
  * The metadata exported by Squarkdown for a Markdown page, returned from `load()` in `+page.ts`.
+ * 
+ * The generic type parameter describes what format the field names use. `long` means full, clear identifiers like `description` and `last_update_raw`. `short` means more compact identifiers like `desc` and `update_raw`.
+ * 
+ * Which format is used in `+page.ts` and `site-data.json` is configured by `out.shorter-fields` in your squarkup config.
  */
 export type PageData<
 	FieldLength extends "long" | "short"
 		= "long" | "short"
 > = (
 	FieldLength extends "long" ?
-		LongFields
+	  LongFields
 	: ShortFields
 );
 

@@ -27,3 +27,22 @@ Remind yourself:
 ```bash
 > npx squarkdown --help
 ```
+
+
+<br>
+
+
+## Library
+
+```svelte
+<script lang="ts">
+	import type { PageData } from "stranger-quarkdown";
+
+	import { page } from "$app/state";
+
+	let page_data: PageData<"long"> = $derived(page.data);
+	
+	// if you set `out.shorter-fields = true`:
+	let shorter_page_data: PageData<"short"> = $derived(page.data);
+</script>
+```
