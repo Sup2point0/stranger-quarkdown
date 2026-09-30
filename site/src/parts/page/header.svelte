@@ -2,8 +2,10 @@
 
 <script lang="ts">
 
+import type { PageData } from "stranger-quarkdown";
+
 interface Props {
-  page: object;
+  page: PageData;
 }
 
 let { page }: Props = $props();
@@ -14,8 +16,8 @@ let { page }: Props = $props();
 <header>
   <h1> {@html page.heading} </h1>
 
-  {#if page.update_display}
-    <p> Last updated <span>{page.update_display}</span> </p>
+  {#if page.last_update_raw}
+    <p> Last updated <span>{page.last_update_raw}</span> </p>
   {/if}
 </header>
 
