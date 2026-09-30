@@ -18,7 +18,7 @@ use std::fs;
 	assert!( path.is_file() )
 }
 
-/// Squarkdown only copies assets with the relevant extensions.
+/// Squarkdown only copies assets with user-specified extensions.
 #[test] fn extensions()
 {
 	clear_files("../../static/extensions").unwrap();
@@ -27,6 +27,7 @@ use std::fs;
 	assert!( path!(*TEST_SITE / "static/extensions/ext.png").is_file() );
 	assert!( path!(*TEST_SITE / "static/extensions/ext.jpg").is_file() );
 	assert!( path!(*TEST_SITE / "static/extensions/ext.svg").is_file() );
+	assert!( path!(*TEST_SITE / "static/extensions/ext.custom").is_file() );
 
 	assert_not!( path!(*TEST_SITE / "static/extensions/ext.ttf").exists() );
 	assert_not!( path!(*TEST_SITE / "static/extensions/ext.md").exists() );

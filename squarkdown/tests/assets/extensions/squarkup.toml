@@ -5,7 +5,7 @@ site = "../../test-project/"
 
 [assets]
 folder = "."
-extensions = ["png", "jpg", "svg"]
+extensions = ["png", "jpg", "svg", "custom"]
 
 [errors]
 strict = false
