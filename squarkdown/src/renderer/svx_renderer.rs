@@ -149,7 +149,7 @@ impl<'d> Renderer<'d>
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone()).unwrap();
 
 		// strip charm squark
-		match regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\n-->").replace(&out, "$1") {
+		match regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\s-->").replace(&out, "$1") {
 			Cow::Borrowed(..) => out,
 			Cow::Owned(out) => out,
 		}
@@ -872,6 +872,15 @@ mod comments {
 		#[test] fn nested() {
 			test_expected_for(|c| c.format.preserve_comments = true, &[
 				pair!("<!-- <!-- illegal --> comment"),
+			]);
+		}
+
+		#[test] fn unopened() {
+			test_expected(&[
+				pair!("not --> a comment"),
+				pair!("not -->\na comment"),
+				("-->",           "\\-->"),
+				("--> a comment", "\\--> a comment"),
 			]);
 		}
 	}
