@@ -12,13 +12,16 @@ pub fn prep_assets(site_data: &mut SiteData, config: &SquarkupConfig) -> SquarkR
 	for paths in resolver::resolve_assets(&config) {
 		catch!(errs => {
 			let (source_path, dest_path) = paths?;
-			log::info!(slash!("found asset: {GREY1}{}", source_path));
+
+			log::info!(slash!(
+				"found asset: {GREY1}{}",
+				source_path.strip_prefix(&config.paths.root).unwrap()
+			));
 
 			if let Some(parent) = dest_path.parent() {
 				std::fs::create_dir_all(parent)?;
 			}
 
-			log::info!(slash!("copying to: {GREY1}{}", dest_path));
 			std::fs::copy(&source_path, &dest_path)?;
 
 			site_data.stats.assets += 1;
