@@ -136,7 +136,7 @@ impl SquarkupConfig
 				}
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_str(value, "paths.include", "(entry in an array)")?;
+					let pattern = Self::try_get_str(value, "paths.include", "(RegEx pattern)")?;
 
 					match Regex::new(pattern) {
 						Ok(compiled) => s.paths.include.push(compiled),
@@ -152,7 +152,7 @@ impl SquarkupConfig
 				let values = Self::try_get_array(value, "paths.exclude", "(of RegEx patterns)")?;
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_str(value, "paths.exclude", "(entry in an array)")?;
+					let pattern = Self::try_get_str(value, "paths.exclude", "(RegEx pattern)")?;
 
 					match Regex::new(pattern) {
 						Ok(compiled) => s.paths.exclude.push(compiled),
@@ -189,7 +189,7 @@ impl SquarkupConfig
 					});
 				}
 
-				s.out.file_name = raw.to_string();
+				s.out.file_name = raw.to_owned();
 			}) }
 
 			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
@@ -265,6 +265,24 @@ impl SquarkupConfig
 				let folder = Self::try_resolve_folder(root, dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
 
 				s.assets.site_assets_folder = Some(folder);
+			}) }
+
+			if let Some(value) = assets.get("extensions") { catch!(errs => {
+				let values = Self::try_get_array(value, "assets.extensions", "(of file extensions without .)")?;
+
+				if !values.is_empty() {
+					s.assets.extensions.clear();
+				}
+
+				for value in values { catch!(errs => {
+					let mut raw = Self::try_get_str(value, "assets.extensions", "(file extension)")?;
+
+					if raw.starts_with(".") {
+						raw = &raw[1..];
+					}
+					
+					s.assets.extensions.push(raw.to_owned());
+				}) }
 			}) }
 		}
 

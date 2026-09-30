@@ -1,8 +1,6 @@
-use enum_stringify::EnumStringify;
+use crate::macros::*;
 
-use crate::{
-	macros::*,
-};
+use enum_stringify::EnumStringify;
 
 use std::path::PathBuf;
 
@@ -13,7 +11,7 @@ use std::path::PathBuf;
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
-	pub paths:  PathsConfig,
+	pub paths: PathsConfig,
 
 	/// Options for output.
 	pub out: OutConfig,
