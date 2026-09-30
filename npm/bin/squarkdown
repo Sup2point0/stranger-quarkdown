@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+import { platform } from "node:process";
+import { spawn } from "node:child_process";
+
+
+let os;
+
+switch (platform) {
+	case "linux": os = "linux"; break;
+	case "win32": os = "win"; break;
+	default:
+		console.error("Squarkdown only supports 'win32' and 'linux', sorry =(");
+		process.exit(1);
+}
+
+let squarkup = spawn(`squarkdown-${os}`, process.argv.slice(2));
+
+squarkup.on("error", e => {
+	console.error(e);
+	process.exit(1);
+});
+
+squarkup.on("exit", code => {
+	process.exit(code ?? 1);
+});

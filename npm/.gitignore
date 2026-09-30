@@ -1,4 +1,5 @@
 /target-temp/
-/bin/
+/bin/*
+!/bin/squarkdown
 
 LICENCE
