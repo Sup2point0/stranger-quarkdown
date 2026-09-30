@@ -125,10 +125,16 @@ fn squarkup(args: &[String]) -> SquarkResult
 		// == RENDER == //
 		log::is!("rendering...");
 
+		let mut rendered = 0;
+
 		for page in site_data.pages() {
 			renderer::render(page, &site_data, &config)
 				.or_else(|e| e.depends(&config))?;
+
+			rendered += 1;
 		}
+
+		log::ok!("rendered {rendered}/{} pages", site_data.stats.active_pages);
 	}
 
 	// == SITE DATA == //
@@ -139,7 +145,7 @@ fn squarkup(args: &[String]) -> SquarkResult
 		let file = BufWriter::new(File::create(dest)?);
 		serde_json::to_writer_pretty(file, &data_raw)?;
 
-		log::ok!(slash!("saved site data to {B}{}", dest));
+		log::ok!(slash!("saved site data to: {B}{}", dest));
 	}
 	
 	Ok(())
