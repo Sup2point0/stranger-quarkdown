@@ -478,6 +478,25 @@ mod full {
 		}
 	}
 
+	mod edge {
+		use super::*;
+
+		#[test] fn slash_in_singles() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| title = not / a / list
+				| capt = not
+				       / a
+				       / list
+				-->
+			"});
+			assert_eq!( page_data.title, Some(str!("not / a / list")) );
+			assert_eq!( page_data.caption, Some(str!("not / a / list")) );
+		}
+	}
+
 	mod unicode {
 		use super::*;
 

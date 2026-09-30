@@ -57,7 +57,7 @@ impl PageData
 
 		let mut destination = PathBuf::new();
 
-		if let Some(dest) = Self::take1(&mut fields, "destination", "dest") {
+		if let Some(dest) = Self::take_flat(&mut fields, "destination", "dest") {
 			destination = path!(config.out.folder / utils::to_rel(&dest)).clean();
 
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
@@ -81,18 +81,18 @@ impl PageData
 			});
 		}
 		
-		let heading      = Self::take1(&mut fields, "heading", "head");
-		let title        = Self::take1(&mut fields, "title", "title").or_else(|| heading.clone());
+		let heading      = Self::take_flat(&mut fields, "heading", "head");
+		let title        = Self::take_flat(&mut fields, "title", "title").or_else(|| heading.clone());
 		
-		let caption      = Self::take1(&mut fields, "caption", "capt");
-		let description  = Self::take1(&mut fields, "description", "desc").or_else(|| caption.clone());
+		let caption      = Self::take_flat(&mut fields, "caption", "capt");
+		let description  = Self::take_flat(&mut fields, "description", "desc").or_else(|| caption.clone());
 
 		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or_default();
 
 		let mut release_date = None;
 		let mut release_date_raw = None;
 
-		if let Some(raw) = Self::take1(&mut fields, "release-date", "date") {
+		if let Some(raw) = Self::take_flat(&mut fields, "release-date", "date") {
 			catch!(errs => {
 				release_date = Some(Self::try_parse_date(&raw, "release date")?);
 			});
@@ -102,7 +102,7 @@ impl PageData
 		let mut last_update = release_date;
 		let mut last_update_raw = release_date_raw.clone();
 
-		if let Some(raw) = Self::take1(&mut fields, "last-update", "update") {
+		if let Some(raw) = Self::take_flat(&mut fields, "last-update", "update") {
 			catch!(errs => {
 				last_update = Some(Self::try_parse_date(&raw, "last updated")?);
 			});
@@ -167,13 +167,14 @@ impl PageData
 			.map(|t| t.into_vec())
 	}
 
-	/// Extract a single-valued field from `fields`.
-	fn take1(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<String>
+	/// Extract a single-valued field from `fields` by joining the values with ` / `.
+	fn take_flat(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<String>
 	{
-		// FIXME dangerous drop if actually a list
-		fields.remove(short)
-			.or_else(|| fields.remove(long))?
-			.into_iter().next()
+		Some(
+			fields.remove(short)
+				.or_else(|| fields.remove(long))?
+				.join(" / ")
+		)
 	}
 
 	fn try_parse_date(date: &str, field: &str) -> SquarkResult<Date>
