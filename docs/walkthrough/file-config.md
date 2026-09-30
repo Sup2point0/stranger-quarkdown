@@ -78,7 +78,7 @@ For fields which accept multiple values, these should be separated with ` / `.
 | `duality` | `<duality>` | `light` `dark` <br> `light!` `dark!` | Default colour theme to use if user has no preference. | `light` | User preference can be ignored by following it with a `!`. |
 | `index` | `<index(s)>` | any | Where to index the page. | | |
 | `date` | `<year> / <month/season?> / <day?>` | `<season>`: `spring` `summer` `autumn` `winter` | Creation or publish date of the page. | | Used as a sort parameter when searching. |
-| `clean` | `<clean-aspect(s)>` | `line-breaks` `comments` `braces` `angles` | Aspects of the text to cleanup. | | See [Cleanup](cleanup.md) for more. |
+| `clean` | `<clean-aspect(s)>` | `line-breaks` `comments` `braces` `angles` | Aspects of the text to cleanup. | | |
 
 
 <br>
