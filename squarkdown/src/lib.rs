@@ -7,6 +7,7 @@ pub mod config;
 pub mod resolver;
 pub mod parser;
 pub mod renderer;
+pub mod extras;
 
 pub mod types;
 pub mod utils;

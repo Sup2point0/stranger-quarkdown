@@ -111,32 +111,10 @@ fn squarkup(args: Vec<String>) -> SquarkResult
 
 	// == ASSETS == //
 	if args.iter().any(|arg| arg == "--assets") {
-		log::is!("copying assets...");
-
-		for paths in resolver::resolve_assets(&config) {
-			catch! {
-				let (source_path, dest_path) = paths?;
-				log::info!(slash!("found asset: {GREY1}{}", source_path));
-
-				if let Some(parent) = dest_path.parent() {
-					std::fs::create_dir_all(parent)?;
-				}
-
-				log::info!(slash!("copying to: {GREY1}{}", dest_path));
-				std::fs::copy(&source_path, &dest_path)?;
-
-				site_data.stats.assets += 1;
-			}
+		log::is!("preprocessing assets...");
+		
+		extras::prep_assets(&mut site_data, &config)
 			.or_else(|e| e.depends(&config))?;
-		}
-
-		if site_data.stats.assets == 0 {
-			SquarkError::Recoverable {
-				msg: str!("no assets found to copy"),
-				hint: fmt!("check your {Y}assets.folder{G}, {Y}assets.site-assets-folder{G}, {Y}assets.extensions{G} are configured correctly?"),
-				debug: vec![],
-			}.depends(&config)?;
-		}
 	}
 
 	// == PARSE == //
