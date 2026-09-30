@@ -28,18 +28,11 @@ jobs:
 
       - name: '› npm ci'
         run: |
-          npm ci
-        # run: |
-        #   npm install stranger-quarkdown@latest
-
-      - name: '› cargo install squarkdown'
-        run: |
-          cargo install squarkdown --version 4.0.0-alpha.0
+          npm install stranger-quarkdown@latest
 
       - name: '› npm run buildx'
         run: |
-          squarkdown --assets
-          npm run build
+          npm run buildx
 
       - name: 'Upload Artifact'
         uses: actions/upload-pages-artifact@v3
