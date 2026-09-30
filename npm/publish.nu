@@ -1,3 +1,9 @@
+const n = ansi 'n'
+
+const WHITE = $'($n)(ansi '#ffffff')'
+const PINK  = $'($n)(ansi '#f190f1')'
+
+
 def main [] {
 	cp ../LICENCE .
 
@@ -15,13 +21,15 @@ def main [] {
 }
 
 def sync-version [] {
-	echo "\n› syncing version from Cargo.toml to package.json\n"
+	print $"($PINK)\n› syncing version from Cargo.toml to package.json\n($WHITE)"
+
 	let $ver = (open Cargo.toml | get package.version)
+	print $"received version: ($ver)"
 
 	cd ../npm
 
 	let $regex_match = "\"version\": \"([^\"]+)\""
-	let $regex_repl  = "\"version\": \"$1\""
+	let $regex_repl  = $"\"version\": \"($ver)\""
 
 	let $before = open package.json -r
 	let $after = $before | str replace --regex $regex_match $regex_repl
@@ -29,11 +37,11 @@ def sync-version [] {
 }
 
 def windows [] {
-	echo "\n› compiling Windows binary\n"
+	print $"($PINK)\n› compiling Windows binary\n($WHITE)"
 	cargo build --release --target-dir ../npm/target-temp/windows
 }
 
 def linux [] {
-	echo "\n› compiling Linux binary\n"
+	print $"($PINK)\n› compiling Linux binary\n($WHITE)"
 	wsl -- bash -lc "cargo build --release --target-dir ../npm/target-temp/linux"
 }
