@@ -289,5 +289,5 @@ fn serialise_date<S>(date: &Option<Date>, serialiser: S) -> Result<S::Ok, S::Err
 	let format = format_description!("[year]-[month]-[day]");
 	let formatted = date.format(format).expect("date serialisation always succeeds");
 
-	serialiser.serialize_str(&fmt!("{}", formatted))
+	serialiser.serialize_str(&formatted)
 }

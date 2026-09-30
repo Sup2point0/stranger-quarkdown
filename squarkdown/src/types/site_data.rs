@@ -3,7 +3,7 @@ use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
-use time::{ UtcDateTime };
+use time::{ UtcDateTime, macros::* };
 
 use std::collections::{ HashMap };
 use std::path::{ Path };
@@ -26,7 +26,9 @@ pub struct SiteData
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct SiteStats
 {
+	#[serde(serialize_with = "serialise_datetime")]
 	pub built_on: UtcDateTime,
+
 	pub checked_files: usize,
 	pub active_pages: usize,
 	pub assets: usize,
@@ -119,4 +121,13 @@ impl SiteData
 			"tags": self.tags,
 		})
 	}
+}
+
+fn serialise_datetime<S>(date: &UtcDateTime, serialiser: S) -> Result<S::Ok, S::Error>
+	where S: serde::Serializer
+{
+	let format = format_description!("[year]-[month]-[day] [hour]:[minute]:[second]");
+	let formatted = date.format(format).expect("date serialisation always succeeds");
+
+	serialiser.serialize_str(&formatted)
 }
