@@ -1,7 +1,7 @@
 {
   "name": "stranger-quarkdown",
   "author": "Sup#2.0",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "license": "MIT",
 
   "description": "Markdown preprocessing for SvelteKit projects",
@@ -21,7 +21,7 @@
   "type": "module",
   "sideEffects": false,
   "files": [
-    "./bin/squarkdown.exe",
+    "./bin/",
     "index.d.ts",
     "package.json",
     "LICENCE"
@@ -32,9 +32,9 @@
     }
   },
   "bin": {
-    "squarkdown": "bin/squarkdown.exe"
+    "squarkdown": "bin/squarkdown"
   },
-  "os": ["win32"],
+  "os": ["win32", "linux"],
   "cpu": ["x64"],
 
   "scripts": {

@@ -11,7 +11,7 @@ def main [] {
 	cd ../npm
 	mkdir bin
 	cp target-temp/windows/release/squarkdown.exe bin/squarkdown-win.exe
-	cp target-temp/linux/release/squarkdown bin/squarkdown-linux.exe
+	cp target-temp/linux/release/squarkdown bin/squarkdown-linux
 }
 
 def windows [] {
