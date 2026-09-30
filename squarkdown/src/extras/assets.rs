@@ -9,7 +9,7 @@ pub fn prep_assets(site_data: &mut SiteData, config: &SquarkupConfig) -> SquarkR
 {
 	let mut errs = SquarkError::multiple("preprocessing assets");
 
-	for paths in resolver::resolve_assets(&config) {
+	for paths in resolver::resolve_assets(config) {
 		catch!(errs => {
 			let (source_path, dest_path) = paths?;
 

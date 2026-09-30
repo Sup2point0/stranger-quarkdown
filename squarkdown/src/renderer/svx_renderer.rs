@@ -257,9 +257,8 @@ impl Renderer<'_>
 		if html.starts_with("<!--") && html.ends_with("-->") {
 			if self.process_comment(html) || self.ctx.is_slash() {
 				return ProcessAction::ERASE;
-			} else {
-				return ProcessAction::from(preserve || self.ctx.is_leave());
 			}
+			return ProcessAction::from(preserve || self.ctx.is_leave());
 		}
 		else if !self.ctx.is_slash() {
 			if html.starts_with("<!--") {

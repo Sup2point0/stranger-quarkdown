@@ -88,7 +88,7 @@ pub fn error(err: SquarkError)
 					line();
 				}
 
-				for (i, err) in errs.into_iter().enumerate() {
+				for (i, err) in errs.iter().enumerate() {
 					if i != 0 {
 						line();
 					}

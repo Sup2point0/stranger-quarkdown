@@ -22,7 +22,7 @@ fn main() -> ExitCode
 	}
 
 	let t_init = Instant::now();
-	let r = squarkup(args);
+	let r = squarkup(&args);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -44,7 +44,7 @@ fn main() -> ExitCode
 /// Run Squarkdown on the user's project.
 /// 
 /// This includes squarkup as well as extras like fonts and assets preprocessing.
-fn squarkup(args: Vec<String>) -> SquarkResult
+fn squarkup(args: &[String]) -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
 

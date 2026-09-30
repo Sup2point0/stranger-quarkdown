@@ -181,7 +181,7 @@ impl SquarkupConfig
 			if let Some(value) = out.get("file-name") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
 
-				if raw.contains("/") {
+				if raw.contains('/') {
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("illegal value for {Y}out.file-name{R}: {W}{raw}"),
 						hint: fmt!("the file name cannot contain {W}/{G}, because that turns into a file path!"),
@@ -189,7 +189,7 @@ impl SquarkupConfig
 					});
 				}
 
-				s.out.file_name = raw.to_owned();
+				raw.clone_into(&mut s.out.file_name);
 			}) }
 
 			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
@@ -277,7 +277,7 @@ impl SquarkupConfig
 				for value in values { catch!(errs => {
 					let mut raw = Self::try_get_str(value, "assets.extensions", "(file extension)")?;
 
-					if raw.starts_with(".") {
+					if raw.starts_with('.') {
 						raw = &raw[1..];
 					}
 					
