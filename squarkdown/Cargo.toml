@@ -1,11 +1,14 @@
 [package]
 name = "squarkdown"
-version = "4.0.0-alpha.0"
+version = "4.0.0-alpha.1"
 edition = "2024"
 license = "MIT"
 
 description = "Markdown preprocessing for SvelteKit projects"
+keywords = ["svelte", "sveltekit", "mdsvex", "markdown", "squark"]
 repository = "https://github.com/Sup2point0/stranger-quarkdown"
+homepage = "https://sup2point0.github.io/stranger-quarkdown"
+documentation = "https://sup2point0.github.io/stranger-quarkdown/docs"
 
 exclude = [
 	"tests/",
