@@ -4,6 +4,18 @@ use assertables::*;
 use path_macro::path;
 
 
+/// Squarkdown ignores files with `#SQUARK dead!`.
+#[test] fn dead()
+{
+	let (status, out) = capture_squarkup_from("render/dead");
+	assert_not!( status.success() );
+	assert_contains!( out, "no active files found" );
+
+	assert_not!( path!(*TEST_ROUTES / "render/dead/only-dead" ).exists() );
+	assert_not!( path!(*TEST_ROUTES / "render/dead/live-and-dead" ).exists() );
+	assert_not!( path!(*TEST_ROUTES / "render/dead/dead-and-live" ).exists() );
+}
+
 /// Squarkdown exports files to the right place.
 #[test] fn dest()
 {
