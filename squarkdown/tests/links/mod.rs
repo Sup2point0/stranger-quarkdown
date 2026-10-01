@@ -77,6 +77,19 @@ use assertables::*;
 	assert_contains!( main, "[GitHub](https://github.com/Sup2point0/stranger-quarkdown \"squarkdown\")" );
 }
 
+/// Squarkdown normalises links with `%20`-encoded spaces, rewriting `%20` to `-`.
+#[test] fn spaces()
+{
+	clear_files("links/spaces").unwrap();
+
+	assert!( squarkup_from("links/spaces").success() );
+	
+	let main = read_file("links/spaces/the-main-file/+page.svx");
+	let side = read_file("links/spaces/other-file/+page.svx");
+	assert_contains!( main, "[other file](other-file)" );
+	assert_contains!( side, "[the main file](the-main-file)" );
+}
+
 /// Squarkdown crashes when encountering links to nonexistent files.
 #[test] fn broken_crashes()
 {
