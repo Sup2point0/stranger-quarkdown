@@ -12,10 +12,17 @@ This keeps the core semantics and functionality of Squarkdown the same, but brin
 
 While I was at it, I also implemented some way overdue features that were too scary to implement in Ruby!
 
+### Breaking
+- Squarkdown is now installable as a cross-platform binary from [crates.io](https://crates.io/crates/squarkdown) or [npm](https://www.npmjs.com/package/stranger-quarkdown), instead of requiring a local Ruby installation.
+  - Install it with either `cargo install squarkdown`/`npm i stranger-quarkdown`
+  - Run it with `squarkdown`/`npx squarkdown`
+
 ### New
 - Squarkdown now resolves links, rewriting internal links to other Markdown files into links to webpages
+  - Links with `%20`-encoded spaces are normalised to `-`
 - Improved error messages with hints, diagnostics and line numbers
 - Safer path resolution, with stricter checks to ensure paths remain inside your repository
+- `stranger-quarkdown` npm package exposes `PageData<"short">` and `PageData<"long">` types for `+page.ts` files
 
 ### Rendering
 - Squarkdown now uses a proper context-aware linear parsing engine, instead of global RegEx substitutions, so `#SQUARK`s are properly handled inside code blocks!
@@ -23,7 +30,7 @@ While I was at it, I also implemented some way overdue features that were too sc
 
 ### Config
 - Favour `squarkup.toml` over `squarkup.json`
-- *Breaking*: `on-no-dir` changed to `on-file-exists`
+- *Breaking*: `errors.on-no-dir` changed to `errors.file-already-exists`
   - Available options are `kill`, `skip`, `overwrite`
   - This is more relevant than the previous "if directory doesn’t exist" – it doesn’t really matter if the directory doesn’t exist, and for a fully generated site it never will.
 - *New*: `format` config options for controlling how text is rendered
