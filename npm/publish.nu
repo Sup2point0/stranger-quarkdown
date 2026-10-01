@@ -18,7 +18,7 @@ def main [] {
 	mkdir bin
 	cp target-temp/windows/release/squarkdown.exe bin/squarkdown-win.exe
 	cp target-temp/linux/release/squarkdown bin/squarkdown-linux
-	chmod +x bin/squarkdown-linux
+	wsl -- bash -lc "chmod +x bin/squarkdown-linux"
 }
 
 def sync-version [] {
