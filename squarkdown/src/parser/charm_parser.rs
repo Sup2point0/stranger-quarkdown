@@ -136,9 +136,21 @@ impl CharmParser<'_>
 	pub(super) fn try_parse_squark_live(&mut self) -> SquarkResult
 	{
 		self.try_eat("<!--")?;
-		self.eat_whitespace(); self.try_eat_caseless("#SQUARK")?;
-		// TODO notify if live! not found
-		self.eat_spaces(); self.try_eat_caseless("live!")?;
+		self.eat_whitespace();
+		self.try_eat_caseless("#SQUARK")?;
+		self.eat_spaces();
+
+		self.try_eat_caseless("live!")
+			.map_err(|_| 
+				match self.try_eat_caseless("dead!") {
+					Ok(..) => SquarkError::ABANDON,
+					Err(..) => SquarkError::Unrecoverable {
+						msg: fmt!("expected either {W}live!{R} or {W}dead!{R} to start charm squark"),
+						hint: fmt!("use {W}<!-- #SQUARK live!{G} for an active file, or {W}<!-- #SQUARK dead!{G} for an inactive file"),
+						debug: vec![],
+					},
+				}
+			)?;
 
 		self.is_live = true;
 		Ok(())

@@ -13,10 +13,12 @@ pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 /// 
 /// Squarkdown needs to handle errors in many different ways:
 /// 
-/// - Some errors are mission-critical, and Squarkdown can't continue properly if it encounters them.
-/// - Some errors are undesirable, but localised, so Squarkdown can still recover from them.
-/// - If Squarkdown encounters multiple errors, it aggregates them and presses on to do a best-effort job.
-/// - Squarkdown interfaces with many external APIs, which all return their own errors.
+/// - [`Self::Unrecoverable`]: Mission-critical errors. Squarkdown can't continue properly.
+/// - [`Self::Recoverable`]: Undesirable, but localised, so Squarkdown can still recover from them.
+/// - [`Self::Multiple`]: If Squarkdown encounters multiple errors, it aggregates them and presses on to do a best-effort job.
+/// - [`Self::External`]: Squarkdown interfaces with many external APIs, which all return their own errors.
+/// 
+/// [`Self::ABANDON`] is also used for propagation when skipping operations.
 /// 
 /// How errors are handled depends on the user's `config.errors.on-error`.
 #[derive(Debug)]
