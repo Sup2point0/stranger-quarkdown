@@ -380,7 +380,7 @@ impl Renderer<'_>
 		}
 
 		// 2. find where the target file will be exported to
-		let shard = PageData::shard_for(&their_source_path, &self.config);
+		let shard = PageData::shard_for(&their_source_path, self.config);
 
 		if let Some(dest_page) = self.site.get_page(&shard)
 		{

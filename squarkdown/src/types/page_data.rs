@@ -159,9 +159,10 @@ impl PageData
 		)
 	}
 
-	pub fn shard_for(filepath: impl AsRef<Path>, config: &SquarkupConfig) -> String
+	#[must_use]
+	pub fn shard_for(filepath: &Path, config: &SquarkupConfig) -> String
 	{
-		utils::display_rel(&filepath, &config.paths.root)
+		utils::display_rel(filepath, &config.paths.root)
 	}
 
 	/// Extract a multi-valued field from `fields`.

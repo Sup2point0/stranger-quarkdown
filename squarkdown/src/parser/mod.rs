@@ -24,12 +24,9 @@ use std::path::Path;
 
 
 /// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
-pub fn parse(
-	filepath: impl AsRef<Path>,
-	config: &SquarkupConfig,
-) -> SquarkResult<Option<PageData>>
+pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<PageData>>
 {
-	let mut reader = BufReader::new(File::open(&filepath)?);
+	let mut reader = BufReader::new(File::open(filepath)?);
 	let mut source = str!();
 	
 	/* Read up until we see a `-->` terminating the charm squark */
@@ -45,7 +42,7 @@ pub fn parse(
 		}
 	}
 
-	let parser = CharmParser::new(&source, filepath.as_ref().to_path_buf(), config);
+	let parser = CharmParser::new(&source, filepath.to_owned(), config);
 	
 	match parser.parse()
 	{
