@@ -24,8 +24,8 @@ You write Markdown content anywhere in your project repo, with [special syntax](
 
 ```md
 # Welcome to Squarkdown!
-<!-- #SQUARK live!
-| dest = walkthrough welcome
+<!-- #SQUARK live! feat!
+| dest = walkthrough/welcome
 | capt = An introduction to what Squarkdown can do
 | date = 2024 July 1
 -->
