@@ -58,7 +58,7 @@ impl PageData
 		let mut destination = PathBuf::new();
 
 		if let Some(dest) = Self::take_flat(&mut fields, "destination", "dest") {
-			destination = path!(config.out.folder / utils::to_rel(&dest)).clean();
+			destination = path!(config.out.folder / utils::to_rel(&dest.replace(" ", "-"))).clean();
 
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {
@@ -161,7 +161,7 @@ impl PageData
 
 	pub fn shard_for(filepath: impl AsRef<Path>, config: &SquarkupConfig) -> String
 	{
-		utils::display_rel(&filepath, &config.paths.root).replace(" ", "%20")
+		utils::display_rel(&filepath, &config.paths.root)
 	}
 
 	/// Extract a multi-valued field from `fields`.

@@ -353,12 +353,12 @@ impl Renderer<'_>
 		}
 
 		// TODO can avoid `.to_string()`?
-		let mut their_file_name = dest_url.to_string();
-		let mut anchor: Option<String> = None;
+		let mut their_file_name = dest_url.replace("%20", " ");
+		let mut anchor: Option<&str> = None;
 
 		if let Some((left, right)) = dest_url.split_once(".md#") {
-			their_file_name = left.replace("%20", " ") + ".md";
-			anchor = Some(right.to_string());
+			their_file_name = left.to_owned() + ".md";
+			anchor = Some(right);
 		}
 
 		// 1. find where the target file lives, relative to the current file

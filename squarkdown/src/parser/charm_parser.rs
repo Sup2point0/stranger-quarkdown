@@ -481,7 +481,17 @@ mod full {
 	mod edge {
 		use super::*;
 
-		#[test] fn slash_in_singles() {
+		#[test] fn space_in_dest() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = a dangerous path
+				-->
+			"});
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/a-dangerous-path") );
+		}
+
+		#[test] fn slash_in_single() {
 			let page_data = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
