@@ -357,7 +357,7 @@ impl Renderer<'_>
 		let mut anchor: Option<String> = None;
 
 		if let Some((left, right)) = dest_url.split_once(".md#") {
-			their_file_name = left.to_string() + ".md";
+			their_file_name = left.replace("%20", " ") + ".md";
 			anchor = Some(right.to_string());
 		}
 
@@ -380,9 +380,9 @@ impl Renderer<'_>
 		}
 
 		// 2. find where the target file will be exported to
-		let key = utils::display_rel(&their_source_path, &self.config.paths.root);
+		let shard = PageData::shard_for(&their_source_path, &self.config);
 
-		if let Some(dest_page) = self.site.get_page(&key)
+		if let Some(dest_page) = self.site.get_page(&shard)
 		{
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
@@ -415,7 +415,7 @@ impl Renderer<'_>
 					hint: str!(),
 					debug: vec![
 						// TODO add line number
-						fmt!("resolved to: {GREY1}{key}"),
+						fmt!("resolved to: {GREY1}{shard}"),
 					]
 				});
 			}

@@ -10,13 +10,13 @@ use time::Date;
 use time::macros::format_description;
 
 use std::collections::{ HashMap };
-use std::path::{ PathBuf };
+use std::path::{ Path, PathBuf };
 
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PageData
 {
-	/// The unique stable identifier for the page.
+	/// The unique stable identifier for the page, normalised from `.filepath`.
 	pub shard: String,
 
 	/// The location of the original `.md` file this page represents.
@@ -144,7 +144,7 @@ impl PageData
 
 		errs.or_else(||
 			Self {
-				shard: utils::display_rel(&filepath, &config.paths.root),
+				shard: Self::shard_for(&filepath, config),
 				filepath,
 				flags,
 				destination,
@@ -157,6 +157,11 @@ impl PageData
 				other: fields,
 			}
 		)
+	}
+
+	pub fn shard_for(filepath: impl AsRef<Path>, config: &SquarkupConfig) -> String
+	{
+		utils::display_rel(&filepath, &config.paths.root).replace(" ", "%20")
 	}
 
 	/// Extract a multi-valued field from `fields`.
