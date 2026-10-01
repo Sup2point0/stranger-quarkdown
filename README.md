@@ -22,6 +22,27 @@
 
 You write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to mass-export them into `+page.svx` and `+page.ts` files in your SvelteKit project.
 
+```md
+# Welcome to Squarkdown!
+<!-- #SQUARK live!
+| dest = walkthrough welcome
+| capt = An introduction to what Squarkdown can do
+| date = 2024 July 1
+-->
+
+This link to [other-file.md](other-file.md) will have its `.md` extension stripped.
+
+<!-- #SQUARK slash? -->
+This content won’t be included in the output.
+<!-- #SQUARK slash. -->
+
+<!-- #SQUARK only?
+
+This content only shows up in the output.
+
+     #SQUARK only. -->
+```
+
 
 <br>
 
@@ -33,7 +54,7 @@ Squarkdown lets you:
 - Write Markdown anywhere in your repo, independently of your SvelteKit site
 - Use [Squarkdown-Flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md) syntax to control how Squarkdown renders the content – all hidden inside `<!-- #SQUARK -->` comments, meaning no disruption to the original Markdown preview!
 - Attach metadata to pages that is passed to SvelteKit via `+page.ts`
-- Link between Markdown files without worry; Squarkdown fixes the links for the site
+- Link between Markdown files and to asset files without worry; Squarkdown fixes the links for the site
 
 > In my experience, Squarkdown is quite difficult to explain *properly* to people. But it’s a tool I absolutely need – and use in so many projects! – so trust me, it *is* useful ;)
 
