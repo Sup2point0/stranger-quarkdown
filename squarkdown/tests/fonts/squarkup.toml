@@ -1,0 +1,14 @@
+#:schema ../../src/config/schema.json
+
+[errors]
+strict = false
+on-error = "kill"
+
+[paths]
+site = "../test-project/"
+
+[fonts]
+queries = [
+	"Montserrat",
+	"Rajdhani",
+]

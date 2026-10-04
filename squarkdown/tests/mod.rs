@@ -21,6 +21,8 @@ mod links;
 
 mod assets;
 
+mod fonts;
+
 
 mod utils;
 pub use utils::*;
