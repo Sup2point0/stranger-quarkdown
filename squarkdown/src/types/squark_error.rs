@@ -139,8 +139,11 @@ impl SquarkError
 	#[must_use]
 	pub fn is_fine(&self) -> bool
 	{
-		matches!(self, Self::Multiple{ errs, .. } if errs.is_empty())
-		|| matches!(self, Self::ABANDON)
+		matches!(self, Self::ABANDON)
+		||
+		matches!(self, Self::Multiple{ errs, .. }
+			if errs.iter().all(|e| e.is_fine())
+		)
 	}
 
 	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return `t`.
