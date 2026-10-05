@@ -66,14 +66,13 @@ impl<'d> CharmParser<'d>
 	{
 		self.eat_whitespace();
 		
-		let heading = {
-			if self.current() == Some('#') {
-				Some(self.parse_heading()?)
-			}
-			else {
-				None
-			}
-		};
+		let mut heading = None;
+		
+		if self.current() == Some('#') {
+			catch!(self.errors => {
+				heading = Some(self.parse_heading()?);
+			});
+		}
 
 		self.eat_whitespace();
 
