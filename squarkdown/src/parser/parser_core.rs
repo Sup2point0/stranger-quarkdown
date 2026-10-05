@@ -81,7 +81,7 @@ impl CharmParser<'_>
 				Some(c) if c != expected => {
 					return Err(SquarkError::Recoverable {
 						msg: fmt!("unexpected input"),
-						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
+						hint: fmt!("expected {W}{target} {G}{}, but found: {W}{}", to(), self.preview()),
 						debug: self.ctx.printed(),
 					});
 				}

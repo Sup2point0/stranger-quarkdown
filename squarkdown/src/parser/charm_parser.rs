@@ -94,7 +94,7 @@ impl CharmParser<'_>
 	{
 		ctx!(self, ParseCtx::HEADING =>
 		{
-			self.eat("#", to!("start heading"))?;
+			self.eat("#", to!("to start heading"))?;
 
 			while let Some('#') = self.current() {
 				self.advance()?;
@@ -226,7 +226,7 @@ impl CharmParser<'_>
 				self.eat_whitespace();
 			}
 			
-			self.eat("-->", to!("terminate charm squark"))?;
+			self.eat("-->", to!("to terminate charm squark"))?;
 
 			Ok(data)
 		})
@@ -246,7 +246,7 @@ impl CharmParser<'_>
 	{
 		ctx!(self, ParseCtx::FIELD =>
 		{
-			self.eat("|", to!("start field in charm squark"))?;
+			self.eat("|", to!("to start field in charm squark"))?;
 			self.eat_whitespace();
 
 			let key = self.parse_ident()?;
@@ -339,10 +339,21 @@ impl CharmParser<'_>
 
 #[cfg(test)] use super::test_utils::*;
 #[cfg(test)] use crate::utils::testing::*;
+#[cfg(test)] use crate::log;
 
 #[cfg(test)] use assertables::*;
 #[cfg(test)] use indoc::indoc;
 #[cfg(test)] use path_macro::path;
+
+
+#[cfg(test)]
+fn parse(source: &str) -> PageData
+{
+	match CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse() {
+		Ok(page_data) => return page_data,
+		Err(e) => { log::error(e); panic!("failed parse") },
+	}
+}
 
 
 #[cfg(test)]
@@ -352,11 +363,6 @@ mod full {
 	use time::macros::date;
 
 	// TODO add tests
-
-	fn parse(source: &str) -> PageData
-	{
-		CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse().unwrap()
-	}
 
 	mod easy {
 		use super::*;
