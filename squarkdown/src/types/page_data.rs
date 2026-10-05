@@ -159,6 +159,36 @@ impl PageData
 		)
 	}
 
+	/// Check if `fields` contains any unknown fields (not native to Squarkdown).
+	pub fn check_no_unknown<'a>(fields: impl Iterator<Item = &'a String>) -> SquarkResult
+	{
+		let mut errs = SquarkError::multiple("");
+
+		for field in fields {
+			if [
+				"dest", "destination",
+				"title",
+				"desc", "description",
+				"head", "heading",
+				"capt", "caption",
+				"tags",
+				"date",   "release-date",
+				"update", "last-update",
+				"clean",  "cleanse",
+			].contains(&field.as_ref()) {
+				continue;
+			}
+
+			errs.push(SquarkError::Recoverable {
+				msg: fmt!("warning: unknown field {W}{field}"),
+				hint: fmt!("only Squarkdown-native fields like {W}desc{G} or {W}update{G} are allowed before {W}---"),
+				debug: vec![],
+			});
+		}
+
+		errs.or(())
+	}
+
 	#[must_use]
 	pub fn shard_for(filepath: &Path, config: &SquarkupConfig) -> String
 	{

@@ -131,6 +131,12 @@ impl CharmParser<'_>
 
 		self.eat_whitespace();
 		let mut fields = self.parse_fields()?;
+
+		// enforce only native fields before ---
+		if self.config.errors.strict {
+			PageData::check_no_unknown(fields.keys())
+				.or_else(|e| e.depends(self.config))?;
+		}
 		
 		if self.try_eat("---").is_ok() {
 			let other = self.parse_fields()?;

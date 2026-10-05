@@ -6,6 +6,22 @@
 
 ## Next (v4.0.1)
 
+### New
+- Validate `| field =` that appear before `---` are strictly Squarkdown-native fields:
+
+  ```md
+  # Page
+  <!-- #SQUARK live!
+  | dest = page
+  | date = 2026 October 6
+  | unknown = not allowed!
+  ---
+  | arbitrary = allowed
+  -->
+  ```
+
+  - Opt in with `errors.strict = true`
+
 ### Fixes
 - Fix `release-date` and `last-update` long-form fields.
 - Correctly override `# Heading` when `| heading =` is set.
