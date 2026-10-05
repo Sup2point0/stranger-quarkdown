@@ -171,10 +171,16 @@ impl CharmParser<'_>
 			while let Some(c) = self.current()
 				&& c != '\n'
 			{
-				/* NOTE: We're assuming `-` starts the terminating `-->`, since identifiers can't start with `-`. However, it could be the user genuinely using an illegal identifier... maybe we can handle that properly in future. */
 				if self.lookahead("-->") { break; }
 
-				let ident = self.parse_ident()?;
+				let ident = match self.parse_ident() {
+					Ok(id) => id,
+					Err(e) => {
+						self.errors.push(e);
+						self.advance()?;
+						continue;
+					},
+				};
 
 				if self.current() == Some('!') {
 					flags.push(ident);
@@ -182,12 +188,10 @@ impl CharmParser<'_>
 				}
 				else {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("invalid flag: {}", self.preview()),
+						msg: fmt!("invalid flag: {W}{ident}...",),
 						hint: fmt!("flags must end in {W}!{G}, like: {W}{ident}!"),
 						debug: self.ctx.printed(),
-					});
-					
-					// TODO recover
+					});	
 				}
 				
 				self.eat_spaces();

@@ -197,8 +197,7 @@ impl CharmParser<'_>
 				});
 			}
 
-			if let Some(c) = self.current()
-				&& !matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
+			if let Some(c) = self.current() && !Self::is_ident_char(c)
 			{
 				return Err(SquarkError::Unrecoverable {
 					msg: fmt!("expected identifier, but found: {W}{}", self.preview()),
@@ -207,9 +206,7 @@ impl CharmParser<'_>
 				});
 			}
 
-			while let Some(c) = self.current()
-				&& matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.')
-			{
+			while let Some(c) = self.current() && Self::is_ident_char(c) {
 				out.push(c);
 				self.advance()?;
 			}
@@ -219,8 +216,15 @@ impl CharmParser<'_>
 	}
 }
 
+/// Shared uilities
 impl CharmParser<'_>
 {
+	/// Is `c` a valid character for starting an identifier?
+	pub(super) fn is_ident_char(c: char) -> bool
+	{
+		matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '_' | '.' | '~')
+	}
+
 	/// Return the appropriate response for an unexpected end of file.
 	/// 
 	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
