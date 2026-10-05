@@ -231,8 +231,18 @@ impl CharmParser<'_>
 					Ok(r) => r,
 					Err(e) => {
 						self.errors.push(e);
-						while let Some(c) = self.current() && c != '|' {
+
+						let mut can_recover = true;
+
+						loop {
 							self.advance()?;
+
+							match self.current()
+							{
+								Some('|') | Some('-') if can_recover => break,
+								Some('\n') => can_recover = true,
+								_          => can_recover = false,
+							}
 						}
 						continue;
 					}
