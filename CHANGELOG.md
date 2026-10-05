@@ -12,6 +12,8 @@ This keeps the core semantics and functionality of Squarkdown the same, but brin
 
 While I was at it, I also implemented some way overdue features that were too scary to implement in Ruby!
 
+While this release means more stability for Squarkdown, there’s still a fair amount of stuff that isn’t yet implemented, so I’ll slowly be sorting those out over the next few releases.
+
 ### Breaking
 - Squarkdown is now installable as a cross-platform binary from [crates.io](https://crates.io/crates/squarkdown) or [npm](https://www.npmjs.com/package/stranger-quarkdown), instead of requiring a local Ruby installation.
   - Install it with `cargo install squarkdown`/`npm install stranger-quarkdown`
@@ -23,6 +25,7 @@ While I was at it, I also implemented some way overdue features that were too sc
 ### New
 - Squarkdown now resolves links, rewriting internal links to other Markdown files or assets into links to webpages
   - Links with `%20`-encoded spaces are normalised to `-`
+- Comment stripping when rendering
 - Improved error messages with contexts, hints and diagnostics
 - Safer path resolution, with stricter checks to ensure paths remain inside your repository
 - `stranger-quarkdown` npm package exposes `PageData<"short">` and `PageData<"long">` types for `+page.ts` files

@@ -1,7 +1,7 @@
 {
   "name": "stranger-quarkdown",
   "author": "Sup#2.0",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0",
   "license": "MIT",
 
   "description": "Markdown preprocessing for SvelteKit projects",
