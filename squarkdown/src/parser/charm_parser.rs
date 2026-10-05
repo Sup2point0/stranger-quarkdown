@@ -544,6 +544,19 @@ mod full {
 			assert_eq!( page_data.title, Some(str!("not / a / list")) );
 			assert_eq!( page_data.caption, Some(str!("not / a / list")) );
 		}
+
+		#[test] fn trailing_slash() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| tags = one /
+				| desc = Works
+				-->
+			"});
+			assert_eq!( page_data.tags, vec!["one"] );
+			assert_eq!( page_data.description, Some(str!("Works")) );
+		}
 	}
 
 	mod unicode {

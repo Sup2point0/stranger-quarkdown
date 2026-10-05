@@ -15,7 +15,7 @@ use std::fs;
 	}
 
 	assert!( squarkup!("assets/basic", "--assets").success() );
-	assert!( path.is_file() )
+	assert!( path.is_file() );
 }
 
 /// Squarkdown only copies assets with user-specified extensions.
@@ -44,5 +44,5 @@ use std::fs;
 	}
 
 	assert!( squarkup!("assets/site", "--assets").success() );
-	assert!( path.is_file() )
+	assert!( path.is_file() );
 }

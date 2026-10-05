@@ -19,6 +19,8 @@ mod links;
 
 // == EXTRAS == //
 
+mod data;
+
 mod assets;
 
 mod fonts;

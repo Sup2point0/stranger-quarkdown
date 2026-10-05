@@ -21,16 +21,13 @@ macro_rules! assert_not {
 lazy_static!
 {
 	/// The `/tests/` directory.
-	pub static ref TESTS: PathBuf
-		= path!(std::env::current_dir().unwrap() / "tests");
+	pub static ref TESTS: PathBuf = path!(std::env::current_dir().unwrap() / "tests");
 	
 	/// The `/tests/test-project/` directory.
-	pub static ref TEST_SITE: PathBuf
-		= path!(*TESTS / "test-project");
+	pub static ref TEST_SITE: PathBuf = path!(*TESTS / "test-project");
 	
 	/// The `/tests/test-project/src/routes/` directory.
-	pub static ref TEST_ROUTES: PathBuf
-		= path!(*TEST_SITE / "src/routes");
+	pub static ref TEST_ROUTES: PathBuf = path!(*TEST_SITE / "src/routes");
 }
 
 
