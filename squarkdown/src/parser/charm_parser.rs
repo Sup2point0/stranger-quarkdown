@@ -524,38 +524,6 @@ mod full {
 		}
 	}
 
-	mod recovery {
-		use super::*;
-
-		mod flags {
-			use super::*;
-
-			#[test] fn bad() {
-				let page_data = parse(indoc! {"
-					# Test
-					<!-- #SQUARK live! bad ignore
-					| dest = .
-					| title = Success
-					-->
-				"});
-				assert_eq!( page_data.flags, strings![] );
-				assert_eq!( page_data.title, Some(str!("Success")) );
-			}
-
-			#[test] fn worse() {
-				let page_data = parse(indoc! {"
-					# Test
-					<!-- #SQUARK live! very!! weird keep!
-					| dest = .
-					| title = Success
-					-->
-				"});
-				assert_eq!( page_data.flags, strings!["very", "keep"] );
-				assert_eq!( page_data.title, Some(str!("Success")) );
-			}
-		}
-	}
-
 	mod unicode {
 		use super::*;
 
@@ -576,6 +544,69 @@ mod full {
 		}
 	}
 }
+
+#[cfg(test)]
+mod recovery {
+	use super::*;
+
+	mod flags {
+		use super::*;
+
+		#[test] fn bad() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live! bad ignore
+				| dest = .
+				| title = Success
+				-->
+			"});
+			assert_eq!( page_data.flags, strings![] );
+			assert_eq!( page_data.title, Some(str!("Success")) );
+		}
+
+		#[test] fn worse() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live! very!! weird keep!
+				| dest = .
+				| title = Success
+				-->
+			"});
+			assert_eq!( page_data.flags, strings!["very", "keep"] );
+			assert_eq!( page_data.title, Some(str!("Success")) );
+		}
+
+		#[test] fn worst() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live! very deformed:: !confusion how! handle?
+				| dest = .
+				| title = Success
+				-->
+			"});
+			assert_eq!( page_data.flags, strings!["how"] );
+			assert_eq!( page_data.title, Some(str!("Success")) );
+		}
+	}
+
+	mod fields {
+		use super::*;
+
+		#[test] fn one() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| title
+				| capt = Works
+				-->
+			"});
+			assert_eq!( page_data.flags, strings!["very", "keep"] );
+			assert_eq!( page_data.title, None );
+			assert_eq!( page_data.caption, Some(str!("Works")) );
+		}
+	}
+	}
 
 #[cfg(test)]
 mod partial {
