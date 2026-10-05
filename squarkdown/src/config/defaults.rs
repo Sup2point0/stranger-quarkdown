@@ -41,7 +41,6 @@ impl SquarkupConfig
 				preserve_heading: false,
 				preserve_comments: false,
 				externalise_links: false,
-				mark_invalid_links: false,
 			},
 			assets: AssetsConfig { folder: root.to_owned(), site_assets_folder: None,
 				extensions: vec![

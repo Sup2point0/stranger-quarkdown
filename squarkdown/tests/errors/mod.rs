@@ -19,7 +19,6 @@ use path_macro::path;
 	assert_contains!( out, "format.preserve-heading" );
 	assert_contains!( out, "format.preserve-comments" );
 	assert_contains!( out, "format.externalise-links" );
-	assert_contains!( out, "format.mark-invalid-links" );
 	assert_contains!( out, "assets.folder" );
 	assert_contains!( out, "assets.site-assets-folder" );
 
