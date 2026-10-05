@@ -519,6 +519,38 @@ mod full {
 		}
 	}
 
+	mod recovery {
+		use super::*;
+
+		mod flags {
+			use super::*;
+
+			#[test] fn bad() {
+				let page_data = parse(indoc! {"
+					# Test
+					<!-- #SQUARK live! bad ignore
+					| dest = .
+					| title = Success
+					-->
+				"});
+				assert_eq!( page_data.flags, strings![] );
+				assert_eq!( page_data.title, Some(str!("Success")) );
+			}
+
+			#[test] fn worse() {
+				let page_data = parse(indoc! {"
+					# Test
+					<!-- #SQUARK live! very!! weird keep!
+					| dest = .
+					| title = Success
+					-->
+				"});
+				assert_eq!( page_data.flags, strings!["keep"] );
+				assert_eq!( page_data.title, Some(str!("Success")) );
+			}
+		}
+	}
+
 	mod unicode {
 		use super::*;
 
@@ -709,7 +741,7 @@ mod partial {
 			});
 		}
 		
-		#[test] fn fails() {
+		#[test] fn ignores() {
 			test_expected(&[
 				("live! ignore\n",     vec!["live"]),
 				("live!\nignore\n",    vec!["live"]),
@@ -727,13 +759,13 @@ mod partial {
 			});
 		}
 
-		#[test] fn crashes() {
+		#[test] fn recovers() {
 			test_expected(&[
 				("live!ignore:ignored", "cannot start with"),
 			],
 			|mut parser, expected_err| {
-				let e = parser.parse_flags().unwrap_err();
-				assert_contains!( e, expected_err );
+				parser.parse_flags().unwrap();
+				assert_contains!( parser.errors, expected_err );
 			});
 		}
 	}
