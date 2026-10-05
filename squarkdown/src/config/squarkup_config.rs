@@ -84,9 +84,6 @@ pub struct FormatConfig {
 
 	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 	pub externalise_links: bool,
-
-	/// Mark hyperlinks to nonexistent pages?
-	pub mark_invalid_links: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -148,7 +145,10 @@ pub enum FileAction {
 #[derive(EnumStringify)] #[enum_stringify(case = "kebab")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LinkRewriteAction {
-	/// Still strip the `.md` file extension, but don't do anything else
+	/// Attach `class="invalid-link"` to the link element.
+	MARK_INVALID,
+
+	/// Still strip the `.md` file extension, but don't do anything else.
 	STRIP_EXTENSION,
 
 	/// Replace the link with an absolute link to the original file in the GitHub repo.

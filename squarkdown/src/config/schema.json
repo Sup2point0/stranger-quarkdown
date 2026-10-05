@@ -82,10 +82,6 @@
         "externalise-links": {
           "title": "Externalise Links",
           "type": "boolean"
-        },
-        "mark-invalid-links": {
-          "title": "Mark Invalid Links",
-          "type": "boolean"
         }
       }
     },
@@ -149,7 +145,7 @@
         "inactive-link": {
           "title": "Inactive Link Handling",
           "type": "string",
-          "enum": ["strip-extension", "link-to-github", "error"]
+          "enum": ["mark-invalid", "strip-extension", "link-to-github", "error"]
         }
       }
     }

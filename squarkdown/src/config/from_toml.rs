@@ -250,9 +250,6 @@ impl SquarkupConfig
 			if let Some(value) = format.get("externalise-links") { catch!(errs => {
 				c.externalise_links = Self::try_get_bool(value, "format.externalise-links")?;
 			}) }
-			if let Some(value) = format.get("mark-invalid-links") { catch!(errs => {
-				c.mark_invalid_links = Self::try_get_bool(value, "format.mark-invalid-links")?;
-			}) }
 		}
 
 		// == AssetsConfig == //

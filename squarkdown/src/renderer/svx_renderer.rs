@@ -402,7 +402,11 @@ impl Renderer<'_>
 			return;
 		}
 
-		match self.config.errors.inactive_link {
+		match self.config.errors.inactive_link
+		{
+			LinkRewriteAction::MARK_INVALID => {
+				todo!("mark invalid")
+			}
 			LinkRewriteAction::STRIP_EXTENSION => {
 				todo!("replace regex")
 			}
