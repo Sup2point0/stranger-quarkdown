@@ -235,14 +235,13 @@ impl CharmParser<'_>
 						let mut can_recover = true;
 
 						loop {
-							self.advance()?;
-
 							match self.current()
 							{
 								Some('|') | Some('-') if can_recover => break,
 								Some('\n') => can_recover = true,
 								_          => can_recover = false,
 							}
+							self.advance()?;
 						}
 						continue;
 					}
