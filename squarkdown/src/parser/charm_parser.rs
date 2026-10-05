@@ -125,7 +125,14 @@ impl CharmParser<'_>
 		}
 
 		self.eat_whitespace();
-		let fields = self.parse_fields()?;
+		let mut fields = self.parse_fields()?;
+		
+		if self.try_eat("---").is_ok() {
+			let other = self.parse_fields()?;
+			fields.extend(other);
+		}
+
+		self.eat("-->", to!("to terminate charm squark"))?;
 
 		Ok((flags, fields))
 	}
@@ -209,13 +216,28 @@ impl CharmParser<'_>
 
 	/// Parse the fields in the charm squark and return a hashmap of the data.
 	/// 
+	/// # Example
+	/// 
 	/// ```ts
 	/// <!-- #SQUARK live!
 	/// | field = value
 	///   ^^^^^   ^^^^^
 	/// | fields = value / value / value
 	///   ^^^^^^   ^^^^^   ^^^^^   ^^^^^
+	/// ---
+	/// | arbitrary = value
+	///   ^^^^^^^^^   ^^^^^
 	/// -->
+	/// ```
+	/// 
+	/// Would give:
+	/// 
+	/// ```ts
+	/// {
+	///    field: ["value"],
+	///    fields: ["value", "value", "value"],
+	///    arbitrary: ["value"],
+	/// }
 	/// ```
 	pub(super) fn parse_fields(&mut self) -> SquarkResult<HashMap<String, Strings>>
 	{
@@ -246,12 +268,9 @@ impl CharmParser<'_>
 						continue;
 					}
 				};
-
 				data.insert(key, value);
 				self.eat_whitespace();
 			}
-			
-			self.eat("-->", to!("to terminate charm squark"))?;
 
 			Ok(data)
 		})
@@ -333,7 +352,7 @@ impl CharmParser<'_>
 					'|' if can_terminate => break,
 
 					// `-->` terminates
-					'-' if can_terminate && self.lookahead("-->") => break,
+					'-' if can_terminate && self.lookahead("--") => break,
 
 					_ => {
 						can_terminate = c.is_whitespace();
@@ -387,8 +406,6 @@ mod full {
 
 	use time::macros::date;
 
-	// TODO add tests
-
 	mod easy {
 		use super::*;
 	
@@ -440,6 +457,40 @@ mod full {
 			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
+		}
+	}
+
+	mod arbitrary {
+		use super::*;
+
+		#[test] fn one() {
+			let page_data = parse(indoc! {"
+				# One
+				<!-- #SQUARK live!
+				| dest = test
+				---
+				| testing = true
+				-->
+			"});
+			assert_eq!( page_data.heading, Some(str!("One")) );
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.other["testing"], strings!("true") );
+		}
+
+		#[test] fn many() {
+			let page_data = parse(indoc! {"
+				# Many
+				<!-- #SQUARK live!
+				| dest = test
+				---
+				| one = 1
+				| two = 2
+				-->
+			"});
+			assert_eq!( page_data.heading, Some(str!("Many")) );
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.other["one"], strings!("1") );
+			assert_eq!( page_data.other["two"], strings!("2") );
 		}
 	}
 
