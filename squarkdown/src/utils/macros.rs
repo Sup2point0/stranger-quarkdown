@@ -54,11 +54,13 @@ macro_rules! strings {
 // == ERRORS == //
 
 /// Scope `?` try fallbacks to a local scope, instead of the entire containing function.
+/// 
+/// Automatically returns `Ok(())` at the end.
 #[macro_export]
 macro_rules! catch
 {
-	($errs:expr => $eval:block) => {
-		if let Err(e) = (|| -> SquarkResult<_> { $eval; Ok(()) })() {
+	($errs:expr => $body:block) => {
+		if let Err(e) = (|| -> SquarkResult<_> { $body; Ok(()) })() {
 			$errs.push(e);
 		}
 	};

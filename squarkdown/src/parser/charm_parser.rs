@@ -220,8 +220,19 @@ impl CharmParser<'_>
 
 			self.eat_whitespace();
 
-			while self.current() != Some('-') {
-				let (key, value) = self.parse_field()?;
+			while self.current() != Some('-')
+			{
+				let (key, value) = match self.parse_field() {
+					Ok(r) => r,
+					Err(e) => {
+						self.errors.push(e);
+						while let Some(c) = self.current() && c != '|' {
+							self.advance()?;
+						}
+						continue;
+					}
+				};
+
 				data.insert(key, value);
 				self.eat_whitespace();
 			}
@@ -603,16 +614,32 @@ mod recovery {
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
-				| title
-				| capt = Works
+				| capt
+				| desc = Works
 				-->
 			"});
-			assert_eq!( page_data.flags, strings!["very", "keep"] );
-			assert_eq!( page_data.title, None );
-			assert_eq!( page_data.caption, Some(str!("Works")) );
+			assert_eq!( page_data.caption, None );
+			assert_eq!( page_data.description, Some(str!("Works")) );
+		}
+
+		#[test] fn many() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| date
+				| capt = Still
+				| update
+				| desc = Works
+				-->
+			"});
+			assert_eq!( page_data.release_date, None );
+			assert_eq!( page_data.caption, Some(str!("Still")) );
+			assert_eq!( page_data.last_update, None );
+			assert_eq!( page_data.description, Some(str!("Works")) );
 		}
 	}
-	}
+}
 
 #[cfg(test)]
 mod partial {
