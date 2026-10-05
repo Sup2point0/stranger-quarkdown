@@ -190,9 +190,9 @@ impl CharmParser<'_>
 			let mut out = str!();
 
 			if let Some('-') = self.current() {
-				return Err(SquarkError::Unrecoverable {
-					msg: fmt!("illegal input: {}", self.preview()),
-					hint: fmt!("identifiers cannot start with {W}'-'"),
+				return Err(SquarkError::Recoverable {
+					msg: fmt!("illegal identifier: {}", self.preview()),
+					hint: fmt!("identifiers cannot start with {W}-"),
 					debug: self.ctx.printed(),
 				});
 			}
@@ -201,7 +201,7 @@ impl CharmParser<'_>
 			{
 				return Err(SquarkError::Unrecoverable {
 					msg: fmt!("expected identifier, but found: {W}{}", self.preview()),
-					hint: fmt!("identifiers cannot start with {W}{c:?}"),
+					hint: fmt!("identifiers cannot start with {W}{c}"),
 					debug: self.ctx.printed(),
 				});
 			}

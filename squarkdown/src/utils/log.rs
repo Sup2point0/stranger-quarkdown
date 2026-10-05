@@ -84,7 +84,7 @@ pub fn error(err: SquarkError)
 				if !already_shown_when && !when.is_empty() {
 					let count = err.len();
 					let plural = if count == 1 {""} else {"s"};
-					bad!("{count} error{plural} while {when}:");
+					bad!("{count} error{plural} while {when}");
 					line();
 				}
 

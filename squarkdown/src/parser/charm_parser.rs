@@ -188,7 +188,7 @@ impl CharmParser<'_>
 				}
 				else {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("invalid flag: {W}{ident}...",),
+						msg: fmt!("invalid flag: {W}{ident}{GREY}...",),
 						hint: fmt!("flags must end in {W}!{G}, like: {W}{ident}!"),
 						debug: self.ctx.printed(),
 					});	
