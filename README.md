@@ -11,16 +11,16 @@
 
 <div align="center">
 
-[Docs](docs/) · [Quickstart](docs/walkthrough/quickstart.md) · [FAQ](FAQ.md) · [Changelog](CHANGELOG.md) · [Site](https://sup2point0.github.io/stranger-quarkdown/docs)
+[Docs](docs/)&ensp;·&ensp;[Quickstart](docs/walkthrough/quickstart.md)&ensp;·&ensp;[FAQ](FAQ.md)&ensp;·&ensp;[Changelog](CHANGELOG.md)&ensp;·&ensp;[Site](https://sup2point0.github.io/stranger-quarkdown/docs)
 
 </div>
 
 > [!Warning]
-> Squarkdown has been freshly rewritten in Rust. It’s not quite battle-tested just yet, but it’s almost there!
+> Squarkdown has been freshly rewritten in Rust, which does mean it has a much more extensive test suite, but also means it’ll probably have some rough edges!
 
 **Stranger Quarkdown** (*Squarkdown*) is a build tool for [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.io) projects.
 
-You write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to mass-export them into `+page.svx` and `+page.ts` files in your SvelteKit project.
+Write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to mass-export them into `+page.svx` and `+page.ts` files in your SvelteKit project.
 
 ```md
 # Welcome to Squarkdown!
@@ -52,11 +52,11 @@ This content only shows up in the output.
 Squarkdown lets you:
 
 - Write Markdown anywhere in your repo, independently of your SvelteKit site
-- Use [Squarkdown-Flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md) syntax to control how Squarkdown renders the content – all hidden inside `<!-- #SQUARK -->` comments, meaning no disruption to the original Markdown preview!
-- Attach metadata to pages that is passed to SvelteKit via `+page.ts`
-- Link between Markdown files and to asset files without worry; Squarkdown fixes the links for the site
+- Use [Squarkdown-Flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md) to control how Squarkdown renders the content – all hidden inside `<!-- #SQUARK -->` comments, meaning no disruption to the original Markdown preview!
+- Attach metadata to pages that is passed to SvelteKit via `+page.ts` and/or `site.json`
+- Link between Markdown files and to asset files without worry; Squarkdown fixes the links for the site for you
 
-> In my experience, Squarkdown is quite difficult to explain *properly* to people. But it’s a tool I absolutely need – and use in so many projects! – so trust me, it *is* useful ;)
+> In my experience, it’s quite difficult to explain to people what Squarkdown is exactly. But it’s a tool I absolutely need – and use in so many projects! – so trust me, it *is* useful ;)
 
 
 <br>
@@ -64,7 +64,7 @@ Squarkdown lets you:
 
 ## Quickstart
 
-### Cargo
+### Cargo (cross-platform)
 ```bash
 # Install:
 > cargo install squarkdown
@@ -80,7 +80,7 @@ Squarkdown lets you:
 > squarkdown --assets
 ```
 
-### npm (currently only Windows)
+### npm (Windows/Linux)
 ```bash
 # Install:
 > npm install stranger-quarkdown
