@@ -7,6 +7,7 @@
 ## Next (v4.0.1)
 
 ### Fixes
+- Fix `release-date` and `last-update` long-form fields.
 - Correctly override `# Heading` when `| heading =` is set.
   - Before, this would result in the page having `heading: "Upper"`:
 

@@ -92,7 +92,7 @@ impl PageData
 		let mut release_date = None;
 		let mut release_date_raw = None;
 
-		if let Some(raw) = Self::take_flat(&mut fields, "release-date", "date") {
+		if let Some(raw) = Self::take_flat(&mut fields, "release_date", "date") {
 			catch!(errs => {
 				release_date = Some(Self::try_parse_date(&raw, "release date")?);
 			});
@@ -102,7 +102,7 @@ impl PageData
 		let mut last_update = release_date;
 		let mut last_update_raw = release_date_raw.clone();
 
-		if let Some(raw) = Self::take_flat(&mut fields, "last-update", "update") {
+		if let Some(raw) = Self::take_flat(&mut fields, "last_update", "update") {
 			catch!(errs => {
 				last_update = Some(Self::try_parse_date(&raw, "last updated")?);
 			});
