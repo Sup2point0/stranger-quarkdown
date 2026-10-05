@@ -4,6 +4,23 @@
 <br>
 
 
+## Next (v4.0.1)
+
+### Fixes
+- Correctly override `# Heading` when `| heading =` is set.
+  - Before, this would result in the page having `heading: "Upper"`:
+
+    ```md
+    # Upper
+    <!-- #SQUARK live!
+    | heading = Lower
+    -->
+    ```
+
+  - Now it is correctly overridden to `"Lower"`.
+  - (This only applied for the long-form `heading`, not the shorthand `head`.)
+
+
 ## v4.0
 
 Squarkdown has been rewritten in Rust. Yeah, I’m sorry, lmao.

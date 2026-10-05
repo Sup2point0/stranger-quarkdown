@@ -77,7 +77,12 @@ impl<'d> CharmParser<'d>
 		self.eat_whitespace();
 
 		let (flags, mut fields) = self.parse_charm_squark()?;
-		fields.entry(str!("head")).or_insert(heading.into_iter().collect());
+
+		if !fields.contains_key("head")
+		&& !fields.contains_key("heading")
+		{
+			fields.insert(str!("head"), heading.into_iter().collect());
+		}
 
 		let page = PageData::init(self.filepath, flags, fields, self.config)?;
 		
@@ -407,7 +412,7 @@ mod full {
 
 	use time::macros::date;
 
-	mod easy {
+	mod short {
 		use super::*;
 	
 		#[test] fn dest_only() {
@@ -421,21 +426,6 @@ mod full {
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
 		}
 
-		#[test] fn carriage_returns() {
-			let page_data = parse(indoc! {"
-				# Test\r
-				<!-- #SQUARK live!\r
-				| dest = test\r
-				-->
-			"});
-			assert_eq!( page_data.heading, Some(str!("Test")) );
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
-		}
-	}
-
-	mod medium {
-		use super::*;
-
 		#[test] fn all_fields() {
 			let page_data = parse(indoc! {"
 				# Test
@@ -448,6 +438,34 @@ mod full {
 				| tags = five / six / seven
 				| date = 2020 April 1
 				| update = 2021 May 31
+				-->
+			"});
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.title, Some(str!("One")) );
+			assert_eq!( page_data.description, Some(str!("Two")) );
+			assert_eq!( page_data.heading, Some(str!("Three")) );
+			assert_eq!( page_data.caption, Some(str!("Four")) );
+			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
+			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
+			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
+		}
+	}
+
+	mod long {
+		use super::*;
+
+		#[test] fn all_fields() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| destination = test
+				| title = One
+				| description = Two
+				| heading = Three
+				| caption = Four
+				| tags = five / six / seven
+				| release-date = 2020 April 1
+				| last-update = 2021 May 31
 				-->
 			"});
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
@@ -634,6 +652,17 @@ mod full {
 
 	mod unicode {
 		use super::*;
+
+		#[test] fn carriage_returns() {
+			let page_data = parse(indoc! {"
+				# Test\r
+				<!-- #SQUARK live!\r
+				| dest = test\r
+				-->
+			"});
+			assert_eq!( page_data.heading, Some(str!("Test")) );
+			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+		}
 
 		#[test] fn chinese() {
 			let page_data = parse(indoc! {"
