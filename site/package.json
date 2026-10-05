@@ -19,6 +19,7 @@
   
   "devDependencies":
   {
+    "stranger-quarkdown": "latest",
     "@sveltejs/adapter-static": "^3.0",
     "@sveltejs/kit": "^2.69",
     "@sveltejs/vite-plugin-svelte": "^7.2",

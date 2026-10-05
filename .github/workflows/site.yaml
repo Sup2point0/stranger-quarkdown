@@ -28,13 +28,7 @@ jobs:
 
       - name: '› npm ci'
         run: |
-          npm ci
-        # run: |
-        #   npm install stranger-quarkdown@latest
-
-      - name: '› cargo install squarkdown'
-        run: |
-          cargo install squarkdown
+          npm install stranger-quarkdown@latest
 
       - name: '› npm run buildx'
         run: |
