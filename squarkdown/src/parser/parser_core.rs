@@ -38,7 +38,7 @@ impl CharmParser<'_>
 		let chars = self.source.get(self.i..end);
 		
 		match chars {
-			Some(c) => c.iter().collect(),
+			Some(c) => c.iter().take_while(|&&c| c != '\n').collect(),
 			None => str!("END OF FILE"),
 		}
 	}
