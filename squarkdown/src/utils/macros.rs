@@ -33,13 +33,6 @@ macro_rules! to {
 	($($args:tt)*) => { || format!($($args)*) };
 } pub use to;
 
-/// Lazily produce a string for an error path.
-#[macro_export]
-macro_rules! hints {
-	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
-	($($args:tt)*) => { || format!($($args)*) };
-} pub use hints;
-
 
 // == STRUCTS == //
 

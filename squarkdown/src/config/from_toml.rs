@@ -11,6 +11,15 @@ use regex::{ Regex };
 use std::path::{ Path, PathBuf };
 
 
+/// Lazily produce a string for a hint message.
+macro_rules! hints
+{
+	($($args:tt)*) => {
+		|| format!($($args)*)
+	};
+}
+
+
 /// Loading from `squarkup.toml`
 impl SquarkupConfig
 {
