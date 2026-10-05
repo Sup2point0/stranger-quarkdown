@@ -4,7 +4,7 @@
 <br>
 
 
-## v4.0 (Alpha)
+## v4.0
 
 Squarkdown has been rewritten in Rust. Yeah, I’m sorry, lmao.
 
@@ -14,30 +14,42 @@ While I was at it, I also implemented some way overdue features that were too sc
 
 ### Breaking
 - Squarkdown is now installable as a cross-platform binary from [crates.io](https://crates.io/crates/squarkdown) or [npm](https://www.npmjs.com/package/stranger-quarkdown), instead of requiring a local Ruby installation.
-  - Install it with either `cargo install squarkdown`/`npm i stranger-quarkdown`
+  - Install it with `cargo install squarkdown`/`npm install stranger-quarkdown`
   - Run it with `squarkdown`/`npx squarkdown`
+- Squarkup configuration has been overhauled; see [config](#config)
+- `+page.svelte` and `+page.js` bases have been removed, since they were unnecessary
+- SCSS preprocessing has been removed, since it wasn’t that useful
 
 ### New
-- Squarkdown now resolves links, rewriting internal links to other Markdown files into links to webpages
+- Squarkdown now resolves links, rewriting internal links to other Markdown files or assets into links to webpages
   - Links with `%20`-encoded spaces are normalised to `-`
-- Improved error messages with hints, diagnostics and line numbers
+- Improved error messages with contexts, hints and diagnostics
 - Safer path resolution, with stricter checks to ensure paths remain inside your repository
 - `stranger-quarkdown` npm package exposes `PageData<"short">` and `PageData<"long">` types for `+page.ts` files
 
 ### Rendering
-- Squarkdown now uses a proper context-aware linear parsing engine, instead of global RegEx substitutions, so `#SQUARK`s are properly handled inside code blocks!
+- Squarkdown now uses a proper context-aware Markdown parsing engine, instead of global RegEx substitutions, so `#SQUARK`s are properly handled inside code blocks!
 - New `#SQUARK slash` squark, for removing content from rendered output
 
 ### Config
-- Favour `squarkup.toml` over `squarkup.json`
-- *Breaking*: `errors.on-no-dir` changed to `errors.file-already-exists`
-  - Available options are `kill`, `skip`, `overwrite`
-  - This is more relevant than the previous "if directory doesn’t exist" – it doesn’t really matter if the directory doesn’t exist, and for a fully generated site it never will.
-- *New*: `format` config options for controlling how text is rendered
-  - `format.preserve-comments`
-  - `format.externalise-links`
-  - `format.mark_invalid-links`
-- Support `/squarkup.toml` in project root, not just `/.squarkdown/squarkup.toml`
+- Squarkdown now uses `squarkup.toml` instead of `squarkup.json`
+  - Squarkdown also accepts a `squarkup.toml` in your project root, instead of `.squarkdown/squarkup.toml`
+- Many config options have been renamed:
+  - `opts / on-error` -> `errors.on-error`
+  - `opts / on-no-dir` -> `errors.file-already-exists` (with semantic change)
+  - `paths / dest` -> `out.folder`
+  - `out / site-data` -> `out.site-data-path`
+  - `assets / path` -> `assets.folder`
+  - `assets / site-assets` -> `assets.site-assets-folder`
+- New options:
+  - `errors.strict` to enable stricter checks
+  - `errors.link-broken` for broken link handling
+  - `out.render-page-ts` to produce `+page.ts` files
+  - `out.shorter-fields` to prefer shorter field names
+  - `out.site-data-path` for where to export `site.json`
+  - `format.preserve-heading` to preserve `# Heading`
+  - `format.preserve-comments` to preserve `<!-- comments -->`
+  - `format.externalise-links` (not yet implemented)
 
 
 <br>
