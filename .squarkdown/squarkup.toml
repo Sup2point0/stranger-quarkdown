@@ -4,8 +4,8 @@
 strict = true
 on-error = "kill"
 file-already-exists = "overwrite"
-# inactive-link = "link-to-github"
-inactive-link = "error"
+# broken-link = "link-to-github"
+broken-link = "error"
 
 [paths]
 site = "/site/"

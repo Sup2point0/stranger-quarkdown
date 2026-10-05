@@ -116,7 +116,7 @@ pub struct ErrorConfig {
 	pub file_already_exists: FileAction,
 
 	/// When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?
-	pub inactive_link: LinkRewriteAction,
+	pub link_broken: LinkRewriteAction,
 }
 
 #[derive(EnumStringify)] #[enum_stringify(case = "kebab")]

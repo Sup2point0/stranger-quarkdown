@@ -142,7 +142,7 @@
           "enum": ["overwrite", "error", "skip"]
         },
 
-        "inactive-link": {
+        "broken-link": {
           "title": "Inactive Link Handling",
           "type": "string",
           "enum": ["mark-invalid", "strip-extension", "link-to-github", "error"]

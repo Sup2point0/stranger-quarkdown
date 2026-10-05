@@ -12,4 +12,4 @@ externalise-links = true
 [errors]
 strict = false
 on-error = "kill"
-inactive-link = "error"
+broken-link = "error"

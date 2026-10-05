@@ -53,7 +53,7 @@ impl SquarkupConfig
 				strict: true,
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
-				inactive_link: LinkRewriteAction::STRIP_EXTENSION,
+				link_broken: LinkRewriteAction::STRIP_EXTENSION,
 			},
 		}
 	}

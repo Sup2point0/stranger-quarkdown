@@ -13,4 +13,4 @@ site-assets-folder = ".assets/.site/"
 [errors]
 strict = false
 on-error = "kill"
-inactive-link = "error"
+broken-link = "error"
