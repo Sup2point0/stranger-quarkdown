@@ -79,7 +79,7 @@ impl CharmParser<'_>
 		{
 			match self.current() {
 				Some(c) if c != expected => {
-					return Err(SquarkError::Unrecoverable {
+					return Err(SquarkError::Recoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
 						debug: self.ctx.printed(),
@@ -121,7 +121,7 @@ impl CharmParser<'_>
 		{
 			match self.current() {
 				Some(c) if !c.eq_ignore_ascii_case(&expected) => {
-					return Err(SquarkError::Unrecoverable {
+					return Err(SquarkError::Recoverable {
 						msg: fmt!("unexpected input"),
 						hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
 						debug: self.ctx.printed(),
@@ -199,7 +199,7 @@ impl CharmParser<'_>
 
 			if let Some(c) = self.current() && !Self::is_ident_char(c)
 			{
-				return Err(SquarkError::Unrecoverable {
+				return Err(SquarkError::Recoverable {
 					msg: fmt!("expected identifier, but found: {W}{}", self.preview()),
 					hint: fmt!("identifiers cannot start with {W}{c}"),
 					debug: self.ctx.printed(),
