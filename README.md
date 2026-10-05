@@ -2,8 +2,10 @@
 
 ![Stranger Quarkdown: A Successor to Quarkdown](.github/squark-cover.png)
 
-[![Tests](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yml)
-[![Site](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yaml/badge.svg)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yml)
+[![crates.io](https://img.shields.io/crates/v/squarkdown?color=fb8717&style=flat-square)](https://crates.io/crates/squarkdown)
+[![npm](https://img.shields.io/npm/v/stranger-quarkdown?color=fb8717&style=flat-square)](https://www.npmjs.com/package/stranger-quarkdown)
+[![tests](https://img.shields.io/github/actions/workflow/status/Sup2point0/stranger-quarkdown/test.yaml?label=tests&style=flat-square)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/test.yaml)
+[![site](https://img.shields.io/github/actions/workflow/status/Sup2point0/stranger-quarkdown/site.yaml?label=site&style=flat-square)](https://github.com/Sup2point0/stranger-quarkdown/actions/workflows/site.yaml)
 
 </div>
 
