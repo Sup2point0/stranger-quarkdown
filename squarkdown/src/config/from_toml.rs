@@ -150,7 +150,7 @@ impl SquarkupConfig
 					match Regex::new(pattern) {
 						Ok(compiled) => s.paths.include.push(compiled),
 						Err(e) => return Err(SquarkError::External {
-							err: bx!(e),
+							err: Box::new(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
 						})
 					}
@@ -166,7 +166,7 @@ impl SquarkupConfig
 					match Regex::new(pattern) {
 						Ok(compiled) => s.paths.exclude.push(compiled),
 						Err(e) => return Err(SquarkError::External {
-							err: bx!(e),
+							err: Box::new(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
 						})
 					}

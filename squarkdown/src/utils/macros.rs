@@ -41,10 +41,6 @@ macro_rules! pair {
 	($t:expr) => { ($t, $t) }
 } pub(crate) use pair;
 
-macro_rules! bx {
-	($t:expr) => { Box::new($t) };
-} pub(crate) use bx;
-
 macro_rules! strings {
 	() => {
 		tiny_vec!([String; 1])

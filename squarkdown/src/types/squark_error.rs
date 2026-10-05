@@ -78,7 +78,7 @@ impl SquarkError
 	{
 		Self::External {
 			msg: str!("unexpected external error"),
-			err: bx!(error),
+			err: Box::new(error),
 		}
 	}
 }
