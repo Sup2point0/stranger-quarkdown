@@ -26,9 +26,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './site/package-lock.json'
 
-      - name: '› npm install'
+      - name: '› npm ci'
         run: |
-          npm install stranger-quarkdown@latest
+          npm ci
+        # run: |
+        #   npm install stranger-quarkdown@latest
+
+      - name: '› cargo install squarkdown'
+        run: |
+          cargo install squarkdown
 
       - name: '› npm run buildx'
         run: |

@@ -28,7 +28,6 @@
     "remark-footnotes": "2.0.0",
     "remark-numbered-footnote-labels": "1.1.0",
     "sass": "^1.101",
-    "stranger-quarkdown": "latest",
     "svelte": "^5.56",
     "svelte-preprocess": "^6.0",
     "tslib": "^2.8",
