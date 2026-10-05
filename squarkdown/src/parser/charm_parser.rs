@@ -168,8 +168,7 @@ impl CharmParser<'_>
 		{
 			let mut flags = strings!();
 
-			while let Some(c) = self.current()
-				&& c != '\n'
+			while let Some(c) = self.current() && c != '\n'
 			{
 				if self.lookahead("-->") { break; }
 
@@ -177,7 +176,9 @@ impl CharmParser<'_>
 					Ok(id) => id,
 					Err(e) => {
 						self.errors.push(e);
-						self.advance()?;
+						while let Some(c) = self.current() && !Self::is_ident_char(c) {
+							self.advance()?;
+						}
 						continue;
 					},
 				};
@@ -549,7 +550,7 @@ mod full {
 					| title = Success
 					-->
 				"});
-				assert_eq!( page_data.flags, strings!["keep"] );
+				assert_eq!( page_data.flags, strings!["very", "keep"] );
 				assert_eq!( page_data.title, Some(str!("Success")) );
 			}
 		}
