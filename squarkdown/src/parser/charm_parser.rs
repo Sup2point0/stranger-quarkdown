@@ -82,7 +82,8 @@ impl<'d> CharmParser<'d>
 
 		let page = PageData::init(self.filepath, flags, fields, self.config)?;
 		
-		self.errors.or(page)
+		self.errors.depends(&self.config)?;
+		Ok(page)
 	}
 }
 
