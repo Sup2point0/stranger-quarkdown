@@ -294,6 +294,7 @@ impl CharmParser<'_>
 			self.eat_whitespace();
 
 			let key = self.parse_ident()?;
+			let key = key.replace('-', "_");
 
 			self.eat_whitespace();
 			self.eat("=", to!("after field identifier"))?;
@@ -603,6 +604,18 @@ mod full {
 			"});
 			assert_eq!( page_data.title, Some(str!("not / a / list")) );
 			assert_eq!( page_data.caption, Some(str!("not / a / list")) );
+		}
+
+		#[test] fn hyphen_to_underscore() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				---
+				| some-field = js
+				-->
+			"});
+			assert_eq!( page_data.other["some_field"], strings!("js") );
 		}
 
 		#[test] fn trailing_slash() {

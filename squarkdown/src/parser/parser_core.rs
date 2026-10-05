@@ -210,7 +210,7 @@ impl CharmParser<'_>
 				out.push(c);
 				self.advance()?;
 			}
-			
+
 			Ok(out)
 		})
 	}
