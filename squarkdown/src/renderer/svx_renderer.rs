@@ -405,13 +405,13 @@ impl Renderer<'_>
 		match self.config.errors.link_broken
 		{
 			LinkRewriteAction::MARK_INVALID => {
-				todo!("mark invalid")
+				todo!("mark invalid is not yet supported")
 			}
 			LinkRewriteAction::STRIP_EXTENSION => {
-				todo!("replace regex")
+				todo!("replace regex is not yet supported")
 			}
 			LinkRewriteAction::LINK_TO_GITHUB => {
-				todo!("link to github")
+				todo!("link to github is not yet supported")
 			}
 			LinkRewriteAction::ERROR => {
 				self.errors.push(SquarkError::Recoverable {
