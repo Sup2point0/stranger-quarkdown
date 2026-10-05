@@ -14,13 +14,15 @@
       {
         "site": {
           "title": "Site Directory",
-          "type": "string"
+          "type": "string",
+          "description": "[relative to root]\n\nThe folder containing your SvelteKit site."
         },
 
         "sources": {
           "title": "Source Directories",
           "type": "array",
-          "items": {"type": "string"}
+          "items": {"type": "string"},
+          "description": "[relative to root]\n\nSource folders from which to start searching for Markdown files."
         },
 
         "include": {
@@ -61,7 +63,7 @@
         "site-data-path": {
           "title": "Site Data Filepath",
           "type": "string",
-          "description": "Where to export site data, including the (expected) `.json` extension.\n\nIf absent, site data is not exported."
+          "description": "[relative to `paths.site`]\n\nWhere to export site data, including the (expected) `.json` extension.\n\nIf absent, site data is not exported."
         }
       }
     },

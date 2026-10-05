@@ -35,10 +35,10 @@ pub struct PathsConfig {
 	/// The root directory of the user's project, from which squarkup begins.
 	pub root: PathBuf,
 
-	/// The directory containing the user's SvelteKit site.
+	/// The folder containing the user's SvelteKit site.
 	pub site: PathBuf,
 	
-	/// Source directories from which to start searching for Markdown files.
+	/// Source folders from which to start searching for Markdown files.
 	/// 
 	/// `/` is a special entry, treated as 'root-only'; it won’t recurse into any directories. Use this to pick up files like `README.md`, `CHANGELOG.md`, etc.
 	pub sources: Vec<PathBuf>,
@@ -52,7 +52,7 @@ pub struct PathsConfig {
 
 #[derive(Clone, Debug)]
 pub struct OutConfig {
-	/// Where to export files relative to, relative to `.paths.site`.
+	/// Where to export files relative to.
 	/// 
 	/// `dest` paths in files are relative to this folder.
 	pub folder: PathBuf,
