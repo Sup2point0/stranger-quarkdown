@@ -68,7 +68,7 @@ macro_rules! strings {
 #[macro_export]
 macro_rules! catch
 {
-	($errs:ident => $eval:block) => {
+	($errs:expr => $eval:block) => {
 		if let Err(e) = (|| -> SquarkResult<_> { $eval; Ok(()) })() {
 			$errs.push(e);
 		}
