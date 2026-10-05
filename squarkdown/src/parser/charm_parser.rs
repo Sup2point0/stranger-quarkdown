@@ -176,9 +176,14 @@ impl CharmParser<'_>
 					Ok(id) => id,
 					Err(e) => {
 						self.errors.push(e);
-						while let Some(c) = self.current() && !Self::is_ident_char(c) {
+
+						while let Some(c) = self.current()
+							&& !Self::is_ident_char(c)
+							&& c != '\n'
+						{
 							self.advance()?;
 						}
+
 						continue;
 					},
 				};

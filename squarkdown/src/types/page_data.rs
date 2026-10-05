@@ -76,7 +76,7 @@ impl PageData
 				msg: fmt!("missing field: {W}dest"),
 				hint: fmt!("active pages must specify where they should be rendered to"),
 				debug: vec![
-					slash!("in file: {}", filepath),
+					fmt!("parsed fields: {GREY1}{fields:?}")
 				],
 			});
 		}
