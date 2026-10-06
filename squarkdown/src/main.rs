@@ -40,7 +40,7 @@ fn main() -> ExitCode
 			"--assets" => assets = true,
 			"--fonts"  => fonts = true,
 
-			f if f.starts_with("-") => {
+			f if f.starts_with('-') => {
 				log::bad!("unknown CLI option: {f}");
 				found_unknown = true;
 			}

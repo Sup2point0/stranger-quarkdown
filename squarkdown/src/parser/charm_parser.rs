@@ -86,7 +86,7 @@ impl<'d> CharmParser<'d>
 
 		let page = PageData::init(self.filepath, flags, fields, self.config)?;
 		
-		self.errors.depends(&self.config)?;
+		self.errors.depends(self.config)?;
 		Ok(page)
 	}
 }
@@ -270,7 +270,7 @@ impl CharmParser<'_>
 						loop {
 							match self.current()
 							{
-								Some('|') | Some('-') if can_recover => break,
+								Some('|' | '-') if can_recover => break,
 								Some('\n') => can_recover = true,
 								_          => can_recover = false,
 							}

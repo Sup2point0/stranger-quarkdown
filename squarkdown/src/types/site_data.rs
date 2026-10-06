@@ -124,6 +124,7 @@ impl SiteData
 		out.end()
 	}
 
+	#[must_use]
 	pub fn to_serializable<'d>(&'d self, config: &'d SquarkupConfig) -> SerializableSiteData<'d>
 	{
 		SerializableSiteData { site_data: self, config }

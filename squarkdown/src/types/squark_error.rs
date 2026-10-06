@@ -142,7 +142,7 @@ impl SquarkError
 		matches!(self, Self::ABANDON)
 		||
 		matches!(self, Self::Multiple{ errs, .. }
-			if errs.iter().all(|e| e.is_fine())
+			if errs.iter().all(Self::is_fine)
 		)
 	}
 

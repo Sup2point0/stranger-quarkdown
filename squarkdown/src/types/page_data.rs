@@ -60,7 +60,7 @@ impl PageData
 		let mut destination = PathBuf::new();
 
 		if let Some(dest) = Self::take_flat(&mut fields, "destination", "dest") {
-			destination = path!(config.out.folder / utils::to_rel(&dest.replace(" ", "-"))).clean();
+			destination = path!(config.out.folder / utils::to_rel(&dest.replace(' ', "-"))).clean();
 
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {
@@ -285,6 +285,7 @@ impl PageData
 		map.end()
 	}
 
+	#[must_use]
 	pub fn to_serializable<'d>(&'d self, config: &'d SquarkupConfig) -> SerializablePageData<'d>
 	{
 		SerializablePageData { page_data: self, config }
