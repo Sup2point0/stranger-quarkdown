@@ -36,4 +36,4 @@ your-project/
 
 Squarkdown recursively looks for `.md` from `project/`, preprocesses active files it finds, and outputs to `site/src/routes/`.
 
-Of course, your project may require a different structure, so these paths are [all configurable](../reference/squarkup-json.md) in `squarkup.json`.
+Of course, your project may require a different structure, so these paths are [all configurable](../reference/squarkup-config.md) in `squarkup.json`.

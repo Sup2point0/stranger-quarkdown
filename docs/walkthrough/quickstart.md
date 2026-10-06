@@ -102,7 +102,7 @@ For now, all we need is to specify that our site lives under `/site/`:
 site = "site/"
 ```
 
-> See [Squarkup Configuration](squarkup-config.md) for full details on all the options that can go in `squarkup.toml`.
+> See [Squarkup Configuration](../reference/squarkup-config.md) for full details on all the options that can go in `squarkup.toml`.
 
 > [!Tip]
 > Try running `npx squarkdown` now. What happens?
@@ -289,7 +289,7 @@ Squarkdown also supports seasons:
 
 Here’s some things you might want to try next:
 
-- Modify your [Squarkup Config](squarkup-config.md) to suit your needs
+- Modify your [Squarkup Config](../reference/squarkup-config.md) to suit your needs
 - Use [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md) to customise how Squarkdown processes and renders your Markdown
 - Use `squarkdown --assets` to handle assets and asset links
 
