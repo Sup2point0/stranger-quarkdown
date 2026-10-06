@@ -2,7 +2,7 @@
 
 <footer>
   <div class="left">
-    <p> See something that needs fixing? Drop an <a target="_blank" href="https://github.com/Sup2point0/stranger-quarkdown">issue on GitHub</a>! </p>
+    <p> See something that needs fixing? Drop an <a target="_blank" href="https://github.com/Sup2point0/stranger-quarkdown/issues">issue on GitHub</a>! </p>
   </div>
 
   <div class="right">
