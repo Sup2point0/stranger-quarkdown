@@ -3,6 +3,8 @@
 #![allow(unused_doc_comments)]
 #![allow(non_camel_case_types)]
 
+pub mod cli;
+
 pub mod config;
 pub mod resolver;
 pub mod parser;
