@@ -7,19 +7,18 @@ A section in the left navigation pane.
 
 import { slide } from "svelte/transition";
 import { base } from "$app/paths";
+import type { Snippet } from "svelte";
 
 
 interface Props {
-  title: string;
-  link?: string;
-    intern?: string;
-  children?: any;
+  title: string
+  link?: string
+    intern?: string
+  open?: boolean
+  children?: Snippet
 }
 
-let { title, link, intern, children }: Props = $props();
-
-
-let open = $state(true);
+let { title, link, intern, open = true, children }: Props = $props();
 
 </script>
 
