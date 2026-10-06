@@ -5,6 +5,7 @@ site = "../../test-project/"
 
 [out]
 folder = "src/routes/fields/short/"
+site-data-path = "src/data/short.json"
 render-page-ts = true
 shorter-fields = true
 
