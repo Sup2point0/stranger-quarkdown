@@ -1,4 +1,8 @@
 //! The Squarkdown core engine, containing all of the components required for squarkup. Assembling them together into the full squarkup pipeline is left to `main.rs`.
+//! 
+//! If you’re reading this on docs.rs, note that Squarkdown is not intended to be a library, and all of this is unstable implementation detail. (It’s published on docs.rs because Squarkdown uses a `lib.rs`+`main.rs` structure, and docs.rs always builds the library docs for a crate.)
+//! 
+//! Of course, feel free to use these docs to understand the internals of how Squarkdown works!
 
 #![allow(unused_doc_comments)]
 #![allow(non_camel_case_types)]
