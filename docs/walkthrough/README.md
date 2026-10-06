@@ -4,14 +4,15 @@
 | desc = A full walkthrough on how to use all of Squarkdown’s features.
 -->
 
-Welcome to the Squarkdown walkthrough. For a lightning-quick overview of how it works, check out [quickstart](quickstart.md).
+Here you’ll find guides on how to use Squarkdown.
 
-For detailed guidance on Squarkdown’s usage and features, see the below pages. You can read them in any order you like – this is just a recommended reading order.
+For a walkthrough on how to get Squarkdown set up and running, see [Quickstart](quickstart.md).
+
+For more focused guidance on specific Squarkdown features, see the below pages. You can read them in any order you like – this is just a recommended order!
 
 - [What is Squarkdown?](what-is-squarkdown.md)
 - [Project Requirements](project-requirements.md)
 - [Project Structure](project-structure.md)
 - [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md)
-- [Configuring Squarkup for a Repository](repo-config.md)
 - [Configuring Squarkup for a File](file-config.md)
 - [Making Full Use of Squarkdown](further-features.md)

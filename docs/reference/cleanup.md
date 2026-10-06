@@ -3,7 +3,7 @@
 | dest = docs/reference/cleanup
 -->
 
-Sometimes there’s a couple things in a Markdown file that need to be cleaned up when it’s processed by Squarkdown. We can let Squarkdown know it needs to handle these through the `clean` field in the [squark charm](squark-charm.md).
+Sometimes there’s a couple things in a Markdown file that need to be cleaned up when it’s processed by Squarkdown. We can let Squarkdown know it needs to handle these through the `clean` field in the [squark charm](charm-squark.md).
 
 
 <br>

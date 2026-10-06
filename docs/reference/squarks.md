@@ -14,7 +14,7 @@
 Currently, the only existing singleton squark is the critical ***squark charm***, but this may change in future.
 
 ### Squark Charm
-> *See* [Squark Charm](squark-charm.md).
+> *See* [Squark Charm](charm-squark.md).
 
 
 <br>

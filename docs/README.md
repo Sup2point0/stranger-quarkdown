@@ -14,8 +14,14 @@ You can also read these docs on the [site](https://sup2point0.github.io/stranger
 <br>
 
 
-## Recommended Reading Order
+## Directory
 
-New to Squarkdown? Start with the [walkthrough](walkthrough).
+New to Squarkdown? Start with the [Walkthrough](walkthrough/).
 
-Looking for something? Complete documentation is in [reference](reference).
+Looking for something? Complete documentation is in [Reference](reference/).
+
+If you’re confused what a recurring word means, check [Glossary](glossary.md).
+
+To understand why Squarkdown exists and what exactly it’s for, read [Rationale](rationale.md).
+
+Enjoy Squarkdown!
