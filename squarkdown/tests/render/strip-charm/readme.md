@@ -1,4 +1,4 @@
-# Squark Charm is Always Stripped
+# Charm Squark is Always Stripped
 <!-- #SQUARK live!
 | dest = .
 -->

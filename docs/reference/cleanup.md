@@ -22,9 +22,9 @@ Similarly, Svelte will try to process `<` and `>` as HTML tags, even if they are
 
 ## Braces
 
-Curly braces `{}` pose an issue since Svelte and MDSveX use them for interpolation. This means when we try to import the `.svx` file, errors are raised as Svelte attempts to process the text inside as JavaScript.
+Curly braces `{}` pose an issue since Svelte and MDsveX use them for interpolation. This means when we try to import the `.svx` file, errors are raised as Svelte attempts to process the text inside as JavaScript.
 
-To solve this, Squarkdown replaces all occurrences of `{` with `&amp;&lbrace;` (and likewise for `}`). The double escape is necessary since `&lbrace;` alone would still be rendered to `{` by MDSveX.
+To solve this, Squarkdown replaces all occurrences of `{` with `&amp;&lbrace;` (and likewise for `}`). The double escape is necessary since `&lbrace;` alone would still be rendered to `{` by MDsveX.
 
 
 <br>

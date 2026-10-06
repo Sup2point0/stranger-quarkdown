@@ -13,14 +13,14 @@
 > [!Warning]
 > This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
 
-The squark charm is an extended squark which should go under the `# h1` title of a page. It provides all the metadata and instructions for how Squarkdown should squarkup the page.
+The charm squark is an extended squark which should go under the `# h1` title of a page. It provides all the metadata and instructions for how Squarkdown should squarkup the page.
 
-When Squarkdown processes files, it will only export them if they indicate they are **active** and provide necessary metadata. This takes the form of an expanded squark known as the **squark charm**, which looks like this:
+When Squarkdown processes files, it will only export them if they indicate they are **active** and provide necessary metadata. This takes the form of an expanded squark known as the **charm squark**, which looks like this:
 
 ```md
 <!-- #SQUARK live!
 | dest = path/to/destination
-| capt = This is a squark charm!
+| capt = This is a charm squark!
 | ...
 -->
 ```
@@ -32,9 +32,9 @@ When Squarkdown processes files, it will only export them if they indicate they 
 ## Overview
 
 > [!Tip]
-> Place the squark charm at the start of the text, below the title if you prefer. The sooner Squarkdown can find it, the more time saved – across a large repo, it adds up!
+> Place the charm squark at the start of the text, below the title if you prefer. The sooner Squarkdown can find it, the more time saved – across a large repo, it adds up!
 
-The squark charm is broken over multiple lines. After `#SQUARK` comes a series of [Flags](#Flags). These tell Squarkdown, *Hey, keep this in mind!*
+The charm squark is broken over multiple lines. After `#SQUARK` comes a series of [Flags](#Flags). These tell Squarkdown, *Hey, keep this in mind!*
 
 Below are the [Fields](#Fields), neatly arranged with pipe signs and equals, which can be set to desired values. Squarkdown processes and stores these internally for processing and rendering.
 
@@ -89,7 +89,7 @@ For fields which accept multiple values, these should be separated with ` / `.
 
 ## Example
 
-Here’s what a Markdown file with a full squark charm would look like:
+Here’s what a Markdown file with a full charm squark would look like:
 
 ```md
 # Example: Never Gonna Give You Up
