@@ -6,6 +6,7 @@ use crate::macros::*;
 
 use path_clean::PathClean;
 use path_macro::path;
+use serde::ser::SerializeMap;
 use time::Date;
 use time::macros::format_description;
 
@@ -242,7 +243,7 @@ impl PageData
 {
 	/// Serialise this page data to JSON with long, unabbreviated field names.
 	#[must_use]
-	pub fn serialised_long<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
+	pub fn serialized<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
 	{
 		SerialisedPageData {
 			filepath:         utils::display_rel(&self.filepath, &config.paths.root),
@@ -263,12 +264,11 @@ impl PageData
 }
 
 
-#[serde_with::skip_serializing_none]
-#[derive(serde::Serialize)]
 pub struct SerialisedPageData<'s>
 {
 	pub filepath: String,
 	pub destination: String,
+
 	pub flags: &'s [String],
 
 	pub title:       Option<&'s String>,
@@ -278,17 +278,62 @@ pub struct SerialisedPageData<'s>
 	
 	pub tags: &'s [String],
 	
-	#[serde(serialize_with = "serialise_date")]
 	pub release_date: Option<Date>,
-	
 	pub release_date_raw: Option<&'s String>,
-	
-	#[serde(serialize_with = "serialise_date")]
 	pub last_update: Option<Date>,
-	
 	pub last_update_raw: Option<&'s String>,
 
 	pub other: &'s HashMap<String, Strings>,
+}
+
+impl SerialisedPageData<'_>
+{
+	/// Serialise to serde applying `config`.
+	fn serialize_with_config<S>(&self, s: S, config: &SquarkupConfig) -> Result<S::Ok, S::Error>
+		where S: serde::Serializer
+	{
+		let f = config.out.shorter_fields;
+		let mut map = s.serialize_map(None)?;
+
+		map.serialize_entry(self.path(f), &self.filepath)?;
+		map.serialize_entry(self.dest(f), &self.destination)?;
+
+		map.serialize_entry(self.flags(f), &self.flags)?;
+
+		if let Some(v) = self.title {
+			map.serialize_entry(self.title(f), v)?;
+		}
+		if let Some(v) = self.description {
+			map.serialize_entry(self.desc(f), v)?;
+		}
+		if let Some(v) = self.heading {
+			map.serialize_entry(self.head(f), v)?;
+		}
+		if let Some(v) = self.caption {
+			map.serialize_entry(self.capt(f), v)?;
+		}
+
+		map.serialize_entry(self.tags(f), &self.tags)?;
+		
+		if let Some(v) = self.release_date {
+			map.serialize_entry(self.date(f), &format_date(v))?;
+		}
+		if let Some(v) = self.release_date_raw {
+			map.serialize_entry(self.date_raw(f), v)?;
+		}
+		if let Some(v) = self.last_update {
+			map.serialize_entry(self.update(f), &format_date(v))?;
+		}
+		if let Some(v) = self.last_update_raw {
+			map.serialize_entry(self.update_raw(f), v)?;
+		}
+
+		for (key, val) in self.other {
+			map.serialize_entry(key, val)?;
+		}
+
+		map.end()
+	}
 }
 
 macro_rules! impl_field_repr
@@ -306,7 +351,7 @@ macro_rules! impl_field_repr
 
 impl SerialisedPageData<'_>
 {
-	impl_field_repr!(filepath   => "path",       "filepath"        );
+	impl_field_repr!(path       => "path",       "filepath"        );
 	impl_field_repr!(dest       => "dest",       "destination"     );
 	impl_field_repr!(flags      => "flags"                         );
 	impl_field_repr!(title      => "title"                         );
@@ -322,15 +367,9 @@ impl SerialisedPageData<'_>
 }
 
 
-fn serialise_date<S>(date: &Option<Date>, serialiser: S) -> Result<S::Ok, S::Error>
-	where S: serde::Serializer
+fn format_date(date: Date) -> String
 {
-	let Some(date) = date else {
-		return serialiser.serialize_none();
-	};
-
-	let format = format_description!("[year]-[month]-[day]");
-	let formatted = date.format(format).expect("date serialisation always succeeds");
-
-	serialiser.serialize_str(&formatted)
+	date
+		.format(format_description!("[year]-[month]-[day]"))
+		.expect("date serialisation always succeeds")
 }

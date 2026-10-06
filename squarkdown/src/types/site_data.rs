@@ -114,7 +114,7 @@ impl SiteData
 			"pages":
 				self.pages.iter()
 				.map(|(key, page)|
-					(key, page.serialised_long(config))
+					(key, page.serialized(config))
 				)
 				.collect::<HashMap<_, _>>(),
 

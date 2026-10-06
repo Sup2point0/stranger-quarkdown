@@ -27,7 +27,7 @@ impl Renderer<'_>
 		}
 
 		let mut f = BufWriter::new(File::create(dest)?);
-		let d = self.page.serialised_long(self.config);
+		let d = self.page.serialized(self.config);
 		let s = self.config.out.shorter_fields;
 
 		f.write_all(b"import type { PageData } from \"squarkdown\";\n\n")?;
@@ -36,9 +36,9 @@ impl Renderer<'_>
 		f.write_all(b"> {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
-		writeln!(f, "\t\t{}: {:?},", d.filepath(s), d.filepath)?;
-		writeln!(f, "\t\t{}: {:?},", d.dest(s),     d.destination)?;
-		writeln!(f, "\t\t{}: {:?},", d.flags(s),    d.flags)?;
+		writeln!(f, "\t\t{}: {:?},", d.path(s),  d.filepath)?;
+		writeln!(f, "\t\t{}: {:?},", d.dest(s),  d.destination)?;
+		writeln!(f, "\t\t{}: {:?},", d.flags(s), d.flags)?;
 
 		if let Some(v) = d.title       { writeln!(f, "\t\t{}: {v:?},", d.title(s))?; }
 		if let Some(v) = d.description { writeln!(f, "\t\t{}: {v:?},", d.desc(s))?; }
