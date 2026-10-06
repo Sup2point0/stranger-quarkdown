@@ -16,6 +16,9 @@ enum Mode
 
 	/// `squarkdown`
 	SQUARKUP,
+
+	/// `squarkdown init`
+	INIT,
 }
 
 
@@ -30,16 +33,13 @@ fn main() -> ExitCode
 	for arg in std::env::args().skip(1) {
 		match arg.as_str()
 		{
-			"--help" | "-h" => {
-				mode = Mode::HELP;
-				break;
-			}
-			"--version" => {
-				mode = Mode::VERSION;
-				break;
-			}
+			"--help" | "-h" => { mode = Mode::HELP; break; }
+			"--version"     => { mode = Mode::VERSION; break; }
+			"init"          => { mode = Mode::INIT; break; }
+
 			"--assets" => assets = true,
 			"--fonts"  => fonts = true,
+
 			f if f.starts_with("-") => {
 				log::bad!("unknown CLI option: {f}");
 				found_unknown = true;
@@ -73,6 +73,14 @@ fn main() -> ExitCode
 			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 			log::line();
 			cli::squarkdown(assets, fonts)
+		}
+
+		Mode::INIT =>
+		{
+			log::line();
+			log::bad!("{W}squarkdown init{R} is not yet supported!");
+			log::line();
+			ExitCode::FAILURE
 		}
 	}
 }
