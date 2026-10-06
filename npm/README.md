@@ -1,5 +1,7 @@
 # Stranger Quarkdown
 
+[Docs](https://github.com/Sup2point0/stranger-quarkdown/tree/main/docs)&ensp;·&ensp;[Quickstart](https://github.com/Sup2point0/stranger-quarkdown/blob/main/docs/walkthrough/quickstart.md)&ensp;·&ensp;[FAQ](https://github.com/Sup2point0/stranger-quarkdown/blob/main/FAQ.md)&ensp;·&ensp;[Changelog](https://github.com/Sup2point0/stranger-quarkdown/blob/main/CHANGELOG.md)&ensp;·&ensp;[Site](https://sup2point0.github.io/stranger-quarkdown/docs)
+
 Markdown preprocessing automation for Svelte/Kit projects.
 
 Please visit [the GitHub](https://github.com/Sup2point0/stranger-quarkdown#readme) for the full README :]
