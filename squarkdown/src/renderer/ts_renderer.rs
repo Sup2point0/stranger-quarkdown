@@ -36,8 +36,12 @@ impl Renderer<'_>
 		f.write_all(b"> {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
-		writeln!(f, "\t\t{}: {:?},", p.path(s),  p.filepath)?;
-		writeln!(f, "\t\t{}: {:?},", p.dest(s),  p.destination)?;
+		let path = utils::display_rel(&p.filepath, &self.config.paths.root);
+		writeln!(f, "\t\t{}: {:?},", p.path(s), path)?;
+
+		let dest = utils::display_rel(&p.destination, &self.config.out.folder);
+		writeln!(f, "\t\t{}: {:?},", p.dest(s), dest)?;
+		
 		writeln!(f, "\t\t{}: {:?},", p.flags(s), p.flags)?;
 
 		if let Some(v) = &p.title       { writeln!(f, "\t\t{}: {v:?},", p.title(s))?; }

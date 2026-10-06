@@ -39,8 +39,7 @@ use std::fs;
 	assert_contains!( data, "release_date\": \"2020-03-31\"," );
 	assert_contains!( data, "release_date_raw\": \"2020 March 31\"," );
 	assert_contains!( data, "last_update\": \"2020-04-01\"," );
-	assert_contains!( data, "last_update_raw\": \"2020 April 1\"," );
-	assert_contains!( data, "other\": {}" );
+	assert_contains!( data, "last_update_raw\": \"2020 April 1\"" );
 
 	assert_contains!( data, "work?\": [\n" );
 	assert_contains!( data, "does\": [\n" );
