@@ -1,6 +1,6 @@
-# Squark Charm
+# Charm Squark
 <!-- #SQUARK live!
-| dest = docs/reference/squark-charm
+| dest = docs/reference/charm-squark
 -->
 
 <div class="quicklinks" align="center">
