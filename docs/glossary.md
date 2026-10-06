@@ -13,13 +13,13 @@ You don’t by any means need to understand all of these to use Squarkdown, but 
 <br>
 
 
-### Active
+## Active
 A `.md` file is *active* if it contains `#SQUARK live!` in its [charm squark](#charm-squark):
 
 ```md
 # Page
 <!-- #SQUARK live!
-| dest = path/to/destination
+| destination = path/to/destination
 -->
 
 sup, world!
@@ -31,7 +31,7 @@ Active files are processed by Squarkdown and exported to `+page.svx` files.
 <br>
 
 
-### Charm Squark
+## Charm Squark
 > Main article: [Charm Squark](reference/charm-squark.md)
 
 A special expanded `<!-- #SQUARK -->` [squark](#squark) at the front of your Markdown files that provides metadata to Squarkdown, which is exported to `+page.ts` and `site.json`.
@@ -39,7 +39,7 @@ A special expanded `<!-- #SQUARK -->` [squark](#squark) at the front of your Mar
 ```md
 # Page
 <!-- #SQUARK live!
-| dest = path/to/destination
+| destination = path/to/destination
 | capt = This is how Squarkdown works!
 | update = 2026 October
 -->
@@ -51,19 +51,34 @@ Why not YAML frontmatter? Because it’s rendered in Markdown previews!
 <br>
 
 
-### Field
+## Field
+
+A piece of metadata in the [charm squark](#charm-squark).
+
+```md
+# Page
+<!-- #SQUARK live!
+| destination = path/to/destination
+| caption = This is a field!
+| last-update = 2026 October
+-->
+```
+
+Here, we’ve provided the `destination`, `caption` and `last-update` fields.
+
+See [Charm Squark](reference/charm-squark.md) for a list of all the available fields.
 
 
 <br>
 
 
-### Inactive
+## Inactive
 A `.md` file is *inactive* either if it does not contain `#SQUARK live!` in its [charm squark](#charm-squark), or an explicit `#SQUARK dead!`:
 
 ```md
 # Page
 <!-- #SQUARK dead!
-| dest = path/to/destination
+| destination = path/to/destination
 -->
 
 goodbye, cruel world...
@@ -75,7 +90,7 @@ Inactive files are not processed by Squarkdown.
 <br>
 
 
-### Squark
+## Squark
 > Main article: [squarks](reference/squarks.md)
 
 A special `<!-- #SQUARK -->` comment that tells Squarkdown to do something.
@@ -98,7 +113,7 @@ The most important squark is the [charm squark](#charm-squark), a special extend
 <br>
 
 
-### Squarkdown
+## Squarkdown
 Short for *Stranger Quarkdown*, the name of this project!
 
 `squarkdown` is the command to run Stranger Quarkdown.
@@ -107,7 +122,7 @@ Short for *Stranger Quarkdown*, the name of this project!
 <br>
 
 
-### Squarkdown-flavoured Markdown
+## Squarkdown-flavoured Markdown
 > Main article: [Squarkdown-flavoured Markdown](walkthrough/squarkdown-flavoured-markdown.md)
 
 The special Markdown syntax Squarkdown accepts, using [squarks](#squark) hidden inside comments.
@@ -116,7 +131,7 @@ The special Markdown syntax Squarkdown accepts, using [squarks](#squark) hidden 
 <br>
 
 
-### Squarkup
+## Squarkup
 The entire processing pipeline of Squarkdown:
 
 - Finding your Markdown files
@@ -130,7 +145,7 @@ The entire processing pipeline of Squarkdown:
 <br>
 
 
-### Squarkup Config
+## Squarkup Config
 > Main article: [Squarkup Config](reference/squarkup-config.md)
 
 Your configuration for Squarkdown, sourced from either a `squarkup.toml` or `squarkup.json` file in your project repo.
