@@ -32,21 +32,20 @@ const delay = 240;
 
   <NavSection title="Home" link="https://sup2point0.github.io/stranger-quarkdown">
     <NavLink text="FAQ" intern="info/faq" />
+    <NavLink text="Glossary" intern="docs/glossary" />
   </NavSection>
 
   <NavSection title="Walkthrough" intern="docs/walkthrough">
-    <NavLink text="quickstart" intern="docs/walkthrough/quickstart" />
-    <NavLink text="what is squarkdown?" intern="docs/walkthrough/what-is-squarkdown" />
-    <NavLink text="project requirements" intern="docs/walkthrough/project-requirements" />
-    <NavLink text="project structure" intern="docs/walkthrough/project-structure" />
-    <NavLink text="squarkdown-flavoured markdown" intern="docs/walkthrough/squarkdown-flavoured-markdown" />
-    <NavLink text="configuring repositories" intern="docs/walkthrough/repo-config" />
-    <NavLink text="configuring files" intern="docs/walkthrough/file-config" />
-    <NavLink text="making full use of squarkdown" intern="docs/walkthrough/further-features" />
+    <NavLink text="Quickstart" intern="docs/walkthrough/quickstart" />
+    <NavLink text="What is Squarkdown?" intern="docs/walkthrough/what-is-squarkdown" />
+    <NavLink text="Project Requirements" intern="docs/walkthrough/project-requirements" />
+    <NavLink text="Project Structure" intern="docs/walkthrough/project-structure" />
+    <NavLink text="Squarkdown-flavoured Markdown" intern="docs/walkthrough/squarkdown-flavoured-markdown" />
+    <NavLink text="Configuring Files" intern="docs/walkthrough/file-config" />
+    <NavLink text="Making full use of Squarkdown" intern="docs/walkthrough/further-features" />
   </NavSection>
 
   <NavSection title="Docs" intern="docs">
-    <NavLink text="glossary" intern="docs/glossary" />
     <NavLink code="squarkup.json" intern="docs/reference/squarkup-json">
       <NavLink code="repo" intern="docs/reference/squark-json#" />
       <NavLink code="paths / site" intern="docs/reference/squark-json#site" />
@@ -68,9 +67,6 @@ const delay = 240;
       <NavLink code="fonts / queries" intern="docs/reference/squark-json#queries" />
     </NavLink>
     <NavLink text="CLI" intern="docs/reference/cli">
-      <NavLink code="rake init" intern="docs/reference/cli/init" />
-      <NavLink code="rake squark" intern="docs/reference/cli/squark" />
-      <NavLink code="rake skeleton" intern="docs/reference/cli/skeleton" />
     </NavLink>
     <NavLink text="squark charm" intern="docs/reference/squark-charm">
       <NavLink code="live" intern="docs/reference/squark-charm#live" />
@@ -88,34 +84,29 @@ const delay = 240;
       <NavLink code="clean" intern="docs/reference/squark-charm#clean" />
     </NavLink>
     <NavLink text="squarks" intern="docs/reference/squarks">
+      <NavLink code="slash" intern="docs/reference/squarks/slash" />
       <NavLink code="leave" intern="docs/reference/squarks/leave" />
       <NavLink code="only" intern="docs/reference/squarks/only" />
     </NavLink>
-    <NavLink text="site data" intern="docs/reference/site-data" />
-    <NavLink text="cleanup" intern="docs/reference/cleanup" />
+    <!-- <NavLink text="site data" intern="docs/reference/site-data" /> -->
+    <!-- <NavLink text="cleanup" intern="docs/reference/cleanup" /> -->
   </NavSection>
 
-  <NavSection title="Features" intern="features">
-    <NavLink text="page generation" intern="features/page-gen" />
-    <NavLink text="assets" intern="features/assets" />
-    <NavLink text="SCSS" intern="features/scss" />
-    <NavLink text="fonts" intern="features/fonts" />
+  <NavSection title="Extras" intern="features">
+    <NavLink text="Assets" intern="features/assets" />
+    <NavLink text="Fonts" intern="features/fonts" />
   </NavSection>
 
   <NavSection title="Schemas" intern="squarkup-schemas">
     <NavLink text="latest (v{Schema.version})" intern="squarkup-schema/latest.json" />
     <NavLink text="v5.0.7" intern="squarkup-schema/v5.0.7.json" />
-    <NavLink text="v5.0.6" intern="squarkup-schema/v5.0.6.json" />
-    <NavLink text="v5.0.5" intern="squarkup-schema/v5.0.5.json" />
-    <NavLink text="v5.0.4" intern="squarkup-schema/v5.0.4.json" />
-    <NavLink text="v5.0.1" intern="squarkup-schema/v5.0.1.json" />
   </NavSection>
 
   <NavSection title="Info" intern="info/synopsis">
-    <NavLink text="synopsis" intern="info/synopsis" />
-    <NavLink text="rationale" intern="info/rationale" />
-    <NavLink text="decoded" intern="info/decoded" />
-    <NavLink text="licence" intern="info/licence" />
+    <NavLink text="Synopsis" intern="info/synopsis" />
+    <NavLink text="Rationale" intern="info/rationale" />
+    <NavLink text="Decoded" intern="info/decoded" />
+    <NavLink text="Licence" intern="info/licence" />
   </NavSection>
 
   <div style:padding="1rem"></div>
