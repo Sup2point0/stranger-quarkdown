@@ -6,6 +6,9 @@
 | update = 2026 July 11
 -->
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 Squarkdown has grown much beyond moving Markdown files around into a feature-rich content preprocessing framework.[^framework] There are many other features that can help with automating the process of building up a website, which can be enabled at an instant.
 
 [^framework]: Okay, “framework” is a bit of a stretch.

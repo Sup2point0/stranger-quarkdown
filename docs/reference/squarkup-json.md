@@ -10,6 +10,9 @@
 
 </div>
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 `squarkup.json` goes in a `.squarkdown/` directory in your project’s root directory. It’s how you configure Squarkdown to suit your project’s needs.
 
 The structure is flat to keep things simple. Keys follow a `<category> / <option>` format.

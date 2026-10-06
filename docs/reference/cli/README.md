@@ -4,6 +4,9 @@
 | update = 2026 September 8
 -->
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 Squarkdown is a CLI tool! This page provides an overview of the different commands included in Squarkdown.
 
 To run these commands, you’ll need to have [cloned the Stranger Quarkdown repo as a submodule](../../walkthrough/quickstart.md#add-squarkdown) into your project, and installed Ruby. Remember to also install Stranger Quarkdown’s dependencies before using it:

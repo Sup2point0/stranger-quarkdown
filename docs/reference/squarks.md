@@ -4,6 +4,9 @@
 | update = 2025 November 21
 -->
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 <br>
 
 

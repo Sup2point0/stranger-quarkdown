@@ -10,6 +10,9 @@
 
 </div>
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 > *See also: [Configuring Squarkup for a Repo](squarkup-config.md)*
 
 When Squarkdown processes files, it will only export them if they indicate they are **active** and provide necessary metadata. This takes the form of an expanded squark known as the **squark charm**, which looks like this:

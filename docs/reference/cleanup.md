@@ -3,6 +3,9 @@
 | dest = docs/reference/cleanup
 -->
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 Sometimes there’s a couple things in a Markdown file that need to be cleaned up when it’s processed by Squarkdown. We can let Squarkdown know it needs to handle these through the `clean` field in the [squark charm](charm-squark.md).
 
 

@@ -9,6 +9,9 @@
 
 </div>
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 The squark charm is an extended squark which should go under the `# h1` title of a page. It provides all the metadata and instructions for how Squarkdown should squarkup the page.
 
 
