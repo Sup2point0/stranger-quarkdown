@@ -4,6 +4,12 @@
 <br>
 
 
+## v4.0.3
+
+### New
+- Site data now respects `out.shorter-fields = true`
+
+
 ## v4.0.2
 
 ### New
@@ -45,6 +51,9 @@
 
   - Now it is correctly overridden to `"Lower"`.
   - (This only applied for the long-form `heading`, not the shorthand `head`.)
+
+
+<br>
 
 
 ## v4.0
