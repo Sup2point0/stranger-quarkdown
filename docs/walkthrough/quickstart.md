@@ -1,10 +1,17 @@
 # Using Squarkdown in a SvelteKit project
 <!-- #SQUARK live!
 | dest = docs/walkthrough/quickstart
-| capt = A guided walkthrough on how to use Squarkdown in a SvelteKit project
+| capt = A guided walkthrough on how to setup and use Squarkdown
+| update 
 -->
 
-Here’s a guided walkthrough on how to use Squarkdown in a SvelteKit project.
+Welcome to Squarkdown!
+
+This is a zero-to-one guided walkthrough on how to set up and use Squarkdown in your SvelteKit project.
+
+We’ll get Squarkdown installed, configured and running, then look at some common things you might want to do with Squarkdown.
+
+This guide will stick to recommended options to keep it simple, but there are many places where multiple options are available!
 
 > [!Tip]
 > It may be helpful to have the [Glossary](../glossary.md) open while reading.
@@ -16,111 +23,83 @@ Here’s a guided walkthrough on how to use Squarkdown in a SvelteKit project.
 ## Introduction
 
 > [!Important]
-> Squarkdown was made for integration with SvelteKit projects, and nothing else!
+> Squarkdown was made for integration with [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit) + [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.at) projects, and nothing else![^nothing-else]
 
-Let’s say we’ve got some Markdown files in a repository we’d like to quickly and easily turn into a static website – perhaps you’re writing a blog or have documentation for software. And since we love nice things, we use Svelte/Kit for building the website.
+[^nothing-else]: Maybe you can get it work with other frameworks, who knows :P but SvelteKit + MDsveX is the intended target.
 
-Awesome, but now you need to find a way to import the content from our repository to the SvelteKit project. These Markdown files could be scattered all throughout the repository, so it’s not exactly something a 1-liner could solve.
+So we’re on the same page, suppose our project repo looks like this:
+
+```
+project/
+   README.md
+   
+   docs/
+      showerthoughts.md
+   
+   site/
+      vite.config.ts
+      ...
+      src/
+         routes/
+            ...
+```
+
+We’ve got some Markdown files under `docs/` that we’d like to quickly and easily turn into a static website under `site/`. That’s what Squarkdown will do for us.
 
 
 <br>
 
 
-## Setup
+## Install Squarkdown
 
-So we’re on the same page, suppose our project repo looks like this:
+Let’s install Squarkdown from NPM:
 
-```
-./
-   docs/
-      showerthoughts.md
-   README.md
+```bash
+/project/> cd site
+/project/site> npm install stranger-quarkdown
 ```
 
-### Add Squarkdown
-First, add Squarkdown to your project repo as a Git submodule:
+We can check we have access to Squarkdown with:
 
-```console
-git submodule add https://github.com/Sup2point0/stranger-quarkdown
-```
-
-This should clone the Squarkdown repo into a `stranger-quarkdown/` folder. If you’d like to give the folder a different name (`.stranger-quarkdown` is good for distinguishing it from the actual project files), just add it after the command:
-
-```console
-git submodule add https://github.com/Sup2point0/stranger-quarkdown .stranger-quarkdown
-```
-
-If it hasn’t already, clone the submodule:
-
-```console
-git submodule update --init
-```
-
-Your project should now look like this:
-
-```diff
-  ./
-     docs/...
-+    stranger-quarkdown/
-+       Rakefile
-+       ...
-     README.md
-```
-
-### Configure Squarkdown
-Next, add a `.squarkdown/` folder in the root of your project. This is where configuration files for Squarkdown will go, just like `.github/` or `.vscode/`.
-
-You’ll then need to add a `squarkup.json` file inside. You can either do this manually, or let Squarkdown generate a template for you:
-
-```
-cd stranger-quarkdown
-rake setup squarkup
-```
-
-We now have:
-
-```diff
-  ./
-+    .squarkdown/
-+       squarkup.json
-     docs/...
-     stranger-quarkdown/...
-     README.md
-```
-
-For details of what to put in `squarkup.json`, see [Configuring Squarkup for a Repo](repo-config.md).
-
-### Setup Site
-If you haven’t already, create your SvelteKit project. You can do this manually, use `npm create svelte@latest`, or let Squarkdown do it for you:
-
-```
-rake setup site
-```
-
-This will create the site files in the project root, but you’ll probably want them in a folder instead. In that case, just pass it in as an argument:
-
-```
-rake setup site .site
-```
-
-Let’s go with the latter. Our repo is now ready for Squarkdown:
-
-```diff
-  ./
-+    .site/
-+       src/
-+          routes/
-+             ...
-+       svelte.config.js
-+       ...
-     .squarkdown/...
-     docs/...
-     stranger-quarkdown/...
-     README.md
+```bash
+npx squarkdown --version
 ```
 
 > [!Note]
-> Squarkdown uses [Sup2point0/svelte-core](https://github.com/Sup2point0/svelte-core) as the skeleton. This is a cleaned up version of the SvelteKit skeleton configured for static sites, with TypeScript, SCSS, MDSveX added.
+> Pre-4.0, Squarkdown (written in Ruby) required installation as a Git submodule. Now it’s properly published to the [crates.io<sup>↗</sup>](https://crates.io/crates/squarkdown) and [NPM<sup>↗</sup>](https://www.npmjs.com/package/stranger-quarkdown) registries ;)
+
+
+<br>
+
+
+## Configure Squarkdown
+
+We’ll configure Squarkdown in a `squarkup.toml` at the root of our project:
+
+```diff
+  project/
+     README.md
++    squarkup.toml
+     
+     docs/
+        showerthoughts.md
+     
+     site/
+        vite.config.ts
+        ...
+        src/
+           routes/
+              ...
+```
+
+See [Squarkup Configuration](squarkup-config.md) for full details on all the things that can go in `squarkup.toml`.
+
+For now, all we need is to specify that our site lives under `/site/`:
+
+```toml
+[paths]
+site = "site/"
+```
 
 
 <br>
