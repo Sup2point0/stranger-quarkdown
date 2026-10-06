@@ -1,4 +1,4 @@
-#:schema ../new/core/src/config/schema.json
+#:schema ../squarkdown/src/config/schema.json
 
 [errors]
 strict = true
@@ -18,14 +18,13 @@ sources = [
 [out]
 folder = "src/routes/(docs)/(dyna)/"
 file-name = "+page.svx"
+site-data-path = "src/site.json"
 render-page-ts = true
 shorter-fields = false
-site-data-path = "src/site.json"
 
 [format]
 preserve-comments = true
 externalise-links = true
-mark-invalid-links = true
 
 [fonts]
 queries = [
