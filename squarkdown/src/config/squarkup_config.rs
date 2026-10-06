@@ -60,6 +60,11 @@ pub struct OutConfig {
 	/// The file name for exported files, including the (expected) `.svx` extension.
 	pub file_name: String,
 
+	/// Where to export site data, including the (expected) `.json` extension.
+	/// 
+	/// If absent, site data is not exported.
+	pub site_data_path: Option<PathBuf>,
+
 	/// Should `+page.ts` files be exported?
 	pub render_page_ts: bool,
 
@@ -67,11 +72,6 @@ pub struct OutConfig {
 	/// 
 	/// For instance, `description` is shortened to `desc`, and `last_update` is shortened to `update`.
 	pub shorter_fields: bool,
-
-	/// Where to export site data, including the (expected) `.json` extension.
-	/// 
-	/// If absent, site data is not exported.
-	pub site_data_path: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug)]

@@ -201,14 +201,6 @@ impl SquarkupConfig
 				raw.clone_into(&mut s.out.file_name);
 			}) }
 
-			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
-				s.out.render_page_ts = Self::try_get_bool(value, "out.render-page-ts")?;
-			}) }
-
-			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
-				s.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
-			}) }
-
 			if let Some(value) = out.get("site-data-path") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.site-data-path", "(filepath including `.json` extension)")?;
 				let path = path!(site / utils::to_rel(raw));
@@ -229,6 +221,14 @@ impl SquarkupConfig
 				}
 
 				s.out.site_data_path = Some(path);
+			}) }
+
+			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
+				s.out.render_page_ts = Self::try_get_bool(value, "out.render-page-ts")?;
+			}) }
+
+			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
+				s.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
 			}) }
 		}
 
