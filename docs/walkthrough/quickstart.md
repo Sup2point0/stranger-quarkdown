@@ -1,8 +1,8 @@
 # Using Squarkdown in a SvelteKit project
 <!-- #SQUARK live!
-| dest = docs/walkthrough/quickstart
+| destination = docs/walkthrough/quickstart
 | capt = A guided walkthrough on how to setup and use Squarkdown
-| update 
+| update = 2026 October 6
 -->
 
 Welcome to Squarkdown!
@@ -68,6 +68,9 @@ npx squarkdown --version
 > [!Note]
 > Pre-4.0, Squarkdown (written in Ruby) required installation as a Git submodule. Now it’s properly published to the [crates.io<sup>↗</sup>](https://crates.io/crates/squarkdown) and [NPM<sup>↗</sup>](https://www.npmjs.com/package/stranger-quarkdown) registries ;)
 
+> [!Tip]
+> Try running `npx squarkdown` now. What happens?
+
 
 <br>
 
@@ -92,8 +95,6 @@ We’ll configure Squarkdown in a `squarkup.toml` at the root of our project:
               ...
 ```
 
-See [Squarkup Configuration](squarkup-config.md) for full details on all the things that can go in `squarkup.toml`.
-
 For now, all we need is to specify that our site lives under `/site/`:
 
 ```toml
@@ -101,108 +102,60 @@ For now, all we need is to specify that our site lives under `/site/`:
 site = "site/"
 ```
 
+> See [Squarkup Configuration](squarkup-config.md) for full details on all the options that can go in `squarkup.toml`.
+
+> [!Tip]
+> Try running `npx squarkdown` now. What happens?
+
 
 <br>
 
 
-## Squarkdown-Flavoured Markdown
+## Setup Files
 
-Let’s add Squarkdown-Flavoured Markdown to `docs/showerthoughts.md` so it can be squarked up.
+Let’s take `showerthoughts.md`:
 
 ```md
 # Showerthoughts
 
 Popsicle and ice lolly are lollipop and icicle swapped around...
-
 ```
 
 ### Activate the file
-First, we need to mark the file as active. At the start, add a comment starting with `#SQUARK` followed by `live!`:
+By default, Squarkdown won’t do anything with Markdown files. We need to explicitly mark them as [***active***](../glossary.md#active) to tell Squarkdown it should process them.
 
-```md
-# Showerthoughts
-<!-- #SQUARK live! -->
+We do this by adding a special comment to the top of these files, under the heading:
+
+```diff
+  # Showerthoughts
++ <!-- #SQUARK live! -->
+
+  Popsicle and ice lolly are lollipop and icicle swapped around...
 ```
 
-This is a **squark**. It won’t show up when previewing the Markdown, but is kept in the raw text for Squarkdown to process. All squarks start with `#SQUARK` so Squarkdown knows they’re a special comment.
+This is a [***squark***](../glossary.md#squark). Since it’s a comment, it won’t show up when previewing the Markdown, but it *is* kept in the raw text for Squarkdown to process.
+
+All squarks start with `#SQUARK` so Squarkdown knows they’re a special comment.
 
 Here, `live!` is a **flag** telling Squarkdown *“Hey, this file is active!”* Only files with this flag will be processed and exported.
 
 ### Configure the destination
-But, where to? We need to provide this metadata through a **field**. These go in the first squark where `live!` is, forming an expanded squark block called the **squark charm**.
+But, where should Squarkdown export this file to?
 
-Let’s export our file to `./site/src/routes/showerthoughts/content.svx`. Remember in `./.squarkdown/squarkup.json` we’ve already configured our site directory (`./site/`), destination directory (`/src/routes/`), and file name (`content.svx`). So, all we need is `showerthoughts`, and Squarkdown will handle the rest:
+We need to provide this metadata through a [***field***](../glossary.md#field). We add fields below `live!`, forming an expanded squark called the [***charm squark***](../glossary.md#charm-squark).
 
-```md
+Here, we provide `destination`:
+
+```diff
 # Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
--->
+  <!-- #SQUARK live!
++ | destination = showerthoughts
+  -->
+  
+  Popsicle and ice lolly are lollipop and icicle swapped around...
 ```
 
-### Provide other metadata
-There’s plenty of other metadata we can provide.
-
-To configure the title and description that go in the `head` of the page, set the `title` and `desc` fields:
-
-```md
-# Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
-| title = Our Showerthoughts
-| desc = Just some of our showerthoughts
--->
-```
-
-To use a particular stylesheet(s), set `style`:
-
-```md
-# Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
-| style = cute
--->
-```
-
-To use multiple stylesheets, separate each one with ` / `:
-
-```md
-# Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
-| style = cute / special
--->
-```
-
-If you’d like to set a preferred light/dark theme, set `duality`:
-
-```md
-# Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
-| duality = dark
--->
-```
-
-For a release/publish date, the format is `<year> <month> <date>`:
-
-```md
-# Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
-| date = 2022 February 2
--->
-```
-
-We can omit the date and month if desired, and can even supply a season instead of a month:
-
-```md
-# Showerthoughts
-<!-- #SQUARK live!
-| dest = showerthoughts
-| date = 1984 winter
--->
-```
+This means `showerthoughts.md` will be exported to `/site/src/routes/showerthoughts/+page.svx` (as well as an adjacent `+page.ts`).
 
 
 <br>
@@ -210,36 +163,135 @@ We can omit the date and month if desired, and can even supply a season instead 
 
 ## Squarkup!
 
-Alright, we’re now set to squarkup our file. Squarkdown provides tasks through a `Rakefile` which you can invoke if you have `rake` installed. Here, all we’ll need to do is:
+We’re now ready to run Squarkdown!
 
-```
-rake squarkup
-```
-
-Then let the magic happen as Squarkdown does its stuff!
-
-```
->>> squarkdown / squarking up...
-               / ...
-               / done!
+```bash
+/project/site> npx squarkdown
 ```
 
-If nothing’s gone wrong, we now have:
+You should see output like this:
+
+```bash
+Squarkdown v4.0.0
+────────────────────────
+ ✓ found your project: <project>
+ › resolving config...
+ ✓ found your squarkup config: <project>/squarkup.toml
+ › reading config...
+ › read successful!
+ › validating config...
+ ✓ config looks good, all set!
+ ✓ found your site: <project>/site
+ › finding files to squarkup...
+
+...
+```
+
+That means Squarkdown’s done its magic. We should find freshly generated `+page.svx` and `+page.ts` files:
 
 ```diff
-  ./
-     .squarkdown/...
-     docs/...
+  project/
+     README.md
+     squarkup.toml
+     
+     docs/
+        showerthoughts.md
+     
      site/
+        vite.config.ts
+        ...
         src/
            routes/
 +             showerthoughts/
-+                +page.svelte
-+                content.svx
-        ...
-     stranger-quarkdown/...
-     README.md
++                +page.svx
++                +page.ts
 ```
+
+Have a click into `+page.svx` and `+page.ts` to see what Squarkdown generates.
+
+And that’s it, you’re good to go!
+
+
+<br>
+
+
+## More Fields
+`destination` is just one of many metadata fields we can provide.
+
+We can provide a short `description` for the page:
+
+```diff
+# Showerthoughts
+  <!-- #SQUARK live!
+  | destination = showerthoughts
++ | description = Just some of our showerthoughts
+  -->
+```
+
+We can provide a list of `tags`, separated by `/`:
+
+```diff
+# Showerthoughts
+  <!-- #SQUARK live!
+  | destination = showerthoughts
+  | description = Just some of our showerthoughts
++ | tags = docs / examples / writing
+  -->
+```
+
+We can set the `release-date` and `last-update` in the format `<year> <month> <date>`:
+
+```diff
+# Showerthoughts
+  <!-- #SQUARK live!
+  | destination = showerthoughts
+  | description = Just some of our showerthoughts
+  | tags = docs / examples / writing
++ | release-date = 2022 February 2
++ | last-update = 2022 April 1
+  -->
+```
+
+Or if we want a less precise date, we can omit the date, or even month:
+
+```diff
+# Showerthoughts
+  <!-- #SQUARK live!
+  | destination = showerthoughts
+  | description = Just some of our showerthoughts
+  | tags = docs / examples / writing
+- | release-date = 2022 February 2
++ | release-date = 2022 February
+- | last-update = 2022 April 1
++ | last-update = 2022
+  -->
+```
+
+Squarkdown also supports seasons:
+
+```diff
+# Showerthoughts
+  <!-- #SQUARK live!
+  | destination = showerthoughts
+  | description = Just some of our showerthoughts
+  | tags = docs / examples / writing
+  | release-date = 2022 February
+- | last-update = 2022
++ | last-update = 2022 spring
+  -->
+```
+
+
+<br>
+
+
+## Next Steps
+
+Here’s some things you might want to try next:
+
+- Modify your [Squarkup Config](squarkup-config.md) to suit your needs
+- Use [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md) to customise how Squarkdown processes and renders your Markdown
+- Use `squarkdown --assets` to handle assets and asset links
 
 
 <br>
