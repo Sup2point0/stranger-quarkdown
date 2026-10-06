@@ -27,7 +27,7 @@ impl Renderer<'_>
 		}
 
 		let mut f = BufWriter::new(File::create(dest)?);
-		let d = self.page.serialized(self.config);
+		let p = self.page;
 		let s = self.config.out.shorter_fields;
 
 		f.write_all(b"import type { PageData } from \"squarkdown\";\n\n")?;
@@ -36,39 +36,39 @@ impl Renderer<'_>
 		f.write_all(b"> {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
-		writeln!(f, "\t\t{}: {:?},", d.path(s),  d.filepath)?;
-		writeln!(f, "\t\t{}: {:?},", d.dest(s),  d.destination)?;
-		writeln!(f, "\t\t{}: {:?},", d.flags(s), d.flags)?;
+		writeln!(f, "\t\t{}: {:?},", p.path(s),  p.filepath)?;
+		writeln!(f, "\t\t{}: {:?},", p.dest(s),  p.destination)?;
+		writeln!(f, "\t\t{}: {:?},", p.flags(s), p.flags)?;
 
-		if let Some(v) = d.title       { writeln!(f, "\t\t{}: {v:?},", d.title(s))?; }
-		if let Some(v) = d.description { writeln!(f, "\t\t{}: {v:?},", d.desc(s))?; }
-		if let Some(v) = d.heading     { writeln!(f, "\t\t{}: {v:?},", d.head(s))?; }
-		if let Some(v) = d.caption     { writeln!(f, "\t\t{}: {v:?},", d.capt(s))?; }
+		if let Some(v) = &p.title       { writeln!(f, "\t\t{}: {v:?},", p.title(s))?; }
+		if let Some(v) = &p.description { writeln!(f, "\t\t{}: {v:?},", p.desc(s))?; }
+		if let Some(v) = &p.heading     { writeln!(f, "\t\t{}: {v:?},", p.head(s))?; }
+		if let Some(v) = &p.caption     { writeln!(f, "\t\t{}: {v:?},", p.capt(s))?; }
 
-		writeln!(f, "\t\ttags: {:?},", d.tags)?;
+		writeln!(f, "\t\ttags: {:?},", p.tags)?;
 
-		if let Some(v) = d.release_date {
+		if let Some(v) = p.release_date {
 			writeln!(f,
 				"\t\t{}: new Date({}, {}, {}),",
-				d.date(s),
+				p.date(s),
 				v.year(), v.month() as u8 - 1, v.day()
 			)?;
 		}
-		if let Some(v) = d.release_date_raw {
-			writeln!(f, "\t\t{}: {v:?},", d.date_raw(s))?;
+		if let Some(v) = &p.release_date_raw {
+			writeln!(f, "\t\t{}: {v:?},", p.date_raw(s))?;
 		}
-		if let Some(v) = d.last_update {
+		if let Some(v) = p.last_update {
 			writeln!(f,
 				"\t\t{}: new Date({}, {}, {}),",
-				d.update(s),
+				p.update(s),
 				v.year(), v.month() as u8 - 1, v.day()
 			)?;
 		}
-		if let Some(v) = d.last_update_raw {
-			writeln!(f, "\t\t{}: {v:?},", d.update_raw(s))?;
+		if let Some(v) = &p.last_update_raw {
+			writeln!(f, "\t\t{}: {v:?},", p.update_raw(s))?;
 		}
 
-		writeln!(f, "\t\t{}: {:?},", d.other(s), d.other)?;
+		writeln!(f, "\t\t{}: {:?},", p.other(s), p.other)?;
 
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;

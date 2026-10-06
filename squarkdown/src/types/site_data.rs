@@ -1,8 +1,10 @@
 use crate::prelude::*;
+use crate::types::page_data::SerializablePageData;
 use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
+use serde::ser::SerializeMap;
 use time::{ UtcDateTime, macros::* };
 
 use std::collections::{ HashMap };
@@ -106,20 +108,25 @@ impl SiteData
 
 impl SiteData
 {
-	#[must_use]
-	pub fn serialise(self, config: &SquarkupConfig) -> impl serde::Serialize
+	/// Serialise to serde applying `config`.
+	pub fn serialize_with_config<S>(&self, s: S, config: &SquarkupConfig) -> Result<S::Ok, S::Error>
+		where S: serde::Serializer
 	{
-		serde_json::json!({
-			"stats": self.stats,
-			"pages":
-				self.pages.iter()
-				.map(|(key, page)|
-					(key, page.serialized(config))
-				)
-				.collect::<HashMap<_, _>>(),
+		let pages: HashMap<&String, SerializablePageData>
+			= self.pages.iter()
+				.map(|(shard, page)| (shard, page.to_serializable(config)))
+				.collect();
 
-			"tags": self.tags,
-		})
+		let mut out = s.serialize_map(None)?;
+		out.serialize_entry("stats", &self.stats)?;
+		out.serialize_entry("pages", &pages)?;
+		out.serialize_entry("tags", &self.tags)?;
+		out.end()
+	}
+
+	pub fn to_serializable<'d>(&'d self, config: &'d SquarkupConfig) -> SerializableSiteData<'d>
+	{
+		SerializableSiteData { site_data: self, config }
 	}
 }
 
@@ -130,4 +137,18 @@ fn serialise_datetime<S>(date: &UtcDateTime, serialiser: S) -> Result<S::Ok, S::
 	let formatted = date.format(format).expect("date serialisation always succeeds");
 
 	serialiser.serialize_str(&formatted)
+}
+
+
+pub struct SerializableSiteData<'d> {
+	site_data: &'d SiteData,
+	config:    &'d SquarkupConfig,
+}
+
+impl serde::Serialize for SerializableSiteData<'_> {
+	fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+		where S: serde::Serializer
+	{
+		self.site_data.serialize_with_config(s, self.config)
+	}
 }

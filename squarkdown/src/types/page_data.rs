@@ -14,6 +14,7 @@ use std::collections::{ HashMap };
 use std::path::{ Path, PathBuf };
 
 
+/// The metadata provided for an active page, parsed from its charm squark.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PageData
 {
@@ -239,100 +240,54 @@ impl PageData
 	}
 }
 
+/// Serialisation
 impl PageData
 {
-	/// Serialise this page data to JSON with long, unabbreviated field names.
-	#[must_use]
-	pub fn serialized<'s>(&'s self, config: &SquarkupConfig) -> SerialisedPageData<'s>
-	{
-		SerialisedPageData {
-			filepath:         utils::display_rel(&self.filepath, &config.paths.root),
-			destination:      utils::display_rel(&self.destination, &config.out.folder),
-			flags:            &self.flags,
-			title:            self.title.as_ref(),
-			description:      self.description.as_ref(),
-			heading:          self.heading.as_ref(),
-			caption:          self.caption.as_ref(),
-			tags:             &self.tags,
-			release_date:     self.release_date,
-			release_date_raw: self.release_date_raw.as_ref(),
-			last_update:      self.last_update,
-			last_update_raw:  self.last_update_raw.as_ref(),
-			other:            &self.other,
-		}
-	}
-}
-
-
-pub struct SerialisedPageData<'s>
-{
-	pub filepath: String,
-	pub destination: String,
-
-	pub flags: &'s [String],
-
-	pub title:       Option<&'s String>,
-	pub description: Option<&'s String>,
-	pub heading:     Option<&'s String>,
-	pub caption:     Option<&'s String>,
-	
-	pub tags: &'s [String],
-	
-	pub release_date: Option<Date>,
-	pub release_date_raw: Option<&'s String>,
-	pub last_update: Option<Date>,
-	pub last_update_raw: Option<&'s String>,
-
-	pub other: &'s HashMap<String, Strings>,
-}
-
-impl SerialisedPageData<'_>
-{
 	/// Serialise to serde applying `config`.
-	fn serialize_with_config<S>(&self, s: S, config: &SquarkupConfig) -> Result<S::Ok, S::Error>
+	pub fn serialize_with_config<S>(&self, s: S, config: &SquarkupConfig) -> Result<S::Ok, S::Error>
 		where S: serde::Serializer
 	{
-		let f = config.out.shorter_fields;
 		let mut map = s.serialize_map(None)?;
 
-		map.serialize_entry(self.path(f), &self.filepath)?;
-		map.serialize_entry(self.dest(f), &self.destination)?;
-
-		map.serialize_entry(self.flags(f), &self.flags)?;
-
-		if let Some(v) = self.title {
-			map.serialize_entry(self.title(f), v)?;
+		macro_rules! ser {
+			($field:ident => $val:expr) => {
+				map.serialize_entry(self.$field(config.out.shorter_fields), $val)
+			}
 		}
-		if let Some(v) = self.description {
-			map.serialize_entry(self.desc(f), v)?;
+	
+		fn format_date(date: Date) -> String {
+			date
+				.format(format_description!("[year]-[month]-[day]"))
+				.expect("date serialisation always succeeds")
 		}
-		if let Some(v) = self.heading {
-			map.serialize_entry(self.head(f), v)?;
-		}
-		if let Some(v) = self.caption {
-			map.serialize_entry(self.capt(f), v)?;
-		}
-
-		map.serialize_entry(self.tags(f), &self.tags)?;
 		
-		if let Some(v) = self.release_date {
-			map.serialize_entry(self.date(f), &format_date(v))?;
-		}
-		if let Some(v) = self.release_date_raw {
-			map.serialize_entry(self.date_raw(f), v)?;
-		}
-		if let Some(v) = self.last_update {
-			map.serialize_entry(self.update(f), &format_date(v))?;
-		}
-		if let Some(v) = self.last_update_raw {
-			map.serialize_entry(self.update_raw(f), v)?;
-		}
+		ser!(path => &utils::display_rel(&self.filepath, &config.paths.root))?;
+		ser!(dest => &utils::display_rel(&self.destination, &config.out.folder))?;
 
-		for (key, val) in self.other {
+		ser!(flags => &self.flags)?;
+
+		if let Some(v) = &self.title       { ser!(title => v)? }
+		if let Some(v) = &self.description { ser!(desc => v)? }
+		if let Some(v) = &self.heading     { ser!(head => v)? }
+		if let Some(v) = &self.caption     { ser!(capt => v)? }
+
+		ser!(tags => &self.tags)?;
+		
+		if let Some(v) =  self.release_date     { ser!(date => &format_date(v))? }
+		if let Some(v) = &self.release_date_raw { ser!(date_raw => v)? }
+		if let Some(v) =  self.last_update      { ser!(update => &format_date(v))? }
+		if let Some(v) = &self.last_update_raw  { ser!(update_raw => v)? }
+
+		for (key, val) in &self.other {
 			map.serialize_entry(key, val)?;
 		}
 
 		map.end()
+	}
+
+	pub fn to_serializable<'d>(&'d self, config: &'d SquarkupConfig) -> SerializablePageData<'d>
+	{
+		SerializablePageData { page_data: self, config }
 	}
 }
 
@@ -349,7 +304,7 @@ macro_rules! impl_field_repr
 	};
 }
 
-impl SerialisedPageData<'_>
+impl PageData
 {
 	impl_field_repr!(path       => "path",       "filepath"        );
 	impl_field_repr!(dest       => "dest",       "destination"     );
@@ -367,9 +322,17 @@ impl SerialisedPageData<'_>
 }
 
 
-fn format_date(date: Date) -> String
+pub struct SerializablePageData<'d>
 {
-	date
-		.format(format_description!("[year]-[month]-[day]"))
-		.expect("date serialisation always succeeds")
+	page_data: &'d PageData,
+	config:    &'d SquarkupConfig,
+}
+
+impl serde::Serialize for SerializablePageData<'_>
+{
+	fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+		where S: serde::Serializer
+	{
+		self.page_data.serialize_with_config(s, self.config)
+	}
 }

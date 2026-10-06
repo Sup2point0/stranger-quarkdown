@@ -130,7 +130,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 	if let Some(dest) = &config.out.site_data_path {
 		log::is!("saving site data...");
 
-		let data_raw = site_data.serialise(&config);
+		let data_raw = site_data.to_serializable(&config);
 		let file = BufWriter::new(File::create(dest)?);
 		serde_json::to_writer_pretty(file, &data_raw)?;
 
