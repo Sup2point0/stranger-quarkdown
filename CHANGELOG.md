@@ -4,7 +4,7 @@
 <br>
 
 
-## Next (v4.0.2)
+## v4.0.2
 
 ### New
 - `squarkdown --version` command

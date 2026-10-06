@@ -1,7 +1,7 @@
 {
   "name": "stranger-quarkdown",
   "author": "Sup#2.0",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "license": "MIT",
 
   "description": "Markdown preprocessing for SvelteKit projects",
@@ -9,7 +9,7 @@
     "svelte", "sveltekit", "mdsvex", "markdown", "squarkdown", "squark"
   ],
 
-  "homepage": "https://github.com/Sup2point0/stranger-quarkdown#readme",
+  "homepage": "https://sup2point0.github.io/stranger-quarkdown",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Sup2point0/stranger-quarkdown.git"
