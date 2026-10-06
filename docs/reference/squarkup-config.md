@@ -1,23 +1,26 @@
-# squarkup.json
+# Squarkup Configuration
 <!-- #SQUARK live!
-| dest = docs/reference/squarkup-json
-| update = 2026 July 10
+| dest = docs/reference/squarkup-config
+| update = 2026 October 6
 -->
-
-<div class="quicklinks" align="center">
-
-[Example](#example)
-
-</div>
 
 > [!Warning]
 > This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
 
-`squarkup.json` goes in a `.squarkdown/` directory in your project’s root directory. It’s how you configure Squarkdown to suit your project’s needs.
+You can (and should) configure Squarkdown to suit your needs.
 
-The structure is flat to keep things simple. Keys follow a `<category> / <option>` format.
+Squarkdown provides many configuration options to customise its behaviour, neatly sorted into categories. You’ll see these referred to as `category.option` throughout the docs.
 
-Most settings simply tell Squarkdown what filepaths to use for your particular project, since these can obviously be different between projects!
+Squarkdown reads in your configuration from 1 of 4 places:
+
+- `/squarkup.toml`
+- `/squarkup.json`
+- `/.squarkdown/squarkup.toml`
+- `/.squarkdown/squarkup.json`
+
+<!-- TODO -->
+TOML is the recommended format. JSON support is in progress!
+
 
 <br>
 
@@ -59,54 +62,3 @@ Most settings simply tell Squarkdown what filepaths to use for your particular p
 
 
 <br>
-
-
-## Example
-
-Here’s what Squarkdown’s own `squarkup.json` looks like:
-
-```json
-{
-  "$schema": "../squarkdown/resources/squarkup-schema.json",
-
-  "repo": "Squarkdown",
-
-  "paths / site": "site",
-  "paths / sources": [
-    "./",
-    "docs/",
-    ".squarkdown/content/"
-  ],
-  "paths / dest": "src/routes/(docs)/",
-  
-  "out / file-name": "~content",
-  "out / site-data": "src/site.json",
-
-  "opts / on-no-dir": ["warn", "create"],
-  "opts / on-error": "kill",
-
-  "bases / path": "src/parts/bases/",
-  "bases / page.svelte": "~page.svelte",
-  "bases / page.js": "~page.js",
-
-  "styles / path": "src/styles/",
-  "styles / page-styles": "src/styles/",
-  "styles / base-style": "article",
-
-  "assets / path": ".assets",
-  "assets / site-assets": ".assets/site",
-  "assets / extensions": [
-    "jpg", "jpeg", "png", "svg", "ttf"
-  ],
-
-  "fonts / queries": [
-    "Sora:wght@100..800"
-  ]
-}
-```
-
-> (comments added for clarity)
-
-Hopefully, it should be pretty self-explanatory what all the settings do!
-
-Writing it by hand can be tedious, so remember the Squarkdown CLI can [do it for you](cli/)!
