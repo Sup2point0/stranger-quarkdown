@@ -5,9 +5,16 @@ use squarkdown::colours::*;
 use std::process::ExitCode;
 
 
-enum Mode {
+/// The Squarkdown command to run.
+enum Mode
+{
+	/// `squarkdown --help`
 	HELP,
+
+	/// `squarkdown --version`
 	VERSION,
+
+	/// `squarkdown`
 	SQUARKUP,
 }
 
@@ -47,7 +54,12 @@ fn main() -> ExitCode
 
 	match mode
 	{
-		Mode::HELP => cli::help(),
+		Mode::HELP => {
+			println!();
+			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
+			log::line();
+			cli::help()
+		}
 
 		Mode::VERSION =>
 		{

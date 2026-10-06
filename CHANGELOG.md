@@ -4,7 +4,16 @@
 <br>
 
 
-## Next (v4.0.1)
+## Next (v4.0.2)
+
+### New
+- `squarkdown --version` command
+
+### Fixes
+- Improve command arguments parsing to be more robust
+
+
+## v4.0.1
 
 ### New
 - Validate `| field =` that appear before `---` are strictly Squarkdown-native fields:
