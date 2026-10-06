@@ -14,5 +14,4 @@ For more focused guidance on specific Squarkdown features, see the below pages. 
 - [Project Requirements](project-requirements.md)
 - [Project Structure](project-structure.md)
 - [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md)
-- [Configuring Squarkup for a File](file-config.md)
 - [Making Full Use of Squarkdown](further-features.md)
