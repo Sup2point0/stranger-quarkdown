@@ -62,30 +62,28 @@ const delay = 240;
       <NavLink code="errors.file&#8209;already&#8209;exists" intern="docs/reference/squark-config#on-no-dir" />
       <NavLink code="errors.link&#8209;broken" intern="docs/reference/squark-config#on-no-dir" />
     </NavLink>
-    <NavLink text="CLI" intern="docs/reference/cli">
+    <NavLink text="Charm Squark" intern="docs/reference/charm-squark">
+      <NavLink code="live" intern="docs/reference/charm-squark#live" />
+      <NavLink code="destination" intern="docs/reference/charm-squark#destination" />
+      <NavLink code="title" intern="docs/reference/charm-squark#title" />
+      <NavLink code="description" intern="docs/reference/charm-squark#description" />
+      <NavLink code="heading" intern="docs/reference/charm-squark#heading" />
+      <NavLink code="caption" intern="docs/reference/charm-squark#caption" />
+      <NavLink code="index" intern="docs/reference/charm-squark#index" />
+      <NavLink code="tags" intern="docs/reference/charm-squark#tags" />
+      <NavLink code="release-date" intern="docs/reference/charm-squark#release-date" />
+      <NavLink code="last-update" intern="docs/reference/charm-squark#last-update" />
+      <NavLink code="cleanse" intern="docs/reference/charm-squark#cleanse" />
     </NavLink>
-    <NavLink text="Charm Squark" intern="docs/reference/squark-charm">
-      <NavLink code="live" intern="docs/reference/squark-charm#live" />
-      <NavLink code="flags" intern="docs/reference/squark-charm#flags" />
-      <NavLink code="dest" intern="docs/reference/squark-charm#dest" />
-      <NavLink code="title" intern="docs/reference/squark-charm#title" />
-      <NavLink code="desc" intern="docs/reference/squark-charm#desc" />
-      <NavLink code="head" intern="docs/reference/squark-charm#head" />
-      <NavLink code="capt" intern="docs/reference/squark-charm#capt" />
-      <NavLink code="style" intern="docs/reference/squark-charm#style" />
-      <NavLink code="duality" intern="docs/reference/squark-charm#duality" />
-      <NavLink code="index" intern="docs/reference/squark-charm#index" />
-      <NavLink code="tags" intern="docs/reference/squark-charm#tags" />
-      <NavLink code="date" intern="docs/reference/squark-charm#date" />
-      <NavLink code="clean" intern="docs/reference/squark-charm#clean" />
-    </NavLink>
-    <NavLink text="squarks" intern="docs/reference/squarks">
-      <NavLink code="slash" intern="docs/reference/squarks/slash" />
-      <NavLink code="leave" intern="docs/reference/squarks/leave" />
-      <NavLink code="only" intern="docs/reference/squarks/only" />
+    <NavLink text="Squarks" intern="docs/reference/squarks">
+      <NavLink code="slash" intern="docs/reference/squarks#slash" />
+      <NavLink code="leave" intern="docs/reference/squarks#leave" />
+      <NavLink code="only" intern="docs/reference/squarks#only" />
     </NavLink>
     <!-- <NavLink text="site data" intern="docs/reference/site-data" /> -->
     <!-- <NavLink text="cleanup" intern="docs/reference/cleanup" /> -->
+    <NavLink text="CLI" intern="docs/reference/cli">
+    </NavLink>
   </NavSection>
 
   <NavSection title="Extras" intern="features">
