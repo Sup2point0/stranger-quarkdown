@@ -135,9 +135,9 @@ fn squarkup(assets: bool, fonts: bool, no_parallel: bool) -> SquarkResult
 				site_data
 				.pages_map()
 				.par_iter()
-				.map(|(_shard, page)| {
+				.map(|(_shard, page)|
 					renderer::render(page, &site_data, &config)
-				})
+				)
 				.collect()
 			;
 

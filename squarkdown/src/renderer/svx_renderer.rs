@@ -406,13 +406,13 @@ impl Renderer<'_>
 		match self.config.errors.link_broken
 		{
 			LinkRewriteAction::MARK_INVALID => {
-				todo!("mark invalid is not yet supported")
+				todo!("mark-invalid is not yet supported")
 			}
 			LinkRewriteAction::STRIP_EXTENSION => {
-				todo!("replace regex is not yet supported")
+				todo!("strip-extension is not yet supported")
 			}
 			LinkRewriteAction::LINK_TO_GITHUB => {
-				todo!("link to github is not yet supported")
+				todo!("link-to-github is not yet supported")
 			}
 			LinkRewriteAction::ERROR => {
 				self.errors.push(SquarkError::Recoverable {
@@ -480,6 +480,7 @@ impl Renderer<'_>
 /// Core utilities
 impl Renderer<'_>
 {
+	/// Produce the appropriate [`SquarkResult`] for propagation for when the target file already exists, depending on `errors.file-already-exists`.
 	pub(super) fn err_exists(&self, filepath: &Path) -> SquarkResult
 	{
 		match self.config.errors.file_already_exists
