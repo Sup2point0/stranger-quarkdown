@@ -258,3 +258,27 @@ impl<E> From<E> for SquarkError
 		Self::external(error)
 	}
 }
+
+
+pub trait CollectSquark<T>: Iterator<Item = SquarkResult<T>> + Sized
+{
+	/// Collapse an iterator of [`SquarkResult`]s into a single [`SquarkResult`].
+	fn collect_squark(self, when: impl Into<Cow<'static, str>>) -> SquarkResult<Vec<T>>
+	{
+		let mut vals = vec![];
+		let mut errs = SquarkError::multiple(when);
+
+		for each in self {
+			match each {
+				Ok(val)  => { vals.push(val); }
+				Err(err) => { errs.push(err); }
+			}
+		}
+
+		errs.or(vals)
+	}
+}
+
+impl<I, T> CollectSquark<T> for I
+	where I: Iterator<Item = SquarkResult<T>>
+{}

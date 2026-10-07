@@ -1,7 +1,7 @@
 //! This module implements common types shared throughout Squarkdown.
 
 mod squark_error;
-pub use squark_error::{ SquarkResult, SquarkError };
+pub use squark_error::{ SquarkResult, SquarkError, CollectSquark };
 
 mod page_data;
 pub use page_data::{ PageData };
