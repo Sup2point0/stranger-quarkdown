@@ -117,7 +117,7 @@ impl<'d> Renderer<'d>
 
 			write!(
 				file,
-				"<!-- rendered by Squarkdown on {} {} {} at {:02}:{:02} -->",
+				"<!-- rendered by Squarkdown on {} {} {} at {:02}:{:02} -->\n\n",
 				now.year(), now.month(), now.day(),
 				now.hour(), now.minute(),
 			)?;
@@ -138,6 +138,7 @@ impl<'d> Renderer<'d>
 		;
 
 		self.skip_heading(&mut parser);
+		self.skip_charm_squark(&mut parser);
 
 		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
@@ -150,11 +151,7 @@ impl<'d> Renderer<'d>
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone())
 			.expect("rendering always succeeds");
 
-		// strip charm squark
-		match regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\s-->").replace(&out, "$1") {
-			Cow::Borrowed(..) => out,
-			Cow::Owned(out) => out,
-		}
+		out
 	}
 
 	/// Remove `<!-- #SQUARK only?` and `#SQUARK only. -->` to expose their content to the render pipeline.
@@ -179,6 +176,30 @@ impl<'d> Renderer<'d>
 				&& lv == level {
 					break;
 				}
+			}
+		}
+	}
+
+	/// Advance `parser` to skip over the events that produce the charm squark.
+	fn skip_charm_squark(&self, parser: &mut Peekable<pd::OffsetIter>)
+	{
+		/* NOTE:
+		
+			Since `parser` is an iterator and `Peekable` only provides a 1-element lookahead, we can't fully verify the upcoming events are actually the charm squark.
+
+			However, any active page must have had a charm squark, either under or in place of the heading, so this should be safe.
+		*/
+
+		if !matches!(
+			parser.peek(),
+			Some((pd::Event::Start(pd::Tag::HtmlBlock), _))
+		) {
+			return;
+		}
+
+		for (event, _range) in parser.by_ref() {
+			if matches!(event, pd::Event::End(pd::TagEnd::HtmlBlock)) {
+				break;
 			}
 		}
 	}
@@ -531,7 +552,10 @@ impl From<bool> for ProcessAction {
 
 // 	}, &[
 // 		indoc! {"
-// 			*~~test~~*
+// 			# Hi
+// 			<!-- #SQUARK live!
+// 			| hi = true
+// 			-->
 // 		"}
 // 	]);
 // }
@@ -891,7 +915,7 @@ mod comments {
 
 		#[test] fn nested() {
 			test_expected_for(|c| c.format.preserve_comments = true, &[
-				pair!("<!-- <!-- illegal --> comment"),
+				pair!("a <!-- <!-- weird --> comment"),
 			]);
 		}
 
