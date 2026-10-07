@@ -46,7 +46,7 @@ pub struct PathsConfig {
 	/// Only files whose full path matches against any of these RegEx patterns will be searched.
 	pub include: Vec<regex::Regex>,
 
-	/// Files whose full path matches against any of these RegEx patterns will *not* be searched.
+	/// Files whose full path matches against any of these RegEx patterns will *not* be checked by Squarkdown.
 	pub exclude: Vec<regex::Regex>,
 }
 
@@ -54,7 +54,7 @@ pub struct PathsConfig {
 pub struct OutConfig {
 	/// Where to export files relative to.
 	/// 
-	/// `dest` paths in files are relative to this folder.
+	/// `destination` paths in files are relative to this folder.
 	pub folder: PathBuf,
 
 	/// The file name for exported files, including the (expected) `.svx` extension.
@@ -68,7 +68,7 @@ pub struct OutConfig {
 	/// Should `+page.ts` files be exported?
 	pub render_page_ts: bool,
 
-	/// Should fields in exported `+page.ts` use more compact identifiers?
+	/// Should fields in exported `+page.ts` and `site.json` use more compact identifiers?
 	/// 
 	/// For instance, `description` is shortened to `desc`, and `last_update` is shortened to `update`.
 	pub shorter_fields: bool,
@@ -105,7 +105,8 @@ pub struct ErrorConfig {
 	/// 
 	/// This includes:
 	/// 
-	/// - Checking directories remain inside your project
+	/// - Requiring [`PageData.destination`](crate::types::PageData::destination) to be explicitly provided
+	/// - Checking directories remain under your project root
 	/// - Checking multiple files don't export to the same directory
 	pub strict: bool,
 

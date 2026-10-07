@@ -42,7 +42,9 @@ impl SquarkupConfig
 				preserve_comments: false,
 				externalise_links: false,
 			},
-			assets: AssetsConfig { folder: root.to_owned(), site_assets_folder: None,
+			assets: AssetsConfig {
+				folder: root.to_owned(),
+				site_assets_folder: None,
 				extensions: vec![
 					str!("png"), str!("jpg"), str!("jpeg"), str!("webp"), str!("svg"),
 				],
