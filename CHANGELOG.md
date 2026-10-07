@@ -9,6 +9,9 @@
 ### New
 - Check `out.site-data-path` is under your project root when `errors.strict = true`
 
+### Fixes
+- Fix resolution of links with both `%20` and a `#section` anchor (e.g. `other%20file#introduction`)
+
 
 ## v4.0.3
 

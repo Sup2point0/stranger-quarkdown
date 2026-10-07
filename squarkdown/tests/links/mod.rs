@@ -61,6 +61,7 @@ use assertables::*;
 	let main = read_file("links/anchors/main/+page.svx");
 	let side = read_file("links/anchors/side/+page.svx");
 	assert_contains!( main, "[later](#later)" );
+	assert_contains!( main, "[much later](#much-later)" );
 	assert_contains!( main, "[side](side#section)" );
 	assert_contains!( side, "[main](main)" );
 }
@@ -87,7 +88,9 @@ use assertables::*;
 	let main = read_file("links/spaces/the-main-file/+page.svx");
 	let side = read_file("links/spaces/other-file/+page.svx");
 	assert_contains!( main, "[other file](other-file)" );
+	assert_contains!( main, "[Section in the other file](other-file#section)" );
 	assert_contains!( side, "[the main file](the-main-file)" );
+	assert_contains!( side, "[Section in the main file](the-main-file#section)" );
 }
 
 /// Squarkdown crashes when encountering links to nonexistent files.

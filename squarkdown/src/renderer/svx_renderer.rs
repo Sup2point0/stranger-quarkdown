@@ -352,14 +352,16 @@ impl Renderer<'_>
 			return;
 		}
 
-		// TODO can avoid `.to_string()`?
-		let mut their_file_name = dest_url.replace("%20", " ");
 		let mut anchor: Option<&str> = None;
 
-		if let Some((left, right)) = dest_url.split_once(".md#") {
-			their_file_name = left.to_owned() + ".md";
-			anchor = Some(right);
-		}
+		let their_file_name = {
+			if let Some((left, right)) = dest_url.split_once(".md#") {
+				anchor = Some(right);
+				left.replace("%20", " ") + ".md"
+			} else {
+				dest_url.replace("%20", " ")
+			}
+		};
 
 		// 1. find where the target file lives, relative to the current file
 		let own_source_folder = self.page.filepath.parent()
