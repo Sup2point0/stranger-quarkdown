@@ -21,12 +21,11 @@ use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
 
-// == IMPLEMENTATION == //
-
 /// Options for parsing with `pulldown-cmark`.
 pub static PARSER_OPTIONS: LazyLock<pd::Options> = LazyLock::new(||
 	  pd::Options::ENABLE_GFM
 	| pd::Options::ENABLE_TABLES
+	| pd::Options::ENABLE_MATH
 	| pd::Options::ENABLE_FOOTNOTES
 	| pd::Options::ENABLE_TASKLISTS
 );
@@ -389,6 +388,7 @@ impl Renderer<'_>
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
 
+			// FIXME use `utils::display_rel()`
 			let href_path = pathdiff::diff_paths(&dest_page.destination, own_dest_folder)
 				.expect("destinations of files always have ROOT as common ancestor");
 
@@ -399,7 +399,7 @@ impl Renderer<'_>
 				None => href_path_slashed.to_string(),
 			};
 
-			*dest_url = pd::CowStr::Boxed(Box::from(href));
+			*dest_url = href.into();
 
 			return;
 		}
@@ -785,6 +785,16 @@ mod maths_inline {
 	#[test] fn easy() {
 		test_preserves(&[
 			"the $x$ variable",
+			"the $x+y$ variable",
+			"the $x + y$ variable",
+		])
+	}
+
+	#[test] fn medium() {
+		test_preserves(&[
+			"$[1, 2, 3]$",
+			"$[1,\\ 2,\\ 3]$",
+			"$\\{ 1, 2, 3 \\}$",
 		])
 	}
 }
@@ -798,6 +808,11 @@ mod maths_block {
 			indoc! {"
 				```math
 				f(x) = x
+				```
+			"},
+			indoc! {"
+				```math
+				A(X, x_{1}, x_{2}) = X[\\max(x_{1}, x_{2})]
 				```
 			"},
 		])

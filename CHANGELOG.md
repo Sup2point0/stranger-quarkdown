@@ -7,6 +7,7 @@
 ## Next (v4.0.5)
 
 ### Fixes
+- Fix issues with maths rendering (e.g. `$[1, 2]$` being rendered to `$\[1, 2\]$`)
 - `import type { PageData } from` `"stranger-quarkdown"` instead of `"squarkdown"`
 
 
