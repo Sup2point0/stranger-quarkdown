@@ -4,10 +4,10 @@
 <br>
 
 
-## Next (v4.1.0)
+## v4.1.0
 
 ### Breaking
-- Flatten arbitrary fields in `+page.ts` (like in `site.json`)
+- Flatten arbitrary fields in `+page.ts` (like in `site.json`).
   - Before:
 
   ```ts
@@ -35,8 +35,18 @@
   - Arbitrary fields are also now surrounded with `""` for safety.
 
 ### New
-- Render pages in parallel
-  - Pass `--no-parallel` to disable parallelism (internal feature, likely to be removed in future)
+- Render pages in parallel!
+  - Pass `--no-parallel` to disable parallelism (internal feature, likely to be removed in future).
+- Infer a page’s destination if not provided when `errors.strict = false`.
+  - This means the bare minimum for a file to be squarked up is now just `<!-- #SQUARK live! -->` with nothing more:
+
+  ```md
+  # Page
+  <!-- #SQUARK live! -->
+  ```
+
+  - If this page were under `/docs/page.md`, its destination would inferred to be `/site/src/routes/docs/page/`.
+  - However, for safety it’s still best to always explicitly state the destination, so `errors.strict` must be disabled to opt-in to this.
 
 
 <br>
@@ -45,26 +55,26 @@
 ## v4.0.5
 
 ### Fixes
-- Fix issues with maths rendering (e.g. `$[1, 2]$` being rendered to `$\[1, 2\]$`)
-- `import type { PageData } from` `"stranger-quarkdown"` instead of `"squarkdown"`
+- Fix issues with maths rendering (e.g. `$[1, 2]$` being rendered to `$\[1, 2\]$`).
+- `import type { PageData } from` `"stranger-quarkdown"` instead of `"squarkdown"`.
 
 ### Changes
-- Site data uses sorted `BTreeMap` instead of `HashMap`, so keys are now sorted alphabetically
+- Site data uses sorted `BTreeMap` instead of `HashMap`, so keys are now sorted alphabetically.
 
 
 ## v4.0.4
 
 ### New
-- Check `out.site-data-path` is under your project root when `errors.strict = true`
+- Check `out.site-data-path` is under your project root when `errors.strict = true`.
 
 ### Fixes
-- Fix resolution of links with both `%20` and a `#section` anchor (e.g. `other%20file#introduction`)
+- Fix resolution of links with both `%20` and a `#section` anchor (e.g. `other%20file#introduction`).
 
 
 ## v4.0.3
 
 ### New
-- Site data now respects `out.shorter-fields = true`
+- Site data now respects `out.shorter-fields = true`.
 
 
 ## v4.0.2
@@ -73,7 +83,7 @@
 - `squarkdown --version` command
 
 ### Fixes
-- Improve command arguments parsing to be more robust
+- Improve command arguments parsing to be more robust.
 
 
 ## v4.0.1
@@ -92,7 +102,7 @@
   -->
   ```
 
-  - Opt in with `errors.strict = true`
+  - Opt in with `errors.strict = true`.
 
 ### Fixes
 - Fix `release-date` and `last-update` long-form fields.
