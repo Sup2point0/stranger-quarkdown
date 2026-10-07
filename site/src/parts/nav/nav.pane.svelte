@@ -81,15 +81,16 @@ const delay = 240;
       <NavLink code="only" intern="docs/reference/squarks#only" />
     </NavLink>
     <!-- <NavLink text="site data" intern="docs/reference/site-data" /> -->
-    <!-- <NavLink text="cleanup" intern="docs/reference/cleanup" /> -->
     <NavLink text="CLI" intern="docs/reference/cli">
     </NavLink>
   </NavSection>
 
-  <NavSection title="Extras" intern="features">
+  <!-- <NavSection title="Features" intern="features">
+    <NavLink text="Link Rewriting" intern="features/link-rewriting" />
+    <NavLink text="Markdown Sanitisation" intern="features/cleanse" />
     <NavLink text="Assets" intern="features/assets" />
     <NavLink text="Fonts" intern="features/fonts" />
-  </NavSection>
+  </NavSection> -->
 
   <NavSection title="Schemas" intern="squarkup-schemas" open={false}>
     <NavLink text="latest (v{Schema.version})" intern="squarkup-schema/latest.json" />

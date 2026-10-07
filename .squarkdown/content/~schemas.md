@@ -4,6 +4,9 @@
 | desc = JSON Schemas for Configuring Stranger Quarkdown
 -->
 
+> [!Warning]
+> This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
+
 Stranger Quarkdown provides a [JSON Schema<sup>↗</sup>](json-schema.org) to validate your `squarkup.json` against. This also adds helpful hover tooltips in IDEs.
 
 Link a schema to your `squarkup.json`:
