@@ -40,9 +40,6 @@ interface LongFields
 	release_date_raw?: string;
 	last_update?: Date;
 	last_update_raw?:  string;
-	
-	/** Other arbitrary user-provided fields not intrinsic to Squarkdown. */
-	other: Record<string, string[]>;
 }
 
 
@@ -71,7 +68,4 @@ interface ShortFields
 	date_raw?: string;
 	update?: Date;
 	update_raw?:  string;
-	
-	/** Other arbitrary user-provided fields not intrinsic to Squarkdown. */
-	other: Record<string, string[]>;
 }

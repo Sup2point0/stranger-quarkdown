@@ -27,10 +27,12 @@
   return {
     filepath: "readme.md",
     ...,
-    some_arbitrary_field: true,
-    random_message: ["sup", "world"],
+    "some_arbitrary_field": true,
+    "random_message": ["sup", "world"],
   };
   ```
+
+  - Arbitrary fields are also now surrounded with `""` for safety.
 
 ### New
 - Render pages in parallel
