@@ -7,7 +7,7 @@ use crate::macros::*;
 use serde::ser::SerializeMap;
 use time::{ UtcDateTime, macros::* };
 
-use std::collections::{ HashMap };
+use std::collections::{ HashMap, BTreeMap };
 use std::path::{ Path };
 
 
@@ -17,12 +17,12 @@ pub struct SiteData
 	pub stats: SiteStats,
 
 	/// Maps tags to the pages that included them.
-	tags: HashMap<String, Vec<String>>,
+	tags: BTreeMap<String, Vec<String>>,
 
 	/// The active pages in the site, keyed by the location (filepath) of their source file.
 	/// 
 	/// Since the filepath of any file must be unique, this reliably identifies files with minimal effort!
-	pages: HashMap<String, PageData>,
+	pages: BTreeMap<String, PageData>,
 }
 
 #[derive(Clone, Debug, serde::Serialize)]
@@ -72,10 +72,10 @@ impl SiteData
 		for tag in &page_data.tags {
 			self.tags
 				.entry(tag.to_owned()).or_default()
-				.push(key.to_owned());
+				.push(key.clone());
 		}
 
-		self.pages.insert(key.to_owned(), page_data);
+		self.pages.insert(key.clone(), page_data);
 		self.stats.active_pages += 1;
 	}
 
@@ -112,7 +112,7 @@ impl SiteData
 	pub fn serialize_with_config<S>(&self, s: S, config: &SquarkupConfig) -> Result<S::Ok, S::Error>
 		where S: serde::Serializer
 	{
-		let pages: HashMap<&String, SerializablePageData>
+		let pages: BTreeMap<&String, SerializablePageData>
 			= self.pages.iter()
 				.map(|(shard, page)| (shard, page.to_serializable(config)))
 				.collect();

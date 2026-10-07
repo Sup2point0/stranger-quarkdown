@@ -10,6 +10,9 @@
 - Fix issues with maths rendering (e.g. `$[1, 2]$` being rendered to `$\[1, 2\]$`)
 - `import type { PageData } from` `"stranger-quarkdown"` instead of `"squarkdown"`
 
+### Changes
+- Site data uses sorted `BTreeMap` instead of `HashMap`, so keys are now sorted alphabetically
+
 
 ## v4.0.4
 
