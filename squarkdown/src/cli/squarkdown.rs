@@ -25,12 +25,12 @@ pub fn squarkdown(assets: bool, fonts: bool, no_parallel: bool) -> ExitCode
 	{
 		Ok(()) => {
 			log::line();
-			println!("{P}squarkup finished! {GREY}{perf:.2?} ms{W}");
+			println!("{P}squarkup finished! {GREY}{perf:.1?} ms{W}");
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
 			log::error(e);
-			println!("{R}squarkup failed! {GREY}{perf:.2?} ms\n{W}");
+			println!("{R}squarkup failed! {GREY}{perf:.1?} ms\n{W}");
 			ExitCode::FAILURE
 		},
 	}
