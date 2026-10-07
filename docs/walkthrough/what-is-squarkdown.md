@@ -5,18 +5,40 @@
 | update = 2026 July 10
 -->
 
-**Stranger Quarkdown**, or *Squarkdown* `/ˌskwɑːkdaʊn/` for short, is a preprocessing tool for using Markdown content in a SvelteKit website.
+**Stranger Quarkdown**, or *Squarkdown* (`/ˌskwɑːkdaʊn/`) for short, is a Markdown build tool for [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit) projects using [MDsveX](https://mdsvex.pngwn.at).
 
-> No, it’s not yet another JavaScript framework, nor is it a documentation generator like [MkDocs](https://www.mkdocs.org) or CDN like [Wordpress](https://wordpress.com).
+> No, it’s not yet another JavaScript framework, nor is it a documentation generator like [MkDocs<sup>↗</sup>](https://www.mkdocs.org) or CDN like [Wordpress<sup>↗</sup>](https://wordpress.com).
 
-Squarkdown allows you to:
+At its core, it takes Markdown files scattered across your repo, and preprocesses them to `+page.svx` and `+page.ts` files in your SvelteKit site:
 
-- Write Markdown content anywhere in your repo
-- Use [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md) to provide extra metadata and instructions
-- Use Squarkdown to copy that content into your website
+```diff
+  /project/
+     docs/
+        README.md
+        help/
+           quickstart.md
+  
+     site/
+        src/
+           routes/
++             +page.svx
++             +page.ts
+  
++             quickstart/
++                +page.svx
++                +page.ts
+```
 
-To illustrate, say you’ve got a project with `.md` (Markdown) files scattered all throughout it. You want to build a website for the project, using the content in these Markdown files. But there’s no easy way you to access the content in them, and control how they’ll be handled and rendered.
+Squarkdown also allows you to use [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md) hidden inside comments to control how the Markdown is rendered.
 
-Squarkdown does that all for you. You tell it where to find `.md` files, and it’ll search your repo for them and export them to `.svx` files in your site’s directory.
+For instance, if you have some text that you want in your repo, but *not* in the site, you can tell Squarkdown to remove it using `#SQUARK slash` (a [***squark***](../glossary.md#squark)):
 
-Squarkdown is built for integration with [Svelte](https://svelte.dev), [SvelteKit](https://svelte.dev/docs/kit) and [MDsveX](https://mdsvex.pngwn.io). If it isn’t clear already, it is a pretty niche tool! Exactly what sorts of projects Squarkdown can be used for are explored in [Project Requirements](project-requirements.md).
+```md
+Never gonna give you up
+
+<!-- #SQUARK slash? -->
+Hi, GitHub!
+<!-- #SQUARK slash. -->
+
+Never gonna let you down
+```
