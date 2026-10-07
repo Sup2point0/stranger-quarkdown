@@ -49,7 +49,7 @@ impl Renderer<'_>
 		if let Some(v) = &p.heading     { writeln!(f, "\t\t{}: {v:?},", p.head(s))?; }
 		if let Some(v) = &p.caption     { writeln!(f, "\t\t{}: {v:?},", p.capt(s))?; }
 
-		writeln!(f, "\t\ttags: {:?},", p.tags)?;
+		writeln!(f, "\t\t{}: {:?},", p.tags(s), p.tags)?;
 
 		if let Some(v) = p.release_date {
 			writeln!(f,
