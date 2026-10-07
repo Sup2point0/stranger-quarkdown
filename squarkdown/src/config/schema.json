@@ -13,28 +13,30 @@
       "properties":
       {
         "site": {
-          "title": "Site Directory",
-          "type": "string",
+          "title":       "Site Directory",
+          "type":        "string",
           "description": "[relative to root]\n\nThe folder containing your SvelteKit site."
         },
 
         "sources": {
-          "title": "Source Directories",
-          "type": "array",
-          "items": {"type": "string"},
+          "title":       "Source Directories",
+          "type":        "array",
+          "items":       {"type": "string"},
           "description": "[relative to root]\n\nSource folders from which to start searching for Markdown files."
         },
 
         "include": {
-          "title": "Include Patterns",
-          "type": "array",
-          "items": {"type": "string"}
+          "title":       "Include Patterns",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "description": "Only files whose full path matches against any of these RegEx patterns will be searched."
         },
 
         "exclude": {
-          "title": "Exclude Patterns",
-          "type": "array",
-          "items": {"type": "string"}
+          "title":       "Exclude Patterns",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "description": "Files whose full path matches against any of these RegEx patterns will *not* be checked by Squarkdown."
         }
       }
     },
@@ -45,25 +47,32 @@
       "properties":
       {
         "folder": {
-          "title": "Destination Folder",
-          "type": "string"
+          "title":       "Destination Folder",
+          "type":        "string",
+          "description": "[relative to `paths.site`]\n\nWhere to export files relative to.\n\n`destination` paths in files are relative to this folder."
         },
+
         "file-name": {
-          "title": "SVX Filename",
-          "type": "string"
+          "title":       "SVX Filename",
+          "type":        "string",
+          "description": "The file name for exported files, including the (expected) `.svx` extension."
         },
-        "render-page-ts": {
-          "title": "Enable `+page.ts` Rendering",
-          "type": "boolean"
-        },
-        "shorter-fields": {
-          "title": "Shorter Field Names",
-          "type": "boolean"
-        },
+
         "site-data-path": {
-          "title": "Site Data Filepath",
-          "type": "string",
+          "title":       "Site Data Filepath",
+          "type":        "string",
           "description": "[relative to `paths.site`]\n\nWhere to export site data, including the (expected) `.json` extension.\n\nIf absent, site data is not exported."
+        },
+
+        "render-page-ts": {
+          "title":       "Enable `+page.ts` Rendering",
+          "type":        "boolean"
+        },
+
+        "shorter-fields": {
+          "title":       "Shorter Field Names",
+          "type":        "boolean",
+          "description": "Should fields in exported `+page.ts` and `site.json` use more compact identifiers?\n\nFor instance, `description` is shortened to `desc`, and `last_update` is shortened to `update`."
         }
       }
     },
@@ -74,16 +83,18 @@
       "properties":
       {
         "preserve-heading": {
-          "title": "Preserve Page Heading",
-          "type": "boolean"
+          "title":       "Preserve Page Heading",
+          "type":        "boolean"
         },
+
         "preserve-comments": {
-          "title": "Preserve Comments",
-          "type": "boolean"
+          "title":       "Preserve Comments",
+          "type":        "boolean"
         },
+
         "externalise-links": {
-          "title": "Externalise Links",
-          "type": "boolean"
+          "title":       "Externalise Links",
+          "type":        "boolean"
         }
       }
     },
@@ -94,17 +105,21 @@
       "properties":
       {
         "folder": {
-          "title": "Assets Folder",
-          "type": "string"
+          "title":       "Assets Folder",
+          "type":        "string",
+          "description": "[relative to root]\n\nThe folder from which to copy assets to `site/static/`."
         },
+
         "site-assets-folder": {
-          "title": "Site Assets Folder",
-          "type": "string"
+          "title":       "Site Assets Folder",
+          "type":        "string",
+          "description": "[relative to root]\n\nA folder (possibly inside `assets.folder`) from which to copy assets directly to `site/static/` without any nested structure."
         },
+
         "extensions": {
-          "title": "Asset File Extensions",
-          "type": "array",
-          "items": {"type": "string"}
+          "title":       "Asset File Extensions",
+          "type":        "array",
+          "items":       {"type": "string"}
         }
       }
     },
@@ -115,9 +130,9 @@
       "properties":
       {
         "queries": {
-          "title": "Google Fonts Query Parameters",
-          "type": "array",
-          "items": {"type": "string"}
+          "title":       "Google Fonts Query Parameters",
+          "type":        "array",
+          "items":       {"type": "string"}
         }
       }
     },
@@ -128,26 +143,30 @@
       "properties":
       {
         "strict": {
-          "title": "Enable Safety Checks",
-          "type": "boolean"
+          "title":       "Enable Safety Checks",
+          "type":        "boolean",
+          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring [`PageData.destination`](crate::types::PageData::destination) to be explicitly provided\nChecking directories remain under your project root\nChecking multiple files don't export to the same directory"
         },
 
         "on-error": {
-          "title": "Error Handling",
-          "type": "string",
-          "enum": ["warn", "kill"]
+          "title":       "Error Handling",
+          "type":        "string",
+          "enum":        ["warn", "kill"],
+          "description": "What to do when a non-fatal error is encountered (e.g. parsing a file failed)."
         },
 
         "file-already-exists": {
-          "title": "File Conflict Handling",
-          "type": "string",
-          "enum": ["overwrite", "error", "skip"]
+          "title":       "File Conflict Handling",
+          "type":        "string",
+          "enum":        ["overwrite", "error", "skip"],
+          "description": "What to do when a target file to write to already exists."
         },
 
         "broken-link": {
-          "title": "Inactive Link Handling",
-          "type": "string",
-          "enum": ["mark-invalid", "strip-extension", "link-to-github", "error"]
+          "title":       "Inactive Link Handling",
+          "type":        "string",
+          "enum":        ["mark-invalid", "strip-extension", "link-to-github", "error"],
+          "description": "When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?"
         }
       }
     }
