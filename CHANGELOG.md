@@ -4,6 +4,16 @@
 <br>
 
 
+## Next (v4.1.0)
+
+### New
+- Render pages in parallel
+  - Pass `--no-parallel` to disable parallelism (internal feature, likely to be removed in future)
+
+
+<br>
+
+
 ## v4.0.5
 
 ### Fixes

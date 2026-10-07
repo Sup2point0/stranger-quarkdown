@@ -56,7 +56,7 @@ pub enum SquarkError
 	/// A fatal error that crashes Squarkdown, caused by external factors such as a file read failure.
 	External {
 		msg: String,
-		err: Box<dyn std::error::Error>,
+		err: Box<dyn std::error::Error + Send>,
 	},
 }
 
@@ -74,7 +74,7 @@ impl SquarkError
 
 	/// Construct a [`Self::External`] with only a plain error message.
 	#[must_use]
-	pub fn external(error: impl std::error::Error + 'static) -> Self
+	pub fn external(error: impl std::error::Error + Send + 'static) -> Self
 	{
 		Self::External {
 			msg: str!("unexpected external error"),
@@ -252,7 +252,7 @@ impl SquarkError
 }
 
 impl<E> From<E> for SquarkError
-	where E: std::error::Error + 'static
+	where E: std::error::Error + Send + 'static
 {
 	fn from(error: E) -> Self {
 		Self::external(error)

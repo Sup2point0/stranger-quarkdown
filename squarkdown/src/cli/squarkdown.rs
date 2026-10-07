@@ -1,6 +1,9 @@
 use crate::*;
 use crate::prelude::*;
+use crate::types::{ CollectSquark };
 use crate::colours::*;
+
+use rayon::prelude::*;
 
 use std::fs::File;
 use std::io::BufWriter;
@@ -11,10 +14,10 @@ use std::time::Instant;
 /// Run Squarkdown on the user's project.
 /// 
 /// This includes squarkup as well as extras like fonts and assets preprocessing.
-pub fn squarkdown(assets: bool, fonts: bool) -> ExitCode
+pub fn squarkdown(assets: bool, fonts: bool, no_parallel: bool) -> ExitCode
 {
 	let t_init = Instant::now();
-	let r = squarkup(assets, fonts);
+	let r = squarkup(assets, fonts, no_parallel);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -34,7 +37,7 @@ pub fn squarkdown(assets: bool, fonts: bool) -> ExitCode
 }
 
 /// The core squarkup pipeline that is timed for performance.
-fn squarkup(assets: bool, fonts: bool) -> SquarkResult
+fn squarkup(assets: bool, fonts: bool, no_parallel: bool) -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
 
@@ -115,16 +118,36 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 		// == RENDER == //
 		log::is!("rendering...");
 
-		let mut rendered = 0;
+		if no_parallel {
+			let mut rendered = 0;
 
-		for page in site_data.pages() {
-			renderer::render(page, &site_data, &config)
-				.or_else(|e| e.depends(&config))?;
+			for page in site_data.pages() {
+				renderer::render(page, &site_data, &config)
+					.or_else(|e| e.depends(&config))?;
 
-			rendered += 1;
+				rendered += 1;
+			}
+
+			log::ok!("rendered {rendered}/{} pages", site_data.stats.active_pages);
 		}
+		else {
+			let results: Vec<SquarkResult> =
+				site_data
+				.pages_map()
+				.par_iter()
+				.map(|(_shard, page)| {
+					renderer::render(page, &site_data, &config)
+				})
+				.collect()
+			;
 
-		log::ok!("rendered {rendered}/{} pages", site_data.stats.active_pages);
+			match results.into_iter().collect_squark("") {
+				Ok(c) => {
+					log::ok!("rendered {}/{} pages", c.len(), site_data.stats.active_pages);
+				}
+				Err(e) => e.depends(&config)?,
+			}
+		}
 	}
 
 	// == SITE DATA == //

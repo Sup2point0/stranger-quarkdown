@@ -54,6 +54,10 @@ impl SiteData
 		Self::default()
 	}
 
+	pub fn pages_map(&self) -> &BTreeMap<String, PageData> {
+		&self.pages
+	}
+
 	pub fn pages(&self) -> impl Iterator<Item = &PageData> {
 		self.pages.values()
 	}
