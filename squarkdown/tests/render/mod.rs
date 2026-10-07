@@ -44,10 +44,10 @@ use path_macro::path;
 	let main = read_file("render/dest-infer/main/+page.svx");
 	let nest = read_file("render/dest-infer/nested/+page.svx");
 	let side = read_file("render/dest-infer/nested/side/+page.svx");
-	assert_contains!( base, "Infer" );
-	assert_contains!( main, "Main" );
-	assert_contains!( nest, "Infer" );
-	assert_contains!( side, "Side" );
+	assert_contains!( base, "test-project/src/routes/render/dest-infer/" );
+	assert_contains!( main, "test-project/src/routes/render/dest-infer/main/" );
+	assert_contains!( nest, "test-project/src/routes/render/dest-infer/nested/" );
+	assert_contains!( side, "test-project/src/routes/render/dest-infer/nested/side/" );
 }
 
 /// Squarkdown preserves basic Markdown syntax.
