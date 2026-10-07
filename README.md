@@ -66,36 +66,30 @@ Squarkdown lets you:
 
 ## Quickstart
 
-### Cargo (cross-platform)
+### Install
+Cargo (cross-platform):
+
 ```bash
-# Install:
 > cargo install squarkdown
-
-# Setup (once per project):
-# > squarkdown init
-# (under development)
-
-# Run:
-> squarkdown
-
-# With extras:
-> squarkdown --assets
 ```
 
-### npm (Windows/Linux)
+NPM (Windows/Linux):
+
 ```bash
-# Install:
 > npm install stranger-quarkdown
+```
 
-# Setup (once per project):
-# > squarkdown init
-# (under development)
+### Check
+```bash
+> squarkdown --version
+```
 
-# Run:
+### Run
+```bash
 > squarkdown
 
 # With extras:
-> squarkdown --assets
+> squarkdown --assets --fonts
 ```
 
 > [!Tip]
