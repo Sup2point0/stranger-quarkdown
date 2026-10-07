@@ -62,14 +62,14 @@ Let’s install Squarkdown from NPM:
 We can check we have access to Squarkdown with:
 
 ```bash
-npx squarkdown --version
+squarkdown --version
 ```
 
 > [!Note]
 > Pre-4.0, Squarkdown (written in Ruby) required installation as a Git submodule. Now it’s properly published to the [crates.io<sup>↗</sup>](https://crates.io/crates/squarkdown) and [NPM<sup>↗</sup>](https://www.npmjs.com/package/stranger-quarkdown) registries ;)
 
 > [!Tip]
-> Try running `npx squarkdown` now. What happens?
+> Try running `squarkdown` now. What happens?
 
 
 <br>
@@ -105,7 +105,7 @@ site = "site/"
 > See [Squarkup Configuration](../reference/squarkup-config.md) for full details on all the options that can go in `squarkup.toml`.
 
 > [!Tip]
-> Try running `npx squarkdown` now. What happens?
+> Try running `squarkdown` now. What happens?
 
 
 <br>
@@ -166,7 +166,7 @@ This means `showerthoughts.md` will be exported to `/site/src/routes/showerthoug
 We’re now ready to run Squarkdown!
 
 ```bash
-/project/site> npx squarkdown
+/project/site> squarkdown
 ```
 
 You should see output like this:

@@ -88,14 +88,14 @@ Squarkdown lets you:
 > npm install stranger-quarkdown
 
 # Setup (once per project):
-# > npx squarkdown init
+# > squarkdown init
 # (under development)
 
 # Run:
-> npx squarkdown
+> squarkdown
 
 # With extras:
-> npx squarkdown --assets
+> squarkdown --assets
 ```
 
 > [!Tip]

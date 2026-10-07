@@ -15,19 +15,19 @@ Please visit [the GitHub](https://github.com/Sup2point0/stranger-quarkdown#readm
 Run:
 
 ```bash
-> npx squarkdown
+> squarkdown
 ```
 
 With extras:
 
 ```bash
-> npx squarkdown --assets --fonts
+> squarkdown --assets --fonts
 ```
 
 Remind yourself:
 
 ```bash
-> npx squarkdown --help
+> squarkdown --help
 ```
 
 
