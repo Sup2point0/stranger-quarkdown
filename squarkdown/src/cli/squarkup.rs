@@ -33,6 +33,7 @@ pub fn squarkdown(assets: bool, fonts: bool) -> ExitCode
 	}
 }
 
+/// The core squarkup pipeline that is timed for performance.
 fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
