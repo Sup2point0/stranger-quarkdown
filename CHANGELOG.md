@@ -4,7 +4,7 @@
 <br>
 
 
-## Next (v4.0.5)
+## v4.0.5
 
 ### Fixes
 - Fix issues with maths rendering (e.g. `$[1, 2]$` being rendered to `$\[1, 2\]$`)

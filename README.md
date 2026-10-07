@@ -18,7 +18,7 @@
 </div>
 
 > [!Warning]
-> Squarkdown has been freshly rewritten in Rust, which does mean it has a much more extensive test suite, but also means it’ll probably have some rough edges!
+> Squarkdown has been freshly rewritten in Rust, so it might be rough around the edges in some places!
 
 **Stranger Quarkdown** (*Squarkdown*) is a build tool for [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.at) projects.
 
