@@ -147,12 +147,8 @@ impl<'d> Renderer<'d>
 
 		let mut out = str!();
 
-		cmark::cmark_with_options(
-			parser,
-			&mut out,
-			*PARSER_OPTIONS,
-			RENDER_OPTIONS.clone(),
-		).expect("rendering always succeeds");
+		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone())
+			.expect("rendering always succeeds");
 
 		// strip charm squark
 		match regex!(r"(?is)\A(#+.*?\n)?<!--\s*#SQUARK.*?\s-->").replace(&out, "$1") {
@@ -729,23 +725,14 @@ mod code_blocks {
 	}
 
 	#[test] fn escaped() {
-		test_expected(&[
-			(
-				indoc! {"
-					```md
-					\\```math
-					y = x
-					\\```
-					```
-				"},
-				indoc! {"
-					````md
-					\\```math
-					y = x
-					\\```
-					````
-				"},
-			),
+		test_preserves(&[
+			indoc! {"
+				```md
+				\\```math
+				y = x
+				\\```
+				```
+			"},
 		])
 	}
 
@@ -865,7 +852,7 @@ mod comments {
 				"erase\n<!-- this comment -->\nplease",
 				"erase\n<!--\nthis comment\n-->\nplease",
 				"erase\n<!--\nthis\ncomment\n-->\nplease",
-			], "erase\n\nplease");
+			], "erase\n\n\nplease");
 		}
 
 		#[test] fn nested() {
@@ -945,7 +932,7 @@ mod slash {
 					<!-- #SQUARK slash. -->
 					please
 				"},
-				"erase\n\nplease"
+				"erase\n\n\nplease"
 			),
 		])
 	}
@@ -977,7 +964,9 @@ mod leave {
 				indoc! {"
 					Don't
 
+
 					<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+
 
 					this
 				"}
