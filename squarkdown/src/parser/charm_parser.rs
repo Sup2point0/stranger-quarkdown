@@ -418,6 +418,22 @@ mod full {
 
 	use time::macros::date;
 
+	mod empty {
+		use super::*;
+
+		#[test] fn only_live() {
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK live! -->
+			"};
+			let mut config = TEST_CONFIG.clone();
+			config.errors.strict = false;
+			let r = CharmParser::new(source, TEST_FILE.clone(), &config).parse();
+			assert_ok!( &r );
+			assert_eq!( r.unwrap().heading, Some(str!("Test")) );
+		}
+	}
+
 	mod short {
 		use super::*;
 	
@@ -653,6 +669,19 @@ mod full {
 			"});
 			assert_eq!( page_data.tags, vec!["one"] );
 			assert_eq!( page_data.description, Some(str!("Works")) );
+		}
+
+		#[test] fn empty_arbitrary() {
+			let page_data = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest = .
+				| desc = Works
+				---
+				-->
+			"});
+			assert_eq!( page_data.description, Some(str!("Works")) );
+			assert_is_empty!( page_data.other );
 		}
 	}
 

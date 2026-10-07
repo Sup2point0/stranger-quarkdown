@@ -34,6 +34,22 @@ use path_macro::path;
 	assert_contains!( f5, "Five" );
 }
 
+/// Squarkdown infers the destination when none is explicitly provided.
+#[test] fn dest_infer()
+{
+	clear_files("render/dest-infer").unwrap();
+	assert!( squarkup_from("render/dest-infer").success() );
+
+	let base = read_file("render/dest-infer/+page.svx");
+	let main = read_file("render/dest-infer/main/+page.svx");
+	let nest = read_file("render/dest-infer/nested/+page.svx");
+	let side = read_file("render/dest-infer/nested/side/+page.svx");
+	assert_contains!( base, "Infer" );
+	assert_contains!( main, "Main" );
+	assert_contains!( nest, "Infer" );
+	assert_contains!( side, "Side" );
+}
+
 /// Squarkdown preserves basic Markdown syntax.
 #[test] fn markdown()
 {
