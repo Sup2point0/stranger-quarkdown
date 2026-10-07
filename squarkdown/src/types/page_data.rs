@@ -57,31 +57,51 @@ impl PageData
 	{
 		let mut errs = SquarkError::multiple(slash!("initialising {}", filepath));
 
-		let mut destination = PathBuf::new();
+		let destination = {
+			if let Some(raw) = Self::take_flat(&mut fields, "destination", "dest") {
+				let dest = path!(config.out.folder / utils::to_rel(&raw.replace(' ', "-"))).clean();
 
-		if let Some(dest) = Self::take_flat(&mut fields, "destination", "dest") {
-			destination = path!(config.out.folder / utils::to_rel(&dest.replace(' ', "-"))).clean();
+				if config.errors.strict && !dest.starts_with(&config.paths.root) {
+					errs.push(SquarkError::Unrecoverable {
+						msg: slash!("cannot export a file to: {}", dest),
+						hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
+						debug: vec![
+							slash!("your project's root directory is: {}", config.paths.root),
+							slash!("in file: {}", filepath),
+						],
+					});
+				}
 
-			if config.errors.strict && !destination.starts_with(&config.paths.root) {
+				dest
+			}
+			else if config.errors.strict {
 				errs.push(SquarkError::Unrecoverable {
-					msg: slash!("cannot export a file to: {}", destination),
-					hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
+					msg: fmt!("missing field: {W}dest{R}({W}ination{R})"),
+					hint: fmt!("active pages must specify where they should be rendered to when {Y}errors.strict{G} is enabled"),
 					debug: vec![
-						slash!("your project's root directory is: {}", config.paths.root),
-						slash!("in file: {}", filepath),
+						fmt!("parsed fields: {GREY1}{fields:?}")
 					],
 				});
+				PathBuf::new()
 			}
-		}
-		else {
-			errs.push(SquarkError::Unrecoverable {
-				msg: fmt!("missing field: {W}dest"),
-				hint: fmt!("active pages must specify where they should be rendered to"),
-				debug: vec![
-					fmt!("parsed fields: {GREY1}{fields:?}")
-				],
-			});
-		}
+			else {
+				let filepath_rel = filepath.strip_prefix(&config.paths.root)
+					.expect("source files are always under project root");
+
+				let mut dest_rel = filepath_rel.with_extension("");
+
+				if let Some(filename) = dest_rel.file_name()
+					&& filename.eq_ignore_ascii_case("readme")
+				{
+					dest_rel = dest_rel.parent()
+						.expect("source files always have a parent folder")
+						.to_path_buf()
+					;
+				}
+
+				path!(config.out.folder / dest_rel).clean()
+			}
+		};
 		
 		let heading      = Self::take_flat(&mut fields, "heading", "head");
 		let title        = Self::take_flat(&mut fields, "title", "title").or_else(|| heading.clone());
