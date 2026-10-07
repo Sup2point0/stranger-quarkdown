@@ -4,7 +4,7 @@
 <br>
 
 
-## Next (v4.0.4)
+## v4.0.4
 
 ### New
 - Check `out.site-data-path` is under your project root when `errors.strict = true`
