@@ -24,6 +24,7 @@ use std::sync::{ LazyLock };
 /// Options for parsing with `pulldown-cmark`.
 pub static PARSER_OPTIONS: LazyLock<pd::Options> = LazyLock::new(||
 	  pd::Options::ENABLE_GFM
+	| pd::Options::ENABLE_STRIKETHROUGH
 	| pd::Options::ENABLE_TABLES
 	| pd::Options::ENABLE_MATH
 	| pd::Options::ENABLE_FOOTNOTES
@@ -537,7 +538,7 @@ impl From<bool> for ProcessAction {
 
 // 	}, &[
 // 		indoc! {"
-// 			<!-- line -->
+// 			*~~test~~*
 // 		"}
 // 	]);
 // }
