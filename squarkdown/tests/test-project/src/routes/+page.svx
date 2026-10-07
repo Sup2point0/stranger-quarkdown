@@ -20,13 +20,18 @@
 - [render/dest/nest/nest/3](render/dest/nest/nest/3)
 - [render/dest/nest/nest/nest/4](render/dest/nest/nest/nest/4)
 - [render/dest/nest/nest/nest/nest/5](render/dest/nest/nest/nest/nest/5)
+- [render/dest-infer](render/dest-infer)
+- [render/dest-infer/main](render/dest-infer/main)
+- [render/dest-infer/nested](render/dest-infer/nested)
+- [render/dest-infer/nested/side](render/dest-infer/nested/side)
 - [render/markdown](render/markdown)
 - [render/strip-charm](render/strip-charm)
 - [render/no-page-ts](render/no-page-ts)
 
-### `+page.ts`
-- [page-ts/long](page-ts/long/main)
-- [page-ts/short](page-ts/short/main)
+### Fields
+- [fields/long](fields/long)
+- [fields/short](fields/short)
+- [field/arbitrary](fields/arbitrary)
 
 ### Links
 - [links/basic/main](links/basic/main)
