@@ -391,16 +391,12 @@ impl Renderer<'_>
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
 
-			// FIXME use `utils::display_rel()`
-			let href_path = pathdiff::diff_paths(&dest_page.destination, own_dest_folder)
-				.expect("destinations of files always have ROOT as common ancestor");
+			let mut href = utils::display_rel(&dest_page.destination, own_dest_folder);
 
-			let href_path_slashed = path_slash::PathBufExt::to_slash(&href_path).unwrap();
-
-			let href = match anchor {
-				Some(a) => fmt!("{href_path_slashed}#{a}"),
-				None => href_path_slashed.to_string(),
-			};
+			if let Some(a) = anchor {
+				href += "#";
+				href += a;
+			}
 
 			*dest_url = href.into();
 
