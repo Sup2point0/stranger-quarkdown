@@ -65,7 +65,7 @@ impl PageData
 			if config.errors.strict && !destination.starts_with(&config.paths.root) {
 				errs.push(SquarkError::Unrecoverable {
 					msg: slash!("cannot export a file to: {}", destination),
-					hint: fmt!("a file's destination directory must remain under the root directory of your project"),
+					hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
 					debug: vec![
 						slash!("your project's root directory is: {}", config.paths.root),
 						slash!("in file: {}", filepath),

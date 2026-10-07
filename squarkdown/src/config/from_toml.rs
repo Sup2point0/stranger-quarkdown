@@ -203,13 +203,11 @@ impl SquarkupConfig
 
 			if let Some(value) = out.get("site-data-path") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.site-data-path", "(filepath including `.json` extension)")?;
+
 				let path = path!(site / utils::to_rel(raw));
 
-				// TODO cleanup with helper?
 				let folder = path.parent().expect("site directory always has a parent folder");
 
-				// TODO check rooted?
-				
 				if !folder.exists() {
 					return Err(SquarkError::Unrecoverable {
 						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),

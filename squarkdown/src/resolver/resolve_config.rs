@@ -51,8 +51,8 @@ fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 	}
 
 	Err(SquarkError::Unrecoverable {
-		msg: str!("could not find your squarkup configuration file"),
-		hint: fmt!("make sure you have either a {W}.squarkdown/{G} folder, or a {W}squarkup.toml{G} or {W}squarkup.json{G} file, in the root of your project"),
+		msg: str!("could not find your squarkup config"),
+		hint: fmt!("ensure you have either a {W}.squarkdown/{G} folder, or a {W}squarkup.toml{G} or {W}squarkup.json{G} file, in the root of your project"),
 		debug: vec![fmt!(
 			"looked in {W}{}{GREY} and {W}{}",
 			root.display(),
