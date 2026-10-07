@@ -4,6 +4,12 @@
 <br>
 
 
+## Next (v4.0.5)
+
+### Fixes
+- `import type { PageData } from` `"stranger-quarkdown"` instead of `"squarkdown"`
+
+
 ## v4.0.4
 
 ### New
