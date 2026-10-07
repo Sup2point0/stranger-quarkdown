@@ -1,0 +1,14 @@
+#:schema ../../../src/config/schema.json
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/fields/arbitrary/"
+site-data-path = "src/data/arbitrary.json"
+render-page-ts = true
+shorter-fields = false
+
+[errors]
+strict = false
+on-error = "kill"
