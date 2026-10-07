@@ -6,6 +6,32 @@
 
 ## Next (v4.1.0)
 
+### Breaking
+- Flatten arbitrary fields in `+page.ts` (like in `site.json`)
+  - Before:
+
+  ```ts
+  return {
+    filepath: "readme.md",
+    ...,
+    other: {
+      some_arbitrary_field: true,
+      random_message: ["sup", "world"],
+    },
+  };
+  ```
+
+  - Now:
+
+  ```ts
+  return {
+    filepath: "readme.md",
+    ...,
+    some_arbitrary_field: true,
+    random_message: ["sup", "world"],
+  };
+  ```
+
 ### New
 - Render pages in parallel
   - Pass `--no-parallel` to disable parallelism (internal feature, likely to be removed in future)

@@ -72,7 +72,9 @@ impl Renderer<'_>
 			writeln!(f, "\t\t{}: {v:?},", p.update_raw(s))?;
 		}
 
-		writeln!(f, "\t\t{}: {:?},", p.other(s), p.other)?;
+		for (key, val) in &p.other {
+			writeln!(f, "\t\t{key}: {val:?},")?;
+		}
 
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;
