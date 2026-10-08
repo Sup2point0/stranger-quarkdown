@@ -111,7 +111,7 @@ use path_macro::path;
 
 	let md = read_file("render/head/+page.svx");
 	assert_contains!( md, "<svelte:head>\n" );
-	assert_contains!( md, "<title> Sup, World! </title>\n" );
+	assert_contains!( md, "<title> Sup, World! · Squarkdown Tests </title>\n" );
 	assert_contains!( md, "<meta name=\"description\" content=\"The quick brown fox jumps over the lazy dog\" />\n" );
 	assert_contains!( md, "</svelte:head>\n" );
 }
