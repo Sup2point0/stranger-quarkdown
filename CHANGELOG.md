@@ -4,6 +4,16 @@
 <br>
 
 
+## v4.1.1
+
+### Changes
+- Use SIMD when parsing Markdown (on x86-64), which should mean speedups in performance!
+
+### Fixes
+- Include `.shard` when rendering `+page.ts`
+- Correct `.filepath` -> `.path` in `PageData<"short">`
+
+
 ## v4.1.0
 
 ### Breaking
