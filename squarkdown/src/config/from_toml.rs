@@ -14,6 +14,9 @@ use std::path::{ Path, PathBuf };
 /// Lazily produce a string for a hint message.
 macro_rules! hints
 {
+	() => {
+		|| String::new()
+	};
 	($($args:tt)*) => {
 		|| format!($($args)*)
 	};
@@ -38,18 +41,16 @@ impl SquarkupConfig
 		let mut errs = SquarkError::multiple("loading squarkup config");
 
 		/* NOTE:
-			We first separately read `paths.site` because many *defaults* depend on it, so we need it before calling `::init_defaults()`.
+			We first separately read `paths.site` because many _defaults_ depend on it, so we need it before calling `::init_defaults()`.
 			
-			Since this may invalidate the relevance fatal errors later on (i.e. they might all be fixed by fixing `paths.site`), if this fails we'll immediately bail.
+			Since this may invalidate the relevant fatal errors later on (i.e. they might all be fixed by fixing `paths.site`), if this fails we'll immediately bail.
 		*/
 		let mut site = root.to_path_buf();
 
-		if let Some(paths) = data.get("paths")
+		if let Some(paths) = Self::try_get_table_if_present(&data, "paths",
+			hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
+		)?
 		{
-			Self::check_is_table(paths, "paths",
-				hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
-			)?;
-
 			if let Some(value) = paths.get("site") {
 				let dir = Self::try_get_str(value, "paths.site", "(filepath relative to your project root)")?;
 				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
@@ -61,12 +62,10 @@ impl SquarkupConfig
 		// ...then apply the user's non-defaults on top of it
 
 		// == ErrorConfig == //
-		if let Some(errors) = data.get("errors")
+		if let Some(errors) = Self::try_get_table_if_present(&data, "errors",
+			hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
+		)?
 		{
-			Self::check_is_table(errors, "errors",
-				hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
-			)?;
-			
 			if let Some(value) = errors.get("strict") { catch!(errs => {
 				s.errors.strict = Self::try_get_bool(value, "errors.strict")?;
 			}) }
@@ -116,10 +115,8 @@ impl SquarkupConfig
 		}
 
 		// == PathsConfig == //
-		if let Some(paths) = data.get("paths")
+		if let Some(paths) = Self::try_get_table_if_present(&data, "paths", hints!())?
 		{
-			/* NOTE: Already `check_is_table()`-d earlier */
-
 			if let Some(value) = paths.get("sources") { catch!(errs => {
 				let values = Self::try_get_array(value, "paths.sources", "(of folders relative to your project root)")?;
 
@@ -175,12 +172,10 @@ impl SquarkupConfig
 		}
 
 		// == OutConfig == //
-		if let Some(out) = data.get("out")
+		if let Some(out) = Self::try_get_table_if_present(&data, "out",
+			hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
+		)?
 		{
-			Self::check_is_table(out, "out",
-				hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
-			)?;
-
 			if let Some(value) = out.get("folder") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.folder", "(folder relative to your SvelteKit site)")?;
 				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
@@ -231,12 +226,10 @@ impl SquarkupConfig
 		}
 
 		// == FormatConfig == //
-		if let Some(format) = data.get("format")
+		if let Some(format) = Self::try_get_table_if_present(&data, "format",
+			hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
+		)?
 		{
-			Self::check_is_table(format, "format",
-				hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
-			)?;
-
 			let c = &mut s.format;
 
 			if let Some(value) = format.get("preserve-heading") { catch!(errs => {
@@ -251,12 +244,10 @@ impl SquarkupConfig
 		}
 
 		// == AssetsConfig == //
-		if let Some(assets) = data.get("assets")
+		if let Some(assets) = Self::try_get_table_if_present(&data, "assets",
+			hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
+		)?
 		{
-			Self::check_is_table(assets, "assets",
-				hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
-			)?;
-
 			if let Some(value) = assets.get("folder") { catch!(errs => {
 				let dir = Self::try_get_str(value, "assets.folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
@@ -291,12 +282,10 @@ impl SquarkupConfig
 		}
 
 		// == FontsConfig == //
-		if let Some(fonts) = data.get("fonts")
+		if let Some(fonts) = Self::try_get_table_if_present(&data, "fonts",
+			hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
+		)?
 		{
-			Self::check_is_table(fonts, "fonts",
-				hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
-			)?;
-
 			if let Some(value) = fonts.get("queries") { catch!(errs => {
 				let values = Self::try_get_array(value, "fonts.queries", "(of font query parameters)")?;
 
@@ -320,25 +309,30 @@ impl SquarkupConfig
 /// All the validation logic!
 impl SquarkupConfig
 {
-	/// Validate that `data` is a TOML table.
-	fn check_is_table(
-		data: &toml::Value,
-		setting: &str,
+	/// Try to extract the table from `data` for `setting-group`.
+	/// 
+	/// It is fine is `data` does not have `setting-group`, in which case this returns `Ok(None)`.
+	fn try_get_table_if_present<'d>(
+		data: &'d toml::map::Map<String, toml::Value>,
+		setting_group: &str,
 		hint: impl FnOnce() -> String,
-	) -> SquarkResult
+	) -> SquarkResult<Option<&'d toml::Table>>
 	{
-		if matches!(data, toml::Value::Table(..)) {
-			Ok(())
-		}
-		else {
-			Err(SquarkError::Unrecoverable {
-				msg: fmt!("{Y}{setting}{R} must be a table, not a field"),
+		let Some(value) = data.get(setting_group) else {
+			return Ok(None);
+		};
+
+		let Some(table) = value.as_table() else {
+			return Err(SquarkError::Unrecoverable {
+				msg: fmt!("{Y}{setting_group}{R} must be a table, not a field"),
 				hint: hint(),
 				debug: vec![
-					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", data.type_str()),
+					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", value.type_str()),
 				],
-			})
-		}
+			});
+		};
+
+		Ok(Some(table))
 	}
 
 	/// Try to extract the string from `data` for `setting`.
@@ -349,26 +343,26 @@ impl SquarkupConfig
 	) -> SquarkResult<&'d str>
 	{
 		value.as_str()
-		.ok_or_else(|| SquarkError::Unrecoverable {
-			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-			hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
-			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
-			],
-		})
+			.ok_or_else(|| SquarkError::Unrecoverable {
+				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
+				debug: vec![
+					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+				],
+			})
 	}
 
 	/// Try to extract the boolean from `data` for `setting`.
 	fn try_get_bool(value: &toml::Value, setting: &str) -> SquarkResult<bool>
 	{
 		value.as_bool()
-		.ok_or_else(|| SquarkError::Unrecoverable {
-			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-			hint: fmt!("{Y}{setting}{G} must be a boolean"),
-			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
-			],
-		})
+			.ok_or_else(|| SquarkError::Unrecoverable {
+				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				hint: fmt!("{Y}{setting}{G} must be a boolean"),
+				debug: vec![
+					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+				],
+			})
 	}
 
 	/// Try to extract the array from `data` for `setting`.
@@ -379,13 +373,13 @@ impl SquarkupConfig
 	) -> SquarkResult<&'d Vec<toml::Value>>
 	{
 		value.as_array()
-		.ok_or_else(|| SquarkError::Unrecoverable {
-			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-			hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
-			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
-			],
-		})
+			.ok_or_else(|| SquarkError::Unrecoverable {
+				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
+				debug: vec![
+					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+				],
+			})
 	}
 
 	/// Validate that `root / dir` exists, and is a folder.
