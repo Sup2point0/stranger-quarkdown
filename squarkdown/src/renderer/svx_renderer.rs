@@ -137,7 +137,8 @@ impl<'d> Renderer<'d>
 		self.skip_heading(&mut parser);
 		self.skip_charm_squark(&mut parser);
 
-		let parser = parser
+		let parser =
+			pd::TextMergeWithOffset::new(parser)
 			.inspect(|(e, _)| { println!("{e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
