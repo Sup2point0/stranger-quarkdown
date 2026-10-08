@@ -49,7 +49,7 @@ interface ShortFields
 	shard: string;
 
 	/** The location of the original `.md` file this page represents. */
-	filepath: string;
+	path: string;
 
 	/** The folder to render this page's `+page.svx` and `+page.ts` to, relative to `out.folder`. */
 	dest:  string;
