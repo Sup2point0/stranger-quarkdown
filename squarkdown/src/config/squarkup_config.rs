@@ -11,7 +11,8 @@ use std::path::PathBuf;
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
-	pub repo: RepoConfig,
+	/// Metadata for the user's project.
+	pub project: ProjectConfig,
 
 	pub paths: PathsConfig,
 
@@ -33,7 +34,7 @@ pub struct SquarkupConfig
 
 
 #[derive(Clone, Debug)]
-pub struct RepoConfig {
+pub struct ProjectConfig {
 	/// The displayed name of the repo, injected into `<title>` when `format.inject-head = true`.
 	pub name: Option<String>,
 

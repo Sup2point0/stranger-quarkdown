@@ -17,7 +17,7 @@ impl SquarkupConfig
 	{
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
-			repo: RepoConfig {
+			project: ProjectConfig {
 				name: None,
 				github: None,
 			},
