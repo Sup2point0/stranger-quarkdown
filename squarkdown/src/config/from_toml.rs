@@ -12,8 +12,7 @@ use std::path::{ Path, PathBuf };
 
 
 /// Lazily produce a string for a hint message.
-macro_rules! hints
-{
+macro_rules! hints {
 	() => {
 		|| String::new()
 	};
@@ -22,9 +21,15 @@ macro_rules! hints
 	};
 }
 
+/// Return a [`SquarkError::Recoverable`].
+macro_rules! recoverable {
+	($($args:tt)*) => {
+		return Err(SquarkError::Recoverable { $($args)* })
+	}
+}
+
 /// Return a [`SquarkError::Unrecoverable`].
-macro_rules! unrecoverable
-{
+macro_rules! unrecoverable {
 	($($args:tt)*) => {
 		return Err(SquarkError::Unrecoverable { $($args)* })
 	}
@@ -131,11 +136,11 @@ impl SquarkupConfig
 				let raw = Self::try_get_str(value, "project.name", "(displayed name of project)")?;
 
 				if raw.is_empty() {
-					return Err(SquarkError::Recoverable {
+					recoverable! {
 						msg: fmt!("warning: you provided a blank {Y}project.name"),
 						hint: str!("project name is ignored if blank"),
 						debug: vec![],
-					});
+					}
 				}
 
 				raw.clone_into(&mut s.project.name);
@@ -147,11 +152,11 @@ impl SquarkupConfig
 				)?;
 
 				if raw.is_empty() {
-					return Err(SquarkError::Recoverable {
+					recoverable! {
 						msg: fmt!("warning: you provided a blank {Y}project.github"),
 						hint: str!("project GitHub link is ignored if blank"),
 						debug: vec![],
-					});
+					}
 				}
 				else if !raw.contains("/") {
 					errs.push(SquarkError::Recoverable {
