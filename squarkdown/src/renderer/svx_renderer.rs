@@ -730,16 +730,15 @@ mod code_blocks {
 				<!-- #SQUARK slash. -->
 				```
 			"},
-			// FIXME track only context
-			// indoc! {"
-			// 	```md
-			// 	<!-- #SQUARK only?
+			indoc! {"
+				```md
+				<!-- #SQUARK only?
 
-			// 	This is dangerous
+				This is dangerous
 
-			// 	     #SQUARK only. -->
-			// 	```
-			// "},
+				     #SQUARK only. -->
+				```
+			"},
 		]);
 	}
 
@@ -848,7 +847,7 @@ mod comments {
 	mod erases {
 		use super::*;
 
-		#[test] fn easy() {
+		#[test] fn basic() {
 			test_expect(&[
 				"erase <!--this--> please",
 				"erase <!--this --> please",
@@ -861,7 +860,13 @@ mod comments {
 			], "erase  please");
 		}
 
-		#[test] fn medium() {
+		#[test] fn many_in_one_line() {
+			test_expected(&[
+				("erase <!-- all --> of <!-- this --> please", "erase  of  please"),
+			]);
+		}
+
+		#[test] fn with_breaks_in_comment() {
 			test_expect(&[
 				"erase\n<!-- this comment -->\nplease",
 				"erase\n<!--\nthis comment\n-->\nplease",
@@ -869,22 +874,32 @@ mod comments {
 			], "erase\n\n\nplease");
 		}
 
-		#[test] fn hard() {
+		#[test] fn multi_line_from_line_start() {
 			test_expect(&[
 				"erase\n<!-- this\ncomment -->\nplease",
 				"erase\n<!-- this\n\ncomment -->\nplease",
 			], "erase\n\n\nplease");
+		}
 
+		#[test] fn multi_line_from_mid_line() {
 			test_expect(&[
+				"erase <!--this\ncomment--> please",
 				"erase <!-- this\ncomment --> please",
 				"erase <!-- this\n\ncomment --> please",
 			], "erase  please");
 		}
 
+		#[test] fn multi_line_with_comment_before() {
+			test_expect(&[
+				"erase <!-- all --> of <!-- these\ncomments --> please",
+			], "erase  of  please");
+		}
+
 		#[test] fn nested() {
 			// FIXME
 			// test_expected(&[
-			// 	("<!-- <!-- illegal --> comment", " comment"),
+			// 	("a <!-- <!-- weird --> comment", "a  comment"),
+			// 	("a \n <!-- <!-- weirder --> comment", "a comment"),
 			// ]);
 		}
 	}
