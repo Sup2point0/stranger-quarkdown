@@ -17,6 +17,10 @@ impl SquarkupConfig
 	{
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
+			repo: RepoConfig {
+				name: None,
+				github: None,
+			},
 			paths: PathsConfig {
 				root: root.to_owned(),
 				site: site.to_owned(),
@@ -38,6 +42,7 @@ impl SquarkupConfig
 				shorter_fields: false,
 			},
 			format: FormatConfig {
+				inject_head: true,
 				preserve_heading: false,
 				preserve_comments: false,
 				externalise_links: false,
