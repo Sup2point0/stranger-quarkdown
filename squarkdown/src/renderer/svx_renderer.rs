@@ -13,7 +13,6 @@ use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
 
-use std::borrow::{ Cow };
 use std::fs::{ File };
 use std::io::{ Write };
 use std::iter::{ Peekable };
@@ -129,8 +128,6 @@ impl<'d> Renderer<'d>
 
 	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
-		let source = Self::expand_only(source);
-
 		let mut parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
 			.into_offset_iter()
@@ -140,9 +137,8 @@ impl<'d> Renderer<'d>
 		self.skip_heading(&mut parser);
 		self.skip_charm_squark(&mut parser);
 
-		// TODO maybe `flat_map` to support context-tracking `only`?
 		let parser = parser
-			// .inspect(|e| { dbg!(e); })
+			.inspect(|e| { dbg!(e); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -152,15 +148,6 @@ impl<'d> Renderer<'d>
 			.expect("rendering always succeeds");
 
 		out
-	}
-
-	/// Remove `<!-- #SQUARK only?` and `#SQUARK only. -->` to expose their content to the render pipeline.
-	fn expand_only(source: &str) -> Cow<'_, str>
-	{
-		regex!(
-			r"(?is)<!--\s*#SQUARK\s+ONLY\?\s+(?-i)(.*?)(?i)#SQUARK\s+ONLY\.\s*-->"
-		)
-		.replace_all(source, "$1")
 	}
 
 	/// Advance `parser` to skip over the events that produce the initial page heading.
@@ -285,12 +272,20 @@ impl Renderer<'_>
 		}
 		else if !self.ctx.is_slash() {
 			if html.starts_with("<!--") {
-				self.ctx.push(RenderCtx::COMMENT);
-				return ProcessAction::from(preserve)
+				if self.process_comment(html) {
+					return ProcessAction::ERASE;
+				} else {
+					self.ctx.push(RenderCtx::COMMENT);
+					return ProcessAction::from(preserve)
+				}
 			}
 			else if html.ends_with("-->") {
-				self.ctx.try_pop(RenderCtx::COMMENT).expect("contexts are always balanced");
-				return ProcessAction::from(preserve)
+				if self.process_comment(html) {
+					return ProcessAction::ERASE;
+				} else {
+					self.ctx.try_pop(RenderCtx::COMMENT).expect("contexts are always balanced");
+					return ProcessAction::from(preserve)
+				}
 			}
 		}
 		ProcessAction::DEFER
@@ -325,6 +320,7 @@ impl Renderer<'_>
 		let squark = match m1 {
 			s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
 			s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
+			s if s.eq_ignore_ascii_case("ONLY")  => RenderCtx::ONLY,
 			s => {
 				if !self.ctx.is_leave() {
 					self.errors.push(SquarkError::Recoverable {
@@ -349,12 +345,12 @@ impl Renderer<'_>
 				if r.is_err() {
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("unpaired closing squark: {W}{html}"),
-						hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
+						hint: fmt!("did you forget to close a {:?} context?", self.ctx.current()),
 						debug: self.ctx.printed(),
 					});
 				}
 			}
-			_ => unreachable!("pattern only allows ? and ."),
+			_ => unreachable!("RegEx pattern only allows ? and ."),
 		}
 
 		true
@@ -548,14 +544,15 @@ impl From<bool> for ProcessAction {
 
 
 // #[test] fn playground() {
-// 	test_preserves_for(|_| {
-
+// 	test_preserves_for(|c| {
+// 		// c.errors.strict = false;
 // 	}, &[
 // 		indoc! {"
-// 			# Hi
-// 			<!-- #SQUARK live!
-// 			| hi = true
-// 			-->
+// 			<!-- #SQUARK only
+
+// 			Content
+
+// 			     #SQUARK only -->
 // 		"}
 // 	]);
 // }
@@ -856,24 +853,31 @@ mod comments {
 				"erase <!--this --> this",
 				"erase <!-- this--> this",
 				"erase <!-- this --> this",
+				"erase <!--this comment--> please",
+				"erase <!--this comment --> please",
+				"erase <!-- this comment--> please",
+				"erase <!-- this comment --> please",
 			], "erase  this");
 		}
 
 		#[test] fn medium() {
 			test_expect(&[
-				"erase <!--this comment--> please",
-				"erase <!--this comment --> please",
-				"erase <!-- this comment--> please",
-				"erase <!-- this comment --> please",
-			], "erase  please");
-		}
-
-		#[test] fn hard() {
-			test_expect(&[
 				"erase\n<!-- this comment -->\nplease",
 				"erase\n<!--\nthis comment\n-->\nplease",
 				"erase\n<!--\nthis\ncomment\n-->\nplease",
 			], "erase\n\n\nplease");
+		}
+
+		#[test] fn hard() {
+			test_expect(&[
+				"erase\n<!-- this\ncomment -->\nplease",
+				"erase\n<!-- this\n\ncomment -->\nplease",
+			], "erase\n\n\nplease");
+
+			test_expect(&[
+				"erase <!-- this\ncomment --> please",
+				"erase <!-- this\n\ncomment --> please",
+			], "erase  please");
 		}
 
 		#[test] fn nested() {
@@ -1028,8 +1032,8 @@ mod only {
 
 	#[test] fn easy() {
 		test_expected(&[
-			("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show  me"),
-			("Please <!-- #SQUARK only? do show #SQUARK only. --> me", "Please do show  me"),
+			("Please <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me", "Please show  me"),
+			("Please <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me", "Please do show  me"),
 		])
 	}
 
