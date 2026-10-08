@@ -113,12 +113,57 @@ impl SquarkupConfig
 				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
 					s.errors.link_broken = opt;
 				} else {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.broken-link"),
 						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
+					}
+				}
+			}) }
+		}
+
+		// == RepoConfig == //
+		if let Some(project) = Self::try_get_table_if_present(&data, "repo",
+			hints!("write your config like this: {W}```\n\t[repo]\n\tgithub = 'Sup2point0/stranger-quarkdown'\n```")
+		)?
+		{
+			if let Some(value) = project.get("name") { catch!(errs => {
+				let raw = Self::try_get_str(value, "project.name", "(displayed name of project)")?;
+
+				if raw.is_empty() {
+					return Err(SquarkError::Recoverable {
+						msg: fmt!("warning: you provided an empty {Y}project.name"),
+						hint: str!("project name is ignored if empty"),
+						debug: vec![],
 					});
 				}
+
+				raw.clone_into(&mut s.project.name);
+			}) }
+			
+			if let Some(value) = project.get("github") { catch!(errs => {
+				let raw = Self::try_get_str(value, "project.github",
+					&fmt!("(GitHub repo link in {W}user/repo{G} format)")
+				)?;
+
+				if raw.is_empty() {
+					return Err(SquarkError::Recoverable {
+						msg: fmt!("warning: you provided an empty {Y}project.github"),
+						hint: str!("project GitHub link is ignored if empty"),
+						debug: vec![],
+					});
+				}
+				else if !raw.contains("/") {
+					errs.push(SquarkError::Recoverable {
+						msg: fmt!("warning: your {Y}project.github{R} does not contain a {W}/"),
+						hint: fmt!("use the format {W}user/project"),
+						debug: vec![
+							fmt!("you provided {GREY1}{raw}"),
+						],
+					});
+				}
+
+				raw.clone_into(&mut s.project.name);
 			}) }
 		}
 
