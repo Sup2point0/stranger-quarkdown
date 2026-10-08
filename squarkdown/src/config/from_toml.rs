@@ -122,9 +122,9 @@ impl SquarkupConfig
 			}) }
 		}
 
-		// == RepoConfig == //
-		if let Some(project) = Self::try_get_table_if_present(&data, "repo",
-			hints!("write your config like this: {W}```\n\t[repo]\n\tgithub = 'Sup2point0/stranger-quarkdown'\n```")
+		// == ProjectConfig == //
+		if let Some(project) = Self::try_get_table_if_present(&data, "project",
+			hints!("write your config like this: {W}```\n\t[project]\n\tgithub = 'Sup2point0/stranger-quarkdown'\n```")
 		)?
 		{
 			if let Some(value) = project.get("name") { catch!(errs => {
@@ -132,8 +132,8 @@ impl SquarkupConfig
 
 				if raw.is_empty() {
 					return Err(SquarkError::Recoverable {
-						msg: fmt!("warning: you provided an empty {Y}project.name"),
-						hint: str!("project name is ignored if empty"),
+						msg: fmt!("warning: you provided a blank {Y}project.name"),
+						hint: str!("project name is ignored if blank"),
 						debug: vec![],
 					});
 				}
@@ -148,8 +148,8 @@ impl SquarkupConfig
 
 				if raw.is_empty() {
 					return Err(SquarkError::Recoverable {
-						msg: fmt!("warning: you provided an empty {Y}project.github"),
-						hint: str!("project GitHub link is ignored if empty"),
+						msg: fmt!("warning: you provided a blank {Y}project.github"),
+						hint: str!("project GitHub link is ignored if blank"),
 						debug: vec![],
 					});
 				}
@@ -528,6 +528,23 @@ mod error_handling {
 			let e = load_config(source);
 			assert_err!( &e );
 			assert_contains!( e.unwrap_err(), "errors.on-error" );
+		}
+	}
+}
+
+#[cfg(test)]
+mod project {
+	use super::*;
+
+	#[test] fn reject_empty() {
+		for source in [
+			"[error] \n on-error = 'kill' \n [project] \n name = ''",
+			"[error] \n on-error = 'kill' \n [project] \n github = ''",
+			"[error] \n on-error = 'kill' \n [project] \n name = '' \n github = ''",
+		] {
+			let e = load_config(source);
+			assert_err!( &e );
+			assert_contains!( e.unwrap_err(), "blank" );
 		}
 	}
 }
