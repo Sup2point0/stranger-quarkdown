@@ -18,8 +18,8 @@ impl SquarkupConfig
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
 			project: ProjectConfig {
-				name: None,
-				github: None,
+				name: str!(),
+				github: str!(),
 			},
 			paths: PathsConfig {
 				root: root.to_owned(),

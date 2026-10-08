@@ -35,11 +35,17 @@ pub struct SquarkupConfig
 
 #[derive(Clone, Debug)]
 pub struct ProjectConfig {
+	/* NOTE: Not using `Option<String>` since we should check empty either way, so may as well collapse `None` and `Some("")` into just `""` */
+	
 	/// The displayed name of the repo, injected into `<title>` when `format.inject-head = true`.
-	pub name: Option<String>,
+	/// 
+	/// Empty if not supplied.
+	pub name: String,
 
 	/// The GitHub repository name, e.g. `Sup2point0/stranger-quarkdown`.
-	pub github: Option<String>,
+	/// 
+	/// Empty if not supplied.
+	pub github: String,
 }
 
 #[derive(Clone, Debug)]
