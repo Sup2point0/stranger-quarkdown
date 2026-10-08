@@ -23,22 +23,38 @@ use std::io::{ BufReader, BufRead };
 use std::path::Path;
 
 
+/// The maximum number of lines Squarkdown will check for a `<!--`.
+const MAX_LINES_CHECKED: usize = 10;
+
+
 /// Parse the charm squark of the file at `filepath`, returning `Some(PageData)` for an active page, and `None` otherwise.
 pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<PageData>>
 {
 	let mut reader = BufReader::new(File::open(filepath)?);
 	let mut source = str!();
+	let mut may_have_charm_squark = false;
+	let mut num_lines_checked = 0;
 	
 	/* Read up until we see a `-->` terminating the charm squark */
 	loop {
 		let i = source.len();
 
 		if reader.read_line(&mut source)? == 0 {
-			break;
+			return Ok(None);
 		}
 
-		if source[i..].contains("-->") {
+		if !may_have_charm_squark && source[i..].contains("<--") {
+			may_have_charm_squark = true;
+		}
+		if may_have_charm_squark && source[i..].contains("-->") {
 			break;
+		}
+		
+		/* If we still haven't seen `<!--` after reading `MAX_LINES_CHECKED` lines, bail out to avoid reading huge files into memory */
+		num_lines_checked += 1;
+
+		if !may_have_charm_squark && num_lines_checked > MAX_LINES_CHECKED {
+			return Ok(None);
 		}
 	}
 
