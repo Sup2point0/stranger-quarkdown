@@ -21,6 +21,7 @@ let folder = path.dirname(fileURLToPath(import.meta.url));
 let executable = `${folder}/${bin}`;
 
 if (platform === "linux") {
+	// chmod +x
 	chmodSync(executable, 0o755);
 }
 

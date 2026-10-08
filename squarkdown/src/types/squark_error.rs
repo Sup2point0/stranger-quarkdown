@@ -106,30 +106,6 @@ impl SquarkError
 		}
 	}
 
-	pub fn len(&self) -> usize
-	{
-		if let Self::Multiple{ errs, ..} = self {
-			errs.iter().map(Self::len).sum()
-		} else {
-			1
-		}
-	}
-
-	/// Add an error to a [`Self::Multiple`] instance.
-	pub fn push(&mut self, error: SquarkError) -> bool
-	{
-		if let Self::Multiple{ errs, .. } = self {
-			errs.push(error);
-			true
-		} else {
-			false
-		}
-	}
-}
-
-/// Implementations specific to [`SquarkError::Multiple`].
-impl SquarkError
-{
 	/// Is this an empty error that should be ignored?
 	/// 
 	/// This includes:
@@ -144,6 +120,33 @@ impl SquarkError
 		matches!(self, Self::Multiple{ errs, .. }
 			if errs.iter().all(Self::is_fine)
 		)
+	}
+
+	/// Add an error to a [`Self::Multiple`] instance.
+	pub fn push(&mut self, error: SquarkError) -> bool
+	{
+		if let Self::Multiple{ errs, .. } = self {
+			errs.push(error);
+			true
+		} else {
+			false
+		}
+	}
+}
+
+/// Implementations specific to [`SquarkError::Multiple`]
+impl SquarkError
+{
+	/// Count the number of atomic errors contained in this [`SquarkError`].
+	/// 
+	/// For [`SquarkError::Multiple`], this recursively counts its aggregated errors. For all other error variants, this returns `1`.
+	pub fn len(&self) -> usize
+	{
+		if let Self::Multiple{ errs, ..} = self {
+			errs.iter().map(Self::len).sum()
+		} else {
+			1
+		}
 	}
 
 	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return `t`.
