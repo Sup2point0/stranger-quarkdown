@@ -8,14 +8,11 @@
   "scripts":
   {
     "dev":    "vite",
-      "devx": "vite --open",
-    
-    "build":    "vite build",
-      "buildx": "cargo test && vite build",
+      "devx": "cargo test && vite --open",
 
     "preview": "vite preview",
-
-    "test": "playwright test"
+    
+    "test": "cargo test && (tsc --noEmit || echo) && playwright test"
   },
 
   "devDependencies":
