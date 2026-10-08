@@ -43,7 +43,7 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 			return Ok(None);
 		}
 
-		if !may_have_charm_squark && source[i..].contains("<--") {
+		if !may_have_charm_squark && source[i..].contains("<!--") {
 			may_have_charm_squark = true;
 		}
 		if may_have_charm_squark && source[i..].contains("-->") {
