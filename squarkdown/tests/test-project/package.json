@@ -20,6 +20,7 @@
 
   "devDependencies":
   {
+    "stranger-quarkdown": "latest",
     "@playwright/test": "^1.63.0",
     "@sveltejs/adapter-static": "^3.0",
     "@sveltejs/kit": "^2.0",
