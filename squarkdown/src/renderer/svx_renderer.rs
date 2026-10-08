@@ -138,7 +138,7 @@ impl<'d> Renderer<'d>
 		self.skip_charm_squark(&mut parser);
 
 		let parser = parser
-			.inspect(|e| { dbg!(e); })
+			.inspect(|(e, _)| { println!("{e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -566,7 +566,7 @@ mod plain {
 		test_preserves(&[
 			"sup, world!",
 			"sup,\nworld!",
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -658,7 +658,7 @@ mod code_inline {
 			pair!("this `is` some `more` code"),
 			pair!("`1` onto\nline `2`"),
 			pair!("line `1` onto\nline `2`."),
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -667,20 +667,20 @@ mod code_inline {
 				  ("` 1 ` ` 2 `", "`1` `2`"),
 			pair!("`x y` `z`"),
 			pair!("`x`y`z`"),
-		])
+		]);
 	}
 
 	#[test] fn unclosed() {
 		test_expected(&[
 			("`1\n2", "\\`1\n2"),
-		])
+		]);
 	}
 
 	#[test] fn edge_cases() {
 		test_preserves(&[
 			"`x`",
 			"`code`",
-		])
+		]);
 	}
 }
 
@@ -697,7 +697,7 @@ mod code_blocks {
 				print(\"hello world\")
 				```
 			"},
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -709,7 +709,7 @@ mod code_blocks {
 				<!-- #SQUARK slash. -->
 				```
 			"},
-		])
+		]);
 	}
 
 	#[test] fn hard() {
@@ -739,7 +739,7 @@ mod code_blocks {
 			// 	     #SQUARK only. -->
 			// 	```
 			// "},
-		])
+		]);
 	}
 
 	#[test] fn escaped() {
@@ -751,7 +751,7 @@ mod code_blocks {
 				\\```
 				```
 			"},
-		])
+		]);
 	}
 
 	#[test] fn edge_cases() {
@@ -761,7 +761,7 @@ mod code_blocks {
 			("``````",       "```\n```"),
 			("``` ```",      "` `"),
 			("```\n```",     "```\n```"),
-		])
+		]);
 	}
 }
 
@@ -795,7 +795,7 @@ mod tables {
 				|1|2|
 				|3|4|
 			"},
-		])
+		]);
 	}
 }
 
@@ -808,7 +808,7 @@ mod maths_inline {
 			"the $x$ variable",
 			"the $x+y$ variable",
 			"the $x + y$ variable",
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -816,7 +816,7 @@ mod maths_inline {
 			"$[1, 2, 3]$",
 			"$[1,\\ 2,\\ 3]$",
 			"$\\{ 1, 2, 3 \\}$",
-		])
+		]);
 	}
 }
 
@@ -836,7 +836,7 @@ mod maths_block {
 				A(X, x_{1}, x_{2}) = X[\\max(x_{1}, x_{2})]
 				```
 			"},
-		])
+		]);
 	}
 }
 
@@ -849,15 +849,15 @@ mod comments {
 
 		#[test] fn easy() {
 			test_expect(&[
-				"erase <!--this--> this",
-				"erase <!--this --> this",
-				"erase <!-- this--> this",
-				"erase <!-- this --> this",
+				"erase <!--this--> please",
+				"erase <!--this --> please",
+				"erase <!-- this--> please",
+				"erase <!-- this --> please",
 				"erase <!--this comment--> please",
 				"erase <!--this comment --> please",
 				"erase <!-- this comment--> please",
 				"erase <!-- this comment --> please",
-			], "erase  this");
+			], "erase  please");
 		}
 
 		#[test] fn medium() {
@@ -944,7 +944,7 @@ mod slash {
 				"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
 				"erase  please",
 			),
-		])
+		]);
 	}
 
 	#[test] fn multi_line() {
@@ -959,7 +959,7 @@ mod slash {
 				"},
 				"erase\n\n\nplease"
 			),
-		])
+		]);
 	}
 }
 
@@ -973,7 +973,7 @@ mod leave {
 				"Don't <!-- #SQUARK leave? --> do <!-- #SQUARK leave. --> anything",
 				"Don't  do  anything",
 			),
-		])
+		]);
 	}
 
 	#[test] fn standard() {
@@ -996,7 +996,7 @@ mod leave {
 					this
 				"}
 			),
-		])
+		]);
 	}
 
 	#[test] fn nested() {
@@ -1022,7 +1022,7 @@ mod leave {
 		// 			3
 		// 		"},
 		// 	),
-		// ])
+		// ]);
 	}
 }
 
@@ -1032,12 +1032,9 @@ mod only {
 
 	#[test] fn easy() {
 		test_expected(&[
-			("Please <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me", "Please show  me"),
-			("Please <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me", "Please do show  me"),
-		])
-	}
-
-	#[test] fn medium() {
+			("Please \n <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me", "Please\nshow  me"),
+			("Please \n <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me", "Please\ndo show  me"),
+		]);
 		test_expected(&[
 			(
 				indoc! {"
@@ -1055,7 +1052,14 @@ mod only {
 					show me!
 				"}
 			),
-		])
+		]);
+	}
+
+	#[test] fn medium() {
+		test_expected(&[
+			("Please <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me", "Please show  me"),
+			("Please <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me", "Please do show  me"),
+		]);
 	}
 
 	#[test] fn awkward_whitespace() {
@@ -1063,6 +1067,6 @@ mod only {
 			("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
 			("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
 			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
-		])
+		]);
 	}
 }
