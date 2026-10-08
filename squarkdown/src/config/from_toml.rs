@@ -163,7 +163,7 @@ impl SquarkupConfig
 					});
 				}
 
-				raw.clone_into(&mut s.project.name);
+				raw.clone_into(&mut s.project.github);
 			}) }
 		}
 

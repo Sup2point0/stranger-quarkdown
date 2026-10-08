@@ -521,6 +521,7 @@ impl Renderer<'_>
 		writeln!(file, "<svelte:head>")?;
 		
 		let project = &self.config.project.name;
+		
 		if project.is_empty() {
 			writeln!(file, "\t<title> {title} </title>", )?;
 		} else {
