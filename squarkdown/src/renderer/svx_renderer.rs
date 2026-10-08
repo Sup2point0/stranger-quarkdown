@@ -203,9 +203,25 @@ impl Renderer<'_>
 		range: std::ops::Range<usize>,
 	) -> Option<pd::Event<'e>>
 	{
-		match event {
-			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
-			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(RenderCtx::CODE).expect("contexts are always balanced"); }
+		match &event
+		{
+			pd::Event::Start(pd::Tag::CodeBlock(..)) => {
+				self.ctx.push(RenderCtx::CODE);
+			}
+			pd::Event::End(pd::TagEnd::CodeBlock) => {
+				self.ctx.try_pop(RenderCtx::CODE)
+					.expect("code contexts are always balanced");
+			}
+
+			pd::Event::Text(text) => {
+				if text.contains("<!--") && !text.contains("-->") {
+					self.ctx.push(RenderCtx::COMMENT);
+				} else if text.contains("-->") && !text.contains("<!--") {
+					self.ctx.try_pop(RenderCtx::COMMENT)
+						.expect("comment contexts are always balanced");
+				}
+			}
+
 			_ => (),
 		};
 
