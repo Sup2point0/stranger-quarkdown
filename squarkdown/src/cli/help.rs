@@ -28,7 +28,7 @@ pub fn help() -> ExitCode
 
 {W}  GitHub: {B}https://github.com/Sup2point0/stranger-quarkdown/tree/main/docs
 {W}  site: {B}https://sup2point0.github.io/stranger-quarkdown/docs
-"
+{W}"
 	);
 
 	ExitCode::SUCCESS

@@ -66,7 +66,7 @@ fn main() -> ExitCode
 
 		Mode::VERSION =>
 		{
-			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
+			println!("{P}Squarkdown v{}{W}", env!("CARGO_PKG_VERSION"));
 			ExitCode::SUCCESS
 		}
 
@@ -81,7 +81,7 @@ fn main() -> ExitCode
 		Mode::INIT =>
 		{
 			log::line();
-			log::bad!("{W}squarkdown init{R} is not yet supported!");
+			log::bad!("{W}squarkdown init{R} is not yet supported!{W}");
 			log::line();
 			ExitCode::FAILURE
 		}
