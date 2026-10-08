@@ -4,6 +4,27 @@
 <br>
 
 
+## v4.2.0
+
+### New
+- `project` fields in squarkup config:
+  - `project.name`: The displayed name of your project.
+  - `project.github`: The GitHub name of your project.
+- Inject `<head>` containing metadata into rendered pages:
+
+  ```md
+  <svelte:head>
+    <title> Some Page · My Project </title>
+    <meta name="description" content="Never gonna give you up" />
+  </svelte:head>
+  ```
+
+  - Controlled by `format.inject-head` option (enabled by default)
+
+
+<br>
+
+
 ## v4.1.0
 
 ### Breaking
