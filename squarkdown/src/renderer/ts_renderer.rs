@@ -36,6 +36,8 @@ impl Renderer<'_>
 		f.write_all(b"> {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
+		writeln!(f, "\t\tshard: {:?},", &p.shard)?;
+
 		let path = utils::display_rel(&p.filepath, &self.config.paths.root);
 		writeln!(f, "\t\t{}: {:?},", p.path(s), path)?;
 
