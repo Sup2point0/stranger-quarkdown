@@ -543,9 +543,9 @@ mod project {
 
 	#[test] fn reject_empty() {
 		for source in [
-			"[error] \n on-error = 'kill' \n [project] \n name = ''",
-			"[error] \n on-error = 'kill' \n [project] \n github = ''",
-			"[error] \n on-error = 'kill' \n [project] \n name = '' \n github = ''",
+			"[errors] \n on-error = 'kill' \n [project] \n name = ''",
+			"[errors] \n on-error = 'kill' \n [project] \n github = ''",
+			"[errors] \n on-error = 'kill' \n [project] \n name = '' \n github = ''",
 		] {
 			let e = load_config(source);
 			assert_err!( &e );
