@@ -22,6 +22,14 @@ macro_rules! hints
 	};
 }
 
+/// Return a [`SquarkError::Unrecoverable`].
+macro_rules! unrecoverable
+{
+	($($args:tt)*) => {
+		return Err(SquarkError::Unrecoverable { $($args)* })
+	}
+}
+
 
 /// Loading from `squarkup.toml`
 impl SquarkupConfig
@@ -77,11 +85,11 @@ impl SquarkupConfig
 				if let Ok(opt) = ErrorAction::try_from(raw) {
 					s.errors.on_error = opt;
 				} else {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.on-error"),
 						hint: fmt!("valid values are {W}'warn'{G} (default) or {W}'kill'"),
 						debug: vec![fmt!("you provided {value}")],
-					});
+					}
 				}
 			}
 			
@@ -91,11 +99,11 @@ impl SquarkupConfig
 				if let Ok(opt) = FileAction::try_from(raw) {
 					s.errors.file_already_exists = opt;
 				} else {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
 						hint: fmt!("valid values are {W}'overwrite'{G} (default), {W}'error'{G}, {W}'skip'"),
 						debug: vec![fmt!("you provided {value}")],
-					});
+					}
 				}
 			}) }
 			
@@ -186,11 +194,11 @@ impl SquarkupConfig
 				let raw = Self::try_get_str(value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
 
 				if raw.contains('/') {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("illegal value for {Y}out.file-name{R}: {W}{raw}"),
 						hint: fmt!("the file name cannot contain {W}/{G}, because that turns into a file path!"),
 						debug: vec![],
-					});
+					}
 				}
 
 				raw.clone_into(&mut s.out.file_name);
@@ -204,13 +212,13 @@ impl SquarkupConfig
 				let folder = path.parent().expect("site directory always has a parent folder");
 
 				if !folder.exists() {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),
 						hint: fmt!("{W}out.site-data-path{G} is a filepath relative to your site directory"),
 						debug: vec![
 							slash!("{GREY1}{}{GREY} is not a valid directory", path)
 						],
-					});
+					}
 				}
 
 				s.out.site_data_path = Some(path);
@@ -301,7 +309,7 @@ impl SquarkupConfig
 			}) }
 		}
 
-		errs.or_depends((), &s)?;
+		errs.depends(&s)?;
 		Ok(s)
 	}
 }
@@ -313,7 +321,7 @@ impl SquarkupConfig
 	/// 
 	/// It is fine is `data` does not have `setting-group`, in which case this returns `Ok(None)`.
 	fn try_get_table_if_present<'d>(
-		data: &'d toml::map::Map<String, toml::Value>,
+		data: &'d toml::Table,
 		setting_group: &str,
 		hint: impl FnOnce() -> String,
 	) -> SquarkResult<Option<&'d toml::Table>>
@@ -323,13 +331,13 @@ impl SquarkupConfig
 		};
 
 		let Some(table) = value.as_table() else {
-			return Err(SquarkError::Unrecoverable {
+			unrecoverable! {
 				msg: fmt!("{Y}{setting_group}{R} must be a table, not a field"),
 				hint: hint(),
 				debug: vec![
 					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", value.type_str()),
 				],
-			});
+			}
 		};
 
 		Ok(Some(table))
