@@ -47,7 +47,7 @@ use std::fmt::Display;
 } pub use hint;
 
 
-pub fn line() { println!("{GREY}────────────────────────"); }
+pub fn line() { println!("{GREY}─────────────────────────────"); }
 
 pub fn log_is(msg:    impl Display) { println!(" {}› {}{}",     GREY, Y, msg); }
 pub fn log_info(msg:  impl Display) { println!(" {}› {}",       GREY,    msg); }
