@@ -4,10 +4,16 @@
 <br>
 
 
+## v4.1.5
+
+### Fixes
+- Fix slight issues with line breaks in render output.
+
+
 ## v4.1.4
 
 ### Fixes
-- Fix issues with `#SQUARK leave` interacting with `#SQUARK only`
+- Fix issues with `#SQUARK leave` interacting with `#SQUARK only`.
 
 
 ## v4.1.3
