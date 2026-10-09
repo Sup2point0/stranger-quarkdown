@@ -4,6 +4,12 @@
 <br>
 
 
+## v4.1.4
+
+### Fixes
+- Fix issues with `#SQUARK leave` interacting with `#SQUARK only`
+
+
 ## v4.1.3
 
 ### Fixes
