@@ -275,7 +275,7 @@ impl Renderer<'_>
 			}
 			pd::Event::End(pd::TagEnd::CodeBlock) => {
 				/* SAFETY: A stray `-->` is fine, unlike a stray `<!--` which comments out the entire rest of the file */
-				let _ = self.ctx.try_pop(RenderCtx::CODE);
+				let _ = self.ctx.try_pop(&RenderCtx::CODE);
 			}
 			_ => (),
 		};
@@ -356,7 +356,7 @@ impl Renderer<'_>
 					return ProcessAction::ERASE;
 				}
 
-				if self.ctx.try_pop(RenderCtx::COMMENT).is_ok() {
+				if self.ctx.try_pop(&RenderCtx::COMMENT).is_ok() {
 					return ProcessAction::from(preserve);
 				} else {
 					/* NOTE: If `-->` didn't terminate a comment context, it was just a stray `-->` which should be kept */
@@ -367,8 +367,8 @@ impl Renderer<'_>
 		ProcessAction::DEFER
 	}
 
-	/// Attempt to process squarks inside `html`, returning `true` if a squark was matched (and so the comment should be removed).
-	fn process_comment(&mut self, html: &str) -> bool  // TODO maybe use `ProcessAction`?
+	/// Attempt to process squarks inside `html`, returning `true` if the comment should be removed.
+	fn process_comment(&mut self, html: &str) -> bool
 	{
 		/// The RegEx pattern for twin squarks.
 		/// 
@@ -416,14 +416,22 @@ impl Renderer<'_>
 		match m2 {
 			"?" => self.ctx.push(squark),
 			"." => {
-				let r = self.ctx.try_pop(squark);
+				let r = self.ctx.try_pop(&squark);
 
 				if r.is_err() {
-					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("unpaired closing squark: {W}{html}"),
-						hint: fmt!("did you forget to close a {:?} context?", self.ctx.current()),
-						debug: self.ctx.printed(),
-					});
+					if self.ctx.contains(&squark) {
+						self.errors.push(SquarkError::Recoverable {
+							msg: fmt!("unpaired closing squark: {W}{html}"),
+							hint: fmt!("did you forget to close a {:?} context?", self.ctx.current()),
+							debug: self.ctx.printed(),
+						});
+					} else {
+						self.errors.push(SquarkError::Recoverable {
+							msg: fmt!("unpaired closing squark: {W}{html}"),
+							hint: fmt!("did you forget to open a {W}{html}{G} context?"),
+							debug: self.ctx.printed(),
+						});
+					}
 				}
 			}
 			_ => unreachable!("RegEx pattern only allows ? and ."),

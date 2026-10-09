@@ -41,14 +41,20 @@ impl<Ctx> ContextStack<Ctx>
 impl<Ctx> ContextStack<Ctx>
 	where Ctx: PartialEq + std::fmt::Debug
 {
+	pub fn contains(&self, ctx: &Ctx) -> bool
+	 {
+		/* NOTE: Favour reverse search since we're more likely to be querying down the stack*/
+		self.stack.iter().rev().any(|c| c == ctx)
+	}
+
 	/// Pop `ctx` from the stack, as deep as possible.
 	/// 
 	/// If there are multiple consecutive occurrences of `ctx`, this pops all of them. For instance, popping `SLASH` from `[LEAVE, SLASH, SLASH]` results in `[LEAVE]`.
 	/// 
 	/// Errors if `ctx` is not the current context.
-	pub fn try_pop(&mut self, ctx: Ctx) -> SquarkResult
+	pub fn try_pop(&mut self, ctx: &Ctx) -> SquarkResult
 	{
-		if *self.current() != ctx {
+		if self.current() != ctx {
 			return Err(SquarkError::Recoverable {
 				msg: fmt!("failed to pop context: {ctx:?}"),
 				hint: str!("contexts must always be balanced"),
@@ -56,7 +62,7 @@ impl<Ctx> ContextStack<Ctx>
 			});
 		}
 
-		while self.stack.last() == Some(&ctx) {
+		while self.stack.last() == Some(ctx) {
 			self.stack.pop();
 		}
 
@@ -80,6 +86,15 @@ impl<Ctx> ContextStack<Ctx>
 	}
 }
 
+impl<Ctx> std::ops::Deref for ContextStack<Ctx>
+{
+	type Target = [Ctx];
+
+	fn deref(&self) -> &Self::Target {
+		&self.stack
+	}
+}
+
 
 // == TESTS == //
 
@@ -98,7 +113,7 @@ mod try_pop {
 		ctx.push(RenderCtx::LEAVE { key: None });
 		ctx.push(RenderCtx::SLASH { key: None });
 
-		let r = ctx.try_pop(RenderCtx::SLASH { key: None });
+		let r = ctx.try_pop(&RenderCtx::SLASH { key: None });
 		assert_ok!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
 	}
@@ -110,7 +125,7 @@ mod try_pop {
 		ctx.push(RenderCtx::SLASH { key: None });
 		ctx.push(RenderCtx::SLASH { key: None });
 
-		let r = ctx.try_pop(RenderCtx::SLASH { key: None });
+		let r = ctx.try_pop(&RenderCtx::SLASH { key: None });
 		assert_ok!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
 	}
@@ -122,7 +137,7 @@ mod try_pop {
 		ctx.push(RenderCtx::SLASH { key: None });
 		ctx.push(RenderCtx::LEAVE { key: None });
 
-		let r = ctx.try_pop(RenderCtx::LEAVE { key: None });
+		let r = ctx.try_pop(&RenderCtx::LEAVE { key: None });
 		assert_ok!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::SLASH { key: None } );
 	}
@@ -133,7 +148,7 @@ mod try_pop {
 		ctx.push(RenderCtx::LEAVE { key: None });
 		ctx.push(RenderCtx::SLASH { key: None });
 
-		let r = ctx.try_pop(RenderCtx::LEAVE { key: None });
+		let r = ctx.try_pop(&RenderCtx::LEAVE { key: None });
 		assert_err!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::SLASH { key: None } );
 	}
