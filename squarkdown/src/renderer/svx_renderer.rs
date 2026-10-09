@@ -984,20 +984,20 @@ mod comments {
 		use super::*;
 
 		#[test] fn easy() {
-			test_expected_for(|c| c.format.preserve_comments = true, &[
-				pair!("keep <!--this--> comment"),
-				pair!("keep <!--this --> comment"),
-				pair!("keep <!-- this--> comment"),
-				pair!("keep <!-- this --> comment"),
+			test_preserves_for(|c| c.format.preserve_comments = true, &[
+				"keep <!--this--> comment",
+				"keep <!--this --> comment",
+				"keep <!-- this--> comment",
+				"keep <!-- this --> comment",
 			]);
 		}
 
 		#[test] fn medium() {
-			test_expected_for(|c| c.format.preserve_comments = true, &[
-				pair!("keep <!--this comment--> please"),
-				pair!("keep <!--this comment --> please"),
-				pair!("keep <!-- this comment--> please"),
-				pair!("keep <!-- this comment --> please"),
+			test_preserves_for(|c| c.format.preserve_comments = true, &[
+				"keep <!--this comment--> please",
+				"keep <!--this comment --> please",
+				"keep <!-- this comment--> please",
+				"keep <!-- this comment --> please",
 			]);
 		}
 
