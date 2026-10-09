@@ -60,7 +60,7 @@ pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {}", G,       msg); }
 /// Print `err`, with surrounding line delimiters.
 pub fn error(err: SquarkError)
 {
-	fn go(err: &SquarkError, already_shown_when: bool)
+	fn go(err: &SquarkError, mut already_shown_when: bool)
 	{
 		match err
 		{
@@ -82,6 +82,7 @@ pub fn error(err: SquarkError)
 
 			SquarkError::Multiple{ when, errs } => {
 				if !already_shown_when && !when.is_empty() {
+					already_shown_when = true;
 					let count = err.len();
 					let plural = if count == 1 {""} else {"s"};
 					bad!("{count} error{plural} while {when}");
@@ -92,7 +93,7 @@ pub fn error(err: SquarkError)
 					if i != 0 {
 						line();
 					}
-					go(err, true);
+					go(err, already_shown_when);
 				}
 			}
 

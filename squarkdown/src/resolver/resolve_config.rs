@@ -15,10 +15,10 @@ enum Extension { TOML, JSON }
 /// Find, read, load, validate and initialise the user's squarkup configuration, either from `squarkup.toml` or `squarkup.json`.
 pub fn resolve_config(root: &Path) -> SquarkResult<SquarkupConfig>
 {
-	log::is!("resolving config...");
+	log::is!("resolving squarkup config...");
 
 	let (filepath, ext) = find_config(root)?;
-	log::ok!(slash!("found your squarkup config: {B}{}", filepath));
+	log::ok!(slash!("found your config: {B}{}", filepath));
 
 	let config = match ext {
 		Extension::TOML => {
