@@ -58,7 +58,7 @@ Remind yourself:
 ```md
 # Welcome to Squarkdown!
 <!-- #SQUARK live!
-| dest = walkthrough welcome
+| dest = walkthrough/welcome
 | capt = An introduction to what Squarkdown can do
 | date = 2024 July 1
 -->
