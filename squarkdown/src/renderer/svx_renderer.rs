@@ -65,7 +65,7 @@ pub(super) struct Renderer<'d>
 
 	/// The list of byte boundaries where a new line starts.
 	/// 
-	/// For instance, `[0, 4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
+	/// For instance, `[4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
 	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.
@@ -135,7 +135,7 @@ impl<'d> Renderer<'d>
 	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
 		if self.config.errors.debug {
-			self.source = source.to_owned();
+			self.update_source(source);
 		}
 
 		let mut parser =
@@ -623,6 +623,31 @@ impl Renderer<'_>
 	}
 }
 
+/// Debug
+impl Renderer<'_>
+{
+	/// Find which line number of the source text that `range` starts at.
+	/// 
+	/// Returns `None` if the renderer cannot resolve the range. This might be because:
+	/// 
+	/// - `self.line-boundaries` hasn't been initialised properly.
+	/// - `range` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
+	fn line_number(&self, range: Range<usize>) -> Option<usize>
+	{
+		self.line_boundaries.iter()
+			.position(|b| range.start < *b)
+			.map(|n| n + 1)
+	}
+
+	/// Update `self.source` and `self.line_boundaries` with `source` for debug information.
+	fn update_source(&mut self, source: &str)
+	{
+		self.source = source.to_owned();
+		self.line_boundaries = source.match_indices('\n').map(|(i, _str)| i).collect();
+		self.line_boundaries.push(source.len());
+	}
+}
+
 /// Core utilities
 impl Renderer<'_>
 {
@@ -668,6 +693,7 @@ impl From<bool> for ProcessAction {
 // == TESTS == //
 
 #[cfg(test)] use super::test_utils::*;
+#[cfg(test)] use crate::utils::testing::*;
 
 #[cfg(test)] use indoc::indoc;
 
@@ -1328,4 +1354,21 @@ mod only {
 		// 	("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
 		// ]);
 	}
+}
+
+#[cfg(test)]
+mod line_numbers {
+	use super::*;
+
+	#[test] fn line_boundaries() {
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+
+		renderer.update_source("012\n45\n78");
+		assert_eq!( renderer.line_boundaries, vec![3, 6, 9] );
+		renderer.update_source("01234\n\n78");
+		assert_eq!( renderer.line_boundaries, vec![5, 6, 9] );
+		renderer.update_source("\n123\n");
+		assert_eq!( renderer.line_boundaries, vec![0, 4, 5] );
+	}
+
 }
