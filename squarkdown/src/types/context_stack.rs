@@ -79,7 +79,7 @@ impl<Ctx> ContextStack<Ctx>
 		self.prints().collect()
 	}
 
-	/// Print the stack, top-down from the last pushed context.
+	/// Prints the stack, top-down from the last pushed context.
 	pub fn prints(&self) -> impl Iterator<Item = String>
 	{
 		self.stack().iter().rev().map(ToString::to_string)

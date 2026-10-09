@@ -387,9 +387,9 @@ impl Renderer<'_>
 		else {
 			if html.contains("#squark") || html.contains("#SQUARK") {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("unknown squark pattern: {W}{html}"),
-					hint: fmt!("use squarks like this: {W}<!-- #SQUARK leave? -->"),
-					debug: self.show_source(range),
+					msg: fmt!("unknown squark pattern: {W}{BOLD}{html}{UNBOLD}"),
+					hint: fmt!("use squarks like this: {Y}<!-- #SQUARK leave? -->"),
+					debug: [self.printed_source(range), self.ctx.printed()].concat(),
 				});
 			}
 			return false;
@@ -406,9 +406,9 @@ impl Renderer<'_>
 			s => {
 				if !self.ctx.is_leave() {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("unknown twin squark: {W}{s}"),
-						hint: fmt!("valid twin squarks are {W}leave{G}, {W}slash{G}, {W}only"),
-						debug: self.ctx.printed(),
+						msg: fmt!("unknown twin squark: {W}{BOLD}{s}{UNBOLD}"),
+						hint: fmt!("valid twin squarks are {Y}leave{G} · {Y}slash{G} · {Y}only"),
+						debug: [self.printed_source(range), self.ctx.printed()].concat(),
 					});
 				}
 				return false;
@@ -424,7 +424,7 @@ impl Renderer<'_>
 			"." => {
 				if self.ctx.try_pop(&squark).is_err() {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("unpaired closing squark: {W}{html}"),
+						msg: fmt!("unpaired closing squark"),
 						hint: {
 							if self.ctx.contains(&squark) {
 								fmt!("did you forget to close a {:?} context?", self.ctx.current())
@@ -432,7 +432,7 @@ impl Renderer<'_>
 								fmt!("did you forget to open a {W}{html}{G} context?")
 							}
 						},
-						debug: self.ctx.printed(),
+						debug: [self.printed_source(range), self.ctx.printed()].concat(),
 					});
 				}
 			}
@@ -637,25 +637,33 @@ impl Renderer<'_>
 		self.line_boundaries.push(source.len());
 	}
 
-	fn show_source(&self, range: Range<usize>) -> Vec<String>
+	/// Print a snapshot of the source text, focused around `range`.
+	fn printed_source(&self, range: Range<usize>) -> Vec<String>
 	{
-		let Some(info) = self.line_info(range) else { return vec![] };
+		let Some(info) = self.line_info(range.clone())
+			else { return vec![] };
 
 		let mut out = Vec::with_capacity(3);
 		out.push(str!(" "));
 
+		// previous line
 		if let Some(r) = info.prev_line_range {
-			out.push(fmt!("  {B}{} |  {GREY1}{}", info.line_number - 1, &self.source[r]));
+			out.push(fmt!("{GREY1}{:6} {GREY}│  {GREY1}{}", info.line_number - 1, &self.source[r]));
 		}
 
-		out.push(fmt!("  {B}{} |  {GREY1}{}", info.line_number, &self.source[info.line_range]));
+		// this line
+		let before = &self.source[info.line_range.start..range.start];
+		let focus = &self.source[range.clone()];
+		let after = &self.source[range.end..info.line_range.end];
 
+		out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}", info.line_number));
+
+		// next line
 		if let Some(r) = info.next_line_range {
-			out.push(fmt!("  {B}{} |  {GREY1}{}", info.line_number + 1, &self.source[r]));
+			out.push(fmt!("{GREY1}{:6} {GREY}│  {GREY1}{}", info.line_number + 1, &self.source[r]));
 		}
 
 		out.push(str!(" "));
-
 		out
 	}
 
@@ -667,16 +675,20 @@ impl Renderer<'_>
 		for i in 0..self.line_boundaries.len() {
 			let upper_this = self.line_boundaries[i];
 
-			if start < upper_this {
-				let lower_this = *self.line_boundaries.get(i - 1).unwrap_or(&0);
-
-				return Some(LineInfo {
-					line_number: i + 1,
-					line_range: lower_this..upper_this,
-					prev_line_range: self.line_boundaries.get(i - 2).map(|&lower_prev| lower_prev..lower_this),
-					next_line_range: self.line_boundaries.get(i + 1).map(|&upper_next| upper_this..upper_next),
-				});
+			if start >= upper_this {
+				continue;
 			}
+
+			let lower_this = *self.line_boundaries.get(i - 1).unwrap_or(&0);
+
+			return Some(LineInfo {
+				line_number: i + 1,
+				line_range: (lower_this + 1)..upper_this,
+				prev_line_range:
+					self.line_boundaries.get(i - 2).map(|&lower_prev| (lower_prev + 1)..lower_this),
+				next_line_range:
+					self.line_boundaries.get(i + 1).map(|&upper_next| (upper_this + 1)..upper_next),
+			});
 		}
 
 		None
