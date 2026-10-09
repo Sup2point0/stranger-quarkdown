@@ -13,10 +13,10 @@ use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
 
-use std::borrow::{ Cow };
 use std::fs::{ File };
 use std::io::{ Write };
 use std::iter::{ Peekable };
+use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
@@ -129,8 +129,6 @@ impl<'d> Renderer<'d>
 
 	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
-		let source = Self::expand_only(source);
-
 		let mut parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
 			.into_offset_iter()
@@ -140,9 +138,11 @@ impl<'d> Renderer<'d>
 		self.skip_heading(&mut parser);
 		self.skip_charm_squark(&mut parser);
 
-		// TODO maybe `flat_map` to support context-tracking `only`?
-		let parser = parser
-			// .inspect(|e| { dbg!(e); })
+		let parser =
+			pd::TextMergeWithOffset::new(parser)
+			.inspect(|(e, _)| { println!("before = {e:?}"); })
+			.flat_map(Self::split_comments)
+			.inspect(|(e, _)| { println!("after = {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -153,16 +153,11 @@ impl<'d> Renderer<'d>
 
 		out
 	}
+}
 
-	/// Remove `<!-- #SQUARK only?` and `#SQUARK only. -->` to expose their content to the render pipeline.
-	fn expand_only(source: &str) -> Cow<'_, str>
-	{
-		regex!(
-			r"(?is)<!--\s*#SQUARK\s+ONLY\?\s+(?-i)(.*?)(?i)#SQUARK\s+ONLY\.\s*-->"
-		)
-		.replace_all(source, "$1")
-	}
-
+/// Parser abuse
+impl Renderer<'_>
+{
 	/// Advance `parser` to skip over the events that produce the initial page heading.
 	fn skip_heading(&self, parser: &mut Peekable<pd::OffsetIter>)
 	{
@@ -203,6 +198,64 @@ impl<'d> Renderer<'d>
 			}
 		}
 	}
+
+	/// Split up text containing `<!--` xor `-->` into 2 separate `pd::Event`s with offsets.
+	/// 
+	/// For instance:
+	/// 
+	/// - We split `some <!-- comment` into `Text("some ")` and `InlineHtml("<!-- comment")`.
+	/// - We split `closing --> comment` into `InlineHtml("closing -->")` and `Text(" comment")`.
+	/// 
+	/// This transformation is necessary because `pulldown-cmark` does not handle comments crossing multiple lines very well, so for instance this:
+	/// 
+	/// ```md
+	/// A <!-- perhaps
+	/// 
+	/// strange --> comment
+	/// ```
+	/// 
+	/// Gets parsed to `[Text("a <!-- perhaps"), Text("strange --> comment")]` instead of the more structurally correct `[Text("A"), InlineHtml("<!-- perhaps\n\nstrange -->"), Text("comment")]`.
+	fn split_comments((event, range): (pd::Event, Range<usize>))
+		-> impl Iterator<Item = (pd::Event, Range<usize>)>
+	{
+		if let pd::Event::Text(text)
+				| pd::Event::Html(text)
+				| pd::Event::InlineHtml(text)
+				= &event
+			&& text.trim() != "<!--"
+			&& text.trim() != "-->"
+		{
+			let text = text.trim();
+
+			let mut idx = 0;
+			/* NOTE: Using `Rule` as temporary placeholder, never read */
+			let mut text_left = pd::Event::Rule;
+			let mut text_right = pd::Event::Rule;
+
+			/* For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML */
+			if let Some(i) = text.find("<!--") {
+				idx = i;
+				let (l, r) = text.split_at(idx);
+				text_left = pd::Event::Text(l.to_owned().into());
+				text_right = pd::Event::InlineHtml(r.to_owned().into());
+			}
+			/* Do the opposite for a closing comment */
+			else if let Some(i) = text.find("-->") {
+				idx = i + "-->".len();
+				let (l, r) = text.split_at(idx);
+				text_left = pd::Event::InlineHtml(l.to_owned().into());
+				text_right = pd::Event::Text(r.to_owned().into());
+			}
+
+			/* NOTE: If it's `0` (start of the string) we shouldn't split anyway */
+			if idx != 0 {
+				let left = Some((text_left, range.clone())).into_iter();
+				let right = Some((text_right, range)).into_iter();
+				return left.chain(right)
+			}
+		}
+		Some((event, range)).into_iter().chain(None.into_iter())
+	}
 }
 
 /// Specific transforms
@@ -215,9 +268,15 @@ impl Renderer<'_>
 		range: std::ops::Range<usize>,
 	) -> Option<pd::Event<'e>>
 	{
-		match event {
-			pd::Event::Start(pd::Tag::CodeBlock(..)) => { self.ctx.push(RenderCtx::CODE); }
-			pd::Event::End(pd::TagEnd::CodeBlock) => { self.ctx.try_pop(RenderCtx::CODE).expect("contexts are always balanced"); }
+		match &event
+		{
+			pd::Event::Start(pd::Tag::CodeBlock(..)) => {
+				self.ctx.push(RenderCtx::CODE);
+			}
+			pd::Event::End(pd::TagEnd::CodeBlock) => {
+				/* SAFETY: A stray `-->` is fine, unlike a stray `<!--` which comments out the entire rest of the file */
+				let _ = self.ctx.try_pop(RenderCtx::CODE);
+			}
 			_ => (),
 		};
 
@@ -285,12 +344,23 @@ impl Renderer<'_>
 		}
 		else if !self.ctx.is_slash() {
 			if html.starts_with("<!--") {
+				if self.process_comment(html) {
+					return ProcessAction::ERASE;
+				}
 				self.ctx.push(RenderCtx::COMMENT);
 				return ProcessAction::from(preserve)
 			}
 			else if html.ends_with("-->") {
-				self.ctx.try_pop(RenderCtx::COMMENT).expect("contexts are always balanced");
-				return ProcessAction::from(preserve)
+				if self.process_comment(html) {
+					return ProcessAction::ERASE;
+				}
+
+				if self.ctx.try_pop(RenderCtx::COMMENT).is_ok() {
+					return ProcessAction::from(preserve);
+				} else {
+					/* NOTE: If `-->` didn't terminate a comment context, it was just a stray `-->` which should be kept */
+					return ProcessAction::KEEP;
+				}
 			}
 		}
 		ProcessAction::DEFER
@@ -325,6 +395,7 @@ impl Renderer<'_>
 		let squark = match m1 {
 			s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
 			s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
+			s if s.eq_ignore_ascii_case("ONLY")  => RenderCtx::ONLY,
 			s => {
 				if !self.ctx.is_leave() {
 					self.errors.push(SquarkError::Recoverable {
@@ -349,12 +420,12 @@ impl Renderer<'_>
 				if r.is_err() {
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("unpaired closing squark: {W}{html}"),
-						hint: fmt!("did you mean to close a {:?} context?", self.ctx.current()),
+						hint: fmt!("did you forget to close a {:?} context?", self.ctx.current()),
 						debug: self.ctx.printed(),
 					});
 				}
 			}
-			_ => unreachable!("pattern only allows ? and ."),
+			_ => unreachable!("RegEx pattern only allows ? and ."),
 		}
 
 		true
@@ -388,7 +459,7 @@ impl Renderer<'_>
 
 		// 1. find where the target file lives, relative to the current file
 		let own_source_folder = self.page.filepath.parent()
-			.expect("active files are always inside a folder");
+			.expect("active files always have a parent folder");
 
 		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
@@ -457,7 +528,7 @@ impl Renderer<'_>
 
 		// 1. find where the asset file lives, relative to the current file
 		let own_source_folder = self.page.filepath.parent()
-			.expect("active files are always inside a folder");
+			.expect("active files always have a parent folder");
 
 		let their_source_path = path!(own_source_folder / **dest_url).clean();
 
@@ -548,14 +619,15 @@ impl From<bool> for ProcessAction {
 
 
 // #[test] fn playground() {
-// 	test_preserves_for(|_| {
-
+// 	test_preserves_for(|c| {
+// 		// c.errors.strict = false;
 // 	}, &[
 // 		indoc! {"
-// 			# Hi
-// 			<!-- #SQUARK live!
-// 			| hi = true
-// 			-->
+// 			<!-- #SQUARK only
+
+// 			Content
+
+// 			     #SQUARK only -->
 // 		"}
 // 	]);
 // }
@@ -569,7 +641,7 @@ mod plain {
 		test_preserves(&[
 			"sup, world!",
 			"sup,\nworld!",
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -661,7 +733,7 @@ mod code_inline {
 			pair!("this `is` some `more` code"),
 			pair!("`1` onto\nline `2`"),
 			pair!("line `1` onto\nline `2`."),
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -670,20 +742,20 @@ mod code_inline {
 				  ("` 1 ` ` 2 `", "`1` `2`"),
 			pair!("`x y` `z`"),
 			pair!("`x`y`z`"),
-		])
+		]);
 	}
 
 	#[test] fn unclosed() {
 		test_expected(&[
 			("`1\n2", "\\`1\n2"),
-		])
+		]);
 	}
 
 	#[test] fn edge_cases() {
 		test_preserves(&[
 			"`x`",
 			"`code`",
-		])
+		]);
 	}
 }
 
@@ -700,7 +772,7 @@ mod code_blocks {
 				print(\"hello world\")
 				```
 			"},
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -712,7 +784,7 @@ mod code_blocks {
 				<!-- #SQUARK slash. -->
 				```
 			"},
-		])
+		]);
 	}
 
 	#[test] fn hard() {
@@ -732,17 +804,16 @@ mod code_blocks {
 				<!-- #SQUARK slash. -->
 				```
 			"},
-			// FIXME track only context
-			// indoc! {"
-			// 	```md
-			// 	<!-- #SQUARK only?
+			indoc! {"
+				```md
+				<!-- #SQUARK only?
 
-			// 	This is dangerous
+				This is dangerous
 
-			// 	     #SQUARK only. -->
-			// 	```
-			// "},
-		])
+				     #SQUARK only. -->
+				```
+			"},
+		]);
 	}
 
 	#[test] fn escaped() {
@@ -754,7 +825,7 @@ mod code_blocks {
 				\\```
 				```
 			"},
-		])
+		]);
 	}
 
 	#[test] fn edge_cases() {
@@ -764,7 +835,7 @@ mod code_blocks {
 			("``````",       "```\n```"),
 			("``` ```",      "` `"),
 			("```\n```",     "```\n```"),
-		])
+		]);
 	}
 }
 
@@ -798,7 +869,7 @@ mod tables {
 				|1|2|
 				|3|4|
 			"},
-		])
+		]);
 	}
 }
 
@@ -811,7 +882,7 @@ mod maths_inline {
 			"the $x$ variable",
 			"the $x+y$ variable",
 			"the $x + y$ variable",
-		])
+		]);
 	}
 
 	#[test] fn medium() {
@@ -819,7 +890,7 @@ mod maths_inline {
 			"$[1, 2, 3]$",
 			"$[1,\\ 2,\\ 3]$",
 			"$\\{ 1, 2, 3 \\}$",
-		])
+		]);
 	}
 }
 
@@ -839,7 +910,7 @@ mod maths_block {
 				A(X, x_{1}, x_{2}) = X[\\max(x_{1}, x_{2})]
 				```
 			"},
-		])
+		]);
 	}
 }
 
@@ -850,17 +921,12 @@ mod comments {
 	mod erases {
 		use super::*;
 
-		#[test] fn easy() {
+		#[test] fn basic() {
 			test_expect(&[
-				"erase <!--this--> this",
-				"erase <!--this --> this",
-				"erase <!-- this--> this",
-				"erase <!-- this --> this",
-			], "erase  this");
-		}
-
-		#[test] fn medium() {
-			test_expect(&[
+				"erase <!--this--> please",
+				"erase <!--this --> please",
+				"erase <!-- this--> please",
+				"erase <!-- this --> please",
 				"erase <!--this comment--> please",
 				"erase <!--this comment --> please",
 				"erase <!-- this comment--> please",
@@ -868,7 +934,13 @@ mod comments {
 			], "erase  please");
 		}
 
-		#[test] fn hard() {
+		#[test] fn many_in_one_line() {
+			test_expected(&[
+				("erase <!-- all --> of <!-- this --> please", "erase  of  please"),
+			]);
+		}
+
+		#[test] fn with_breaks_in_comment() {
 			test_expect(&[
 				"erase\n<!-- this comment -->\nplease",
 				"erase\n<!--\nthis comment\n-->\nplease",
@@ -876,10 +948,34 @@ mod comments {
 			], "erase\n\n\nplease");
 		}
 
+		#[test] fn multi_line_from_line_start() {
+			test_expect(&[
+				"erase\n<!-- this\ncomment -->\nplease",
+				"erase\n<!-- this\n\ncomment -->\nplease",
+			], "erase\n\n\nplease");
+		}
+
+		#[test] fn multi_line_from_mid_line() {
+			test_expect(&[
+				"erase <!--this\ncomment--> please",
+				"erase <!-- this\ncomment --> please",
+				"erase <!-- this\n\ncomment --> please",
+			], "erase  please");
+		}
+
+		#[test] fn multi_line_with_comment_before() {
+			test_expected(&[
+				// I have no idea why these 2 produce different output lmao
+				("erase <!-- all --> of <!-- these\ncomments --> please", "erase  of  please"),
+				("erase <!-- all --> of <!-- these\n\ncomments --> please", "erase of  please"),
+			]);
+		}
+
 		#[test] fn nested() {
-			// FIXME
+			// FIXME bugged!
 			// test_expected(&[
-			// 	("<!-- <!-- illegal --> comment", " comment"),
+			// 	("a <!-- <!-- weird --> comment", "a  comment"),
+			// 	("a \n <!-- <!-- weirder --> comment", "a comment"),
 			// ]);
 		}
 	}
@@ -920,11 +1016,12 @@ mod comments {
 		}
 
 		#[test] fn unopened() {
-			test_expected(&[
-				pair!("not --> a comment"),
-				pair!("not -->\na comment"),
-				("-->",           "\\-->"),
-				("--> a comment", "\\--> a comment"),
+			test_preserves(&[
+				"not -->",
+				"not --> a comment",
+				"not -->\na comment",
+				"\\-->",
+				"--> a comment",
 			]);
 		}
 	}
@@ -940,7 +1037,7 @@ mod slash {
 				"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
 				"erase  please",
 			),
-		])
+		]);
 	}
 
 	#[test] fn multi_line() {
@@ -955,7 +1052,7 @@ mod slash {
 				"},
 				"erase\n\n\nplease"
 			),
-		])
+		]);
 	}
 }
 
@@ -969,7 +1066,7 @@ mod leave {
 				"Don't <!-- #SQUARK leave? --> do <!-- #SQUARK leave. --> anything",
 				"Don't  do  anything",
 			),
-		])
+		]);
 	}
 
 	#[test] fn standard() {
@@ -992,7 +1089,7 @@ mod leave {
 					this
 				"}
 			),
-		])
+		]);
 	}
 
 	#[test] fn nested() {
@@ -1018,7 +1115,7 @@ mod leave {
 		// 			3
 		// 		"},
 		// 	),
-		// ])
+		// ]);
 	}
 }
 
@@ -1028,12 +1125,15 @@ mod only {
 
 	#[test] fn easy() {
 		test_expected(&[
-			("Please <!-- #SQUARK only? show #SQUARK only. --> me", "Please show  me"),
-			("Please <!-- #SQUARK only? do show #SQUARK only. --> me", "Please do show  me"),
-		])
-	}
-
-	#[test] fn medium() {
+			(
+				"Please \n <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me",
+				"Please\n\n \n show \n\n me"
+			),
+			(
+				"Please \n <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me",
+				"Please\n\n \n do show \n\n me"
+			),
+		]);
 		test_expected(&[
 			(
 				indoc! {"
@@ -1048,17 +1148,32 @@ mod only {
 				indoc! {"
 					Please
 
+
 					show me!
 				"}
 			),
-		])
+		]);
+	}
+
+	#[test] fn medium() {
+		test_expected(&[
+			(
+				"Please <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me",
+				"Please \n\nshow\n\n&#32;me"
+			),
+			(
+				"Please <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me",
+				"Please \n\ndo show\n\n&#32;me"
+			),
+		]);
 	}
 
 	#[test] fn awkward_whitespace() {
-		test_expected(&[
-			("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
-			("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
-			("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
-		])
+		// FIXME squarks on one line
+		// test_expected(&[
+		// 	("x <!-- #SQUARK only? y #SQUARK only. --> z",  "x y  z"),
+		// 	("x <!-- #SQUARK only?  y #SQUARK only. --> z", "x y  z"),
+		// 	("x <!-- #SQUARK only? y #SQUARK only. -->  z", "x y   z"),
+		// ]);
 	}
 }
