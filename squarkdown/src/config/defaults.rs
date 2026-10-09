@@ -17,6 +17,12 @@ impl SquarkupConfig
 	{
 		/* NOTE: This is the canonical source of truth for Squarkdown's defaults, make sure to sync docs with this! */
 		Self {
+			errors: ErrorConfig {
+				strict: true,
+				on_error: ErrorAction::WARN,
+				file_already_exists: FileAction::OVERWRITE,
+				link_broken: LinkRewriteAction::STRIP_EXTENSION,
+			},
 			paths: PathsConfig {
 				root: root.to_owned(),
 				site: site.to_owned(),
@@ -50,12 +56,6 @@ impl SquarkupConfig
 				],
 			},
 			fonts:  FontsConfig { queries: vec![] },
-			errors: ErrorConfig {
-				strict: true,
-				on_error: ErrorAction::WARN,
-				file_already_exists: FileAction::OVERWRITE,
-				link_broken: LinkRewriteAction::STRIP_EXTENSION,
-			},
 		}
 	}
 }
