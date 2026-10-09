@@ -37,7 +37,7 @@ test("crawl-routes", async () =>
 
 	await Promise.allSettled(Array.from({ length: 4 }, (_, i) =>
 		(async () => {
-			await sleep(i * 500);
+			await sleep(i * 1000);
 
 			const WORKER = `${PINK}[worker ${i+1}]${WHITE}`;
 			console.info(`${GREY}>> ${WORKER} ${YELLOW}Scanning for links...`);
@@ -52,7 +52,7 @@ test("crawl-routes", async () =>
 					if (pending_routes === 0) break;
 					
 					/* NOTE: Other workers might push more targets to the queue, so we'll wait a hot sec before deciding to finish */
-					await sleep(500);
+					await sleep(1000);
 
 					next = to_visit.pop();
 					if (next == undefined) break;

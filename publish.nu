@@ -20,13 +20,17 @@ def test-all [] {
 
 ## Publish to crates.io
 def publish-cargo [] {
+	print $"($PINK)\n› publishing to crates.io...\n($WHITE)"
+
 	cd squarkdown
-	# cargo publish --allow-dirty
+	cargo publish --allow-dirty
 	cd ..
 }
 
 ## Compile binaries and publish to NPM registry
 def publish-npm [] {
+	print $"($PINK)\n› publishing to NPM...\n($WHITE)"
+
 	cd npm
 
 	cp ../LICENCE .
