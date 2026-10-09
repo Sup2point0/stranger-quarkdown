@@ -21,6 +21,10 @@ use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
 
+/// A span in the source text returned by [`pd::Parser`](pulldown_cmark::Parser).
+type ParserRange = Range<usize>;
+
+
 /// Options for parsing with `pulldown-cmark`.
 pub static PARSER_OPTIONS: LazyLock<pd::Options> = LazyLock::new(||
 	  pd::Options::ENABLE_GFM
@@ -224,8 +228,8 @@ impl Renderer<'_>
 	/// ```
 	/// 
 	/// Gets parsed to `[Text("a <!-- perhaps"), Text("strange --> comment")]` instead of the more structurally correct `[Text("A"), InlineHtml("<!-- perhaps\n\nstrange -->"), Text("comment")]`.
-	fn split_comments((event, range): (pd::Event, Range<usize>))
-		-> impl Iterator<Item = (pd::Event, Range<usize>)>
+	fn split_comments((event, range): (pd::Event, ParserRange))
+		-> impl Iterator<Item = (pd::Event, ParserRange)>
 	{
 		if let pd::Event::Text(text)
 				| pd::Event::Html(text)
@@ -271,7 +275,7 @@ impl Renderer<'_>
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
 		event: pd::Event<'e>,
-		range: Range<usize>,
+		range: ParserRange,
 	) -> Option<pd::Event<'e>>
 	{
 		match &event
@@ -306,7 +310,7 @@ impl Renderer<'_>
 	/// Transform content depending on the current context.
 	fn process_ctx<'e>(&mut self,
 		mut event: pd::Event<'e>,
-		range: Range<usize>,
+		range: ParserRange,
 	) -> Option<pd::Event<'e>>
 	{
 		match self.ctx.current()
@@ -323,11 +327,11 @@ impl Renderer<'_>
 			_ => match event
 			{
 				pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) => {
-					self.process_link(dest_url);
+					self.process_link(dest_url, range);
 					Some(event)
 				}
 				pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) => {
-					self.process_image(dest_url);
+					self.process_image(dest_url, range);
 					Some(event)
 				}
 				_ => Some(event),
@@ -336,7 +340,7 @@ impl Renderer<'_>
 	}
 
 	/// Process HTML comments to check for `<!-- #SQUARK -->`s and/or strip comments from the output.
-	fn process_html(&mut self, html: &str, range: Range<usize>) -> ProcessAction
+	fn process_html(&mut self, html: &str, range: ParserRange) -> ProcessAction
 	{
 		let html = html.trim();
 		let preserve = self.config.format.preserve_comments;
@@ -374,7 +378,7 @@ impl Renderer<'_>
 	}
 
 	/// Attempt to process squarks inside `html`, returning `true` if the comment should be [`ERASE`](ProcessAction::ERASE)d.
-	fn process_comment(&mut self, html: &str, range: Range<usize>) -> bool
+	fn process_comment(&mut self, html: &str, range: ParserRange) -> bool
 	{
 		/// The RegEx pattern for twin squarks.
 		/// 
@@ -447,7 +451,7 @@ impl Renderer<'_>
 	/// For instance, suppose page P references `[q](extra.q.md)`. But `q` specifies in its charm squark that it should render to `/secrets/q`. Then we rewrite the `[q](extra/q.md)` link to `[q](/secrets/q)`, both redirecting the link and stripping the `.md` suffix.
 	/// 
 	/// If resolution fails, an error is added to `self.errors`, and as a best-effort fallback, we try to strip a `.md` suffix from the link.
-	fn process_link(&mut self, dest_url: &mut pd::CowStr)
+	fn process_link(&mut self, dest_url: &mut pd::CowStr, range: ParserRange)
 	{
 		/* We only rewrite relative links to Markdown files */
 		if !dest_url.contains(".md")
@@ -476,12 +480,12 @@ impl Renderer<'_>
 
 		if !their_source_path.exists() {
 			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found broken link: {W}({dest_url})"),
+				msg: fmt!("found a broken link"),
 				hint: str!(),
-				debug: vec![
-					// TODO add line number
-					slash!("resolved to: {GREY1}{}", their_source_path),
-				]
+				debug: [
+					self.printed_source(range),
+					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+				].concat()
 			});
 			return;
 		}
@@ -519,18 +523,18 @@ impl Renderer<'_>
 			}
 			LinkRewriteAction::ERROR => {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found link to inactive page: {W}({dest_url})"),
+					msg: fmt!("found a link to an inactive page"),
 					hint: str!(),
-					debug: vec![
-						// TODO add line number
-						fmt!("resolved to: {GREY1}{shard}"),
-					]
+					debug: [
+						self.printed_source(range),
+						vec![fmt!("resolved to: {GREY1}{shard}")],
+					].concat()
 				});
 			}
 		}
 	}
 
-	fn process_image(&mut self, dest_url: &mut pd::CowStr)
+	fn process_image(&mut self, dest_url: &mut pd::CowStr, range: ParserRange)
 	{
 		if dest_url.contains("://")
 		|| dest_url.starts_with("http") {
@@ -546,12 +550,12 @@ impl Renderer<'_>
 		// 2. check it's an asset file
 		if !their_source_path.exists() {
 			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found broken asset link: {W}({dest_url})"),
+				msg: fmt!("found a broken asset link"),
 				hint: str!(),
-				debug: vec![
-					// TODO add line number
-					slash!("resolved to: {GREY1}{}", their_source_path),
-				]
+				debug: [
+					self.printed_source(range),
+					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+				].concat()
 			});
 			return;
 		}
@@ -564,12 +568,12 @@ impl Renderer<'_>
 		let Some(their_path_rel) = self.config.assets.rel_path(&their_source_path)
 			else {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found link to non-exported asset: {W}({dest_url})"),
+					msg: fmt!("found a link to an asset not processed by Squarkdown"),
 					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
-					debug: vec![
-						// TODO add line number
-						slash!("resolved to: {GREY1}{}", their_source_path),
-					]
+					debug: [
+						self.printed_source(range),
+						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+					].concat()
 				});
 				return;
 			};
@@ -638,7 +642,7 @@ impl Renderer<'_>
 	}
 
 	/// Print a snapshot of the source text, focused around `range`.
-	fn printed_source(&self, range: Range<usize>) -> Vec<String>
+	fn printed_source(&self, range: ParserRange) -> Vec<String>
 	{
 		let Some(info) = self.line_info(range.clone())
 			else { return vec![] };
@@ -703,9 +707,9 @@ struct LineInfo
 	/// - `line_info(range)` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
 	line_number: usize,
 
-	line_range: Range<usize>,
-	prev_line_range: Option<Range<usize>>,
-	next_line_range: Option<Range<usize>>,
+	line_range: ParserRange,
+	prev_line_range: Option<ParserRange>,
+	next_line_range: Option<ParserRange>,
 }
 
 /// Core utilities
