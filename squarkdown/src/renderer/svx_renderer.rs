@@ -326,12 +326,7 @@ impl Renderer<'_>
 		}
 	}
 
-	/// Process HTML content – specifically comments, to check for `<!-- #SQUARK -->`s.
-	/// 
-	/// Returns:
-	/// - `Some(true)` if processing was performed, and the content should be kept.
-	/// - `Some(false)` if processing was performed, and the content should be erased from the output.
-	/// - `None` if processing was NOT performed, and the caller should forward to another method.
+	/// Process HTML comments to check for `<!-- #SQUARK -->`s and/or strip comments from the output.
 	fn process_html(&mut self, html: &str) -> ProcessAction
 	{
 		let html = html.trim();
@@ -343,8 +338,9 @@ impl Renderer<'_>
 			}
 			return ProcessAction::from(preserve || self.ctx.is_leave());
 		}
-		else if !self.ctx.is_slash() {
+		else if !self.ctx.is_slash() && !self.ctx.is_leave() {
 			if html.starts_with("<!--") {
+				// check `<!-- #SQUARK only?`
 				if self.process_comment(html) {
 					return ProcessAction::ERASE;
 				}
@@ -352,6 +348,7 @@ impl Renderer<'_>
 				return ProcessAction::from(preserve)
 			}
 			else if html.ends_with("-->") {
+				// check `#SQUARK only. -->`
 				if self.process_comment(html) {
 					return ProcessAction::ERASE;
 				}
@@ -367,7 +364,7 @@ impl Renderer<'_>
 		ProcessAction::DEFER
 	}
 
-	/// Attempt to process squarks inside `html`, returning `true` if the comment should be removed.
+	/// Attempt to process squarks inside `html`, returning `true` if the comment should be [`ERASE`](ProcessAction::ERASE)d.
 	fn process_comment(&mut self, html: &str) -> bool
 	{
 		/// The RegEx pattern for twin squarks.
@@ -416,22 +413,18 @@ impl Renderer<'_>
 		match m2 {
 			"?" => self.ctx.push(squark),
 			"." => {
-				let r = self.ctx.try_pop(&squark);
-
-				if r.is_err() {
-					if self.ctx.contains(&squark) {
-						self.errors.push(SquarkError::Recoverable {
-							msg: fmt!("unpaired closing squark: {W}{html}"),
-							hint: fmt!("did you forget to close a {:?} context?", self.ctx.current()),
-							debug: self.ctx.printed(),
-						});
-					} else {
-						self.errors.push(SquarkError::Recoverable {
-							msg: fmt!("unpaired closing squark: {W}{html}"),
-							hint: fmt!("did you forget to open a {W}{html}{G} context?"),
-							debug: self.ctx.printed(),
-						});
-					}
+				if self.ctx.try_pop(&squark).is_err() {
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("unpaired closing squark: {W}{html}"),
+						hint: {
+							if self.ctx.contains(&squark) {
+								fmt!("did you forget to close a {:?} context?", self.ctx.current())
+							} else {
+								fmt!("did you forget to open a {W}{html}{G} context?")
+							}
+						},
+						debug: self.ctx.printed(),
+					});
 				}
 			}
 			_ => unreachable!("RegEx pattern only allows ? and ."),
@@ -1090,7 +1083,7 @@ mod leave {
 		]);
 	}
 
-	#[test] fn standard() {
+	#[test] fn with_slash() {
 		test_expected(&[
 			(
 				indoc! {"
@@ -1113,30 +1106,90 @@ mod leave {
 		]);
 	}
 
+	#[test] fn with_only() {
+		test_expected(&[
+			(
+				indoc! {"
+					Don't
+					<!-- #SQUARK leave? -->
+					<!-- #SQUARK only?
+					touch
+					     #SQUARK only. -->
+					<!-- #SQUARK leave. -->
+					this
+				"},
+				indoc! {"
+					Don't
+
+
+					<!-- #SQUARK only?
+					touch
+					#SQUARK only. -->
+
+					this
+				"}
+			),
+		]);
+	}
+
 	#[test] fn nested() {
-		// FIXME
-		// test_expected(&[
-		// 	(
-		// 		indoc! {"
-		// 			1
-		// 			<!-- #SQUARK leave? -->
-		// 			<!-- #SQUARK leave? -->
-		// 			2
-		// 			<!-- #SQUARK leave. -->
-		// 			<!-- #SQUARK leave. -->
-		// 			3
-		// 		"},
-		// 		indoc! {"
-		// 			1
+		test_expected_for(|c| c.format.preserve_comments = true, &[
+			(
+				indoc! {"
+					1
+					<!-- #SQUARK leave? -->
+					<!-- #SQUARK leave? -->
+					<!-- #SQUARK only
+					2
+					     #SQUARK only. -->
+					<!-- #SQUARK leave. -->
+					3
+				"},
+				indoc! {"
+					1
 
-		// 			<!-- #SQUARK leave? -->
-		// 			2
-		// 			<!-- #SQUARK leave. -->
 
-		// 			3
-		// 		"},
-		// 	),
-		// ]);
+
+					<!-- #SQUARK only
+					2
+					#SQUARK only. -->
+
+					3
+				"},
+			),
+			(
+				indoc! {"
+					1
+					<!-- #SQUARK leave? -->
+					2
+					<!-- #SQUARK leave? -->
+
+					<!-- #SQUARK only
+
+					3
+
+					     #SQUARK only. -->
+					
+					<!-- #SQUARK leave. -->
+					4
+				"},
+				indoc! {"
+					1
+
+
+					2
+
+
+					<!-- #SQUARK only
+
+					3
+
+					#SQUARK only. -->
+
+					4
+				"},
+			),
+		]);
 	}
 }
 
@@ -1164,7 +1217,7 @@ mod only {
 
 					show me!
 
-							#SQUARK only. -->
+						  #SQUARK only. -->
 				"},
 				indoc! {"
 					Please
