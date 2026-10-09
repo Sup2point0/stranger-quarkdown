@@ -292,19 +292,22 @@ impl Renderer<'_>
 			| pd::Event::InlineHtml(ref html)
 			if !self.ctx.is_code()
 			=>
-				match self.process_html(html) {
+				match self.process_html(html, range.clone()) {
 					ProcessAction::KEEP  => Some(event),
 					ProcessAction::ERASE => None,
-					ProcessAction::DEFER => self.process_ctx(event)
+					ProcessAction::DEFER => self.process_ctx(event, range),
 				}
 
 			/* But for everything else, handling will depend on the current context */
-			_ => self.process_ctx(event)
+			_ => self.process_ctx(event, range),
 		}
 	}
 
 	/// Transform content depending on the current context.
-	fn process_ctx<'e>(&mut self, mut event: pd::Event<'e>) -> Option<pd::Event<'e>>
+	fn process_ctx<'e>(&mut self,
+		mut event: pd::Event<'e>,
+		range: Range<usize>,
+	) -> Option<pd::Event<'e>>
 	{
 		match self.ctx.current()
 		{
@@ -333,13 +336,13 @@ impl Renderer<'_>
 	}
 
 	/// Process HTML comments to check for `<!-- #SQUARK -->`s and/or strip comments from the output.
-	fn process_html(&mut self, html: &str) -> ProcessAction
+	fn process_html(&mut self, html: &str, range: Range<usize>) -> ProcessAction
 	{
 		let html = html.trim();
 		let preserve = self.config.format.preserve_comments;
 		
 		if html.starts_with("<!--") && html.ends_with("-->") {
-			if self.process_comment(html) || self.ctx.is_slash() {
+			if self.process_comment(html, range) || self.ctx.is_slash() {
 				return ProcessAction::ERASE;
 			}
 			return ProcessAction::from(preserve || self.ctx.is_leave());
@@ -347,7 +350,7 @@ impl Renderer<'_>
 		else if !self.ctx.is_slash() && !self.ctx.is_leave() {
 			if html.starts_with("<!--") {
 				// check `<!-- #SQUARK only?`
-				if self.process_comment(html) {
+				if self.process_comment(html, range) {
 					return ProcessAction::ERASE;
 				}
 				self.ctx.push(RenderCtx::COMMENT);
@@ -355,7 +358,7 @@ impl Renderer<'_>
 			}
 			else if html.ends_with("-->") {
 				// check `#SQUARK only. -->`
-				if self.process_comment(html) {
+				if self.process_comment(html, range) {
 					return ProcessAction::ERASE;
 				}
 
@@ -371,7 +374,7 @@ impl Renderer<'_>
 	}
 
 	/// Attempt to process squarks inside `html`, returning `true` if the comment should be [`ERASE`](ProcessAction::ERASE)d.
-	fn process_comment(&mut self, html: &str) -> bool
+	fn process_comment(&mut self, html: &str, range: Range<usize>) -> bool
 	{
 		/// The RegEx pattern for twin squarks.
 		/// 
@@ -386,7 +389,7 @@ impl Renderer<'_>
 				self.errors.push(SquarkError::Recoverable {
 					msg: fmt!("unknown squark pattern: {W}{html}"),
 					hint: fmt!("use squarks like this: {W}<!-- #SQUARK leave? -->"),
-					debug: vec![],
+					debug: self.show_source(range),
 				});
 			}
 			return false;
@@ -626,6 +629,28 @@ impl Renderer<'_>
 /// Debug
 impl Renderer<'_>
 {
+	/// Update `self.source` and `self.line_boundaries` with `source` for debug information.
+	fn update_source(&mut self, source: &str)
+	{
+		self.source = source.to_owned();
+		self.line_boundaries = source.match_indices('\n').map(|(i, _str)| i).collect();
+		self.line_boundaries.push(source.len());
+	}
+
+	fn show_source(&self, range: Range<usize>) -> Vec<String>
+	{
+		let source = match self.line_number(range.clone()) {
+			Some(n) => fmt!("  {B}{n} |  {GREY1}{}", &self.source[range.clone()]),
+			None    => fmt!("  {B} ? |  {GREY1}{}", &self.source[range]),
+		};
+
+		vec![
+			str!(" "),
+			source,
+			str!(" ")
+		]
+	}
+
 	/// Find which line number of the source text that `range` starts at.
 	/// 
 	/// Returns `None` if the renderer cannot resolve the range. This might be because:
@@ -639,14 +664,6 @@ impl Renderer<'_>
 		self.line_boundaries.iter()
 			.position(|b| start < *b)
 			.map(|n| n + 1)
-	}
-
-	/// Update `self.source` and `self.line_boundaries` with `source` for debug information.
-	fn update_source(&mut self, source: &str)
-	{
-		self.source = source.to_owned();
-		self.line_boundaries = source.match_indices('\n').map(|(i, _str)| i).collect();
-		self.line_boundaries.push(source.len());
 	}
 }
 
@@ -705,11 +722,8 @@ impl From<bool> for ProcessAction {
 // 		// c.errors.strict = false;
 // 	}, &[
 // 		indoc! {"
-// 			```
-// 			<!--
-// 			test
-// 			-->
-// 			```
+// 			<!-- #SQUARK unknown? -->
+// 			hi
 // 		"}
 // 	]);
 // }
