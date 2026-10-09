@@ -4,6 +4,13 @@
 <br>
 
 
+## v4.1.2
+
+### Fixes
+- Properly handle `<!-- #SQUARK only? ... #SQUARK only. -->`
+- Improve Markdown rendering to cover more edge cases involving `<!-- comments -->`
+
+
 ## v4.1.1
 
 ### Changes
