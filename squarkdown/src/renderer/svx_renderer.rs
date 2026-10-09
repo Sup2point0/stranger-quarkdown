@@ -16,6 +16,7 @@ use time::UtcDateTime;
 use std::fs::{ File };
 use std::io::{ Write };
 use std::iter::{ Peekable };
+use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
 
@@ -140,6 +141,8 @@ impl<'d> Renderer<'d>
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
 			.inspect(|(e, _)| { println!("{e:?}"); })
+			.flat_map(Self::split_comments)
+			.inspect(|(e, _)| { println!("{e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -150,7 +153,11 @@ impl<'d> Renderer<'d>
 
 		out
 	}
+}
 
+/// Parser abuse
+impl Renderer<'_>
+{
 	/// Advance `parser` to skip over the events that produce the initial page heading.
 	fn skip_heading(&self, parser: &mut Peekable<pd::OffsetIter>)
 	{
@@ -191,6 +198,30 @@ impl<'d> Renderer<'d>
 			}
 		}
 	}
+
+	/// Split up text containing `<!--` or `-->` into 2 separate `pd::Event`s with offsets.
+	fn split_comments((event, range): (pd::Event, Range<usize>))
+		-> impl Iterator<Item = (pd::Event, Range<usize>)>
+	{
+		let mut idx = 0;
+
+		if let pd::Event::Text(text) = &event {
+			if let Some(i) = text.find("<!--") {
+				idx = i;
+			} else if let Some(i) = text.find("-->") {
+				idx = i + "-->".len();
+			}
+
+			/* NOTE: If it's `0` (start of the string) we shouldn't split anyway */
+			if idx != 0 {
+				let left = (pd::Event::Text(text[..idx].to_owned().into()), range.clone());
+				let right = (pd::Event::Text(text[idx..].to_owned().into()), range);
+				return Some(left).into_iter().chain(Some(right).into_iter())
+			}
+		}
+	
+		Some((event, range)).into_iter().chain(None.into_iter())
+	}
 }
 
 /// Specific transforms
@@ -212,16 +243,6 @@ impl Renderer<'_>
 				self.ctx.try_pop(RenderCtx::CODE)
 					.expect("code contexts are always balanced");
 			}
-
-			pd::Event::Text(text) => {
-				if text.contains("<!--") && !text.contains("-->") {
-					self.ctx.push(RenderCtx::COMMENT);
-				} else if text.contains("-->") && !text.contains("<!--") {
-					self.ctx.try_pop(RenderCtx::COMMENT)
-						.expect("comment contexts are always balanced");
-				}
-			}
-
 			_ => (),
 		};
 
@@ -908,6 +929,7 @@ mod comments {
 		#[test] fn multi_line_with_comment_before() {
 			test_expect(&[
 				"erase <!-- all --> of <!-- these\ncomments --> please",
+				"erase <!-- all --> of <!-- these\n\ncomments --> please",
 			], "erase  of  please");
 		}
 
