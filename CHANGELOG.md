@@ -4,11 +4,18 @@
 <br>
 
 
+## v4.1.3
+
+### Fixes
+- Fix issue with squarks being processed inside code contexts.
+- Remove stray debug output that snuck into production...
+
+
 ## v4.1.2
 
 ### Fixes
-- Properly handle `<!-- #SQUARK only? ... #SQUARK only. -->`
-- Improve Markdown rendering to cover more edge cases involving `<!-- comments -->`
+- Properly handle `<!-- #SQUARK only? ... #SQUARK only. -->`.
+- Improve Markdown rendering to cover more edge cases involving `<!-- comments -->`.
 
 
 ## v4.1.1
@@ -17,8 +24,8 @@
 - Use SIMD when parsing Markdown (on x86-64), which should mean speedups in performance!
 
 ### Fixes
-- Include `.shard` when rendering `+page.ts`
-- Correct `.filepath` -> `.path` in `PageData<"short">`
+- Include `.shard` when rendering `+page.ts`.
+- Correct `.filepath` -> `.path` in `PageData<"short">`.
 
 
 ## v4.1.0
