@@ -42,6 +42,7 @@ walkdir = "2.5.0"
 assertables = "10.1.0"
 indoc = "2.0.7"
 lazy_static = "1.5.0"
+pretty_assertions = "1.4.1"
 
 [lints.clippy]
 partialeq_to_none = "allow"

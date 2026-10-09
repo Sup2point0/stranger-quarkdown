@@ -3,6 +3,8 @@ use crate::prelude::*;
 use crate::macros::*;
 use crate::utils::testing::*;
 
+use pretty_assertions::{ assert_eq };
+
 
 /// Run the renderer over `cases`, checking that the rendered output is exactly identical to the input.
 pub(super) fn test_preserves(cases: &[&str])
@@ -39,7 +41,7 @@ pub(super) fn test_expect_for(
 	for source in cases {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
 		let output = renderer.render_from(source.trim());
-		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
+		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.printed() );
 	}
 }
 
@@ -61,6 +63,6 @@ pub(super) fn test_expected_for(
 	for (source, expected) in cases {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
 		let output = renderer.render_from(source.trim());
-		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.stack() );
+		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.printed() );
 	}
 }
