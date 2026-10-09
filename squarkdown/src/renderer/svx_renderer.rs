@@ -225,10 +225,8 @@ impl Renderer<'_>
 			&& text.trim() != "<!--"
 			&& text.trim() != "-->"
 		{
-			let text = text.trim();
-
 			let mut idx = 0;
-			/* NOTE: Using `Rule` as temporary placeholder, never read */
+			/* NOTE: `Rule` is a temporary placeholder, we never read it */
 			let mut text_left = pd::Event::Rule;
 			let mut text_right = pd::Event::Rule;
 
@@ -284,7 +282,7 @@ impl Renderer<'_>
 			/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
 			| pd::Event::Html(ref html)
 			| pd::Event::InlineHtml(ref html)
-			if self.ctx.current() != &RenderCtx::CODE
+			if !self.ctx.is_code()
 			=>
 				match self.process_html(html) {
 					ProcessAction::KEEP  => Some(event),
@@ -818,6 +816,30 @@ mod code_blocks {
 		]);
 	}
 
+	#[test] fn huge_block() {
+		test_preserves(&[
+			indoc! {"
+				```md
+				# What is Squarkdown-flavoured Markdown?
+				<!-- #SQUARK live! feat!
+				| dest = tests/sq-fl-mk
+				| capt = It’s Markdown with wacky comments.
+				| tags = tests / demos / no-deploy
+				| date = 2025 March 14
+				-->
+
+				<!-- #SQUARK leave? -->
+				Squarks won’t change your Markdown preview in any way.
+				<!-- #SQUARK leave. -->
+
+				<!-- #SQUARK only?
+				But they can influence how it’s processed when rendered to HTML!
+					#SQUARK only. -->
+				```
+			"},
+		]);
+	}
+
 	#[test] fn escaped() {
 		test_preserves(&[
 			indoc! {"
@@ -954,7 +976,7 @@ mod comments {
 			test_expect(&[
 				"erase\n<!-- this\ncomment -->\nplease",
 				"erase\n<!-- this\n\ncomment -->\nplease",
-			], "erase\n\n\nplease");
+			], "erase\n\n\n\nplease");
 		}
 
 		#[test] fn multi_line_from_mid_line() {
@@ -966,11 +988,10 @@ mod comments {
 		}
 
 		#[test] fn multi_line_with_comment_before() {
-			test_expected(&[
-				// I have no idea why these 2 produce different output lmao
-				("erase <!-- all --> of <!-- these\ncomments --> please", "erase  of  please"),
-				("erase <!-- all --> of <!-- these\n\ncomments --> please", "erase of  please"),
-			]);
+			test_expect(&[
+				"erase <!-- all --> of <!-- these\ncomments --> please",
+				"erase <!-- all --> of <!-- these\n\ncomments --> please",
+			], "erase  of  please");
 		}
 
 		#[test] fn nested() {
@@ -1124,8 +1145,9 @@ mod leave {
 
 					<!-- #SQUARK only?
 					touch
-					#SQUARK only. -->
+					     #SQUARK only. -->
 
+					
 					this
 				"}
 			),
@@ -1152,8 +1174,9 @@ mod leave {
 
 					<!-- #SQUARK only
 					2
-					#SQUARK only. -->
+					     #SQUARK only. -->
 
+					
 					3
 				"},
 			),
@@ -1184,8 +1207,9 @@ mod leave {
 
 					3
 
-					#SQUARK only. -->
+					     #SQUARK only. -->
 
+					
 					4
 				"},
 			),

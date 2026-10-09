@@ -31,12 +31,17 @@ pub enum RenderCtx
 
 impl ContextStack<RenderCtx>
 {
-	/// Is the current context `RenderCtx::LEAVE`?
+	/// Is the current context [`RenderCtx::CODE`]?
+	pub fn is_code(&self) -> bool {
+		matches!(self.current(), RenderCtx::CODE{..})
+	}
+
+	/// Is the current context [`RenderCtx::LEAVE`]?
 	pub fn is_leave(&self) -> bool {
 		matches!(self.current(), RenderCtx::LEAVE{..})
 	}
 
-	/// Is the current context `RenderCtx::SLASH`?
+	/// Is the current context [`RenderCtx::SLASH`]?
 	pub fn is_slash(&self) -> bool {
 		matches!(self.current(), RenderCtx::SLASH{..})
 	}
