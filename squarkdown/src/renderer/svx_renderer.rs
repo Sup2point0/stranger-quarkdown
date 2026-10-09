@@ -200,26 +200,41 @@ impl Renderer<'_>
 	}
 
 	/// Split up text containing `<!--` or `-->` into 2 separate `pd::Event`s with offsets.
+	/// 
+	/// For instance:
+	/// 
+	/// - We split `some <!-- comment` into `Text("some ")` and `InlineHtml("<!-- comment")`.
+	/// - We split `closing --> comment` into `InlineHtml("closing -->")` and `Text(" comment")`.
 	fn split_comments((event, range): (pd::Event, Range<usize>))
 		-> impl Iterator<Item = (pd::Event, Range<usize>)>
 	{
-		let mut idx = 0;
-
 		if let pd::Event::Text(text) = &event {
+			let mut idx = 0;
+			/* NOTE: Using `Rule` as temporary placeholder, never read */
+			let mut text_left = pd::Event::Rule;
+			let mut text_right = pd::Event::Rule;
+
+			/* For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML */
 			if let Some(i) = text.find("<!--") {
 				idx = i;
-			} else if let Some(i) = text.find("-->") {
+				text_left = pd::Event::Text(text[..idx].to_owned().into());
+				text_right = pd::Event::InlineHtml(text[idx..].to_owned().into());
+			}
+			/* Do the opposite for a closing comment */
+			else if let Some(i) = text.find("-->") {
 				idx = i + "-->".len();
+				text_left = pd::Event::InlineHtml(text[..idx].to_owned().into());
+				text_right = pd::Event::Text(text[idx..].to_owned().into());
 			}
 
 			/* NOTE: If it's `0` (start of the string) we shouldn't split anyway */
 			if idx != 0 {
-				let left = (pd::Event::Text(text[..idx].to_owned().into()), range.clone());
-				let right = (pd::Event::Text(text[idx..].to_owned().into()), range);
-				return Some(left).into_iter().chain(Some(right).into_iter())
+				let left = Some((text_left, range.clone())).into_iter();
+				let right = Some((text_right, range)).into_iter();
+				return left.chain(right)
 			}
 		}
-	
+
 		Some((event, range)).into_iter().chain(None.into_iter())
 	}
 }
