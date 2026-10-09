@@ -12,11 +12,27 @@ use std::path::{ Path, PathBuf };
 
 
 /// Lazily produce a string for a hint message.
-macro_rules! hints
-{
+macro_rules! hints {
+	() => {
+		|| String::new()
+	};
 	($($args:tt)*) => {
 		|| format!($($args)*)
 	};
+}
+
+/// Return a [`SquarkError::Recoverable`].
+macro_rules! recoverable {
+	($($args:tt)*) => {
+		return Err(SquarkError::Recoverable { $($args)* })
+	}
+}
+
+/// Return a [`SquarkError::Unrecoverable`].
+macro_rules! unrecoverable {
+	($($args:tt)*) => {
+		return Err(SquarkError::Unrecoverable { $($args)* })
+	}
 }
 
 
@@ -38,18 +54,16 @@ impl SquarkupConfig
 		let mut errs = SquarkError::multiple("loading squarkup config");
 
 		/* NOTE:
-			We first separately read `paths.site` because many *defaults* depend on it, so we need it before calling `::init_defaults()`.
+			We first separately read `paths.site` because many _defaults_ depend on it, so we need it before calling `::init_defaults()`.
 			
-			Since this may invalidate the relevance fatal errors later on (i.e. they might all be fixed by fixing `paths.site`), if this fails we'll immediately bail.
+			Since this may invalidate the relevant fatal errors later on (i.e. they might all be fixed by fixing `paths.site`), if this fails we'll immediately bail.
 		*/
 		let mut site = root.to_path_buf();
 
-		if let Some(paths) = data.get("paths")
+		if let Some(paths) = Self::try_get_table_if_present(&data, "paths",
+			hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
+		)?
 		{
-			Self::check_is_table(paths, "paths",
-				hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
-			)?;
-
 			if let Some(value) = paths.get("site") {
 				let dir = Self::try_get_str(value, "paths.site", "(filepath relative to your project root)")?;
 				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
@@ -57,18 +71,16 @@ impl SquarkupConfig
 		}
 
 		// now start with defaults...
-		let mut s = Self::init_defaults(root, &site);
+		let mut c = Self::init_defaults(root, &site);
 		// ...then apply the user's non-defaults on top of it
 
 		// == ErrorConfig == //
-		if let Some(errors) = data.get("errors")
+		if let Some(errors) = Self::try_get_table_if_present(&data, "errors",
+			hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
+		)?
 		{
-			Self::check_is_table(errors, "errors",
-				hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
-			)?;
-			
 			if let Some(value) = errors.get("strict") { catch!(errs => {
-				s.errors.strict = Self::try_get_bool(value, "errors.strict")?;
+				c.errors.strict = Self::try_get_bool(value, "errors.strict")?;
 			}) }
 
 			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
@@ -76,13 +88,13 @@ impl SquarkupConfig
 				let raw = Self::try_get_str(value, "errors.on-error", "(an error handling strategy)")?;
 
 				if let Ok(opt) = ErrorAction::try_from(raw) {
-					s.errors.on_error = opt;
+					c.errors.on_error = opt;
 				} else {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.on-error"),
 						hint: fmt!("valid values are {W}'warn'{G} (default) or {W}'kill'"),
 						debug: vec![fmt!("you provided {value}")],
-					});
+					}
 				}
 			}
 			
@@ -90,13 +102,13 @@ impl SquarkupConfig
 				let raw = Self::try_get_str(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
 
 				if let Ok(opt) = FileAction::try_from(raw) {
-					s.errors.file_already_exists = opt;
+					c.errors.file_already_exists = opt;
 				} else {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
 						hint: fmt!("valid values are {W}'overwrite'{G} (default), {W}'error'{G}, {W}'skip'"),
 						debug: vec![fmt!("you provided {value}")],
-					});
+					}
 				}
 			}) }
 			
@@ -104,27 +116,70 @@ impl SquarkupConfig
 				let raw = Self::try_get_str(value, "errors.broken-link", "(a missing file handling strategy)")?;
 
 				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
-					s.errors.link_broken = opt;
+					c.errors.link_broken = opt;
 				} else {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.broken-link"),
 						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
-					});
+					}
 				}
 			}) }
 		}
 
-		// == PathsConfig == //
-		if let Some(paths) = data.get("paths")
+		// == ProjectConfig == //
+		if let Some(project) = Self::try_get_table_if_present(&data, "project",
+			hints!("write your config like this: {W}```\n\t[project]\n\tgithub = 'Sup2point0/stranger-quarkdown'\n```")
+		)?
 		{
-			/* NOTE: Already `check_is_table()`-d earlier */
+			if let Some(value) = project.get("name") { catch!(errs => {
+				let raw = Self::try_get_str(value, "project.name", "(displayed name of project)")?;
 
+				if raw.is_empty() {
+					recoverable! {
+						msg: fmt!("warning: you provided a blank {Y}project.name"),
+						hint: str!("project name is ignored if blank"),
+						debug: vec![],
+					}
+				}
+
+				raw.clone_into(&mut c.project.name);
+			}) }
+			
+			if let Some(value) = project.get("github") { catch!(errs => {
+				let raw = Self::try_get_str(value, "project.github",
+					&fmt!("(GitHub repo link in {W}user/repo{G} format)")
+				)?;
+
+				if raw.is_empty() {
+					recoverable! {
+						msg: fmt!("warning: you provided a blank {Y}project.github"),
+						hint: str!("project GitHub link is ignored if blank"),
+						debug: vec![],
+					}
+				}
+				else if !raw.contains("/") {
+					errs.push(SquarkError::Recoverable {
+						msg: fmt!("warning: your {Y}project.github{R} does not contain a {W}/"),
+						hint: fmt!("use the format {W}user/project"),
+						debug: vec![
+							fmt!("you provided {GREY1}{raw}"),
+						],
+					});
+				}
+
+				raw.clone_into(&mut c.project.github);
+			}) }
+		}
+
+		// == PathsConfig == //
+		if let Some(paths) = Self::try_get_table_if_present(&data, "paths", hints!())?
+		{
 			if let Some(value) = paths.get("sources") { catch!(errs => {
 				let values = Self::try_get_array(value, "paths.sources", "(of folders relative to your project root)")?;
 
 				if !values.is_empty() {
-					s.paths.sources.clear();
+					c.paths.sources.clear();
 				}
 
 				for value in values {
@@ -133,7 +188,7 @@ impl SquarkupConfig
 						root, raw, "a source folder you specified",
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
-					s.paths.sources.push(dir);
+					c.paths.sources.push(dir);
 				}
 			}) }
 
@@ -141,14 +196,14 @@ impl SquarkupConfig
 				let values = Self::try_get_array(value, "paths.include", "(of RegEx patterns)")?;
 
 				if !values.is_empty() {
-					s.paths.include.clear();
+					c.paths.include.clear();
 				}
 
 				for value in values { catch!(errs => {
 					let pattern = Self::try_get_str(value, "paths.include", "(RegEx pattern)")?;
 
 					match Regex::new(pattern) {
-						Ok(compiled) => s.paths.include.push(compiled),
+						Ok(compiled) => c.paths.include.push(compiled),
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
@@ -164,7 +219,7 @@ impl SquarkupConfig
 					let pattern = Self::try_get_str(value, "paths.exclude", "(RegEx pattern)")?;
 
 					match Regex::new(pattern) {
-						Ok(compiled) => s.paths.exclude.push(compiled),
+						Ok(compiled) => c.paths.exclude.push(compiled),
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
@@ -175,30 +230,28 @@ impl SquarkupConfig
 		}
 
 		// == OutConfig == //
-		if let Some(out) = data.get("out")
+		if let Some(out) = Self::try_get_table_if_present(&data, "out",
+			hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
+		)?
 		{
-			Self::check_is_table(out, "out",
-				hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
-			)?;
-
 			if let Some(value) = out.get("folder") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.folder", "(folder relative to your SvelteKit site)")?;
 				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
-				s.out.folder = dir;
+				c.out.folder = dir;
 			}) }
 
 			if let Some(value) = out.get("file-name") { catch!(errs => {
 				let raw = Self::try_get_str(value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
 
 				if raw.contains('/') {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("illegal value for {Y}out.file-name{R}: {W}{raw}"),
 						hint: fmt!("the file name cannot contain {W}/{G}, because that turns into a file path!"),
 						debug: vec![],
-					});
+					}
 				}
 
-				raw.clone_into(&mut s.out.file_name);
+				raw.clone_into(&mut c.out.file_name);
 			}) }
 
 			if let Some(value) = out.get("site-data-path") { catch!(errs => {
@@ -209,73 +262,69 @@ impl SquarkupConfig
 				let folder = path.parent().expect("site directory always has a parent folder");
 
 				if !folder.exists() {
-					return Err(SquarkError::Unrecoverable {
+					unrecoverable! {
 						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),
 						hint: fmt!("{W}out.site-data-path{G} is a filepath relative to your site directory"),
 						debug: vec![
 							slash!("{GREY1}{}{GREY} is not a valid directory", path)
 						],
-					});
+					}
 				}
 
-				s.out.site_data_path = Some(path);
+				c.out.site_data_path = Some(path);
 			}) }
 
 			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
-				s.out.render_page_ts = Self::try_get_bool(value, "out.render-page-ts")?;
+				c.out.render_page_ts = Self::try_get_bool(value, "out.render-page-ts")?;
 			}) }
 
 			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
-				s.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
+				c.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
 			}) }
 		}
 
 		// == FormatConfig == //
-		if let Some(format) = data.get("format")
+		if let Some(format) = Self::try_get_table_if_present(&data, "format",
+			hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
+		)?
 		{
-			Self::check_is_table(format, "format",
-				hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
-			)?;
-
-			let c = &mut s.format;
+			let s = &mut c.format;
 
 			if let Some(value) = format.get("preserve-heading") { catch!(errs => {
-				c.preserve_heading = Self::try_get_bool(value, "format.preserve-heading")?;
+				s.preserve_heading = Self::try_get_bool(value, "format.preserve-heading")?;
 			}) }
 			if let Some(value) = format.get("preserve-comments") { catch!(errs => {
-				c.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?;
+				s.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?;
 			}) }
 			if let Some(value) = format.get("externalise-links") { catch!(errs => {
-				c.externalise_links = Self::try_get_bool(value, "format.externalise-links")?;
+				s.externalise_links = Self::try_get_bool(value, "format.externalise-links")?;
 			}) }
 		}
 
 		// == AssetsConfig == //
-		if let Some(assets) = data.get("assets")
+		if let Some(assets) = Self::try_get_table_if_present(&data, "assets",
+			hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
+		)?
 		{
-			Self::check_is_table(assets, "assets",
-				hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
-			)?;
-
 			if let Some(value) = assets.get("folder") { catch!(errs => {
 				let dir = Self::try_get_str(value, "assets.folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
 
-				s.assets.folder = folder;
+				c.assets.folder = folder;
 			}) }
 
 			if let Some(value) = assets.get("site-assets-folder") { catch!(errs => {
 				let dir = Self::try_get_str(value, "assets.site-assets-folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
 
-				s.assets.site_assets_folder = Some(folder);
+				c.assets.site_assets_folder = Some(folder);
 			}) }
 
 			if let Some(value) = assets.get("extensions") { catch!(errs => {
 				let values = Self::try_get_array(value, "assets.extensions", "(of file extensions without .)")?;
 
 				if !values.is_empty() {
-					s.assets.extensions.clear();
+					c.assets.extensions.clear();
 				}
 
 				for value in values { catch!(errs => {
@@ -285,60 +334,63 @@ impl SquarkupConfig
 						raw = &raw[1..];
 					}
 					
-					s.assets.extensions.push(raw.to_owned());
+					c.assets.extensions.push(raw.to_owned());
 				}) }
 			}) }
 		}
 
 		// == FontsConfig == //
-		if let Some(fonts) = data.get("fonts")
+		if let Some(fonts) = Self::try_get_table_if_present(&data, "fonts",
+			hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
+		)?
 		{
-			Self::check_is_table(fonts, "fonts",
-				hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
-			)?;
-
 			if let Some(value) = fonts.get("queries") { catch!(errs => {
 				let values = Self::try_get_array(value, "fonts.queries", "(of font query parameters)")?;
 
 				if !values.is_empty() {
-					s.fonts.queries.clear();
+					c.fonts.queries.clear();
 				}
 
 				for value in values { catch!(errs => {
 					let raw = Self::try_get_str(value, "fonts.queries", "(font query parameter)")?;
 					
-					s.fonts.queries.push(raw.to_owned());
+					c.fonts.queries.push(raw.to_owned());
 				}) }
 			}) }
 		}
 
-		errs.or_depends((), &s)?;
-		Ok(s)
+		errs.depends(&c)?;
+		Ok(c)
 	}
 }
 
 /// All the validation logic!
 impl SquarkupConfig
 {
-	/// Validate that `data` is a TOML table.
-	fn check_is_table(
-		data: &toml::Value,
-		setting: &str,
+	/// Try to extract the table from `data` for `setting-group`.
+	/// 
+	/// It is fine is `data` does not have `setting-group`, in which case this returns `Ok(None)`.
+	fn try_get_table_if_present<'d>(
+		data: &'d toml::Table,
+		setting_group: &str,
 		hint: impl FnOnce() -> String,
-	) -> SquarkResult
+	) -> SquarkResult<Option<&'d toml::Table>>
 	{
-		if matches!(data, toml::Value::Table(..)) {
-			Ok(())
-		}
-		else {
-			Err(SquarkError::Unrecoverable {
-				msg: fmt!("{Y}{setting}{R} must be a table, not a field"),
+		let Some(value) = data.get(setting_group) else {
+			return Ok(None);
+		};
+
+		let Some(table) = value.as_table() else {
+			unrecoverable! {
+				msg: fmt!("{Y}{setting_group}{R} must be a table, not a field"),
 				hint: hint(),
 				debug: vec![
-					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", data.type_str()),
+					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", value.type_str()),
 				],
-			})
-		}
+			}
+		};
+
+		Ok(Some(table))
 	}
 
 	/// Try to extract the string from `data` for `setting`.
@@ -349,26 +401,26 @@ impl SquarkupConfig
 	) -> SquarkResult<&'d str>
 	{
 		value.as_str()
-		.ok_or_else(|| SquarkError::Unrecoverable {
-			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-			hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
-			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
-			],
-		})
+			.ok_or_else(|| SquarkError::Unrecoverable {
+				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
+				debug: vec![
+					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+				],
+			})
 	}
 
 	/// Try to extract the boolean from `data` for `setting`.
 	fn try_get_bool(value: &toml::Value, setting: &str) -> SquarkResult<bool>
 	{
 		value.as_bool()
-		.ok_or_else(|| SquarkError::Unrecoverable {
-			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-			hint: fmt!("{Y}{setting}{G} must be a boolean"),
-			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
-			],
-		})
+			.ok_or_else(|| SquarkError::Unrecoverable {
+				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				hint: fmt!("{Y}{setting}{G} must be a boolean"),
+				debug: vec![
+					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+				],
+			})
 	}
 
 	/// Try to extract the array from `data` for `setting`.
@@ -379,13 +431,13 @@ impl SquarkupConfig
 	) -> SquarkResult<&'d Vec<toml::Value>>
 	{
 		value.as_array()
-		.ok_or_else(|| SquarkError::Unrecoverable {
-			msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-			hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
-			debug: vec![
-				fmt!("you provided a value of type {GREY1}{}", value.type_str()),
-			],
-		})
+			.ok_or_else(|| SquarkError::Unrecoverable {
+				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
+				debug: vec![
+					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+				],
+			})
 	}
 
 	/// Validate that `root / dir` exists, and is a folder.
@@ -481,6 +533,23 @@ mod error_handling {
 			let e = load_config(source);
 			assert_err!( &e );
 			assert_contains!( e.unwrap_err(), "errors.on-error" );
+		}
+	}
+}
+
+#[cfg(test)]
+mod project {
+	use super::*;
+
+	#[test] fn reject_empty() {
+		for source in [
+			"[errors] \n on-error = 'kill' \n [project] \n name = ''",
+			"[errors] \n on-error = 'kill' \n [project] \n github = ''",
+			"[errors] \n on-error = 'kill' \n [project] \n name = '' \n github = ''",
+		] {
+			let e = load_config(source);
+			assert_err!( &e );
+			assert_contains!( e.unwrap_err(), "blank" );
 		}
 	}
 }

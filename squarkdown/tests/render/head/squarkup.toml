@@ -1,0 +1,14 @@
+#:schema ../../../src/config/schema.json
+
+[project]
+name = "Squarkdown Tests"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/render/head"
+
+[errors]
+strict = false
+on-error = "kill"

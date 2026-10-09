@@ -103,6 +103,19 @@ use path_macro::path;
 	assert_not_contains!( main, "#SQUARK" );
 }
 
+/// Squarkdown injects `<svelte:head>` with `<title>` and `<meta name="description">`.
+#[test] fn head()
+{
+	clear_files("render/head").unwrap();
+	assert!( squarkup_from("render/head").success() );
+
+	let md = read_file("render/head/+page.svx");
+	assert_contains!( md, "<svelte:head>\n" );
+	assert_contains!( md, "<title> Sup, World! · Squarkdown Tests </title>\n" );
+	assert_contains!( md, "<meta name=\"description\" content=\"The quick brown fox jumps over the lazy dog\" />\n" );
+	assert_contains!( md, "</svelte:head>\n" );
+}
+
 /// Squarkdown strips the charm squark even when `config.format.preserve-comments` is enabled.
 #[test] fn no_page_ts()
 {

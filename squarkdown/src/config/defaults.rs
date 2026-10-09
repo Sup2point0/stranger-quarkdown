@@ -23,6 +23,10 @@ impl SquarkupConfig
 				file_already_exists: FileAction::OVERWRITE,
 				link_broken: LinkRewriteAction::STRIP_EXTENSION,
 			},
+			project: ProjectConfig {
+				name: str!(),
+				github: str!(),
+			},
 			paths: PathsConfig {
 				root: root.to_owned(),
 				site: site.to_owned(),
@@ -44,6 +48,7 @@ impl SquarkupConfig
 				shorter_fields: false,
 			},
 			format: FormatConfig {
+				inject_head: true,
 				preserve_heading: false,
 				preserve_comments: false,
 				externalise_links: false,

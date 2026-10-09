@@ -87,6 +87,7 @@ impl<'d> Renderer<'d>
 		}
 	}
 
+	/// Run the renderer to completion, writing the whole `+page.svx` file with all injections.
 	pub(super) fn render_page_svx(mut self) -> SquarkResult
 	{
 		if self.dest_file.exists() {
@@ -112,21 +113,15 @@ impl<'d> Renderer<'d>
 
 		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
 			let mut file = File::create(&self.dest_file)?;
-
-			let now = UtcDateTime::now();
-
-			write!(
-				file,
-				"<!-- rendered by Squarkdown on {} {} {} at {:02}:{:02} -->\n\n",
-				now.year(), now.month(), now.day(),
-				now.hour(), now.minute(),
-			)?;
+			self.inject_timestamp(&mut file)?;
+			self.inject_head(&mut file)?;
 			file.write_all(output.as_bytes())?;
 		}
 
 		self.errors.or(())
 	}
 
+	/// (out-of-place) Render the given Markdown `source`, without surrounding injection.
 	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
 		let mut parser =
@@ -256,7 +251,7 @@ impl Renderer<'_>
 	}
 }
 
-/// Specific transforms
+/// Markdown transforms
 impl Renderer<'_>
 {
 	/// Transform a single `pulldown-cmark` event.
@@ -566,6 +561,50 @@ impl Renderer<'_>
 		let dest = slash!("/{}", their_path_rel);
 
 		*dest_url = pd::CowStr::Boxed(Box::from(dest));
+	}
+}
+
+/// Miscellaneous injections
+impl Renderer<'_>
+{
+	fn inject_timestamp(&self, file: &mut impl Write) -> SquarkResult
+	{
+		let now = UtcDateTime::now();
+
+		write!(
+			file,
+			"<!-- rendered by Squarkdown on {} {} {} at {:02}:{:02} -->\n\n",
+			now.year(), now.month(), now.day(),
+			now.hour(), now.minute(),
+		)?;
+
+		Ok(())
+	}
+
+	fn inject_head(&self, file: &mut impl Write) -> SquarkResult
+	{
+		let Some(title) = &self.page.title else { return Ok(()) };
+
+		writeln!(file, "<svelte:head>")?;
+		
+		let project = &self.config.project.name;
+		
+		if project.is_empty() {
+			writeln!(file, "\t<title> {title} </title>", )?;
+		} else {
+			writeln!(file, "\t<title> {title} · {project} </title>", )?;
+		}
+
+		if let Some(desc) = &self.page.description
+			&& !desc.is_empty()
+		{
+			let content = desc.replace("\"", "\\\"");
+			writeln!(file, "\t<meta name=\"description\" content=\"{content}\" />")?;
+		}
+
+		writeln!(file, "</svelte:head>\n")?;
+
+		Ok(())
 	}
 }
 

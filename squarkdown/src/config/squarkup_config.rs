@@ -11,12 +11,15 @@ use std::path::PathBuf;
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
+	/// Metadata for the user's project.
+	pub project: ProjectConfig,
+
 	pub paths: PathsConfig,
 
 	/// Options for output.
 	pub out: OutConfig,
 
-	/// Rendering customisations.
+	/// Options for Markdown rendering.
 	pub format: FormatConfig,
 
 	/// Options for asset copying.
@@ -29,6 +32,21 @@ pub struct SquarkupConfig
 	pub errors: ErrorConfig,
 }
 
+
+#[derive(Clone, Debug)]
+pub struct ProjectConfig {
+	/* NOTE: Not using `Option<String>` since we should check empty either way, so may as well collapse `None` and `Some("")` into just `""` */
+	
+	/// The displayed name of the repo, injected into `<title>` when `format.inject-head = true`.
+	/// 
+	/// Empty if not supplied.
+	pub name: String,
+
+	/// The GitHub repository name, e.g. `Sup2point0/stranger-quarkdown`.
+	/// 
+	/// Empty if not supplied.
+	pub github: String,
+}
 
 #[derive(Clone, Debug)]
 pub struct PathsConfig {
@@ -76,6 +94,9 @@ pub struct OutConfig {
 
 #[derive(Clone, Debug)]
 pub struct FormatConfig {
+	/// Inject a `<head>` element containing `<title>` and `<meta name="description">`?
+	pub inject_head: bool,
+
 	/// Keep the first heading in the rendered output
 	pub preserve_heading: bool,
 

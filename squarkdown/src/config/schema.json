@@ -7,8 +7,27 @@
 
   "properties":
   {
+    "project": {
+      "title": "Project",
+      "additionalProperties": false,
+      "properties":
+      {
+        "name": {
+          "title":       "Project Name",
+          "type":        "string",
+          "description": "The displayed name of the repo, injected into `<title>` when `format.inject-head = true`."
+        },
+
+        "github": {
+          "title":       "GitHub Repository Name",
+          "type":        "string",
+          "description": "The GitHub repository name, e.g. `Sup2point0/stranger-quarkdown`."
+        }
+      }
+    },
+
     "paths": {
-      "output": "Paths",
+      "title": "Paths",
       "additionalProperties": false,
       "properties":
       {
@@ -91,6 +110,12 @@
       "additionalProperties": false,
       "properties":
       {
+        "inject-head": {
+          "title":       "Inject `<head>`",
+          "type":        "boolean",
+          "default":     true
+        },
+
         "preserve-heading": {
           "title":       "Preserve Page Heading",
           "type":        "boolean",
