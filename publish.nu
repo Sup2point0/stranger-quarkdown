@@ -21,7 +21,7 @@ def test-all [] {
 ## Publish to crates.io
 def publish-cargo [] {
 	cd squarkdown
-	cargo publish --allow-dirty
+	# cargo publish --allow-dirty
 	cd ..
 }
 

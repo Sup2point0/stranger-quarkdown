@@ -12,7 +12,7 @@
 
     "preview": "vite preview",
     
-    "test": "cargo test && (tsc --noEmit || echo) && playwright test"
+    "test": "cargo test && (tsc --noEmit || echo \"type errors expected until we extend PageData with user's arbitrary fields\") && playwright test"
   },
 
   "devDependencies":

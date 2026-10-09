@@ -36,9 +36,5 @@
     "squarkdown": "bin/squarkdown"
   },
   "os": ["win32", "linux"],
-  "cpu": ["x64"],
-
-  "scripts": {
-    "prepublishOnly": "nu publish.nu"
-  }
+  "cpu": ["x64"]
 }

@@ -28,7 +28,7 @@ test("crawl-routes", async () =>
 	let failed_routes: url[] = [];
 
 	let to_visit = [
-		{ url: "/",        source: "." },
+		{ url: "/", source: "." },
 	];
 
 	let pending_routes = 0;
