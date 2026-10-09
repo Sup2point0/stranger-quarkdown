@@ -19,6 +19,7 @@ impl SquarkupConfig
 		Self {
 			errors: ErrorConfig {
 				strict: true,
+				debug: true,
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
 				link_broken: LinkRewriteAction::STRIP_EXTENSION,

@@ -136,6 +136,11 @@ pub struct ErrorConfig {
 	/// - Checking multiple files don't export to the same directory
 	pub strict: bool,
 
+	/// Enable more helpful debug output?
+	/// 
+	/// This requires Squarkdown to do more work, for instance to keep track of line numbers, so has a tiny impact on performance.
+	pub debug: bool,
+
 	/// What to do when a non-fatal error is encountered (e.g. parsing a file failed).
 	pub on_error: ErrorAction,
 

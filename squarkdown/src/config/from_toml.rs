@@ -82,6 +82,10 @@ impl SquarkupConfig
 			if let Some(value) = errors.get("strict") { catch!(errs => {
 				c.errors.strict = Self::try_get_bool(value, "errors.strict")?;
 			}) }
+			
+			if let Some(value) = errors.get("debug") { catch!(errs => {
+				c.errors.debug = Self::try_get_bool(value, "errors.debug")?;
+			}) }
 
 			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
 			if let Some(value) = errors.get("on-error") {
