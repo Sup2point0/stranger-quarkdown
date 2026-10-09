@@ -21,11 +21,11 @@ pub(super) struct CharmParser<'d>
 	/// The source file being parsed.
 	pub(super) filepath: PathBuf,
 
-	// == MUTABLE == //
-
 	/* NOTE: Yeah, a raw `String` or `&str` would be more compact, but for how small the charm squark is anyway, it's not worth all the extra hassle */
 	/// The source text to parse, containing the charm squark.
 	pub(super) source: Vec<char>,
+
+	// == MUTABLE == //
 
 	/// The current index in [`Self::source`]'s characters.
 	pub(super) i: usize,

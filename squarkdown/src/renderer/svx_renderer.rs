@@ -58,12 +58,20 @@ pub(super) struct Renderer<'d>
 	/// The target folder to render to.
 	pub(super) dest_folder: PathBuf,
 
+	/// The source text to parse.
+	pub(super) source: String,
+
 	// == MUTABLE == //
+
+	/// The list of byte boundaries where a new line starts.
+	/// 
+	/// For instance, `[0, 4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
+	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.
 	pub(super) ctx: ContextStack<RenderCtx>,
 
-	/// Accumulated errors during rendering.
+	/// Errors accumulated during rendering.
 	pub(super) errors: SquarkError,
 }
 
@@ -80,6 +88,8 @@ impl<'d> Renderer<'d>
 			page,
 			site,
 			config,
+			source: str!(),
+			line_boundaries: vec![],
 			errors: SquarkError::multiple(str!()),
 			dest_file: path!(page.destination / config.out.file_name),
 			dest_folder: page.destination.clone(),
@@ -124,6 +134,10 @@ impl<'d> Renderer<'d>
 	/// (out-of-place) Render the given Markdown `source`, without surrounding injection.
 	pub(super) fn render_from(&mut self, source: &str) -> String
 	{
+		if self.config.errors.debug {
+			self.source = source.to_owned();
+		}
+
 		let mut parser =
 			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
 			.into_offset_iter()
@@ -257,8 +271,7 @@ impl Renderer<'_>
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
 		event: pd::Event<'e>,
-		#[allow(unused)]  // TODO
-		range: std::ops::Range<usize>,
+		range: Range<usize>,
 	) -> Option<pd::Event<'e>>
 	{
 		match &event
