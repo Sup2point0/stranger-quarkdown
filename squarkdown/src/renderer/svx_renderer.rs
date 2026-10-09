@@ -140,9 +140,9 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			.inspect(|(e, _)| { println!("before = {e:?}"); })
+			// .inspect(|(e, _)| { println!("before = {e:?}"); })
 			.flat_map(Self::split_comments)
-			.inspect(|(e, _)| { println!("after = {e:?}"); })
+			// .inspect(|(e, _)| { println!("after = {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -281,9 +281,10 @@ impl Renderer<'_>
 		};
 
 		match event {
-			/* We always need to process comments regardless of the current context, to check for squarks that may _change_ the context */
+			/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
 			| pd::Event::Html(ref html)
 			| pd::Event::InlineHtml(ref html)
+			if self.ctx.current() != &RenderCtx::CODE
 			=>
 				match self.process_html(html) {
 					ProcessAction::KEEP  => Some(event),
@@ -623,11 +624,11 @@ impl From<bool> for ProcessAction {
 // 		// c.errors.strict = false;
 // 	}, &[
 // 		indoc! {"
-// 			<!-- #SQUARK only
-
-// 			Content
-
-// 			     #SQUARK only -->
+// 			```
+// 			<!--
+// 			test
+// 			-->
+// 			```
 // 		"}
 // 	]);
 // }
@@ -751,7 +752,7 @@ mod code_inline {
 		]);
 	}
 
-	#[test] fn edge_cases() {
+	#[test] fn edge() {
 		test_preserves(&[
 			"`x`",
 			"`code`",
@@ -828,7 +829,7 @@ mod code_blocks {
 		]);
 	}
 
-	#[test] fn edge_cases() {
+	#[test] fn edge() {
 		test_expected(&[
 			("```code```",   "`code`"),
 			("```code\n```", "```code\n```"),
@@ -1022,6 +1023,18 @@ mod comments {
 				"not -->\na comment",
 				"\\-->",
 				"--> a comment",
+			]);
+		}
+
+		#[test] fn inside_inline_code() {
+			test_preserves(&[
+				"`<!-- just some code -->`",
+			]);
+		}
+
+		#[test] fn inside_code_block() {
+			test_preserves(&[
+				"```\n<!-- just some code -->\n```",
 			]);
 		}
 	}
