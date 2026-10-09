@@ -583,10 +583,13 @@ impl Renderer<'_>
 
 	fn inject_head(&self, file: &mut impl Write) -> SquarkResult
 	{
-		let Some(title) = &self.page.title else { return Ok(()) };
+		if self.page.title.is_empty() {
+			return Ok(());
+		}
 
 		writeln!(file, "<svelte:head>")?;
 		
+		let title   = &self.page.title;
 		let project = &self.config.project.name;
 		
 		if project.is_empty() {
@@ -595,10 +598,9 @@ impl Renderer<'_>
 			writeln!(file, "\t<title> {title} · {project} </title>", )?;
 		}
 
-		if let Some(desc) = &self.page.description
-			&& !desc.is_empty()
+		if !self.page.description.is_empty()
 		{
-			let content = desc.replace("\"", "\\\"");
+			let content = self.page.description.replace("\"", "\\\"");
 			writeln!(file, "\t<meta name=\"description\" content=\"{content}\" />")?;
 		}
 

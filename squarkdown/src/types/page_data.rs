@@ -14,6 +14,13 @@ use std::collections::{ HashMap };
 use std::path::{ Path, PathBuf };
 
 
+/* NOTE:
+	Like in `SquarkupConfig`, for string fields we use `""` to represent the absence of a user-provided value.
+
+	Why not `Option<String>`? Well, we're gonna check the string is non-empty before using its value anyway, so may as well collapse `None` and `Some("")` into just `""`.
+*/
+
+
 /// The metadata provided for an active page, parsed from its charm squark.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct PageData
@@ -29,17 +36,24 @@ pub struct PageData
 	
 	pub flags: Strings,
 
-	pub title: Option<String>,
-	pub description: Option<String>,
-	pub heading: Option<String>,
-	pub caption: Option<String>,
+	/// The short title of the page injected into `<title>`.
+	pub title: String,
+
+	/// A short description for the page injected into `<meta name="description">`.
+	pub description: String,
+
+	/// The displayed heading of the page.
+	pub heading: String,
+
+	/// A short caption for the page displayed below `.heading`.
+	pub caption: String,
 
 	pub tags: Vec<String>,
 
 	pub release_date: Option<Date>,
-	pub release_date_raw: Option<String>,
+	pub release_date_raw: String,
 	pub last_update: Option<Date>,
-	pub last_update_raw: Option<String>,
+	pub last_update_raw: String,
 
 	pub cleanse: Vec<CleanseOperation>,
 
@@ -103,22 +117,21 @@ impl PageData
 			}
 		};
 		
-		let heading      = Self::take_flat(&mut fields, "heading", "head");
-		let title        = Self::take_flat(&mut fields, "title", "title").or_else(|| heading.clone());
-		
-		let caption      = Self::take_flat(&mut fields, "caption", "capt");
-		let description  = Self::take_flat(&mut fields, "description", "desc").or_else(|| caption.clone());
+		let heading     = Self::take_flat(&mut fields, "heading", "head").unwrap_or_default();
+		let title       = Self::take_flat(&mut fields, "title", "title").unwrap_or_else(|| heading.clone());
+		let caption     = Self::take_flat(&mut fields, "caption", "capt").unwrap_or_default();
+		let description = Self::take_flat(&mut fields, "description", "desc").unwrap_or_else(|| caption.clone());
 
-		let tags         = Self::take(&mut fields, "tags", "tags").unwrap_or_default();
+		let tags        = Self::take(&mut fields, "tags", "tags").unwrap_or_default();
 
 		let mut release_date = None;
-		let mut release_date_raw = None;
+		let mut release_date_raw = str!();
 
 		if let Some(raw) = Self::take_flat(&mut fields, "release_date", "date") {
 			catch!(errs => {
 				release_date = Some(Self::try_parse_date(&raw, "release date")?);
 			});
-			release_date_raw = Some(raw);
+			release_date_raw = raw;
 		}
 
 		let mut last_update = release_date;
@@ -128,7 +141,7 @@ impl PageData
 			catch!(errs => {
 				last_update = Some(Self::try_parse_date(&raw, "last updated")?);
 			});
-			last_update_raw = Some(raw);
+			last_update_raw = raw;
 		}
 
 		if config.errors.strict
@@ -140,8 +153,8 @@ impl PageData
 				msg: fmt!("you provided a {W}last updated{R} date earlier than the {W}release date"),
 				hint: str!("you can’t update a page before you release it!"),
 				debug: vec![
-					fmt!("last updated = {}", last_update_raw.as_ref().unwrap()),
-					fmt!("release date = {}", release_date_raw.as_ref().unwrap()),
+					fmt!("last updated = {}", &last_update_raw),
+					fmt!("release date = {}", &release_date_raw),
 				],
 			});
 		}
@@ -286,17 +299,18 @@ impl PageData
 
 		ser!(flags => &self.flags)?;
 
-		if let Some(v) = &self.title       { ser!(title => v)? }
-		if let Some(v) = &self.description { ser!(desc => v)? }
-		if let Some(v) = &self.heading     { ser!(head => v)? }
-		if let Some(v) = &self.caption     { ser!(capt => v)? }
+		if !self.title.is_empty()       { ser!(title => &self.title)? }
+		if !self.description.is_empty() { ser!(desc => &self.description)? }
+		if !self.heading.is_empty()     { ser!(head => &self.heading)? }
+		if !self.caption.is_empty()     { ser!(capt => &self.caption)? }
 
 		ser!(tags => &self.tags)?;
 		
-		if let Some(v) =  self.release_date     { ser!(date => &format_date(v))? }
-		if let Some(v) = &self.release_date_raw { ser!(date_raw => v)? }
-		if let Some(v) =  self.last_update      { ser!(update => &format_date(v))? }
-		if let Some(v) = &self.last_update_raw  { ser!(update_raw => v)? }
+		if let Some(v) =  self.release_date  { ser!(date => &format_date(v))? }
+		if !self.release_date_raw.is_empty() { ser!(date_raw => &self.release_date_raw)? }
+
+		if let Some(v) =  self.last_update   { ser!(update => &format_date(v))? }
+		if !self.last_update_raw.is_empty()  { ser!(update_raw => &self.last_update_raw)? }
 
 		for (key, val) in &self.other {
 			map.serialize_entry(key, val)?;

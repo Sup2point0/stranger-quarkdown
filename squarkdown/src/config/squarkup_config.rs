@@ -5,6 +5,13 @@ use enum_stringify::EnumStringify;
 use std::path::PathBuf;
 
 
+/* NOTE:
+	Like in `PageData`, for string fields we use `""` to represent the absence of a user-provided value.
+
+	Why not `Option<String>`? Well, we're gonna check the string is non-empty before using its value anyway, so may as well collapse `None` and `Some("")` into just `""`.
+*/
+
+
 /// The user's complete squarkup configuration.
 /// 
 /// This is loaded from either a `squarkup.toml` or `squarkup.json` file.
@@ -35,8 +42,6 @@ pub struct SquarkupConfig
 
 #[derive(Clone, Debug)]
 pub struct ProjectConfig {
-	/* NOTE: Not using `Option<String>` since we should check empty either way, so may as well collapse `None` and `Some("")` into just `""` */
-	
 	/// The displayed name of the repo, injected into `<title>` when `format.inject-head = true`.
 	/// 
 	/// Empty if not supplied.

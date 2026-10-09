@@ -430,7 +430,7 @@ mod full {
 			config.errors.strict = false;
 			let r = CharmParser::new(source, TEST_FILE.clone(), &config).parse();
 			assert_ok!( &r );
-			assert_eq!( r.unwrap().heading, Some(str!("Test")) );
+			assert_eq!( r.unwrap().heading, str!("Test") );
 		}
 	}
 
@@ -444,7 +444,7 @@ mod full {
 				| dest = test
 				-->
 			"});
-			assert_eq!( page_data.heading, Some(str!("Test")) );
+			assert_eq!( page_data.heading, str!("Test") );
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
 		}
 
@@ -463,10 +463,10 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
-			assert_eq!( page_data.title, Some(str!("One")) );
-			assert_eq!( page_data.description, Some(str!("Two")) );
-			assert_eq!( page_data.heading, Some(str!("Three")) );
-			assert_eq!( page_data.caption, Some(str!("Four")) );
+			assert_eq!( page_data.title, str!("One") );
+			assert_eq!( page_data.description, str!("Two") );
+			assert_eq!( page_data.heading, str!("Three") );
+			assert_eq!( page_data.caption, str!("Four") );
 			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
@@ -491,10 +491,10 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
-			assert_eq!( page_data.title, Some(str!("One")) );
-			assert_eq!( page_data.description, Some(str!("Two")) );
-			assert_eq!( page_data.heading, Some(str!("Three")) );
-			assert_eq!( page_data.caption, Some(str!("Four")) );
+			assert_eq!( page_data.title, str!("One") );
+			assert_eq!( page_data.description, str!("Two") );
+			assert_eq!( page_data.heading, str!("Three") );
+			assert_eq!( page_data.caption, str!("Four") );
 			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
@@ -513,7 +513,7 @@ mod full {
 				| testing = true
 				-->
 			"});
-			assert_eq!( page_data.heading, Some(str!("One")) );
+			assert_eq!( page_data.heading, str!("One") );
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
 			assert_eq!( page_data.other["testing"], strings!("true") );
 		}
@@ -528,7 +528,7 @@ mod full {
 				| two = 2
 				-->
 			"});
-			assert_eq!( page_data.heading, Some(str!("Many")) );
+			assert_eq!( page_data.heading, str!("Many") );
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
 			assert_eq!( page_data.other["one"], strings!("1") );
 			assert_eq!( page_data.other["two"], strings!("2") );
@@ -642,8 +642,8 @@ mod full {
 				       / list
 				-->
 			"});
-			assert_eq!( page_data.title, Some(str!("not / a / list")) );
-			assert_eq!( page_data.caption, Some(str!("not / a / list")) );
+			assert_eq!( page_data.title, str!("not / a / list") );
+			assert_eq!( page_data.caption, str!("not / a / list") );
 		}
 
 		#[test] fn hyphen_to_underscore() {
@@ -668,7 +668,7 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.tags, vec!["one"] );
-			assert_eq!( page_data.description, Some(str!("Works")) );
+			assert_eq!( page_data.description, str!("Works") );
 		}
 
 		#[test] fn empty_arbitrary() {
@@ -680,7 +680,7 @@ mod full {
 				---
 				-->
 			"});
-			assert_eq!( page_data.description, Some(str!("Works")) );
+			assert_eq!( page_data.description, str!("Works") );
 			assert_is_empty!( page_data.other );
 		}
 	}
@@ -695,7 +695,7 @@ mod full {
 				| dest = test\r
 				-->
 			"});
-			assert_eq!( page_data.heading, Some(str!("Test")) );
+			assert_eq!( page_data.heading, str!("Test") );
 			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
 		}
 
@@ -709,9 +709,9 @@ mod full {
 				| tags = 一 / 二 / 三 / 四
 				-->
 			"});
-			assert_eq!( page_data.heading, Some(str!("无名之辈")) );
-			assert_eq!( page_data.title, Some(str!("从前有座山")) );
-			assert_eq!( page_data.caption, Some(str!("你是我的小呀小苹果")) );
+			assert_eq!( page_data.heading, str!("无名之辈") );
+			assert_eq!( page_data.title, str!("从前有座山") );
+			assert_eq!( page_data.caption, str!("你是我的小呀小苹果") );
 			assert_eq!( page_data.tags, vec![str!("一"), str!("二"), str!("三"), str!("四")] );
 		}
 	}
@@ -733,7 +733,7 @@ mod recovery {
 				-->
 			"});
 			assert_eq!( page_data.flags, strings![] );
-			assert_eq!( page_data.title, Some(str!("Success")) );
+			assert_eq!( page_data.title, str!("Success") );
 		}
 
 		#[test] fn worse() {
@@ -745,7 +745,7 @@ mod recovery {
 				-->
 			"});
 			assert_eq!( page_data.flags, strings!["very", "keep"] );
-			assert_eq!( page_data.title, Some(str!("Success")) );
+			assert_eq!( page_data.title, str!("Success") );
 		}
 
 		#[test] fn worst() {
@@ -757,7 +757,7 @@ mod recovery {
 				-->
 			"});
 			assert_eq!( page_data.flags, strings!["how"] );
-			assert_eq!( page_data.title, Some(str!("Success")) );
+			assert_eq!( page_data.title, str!("Success") );
 		}
 	}
 
@@ -773,8 +773,8 @@ mod recovery {
 				| desc = Works
 				-->
 			"});
-			assert_eq!( page_data.caption, None );
-			assert_eq!( page_data.description, Some(str!("Works")) );
+			assert_eq!( page_data.caption, str!() );
+			assert_eq!( page_data.description, str!("Works") );
 		}
 
 		#[test] fn many() {
@@ -789,9 +789,9 @@ mod recovery {
 				-->
 			"});
 			assert_eq!( page_data.release_date, None );
-			assert_eq!( page_data.caption, Some(str!("Still")) );
+			assert_eq!( page_data.caption, str!("Still") );
 			assert_eq!( page_data.last_update, None );
-			assert_eq!( page_data.description, Some(str!("Works")) );
+			assert_eq!( page_data.description, str!("Works") );
 		}
 	}
 }

@@ -46,10 +46,10 @@ impl Renderer<'_>
 		
 		writeln!(f, "\t\t{}: {:?},", p.flags(s), p.flags)?;
 
-		if let Some(v) = &p.title       { writeln!(f, "\t\t{}: {v:?},", p.title(s))?; }
-		if let Some(v) = &p.description { writeln!(f, "\t\t{}: {v:?},", p.desc(s))?; }
-		if let Some(v) = &p.heading     { writeln!(f, "\t\t{}: {v:?},", p.head(s))?; }
-		if let Some(v) = &p.caption     { writeln!(f, "\t\t{}: {v:?},", p.capt(s))?; }
+		if !p.title.is_empty()       { writeln!(f, "\t\t{}: {:?},", p.title(s), p.title )?; }
+		if !p.description.is_empty() { writeln!(f, "\t\t{}: {:?},", p.desc(s),  p.description )?; }
+		if !p.heading.is_empty()     { writeln!(f, "\t\t{}: {:?},", p.head(s),  p.heading )?; }
+		if !p.caption.is_empty()     { writeln!(f, "\t\t{}: {:?},", p.capt(s),  p.caption )?; }
 
 		writeln!(f, "\t\t{}: {:?},", p.tags(s), p.tags)?;
 
@@ -60,8 +60,8 @@ impl Renderer<'_>
 				v.year(), v.month() as u8 - 1, v.day()
 			)?;
 		}
-		if let Some(v) = &p.release_date_raw {
-			writeln!(f, "\t\t{}: {v:?},", p.date_raw(s))?;
+		if !p.release_date_raw.is_empty() {
+			writeln!(f, "\t\t{}: {:?},", p.date_raw(s), p.release_date_raw)?;
 		}
 		if let Some(v) = p.last_update {
 			writeln!(f,
@@ -70,8 +70,8 @@ impl Renderer<'_>
 				v.year(), v.month() as u8 - 1, v.day()
 			)?;
 		}
-		if let Some(v) = &p.last_update_raw {
-			writeln!(f, "\t\t{}: {v:?},", p.update_raw(s))?;
+		if !p.last_update_raw.is_empty() {
+			writeln!(f, "\t\t{}: {:?},", p.update_raw(s), p.last_update_raw)?;
 		}
 
 		for (key, val) in &p.other {
