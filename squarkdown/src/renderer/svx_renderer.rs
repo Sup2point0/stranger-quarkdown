@@ -632,10 +632,12 @@ impl Renderer<'_>
 	/// 
 	/// - `self.line-boundaries` hasn't been initialised properly.
 	/// - `range` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
-	fn line_number(&self, range: Range<usize>) -> Option<usize>
+	fn line_number(&self, mut range: impl Iterator<Item = usize>) -> Option<usize>
 	{
+		let start = range.next()?;
+
 		self.line_boundaries.iter()
-			.position(|b| range.start < *b)
+			.position(|b| start < *b)
 			.map(|n| n + 1)
 	}
 
@@ -1371,4 +1373,18 @@ mod line_numbers {
 		assert_eq!( renderer.line_boundaries, vec![0, 4, 5] );
 	}
 
+	#[test] fn query() {
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let source = str!("012\n45\n78");
+		renderer.update_source(&source);
+		assert_eq!( renderer.line_number(0..), Some(1) );
+		assert_eq!( renderer.line_number(1..), Some(1) );
+		assert_eq!( renderer.line_number(2..), Some(1) );
+		assert_eq!( renderer.line_number(3..), Some(2) );
+		assert_eq!( renderer.line_number(4..), Some(2) );
+		assert_eq!( renderer.line_number(5..), Some(2) );
+		assert_eq!( renderer.line_number(6..), Some(3) );
+		assert_eq!( renderer.line_number(7..), Some(3) );
+		assert_eq!( renderer.line_number(8..), Some(3) );
+	}
 }
