@@ -199,16 +199,31 @@ impl Renderer<'_>
 		}
 	}
 
-	/// Split up text containing `<!--` or `-->` into 2 separate `pd::Event`s with offsets.
+	/// Split up text containing `<!--` xor `-->` into 2 separate `pd::Event`s with offsets.
 	/// 
 	/// For instance:
 	/// 
 	/// - We split `some <!-- comment` into `Text("some ")` and `InlineHtml("<!-- comment")`.
 	/// - We split `closing --> comment` into `InlineHtml("closing -->")` and `Text(" comment")`.
+	/// 
+	/// This transformation is necessary because `pulldown-cmark` does not handle comments crossing multiple lines very well, so for instance this:
+	/// 
+	/// ```md
+	/// A <!-- perhaps
+	/// 
+	/// strange --> comment
+	/// ```
+	/// 
+	/// Gets parsed to `[Text("a <!-- perhaps"), Text("strange --> comment")]` instead of the more structurally correct `[Text("A"), InlineHtml("<!-- perhaps\n\nstrange -->"), Text("comment")]`.
 	fn split_comments((event, range): (pd::Event, Range<usize>))
 		-> impl Iterator<Item = (pd::Event, Range<usize>)>
 	{
-		if let pd::Event::Text(text) = &event {
+		if let
+			  pd::Event::Text(text)
+			| pd::Event::Html(text)
+			| pd::Event::InlineHtml(text)
+			= &event
+		{
 			let mut idx = 0;
 			/* NOTE: Using `Rule` as temporary placeholder, never read */
 			let mut text_left = pd::Event::Rule;
@@ -234,7 +249,6 @@ impl Renderer<'_>
 				return left.chain(right)
 			}
 		}
-
 		Some((event, range)).into_iter().chain(None.into_iter())
 	}
 }
@@ -1104,8 +1118,14 @@ mod only {
 
 	#[test] fn easy() {
 		test_expected(&[
-			("Please \n <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me", "Please\nshow  me"),
-			("Please \n <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me", "Please\ndo show  me"),
+			(
+				"Please \n <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me",
+				"Please\n\n \n show \n\n me"
+			),
+			(
+				"Please \n <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me",
+				"Please\n\n \n do show \n\n me"
+			),
 		]);
 		test_expected(&[
 			(
@@ -1121,6 +1141,7 @@ mod only {
 				indoc! {"
 					Please
 
+
 					show me!
 				"}
 			),
@@ -1129,8 +1150,14 @@ mod only {
 
 	#[test] fn medium() {
 		test_expected(&[
-			("Please <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me", "Please show  me"),
-			("Please <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me", "Please do show  me"),
+			(
+				"Please <!-- #SQUARK only? \n\n show \n\n #SQUARK only. --> me",
+				"Please \n\nshow\n\n&#32;me"
+			),
+			(
+				"Please <!-- #SQUARK only? \n\n do show \n\n #SQUARK only. --> me",
+				"Please \n\ndo show\n\n&#32;me"
+			),
 		]);
 	}
 
