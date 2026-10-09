@@ -5,20 +5,45 @@ const PINK  = $'($n)(ansi '#f190f1')'
 
 
 def main [] {
+	test-all
+	publish-cargo
+	publish-npm
+}
+
+## Run all tests before publish
+def test-all [] {
+	cd squarkdown/tests/test-project
+	npm test
+	cd ../..
+	cargo run
+}
+
+## Publish to crates.io
+def publish-cargo [] {
+	cd squarkdown
+	cargo publish --allow-dirty
+	cd ..
+}
+
+## Compile binaries and publish to NPM registry
+def publish-npm [] {
+	cd npm
+
 	cp ../LICENCE .
 
-	cd ../squarkdown/tests/test-project
-	npm test
-
-	cd ../../../squarkdown
+	cd ../squarkdown
 	sync-version
-	windows
-	linux
+	compile-windows
+	compile-linux
 
 	cd ../npm
 	mkdir bin
 	cp target-temp/windows/release/squarkdown.exe bin/squarkdown-win.exe
 	cp target-temp/linux/release/squarkdown bin/squarkdown-linux
+
+	npm publish
+
+	cd ..
 }
 
 def sync-version [] {
@@ -37,12 +62,12 @@ def sync-version [] {
 	$after | save package.json -f
 }
 
-def windows [] {
+def compile-windows [] {
 	print $"($PINK)\n› compiling Windows binary\n($WHITE)"
 	cargo build --release --target-dir ../npm/target-temp/windows
 }
 
-def linux [] {
+def compile-linux [] {
 	print $"($PINK)\n› compiling Linux binary\n($WHITE)"
 	wsl -- bash -lc "cargo build --release --target-dir ../npm/target-temp/linux"
 }
