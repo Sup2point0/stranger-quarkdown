@@ -140,9 +140,9 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			.inspect(|(e, _)| { println!("{e:?}"); })
+			.inspect(|(e, _)| { println!("before = {e:?}"); })
 			.flat_map(Self::split_comments)
-			.inspect(|(e, _)| { println!("{e:?}"); })
+			.inspect(|(e, _)| { println!("after = {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -255,8 +255,8 @@ impl Renderer<'_>
 				self.ctx.push(RenderCtx::CODE);
 			}
 			pd::Event::End(pd::TagEnd::CodeBlock) => {
-				self.ctx.try_pop(RenderCtx::CODE)
-					.expect("code contexts are always balanced");
+				/* SAFETY: A stray `-->` is fine, unlike a stray `<!--` which comments out the entire rest of the file */
+				let _ = self.ctx.try_pop(RenderCtx::CODE);
 			}
 			_ => (),
 		};
@@ -327,17 +327,20 @@ impl Renderer<'_>
 			if html.starts_with("<!--") {
 				if self.process_comment(html) {
 					return ProcessAction::ERASE;
-				} else {
-					self.ctx.push(RenderCtx::COMMENT);
-					return ProcessAction::from(preserve)
 				}
+				self.ctx.push(RenderCtx::COMMENT);
+				return ProcessAction::from(preserve)
 			}
 			else if html.ends_with("-->") {
 				if self.process_comment(html) {
 					return ProcessAction::ERASE;
+				}
+
+				if self.ctx.try_pop(RenderCtx::COMMENT).is_ok() {
+					return ProcessAction::from(preserve);
 				} else {
-					self.ctx.try_pop(RenderCtx::COMMENT).expect("contexts are always balanced");
-					return ProcessAction::from(preserve)
+					/* NOTE: If `-->` didn't terminate a comment context, it was just a stray `-->` which should be kept */
+					return ProcessAction::KEEP;
 				}
 			}
 		}
@@ -437,7 +440,7 @@ impl Renderer<'_>
 
 		// 1. find where the target file lives, relative to the current file
 		let own_source_folder = self.page.filepath.parent()
-			.expect("active files are always inside a folder");
+			.expect("active files always have a parent folder");
 
 		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
@@ -506,7 +509,7 @@ impl Renderer<'_>
 
 		// 1. find where the asset file lives, relative to the current file
 		let own_source_folder = self.page.filepath.parent()
-			.expect("active files are always inside a folder");
+			.expect("active files always have a parent folder");
 
 		let their_source_path = path!(own_source_folder / **dest_url).clean();
 
@@ -993,11 +996,11 @@ mod comments {
 		}
 
 		#[test] fn unopened() {
-			test_expected(&[
-				pair!("not --> a comment"),
-				pair!("not -->\na comment"),
-				("-->",           "\\-->"),
-				("--> a comment", "\\--> a comment"),
+			test_preserves(&[
+				"not --> a comment",
+				"not -->\na comment",
+				"-->",
+				"--> a comment",
 			]);
 		}
 	}
