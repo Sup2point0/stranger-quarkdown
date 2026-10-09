@@ -639,10 +639,10 @@ impl Renderer<'_>
 
 	fn show_source(&self, range: Range<usize>) -> Vec<String>
 	{
-		let source = match self.line_number(range.clone()) {
-			Some(n) => fmt!("  {B}{n} |  {GREY1}{}", &self.source[range.clone()]),
-			None    => fmt!("  {B} ? |  {GREY1}{}", &self.source[range]),
-		};
+		// let source = match self.line_info(range.clone()) {
+		// 	Some(n) => fmt!("  {B}{n} |  {GREY1}{}", &self.source[range.clone()]),
+		// 	None    => fmt!("  {B} ? |  {GREY1}{}", &self.source[range]),
+		// };
 
 		vec![
 			str!(" "),
@@ -651,20 +651,41 @@ impl Renderer<'_>
 		]
 	}
 
-	/// Find which line number of the source text that `range` starts at.
-	/// 
-	/// Returns `None` if the renderer cannot resolve the range. This might be because:
-	/// 
-	/// - `self.line-boundaries` hasn't been initialised properly.
-	/// - `range` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
-	fn line_number(&self, mut range: impl Iterator<Item = usize>) -> Option<usize>
+	/// Find relevant information surrounding the line of `self.source` that `range` resides in.
+	fn line_info(&self, mut range: impl Iterator<Item = usize>) -> Option<LineInfo>
 	{
 		let start = range.next()?;
 
-		self.line_boundaries.iter()
-			.position(|b| start < *b)
-			.map(|n| n + 1)
+		for i in 0..self.line_boundaries.len() {
+			let upper_this = self.line_boundaries[i];
+
+			if start < upper_this {
+				let lower_this = *self.line_boundaries.get(i - 1).unwrap_or(&0);
+
+				return Some(LineInfo {
+					line_number: i + 1,
+					line_range: lower_this..upper_this,
+					prev_line_range: self.line_boundaries.get(i - 2).map(|&lower_prev| lower_prev..lower_this),
+					next_line_range: self.line_boundaries.get(i + 1).map(|&upper_next| upper_this..upper_next),
+				});
+			}
+		}
+
+		None
 	}
+}
+
+struct LineInfo
+{
+	/// May be `None` if:
+	/// 
+	/// - `renderer.line-boundaries` hasn't been initialised properly.
+	/// - `line_info(range)` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
+	line_number: usize,
+
+	line_range: Range<usize>,
+	prev_line_range: Option<Range<usize>>,
+	next_line_range: Option<Range<usize>>,
 }
 
 /// Core utilities
@@ -1391,14 +1412,14 @@ mod line_numbers {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
 		let source = str!("012\n45\n78");
 		renderer.update_source(&source);
-		assert_eq!( renderer.line_number(0..), Some(1) );
-		assert_eq!( renderer.line_number(1..), Some(1) );
-		assert_eq!( renderer.line_number(2..), Some(1) );
-		assert_eq!( renderer.line_number(3..), Some(2) );
-		assert_eq!( renderer.line_number(4..), Some(2) );
-		assert_eq!( renderer.line_number(5..), Some(2) );
-		assert_eq!( renderer.line_number(6..), Some(3) );
-		assert_eq!( renderer.line_number(7..), Some(3) );
-		assert_eq!( renderer.line_number(8..), Some(3) );
+		assert_eq!( renderer.line_info(0..), Some(1) );
+		assert_eq!( renderer.line_info(1..), Some(1) );
+		assert_eq!( renderer.line_info(2..), Some(1) );
+		assert_eq!( renderer.line_info(3..), Some(2) );
+		assert_eq!( renderer.line_info(4..), Some(2) );
+		assert_eq!( renderer.line_info(5..), Some(2) );
+		assert_eq!( renderer.line_info(6..), Some(3) );
+		assert_eq!( renderer.line_info(7..), Some(3) );
+		assert_eq!( renderer.line_info(8..), Some(3) );
 	}
 }
