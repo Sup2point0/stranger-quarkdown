@@ -53,7 +53,7 @@ pub fn log_is(msg:    impl Display) { println!(" {}› {}{}",     GREY, Y, msg);
 pub fn log_info(msg:  impl Display) { println!(" {}› {}",       GREY,    msg); }
 pub fn log_ok(msg:    impl Display) { println!(" {}✓ {}",       C,       msg); }
 pub fn log_bad(msg:   impl Display) { println!(" {}× {}",       R,       msg); }
-pub fn log_debug(msg: impl Display) { println!(" {}| {}",       GREY,    msg); }
+pub fn log_debug(msg: impl Display) { println!(" {}│ {}",       GREY,    msg); }
 pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {}", G,       msg); }
 
 
