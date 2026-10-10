@@ -69,7 +69,9 @@ pub(super) struct Renderer<'d>
 
 	/// The list of byte boundaries where a new line starts.
 	/// 
-	/// For instance, `[4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
+	/// Each number is an index into `self.source`. The character accessed at that index is the _first_ character in a new line.
+	/// 
+	/// For instance, `[0, 4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
 	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.
@@ -637,8 +639,22 @@ impl Renderer<'_>
 	fn update_source(&mut self, source: &str)
 	{
 		self.source = source.to_owned();
-		self.line_boundaries = source.match_indices('\n').map(|(i, _str)| i).collect();
-		self.line_boundaries.push(source.len());
+
+		/* First character is the first character in a new line */
+		self.line_boundaries = vec![0];
+
+		self.line_boundaries.extend(
+			/* The character _after_ `\n` is the first in a new line */
+			source.match_indices('\n').map(|(i, _str)| i + 1)
+		);
+
+		/* NOTE: Line boundaries assume each line is `\n`-terminated, so making sure the last line has this too makes things a little nicer */
+		if !self.source.ends_with("\n") {
+			self.source.push('\n');
+		}
+
+		/* Terminating `\n` guaranteed by above, then the character _after_ is the first in a new line */
+		self.line_boundaries.push(source.len() + 1);
 	}
 
 	/// Print a snapshot of the source text, focused around `range`.
@@ -683,15 +699,19 @@ impl Renderer<'_>
 				continue;
 			}
 
-			let lower_this = *self.line_boundaries.get(i - 1).unwrap_or(&0);
+			let lower_this = 
+				if i == 0 { 0 }
+				else { *self.line_boundaries.get(i - 1).unwrap_or(&0) };
 
 			return Some(LineInfo {
-				line_number: i + 1,
-				line_range: (lower_this + 1)..upper_this,
+				line_number: i,
+				line_range: lower_this..(upper_this - 1),
 				prev_line_range:
-					self.line_boundaries.get(i - 2).map(|&lower_prev| (lower_prev + 1)..lower_this),
+					if i < 2 { None } else {
+						self.line_boundaries.get(i - 2).map(|&lower_prev| lower_prev..(lower_this - 1))
+					},
 				next_line_range:
-					self.line_boundaries.get(i + 1).map(|&upper_next| (upper_this + 1)..upper_next),
+					self.line_boundaries.get(i + 1).map(|&upper_next| upper_this..(upper_next - 1)),
 			});
 		}
 
@@ -707,9 +727,9 @@ struct LineInfo
 	/// - `line_info(range)` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
 	line_number: usize,
 
-	line_range: ParserRange,
-	prev_line_range: Option<ParserRange>,
-	next_line_range: Option<ParserRange>,
+	line_range: Range<usize>,
+	prev_line_range: Option<Range<usize>>,
+	next_line_range: Option<Range<usize>>,
 }
 
 /// Core utilities
@@ -759,6 +779,7 @@ impl From<bool> for ProcessAction {
 #[cfg(test)] use super::test_utils::*;
 #[cfg(test)] use crate::utils::testing::*;
 
+#[cfg(test)] use assertables::*;
 #[cfg(test)] use indoc::indoc;
 
 
@@ -1418,32 +1439,83 @@ mod only {
 }
 
 #[cfg(test)]
-mod line_numbers {
+mod source_snapshots {
 	use super::*;
 
 	#[test] fn line_boundaries() {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
-
 		renderer.update_source("012\n45\n78");
-		assert_eq!( renderer.line_boundaries, vec![3, 6, 9] );
+		assert_eq!( renderer.line_boundaries, vec![0, 4, 7, 10] );
 		renderer.update_source("01234\n\n78");
-		assert_eq!( renderer.line_boundaries, vec![5, 6, 9] );
+		assert_eq!( renderer.line_boundaries, vec![0, 6, 7, 10] );
 		renderer.update_source("\n123\n");
-		assert_eq!( renderer.line_boundaries, vec![0, 4, 5] );
+		assert_eq!( renderer.line_boundaries, vec![0, 1, 5, 6] );
 	}
 
-	#[test] fn query() {
+	#[test] fn line_number() {
 		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
-		let source = str!("012\n45\n78");
+		renderer.update_source("012\n45\n78");
+		assert_eq!( renderer.line_info(0..).unwrap().line_number, 1 );
+		assert_eq!( renderer.line_info(1..).unwrap().line_number, 1 );
+		assert_eq!( renderer.line_info(2..).unwrap().line_number, 1 );
+		assert_eq!( renderer.line_info(3..).unwrap().line_number, 1 );
+		assert_eq!( renderer.line_info(4..).unwrap().line_number, 2 );
+		assert_eq!( renderer.line_info(5..).unwrap().line_number, 2 );
+		assert_eq!( renderer.line_info(6..).unwrap().line_number, 2 );
+		assert_eq!( renderer.line_info(7..).unwrap().line_number, 3 );
+		assert_eq!( renderer.line_info(8..).unwrap().line_number, 3 );
+	}
+
+	#[test] fn line_range() {
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		renderer.update_source("012\n45\n78");
+		assert_eq!( renderer.line_info(0..).unwrap().line_range, 0..3 );
+		assert_eq!( renderer.line_info(1..).unwrap().line_range, 0..3 );
+		assert_eq!( renderer.line_info(2..).unwrap().line_range, 0..3 );
+		assert_eq!( renderer.line_info(3..).unwrap().line_range, 0..3 );
+		assert_eq!( renderer.line_info(4..).unwrap().line_range, 4..6 );
+		assert_eq!( renderer.line_info(5..).unwrap().line_range, 4..6 );
+		assert_eq!( renderer.line_info(6..).unwrap().line_range, 4..6 );
+		assert_eq!( renderer.line_info(7..).unwrap().line_range, 7..9 );
+		assert_eq!( renderer.line_info(8..).unwrap().line_range, 7..9 );
+	}
+
+	#[test] fn source_printed() {
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let source = "line one\nline two\nline three";
 		renderer.update_source(&source);
-		// assert_eq!( renderer.line_info(0..), Some(1) );
-		// assert_eq!( renderer.line_info(1..), Some(1) );
-		// assert_eq!( renderer.line_info(2..), Some(1) );
-		// assert_eq!( renderer.line_info(3..), Some(2) );
-		// assert_eq!( renderer.line_info(4..), Some(2) );
-		// assert_eq!( renderer.line_info(5..), Some(2) );
-		// assert_eq!( renderer.line_info(6..), Some(3) );
-		// assert_eq!( renderer.line_info(7..), Some(3) );
-		// assert_eq!( renderer.line_info(8..), Some(3) );
+
+		let i = source.find("two").unwrap();
+		let debug = renderer.source_printed(i..i + "two".len());
+		assert_eq!( debug[0], " " );
+		assert_contains!( debug[1], " 1 " );
+		assert_contains!( debug[1], "line one" );
+		assert_contains!( debug[2], " 2 " );
+		assert_contains!( debug[2], &fmt!("line {R}{BOLD}two{UNBOLD}") );
+		// check newlines did not leak (dangerous off-by-1)
+		assert_not_contains!( debug[2], &fmt!("line {R}{BOLD}two{UNBOLD}\n") );
+		assert_contains!( debug[3], " 3 " );
+		assert_contains!( debug[3], "line three" );
+		assert_eq!( debug[4], " " );
+
+		let i = source.find("one").unwrap();
+		let debug = renderer.source_printed(i..i + "one".len());
+		assert_eq!( debug[0], " " );
+		assert_contains!( debug[1], " 1 " );
+		assert_contains!( debug[1], &fmt!("line {R}{BOLD}one{UNBOLD}") );
+		assert_not_contains!( debug[1], &fmt!("line {R}{BOLD}one{UNBOLD}\n") );
+		assert_contains!( debug[2], " 2 " );
+		assert_contains!( debug[2], "line two" );
+		assert_eq!( debug[3], " " );
+
+		let i = source.find("three").unwrap();
+		let debug = renderer.source_printed(i..i + "three".len());
+		assert_eq!( debug[0], " " );
+		assert_contains!( debug[1], " 2 " );
+		assert_contains!( debug[1], "line two" );
+		assert_contains!( debug[2], " 3 " );
+		assert_contains!( debug[2], &fmt!("line {R}{BOLD}three{UNBOLD}") );
+		assert_not_contains!( debug[2], &fmt!("line {R}{BOLD}three{UNBOLD}\n") );
+		assert_eq!( debug[3], " " );
 	}
 }
