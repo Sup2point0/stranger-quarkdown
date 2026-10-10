@@ -7,10 +7,13 @@
 ## v4.2.0
 
 ### New
-- `project` fields in squarkup config:
+New squarkup config options:
+
+- `project` options:
   - `project.name`: The displayed name of your project.
   - `project.github`: The GitHub name of your project.
-- Inject `<head>` containing metadata into rendered pages:
+
+- `format.inject-head` to inject `<head>` metadata into rendered pages (enabled by default):
 
   ```md
   <svelte:head>
@@ -19,7 +22,24 @@
   </svelte:head>
   ```
 
-  - Controlled by `format.inject-head` option (enabled by default)
+  - `My Project` is replaced with `project.name`.
+
+- `errors.debug` to enable more helpful debug output
+  - When enabled, error messages will show a snapshot of where in the source text they were encountered!
+
+  ```hs
+  ─────────────────────────────
+  × 1 error while rendering example.md
+  ─────────────────────────────
+  × unknown twin squark: unknown
+  │  
+  │      6 │  Hmmm, this squark looks suspicious
+  │      7 │  <!-- #SQUARK unknown? -->
+  │      8 │  Squarkdown will ignore it.
+  │  
+  = hint: valid twin squarks are leave · slash · only
+  ─────────────────────────────
+  ```
 
 
 <br>

@@ -2,6 +2,7 @@ const n = ansi 'n'
 
 const WHITE = $'($n)(ansi '#ffffff')'
 const PINK  = $'($n)(ansi '#f190f1')'
+const FADE  = $'($n)(ansi '#2070c1')'
 
 
 def main [] {
@@ -21,6 +22,7 @@ def test-all [] {
 ## Publish to crates.io
 def publish-cargo [] {
 	print $"($PINK)\n› publishing to crates.io...\n($WHITE)"
+	underline
 
 	cd squarkdown
 	cargo publish --allow-dirty
@@ -30,6 +32,7 @@ def publish-cargo [] {
 ## Compile binaries and publish to NPM registry
 def publish-npm [] {
 	print $"($PINK)\n› publishing to NPM...\n($WHITE)"
+	underline
 
 	cd npm
 
@@ -52,6 +55,7 @@ def publish-npm [] {
 
 def sync-version [] {
 	print $"($PINK)\n› syncing version from Cargo.toml to package.json\n($WHITE)"
+	underline
 
 	let $ver = (open Cargo.toml | get package.version)
 	print $"received version: ($ver)"
@@ -68,10 +72,16 @@ def sync-version [] {
 
 def compile-windows [] {
 	print $"($PINK)\n› compiling Windows binary\n($WHITE)"
+	underline
 	cargo build --release --target-dir ../npm/target-temp/windows
 }
 
 def compile-linux [] {
 	print $"($PINK)\n› compiling Linux binary\n($WHITE)"
+	underline
 	wsl -- bash -lc "cargo build --release --target-dir ../npm/target-temp/linux"
+}
+
+def underline [] {
+	print $"($FADE)─────────────────────────────\n($WHITE)"
 }
