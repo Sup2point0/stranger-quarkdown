@@ -2,6 +2,7 @@
 
 [errors]
 strict = true
+debug = true
 on-error = "kill"
 file-already-exists = "overwrite"
 # broken-link = "link-to-github"
