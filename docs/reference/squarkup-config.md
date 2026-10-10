@@ -16,23 +16,29 @@ Squarkdown reads in your configuration from 1 of 4 places:
 <!-- TODO -->
 TOML is the recommended format. JSON support is in progress!
 
+> [!Important]
+> You need a squarkup config file – even if empty – to run Squarkdown, otherwise Squarkdown can’t find your project root!
+
 
 <br>
 
 
 ## Categories
 
-Configuration options are neatly organised into categories. Throughout the docs you’ll see them referred to as `category.option`.
+Configuration options are neatly organised into categories. Throughout the docs you’ll see them referred to as `category.option`, e.g. `format.preserve-comments`.
 
-| Category | Options | Description |
-| -------- | ------- | ----------- |
-| [`errors`](#errors)   | | Error handling |
-| [`project`](#project) || Project metadata |
-| [`paths`](#paths)     || Where Squarkdown should find files |
-| [`out`](#out)         || Output |
-| [`format`](#format)   || Markdown rendering |
-| [`assets`](#assets)   || Assets preprocessing |
-| [`fonts`](#fonts)     || Fonts preprocessing |
+| Category | Description |
+| -------- | ----------- |
+| [`errors`](#errors)   | Error handling |
+| [`project`](#project) | Project metadata |
+| [`paths`](#paths)     | Where Squarkdown should find files |
+| [`out`](#out)         | Output |
+| [`format`](#format)   | Markdown rendering |
+| [`assets`](#assets)   | Assets preprocessing |
+| [`fonts`](#fonts)     | Fonts preprocessing |
+
+> [!Tip]
+> If you’re new to Squarkdown, [`errors`](#errors) and [`paths`](#paths) are the most important to start with!
 
 
 <br>
@@ -40,13 +46,13 @@ Configuration options are neatly organised into categories. Throughout the docs 
 
 ## Errors
 
-| Option | Type | Values |
-| ------ | ---- | ------ |
-| [`strict`](#strict)                           | boolean | |
-| [`debug`](#debug)                             | boolean | |
-| [`on-error`](#on-error)                       | string | `warn` `kill` |
-| [`file-already-exists`](#file-already-exists) | string | `overwrite` `error` `skip` |
-| [`link-broken`](#link-broken)                 | string | `mark-invalid` `strip-extension` `link-to-github` `error` |
+| Option | Type | Values | Default |
+| ------ | ---- | ------ | ------- |
+| [`strict`](#strict)                           | boolean | | `true` |
+| [`debug`](#debug)                             | boolean | | `true` |
+| [`on-error`](#on-error)                       | string | `warn` <br> `kill` | `warn` |
+| [`file-already-exists`](#file-already-exists) | string | `overwrite` <br> `error` <br> `skip` | `overwrite` |
+| [`link-broken`](#link-broken)                 | string | `mark-invalid` <br> `strip-extension` <br> `link-to-github` <br> `error` | `strip-extension` |
 
 ### `strict`
 ### `debug`
@@ -60,10 +66,10 @@ Configuration options are neatly organised into categories. Throughout the docs 
 
 ## Project
 
-| Option | Type | Values |
-| ------ | ---- | ------ |
-| [`name`](#name)     | string ||
-| [`github`](#github) | string ||
+| Option | Type |
+| ------ | ---- |
+| [`name`](#name)     | string |
+| [`github`](#github) | string |
 
 ### `name`
 ### `github`
@@ -74,12 +80,12 @@ Configuration options are neatly organised into categories. Throughout the docs 
 
 ## Paths
 
-| Option | Type |
-| ------ | ---- |
-| [`site`](#site)       | string |
-| [`sources`](#sources) | string array |
-| [`include`](#include) | string array |
-| [`exclude`](#exclude) | string array |
+| Option | Type | Default |
+| ------ | ---- | ------- |
+| [`site`](#site)       | string | your project root |
+| [`sources`](#sources) | string array | your entire project repo |
+| [`include`](#include) | string array | `.md` files |
+| [`exclude`](#exclude) | string array | `.git/`, `.node_modules/`, `.svelte-kit/` folders |
 
 ### `site`
 ### `sources`
@@ -92,12 +98,12 @@ Configuration options are neatly organised into categories. Throughout the docs 
 
 ## Out
 
-| Option | Type | Notes |
-| ------ | ---- | ------ |
-| [`folder`](#folder)                 | string | path relative to project root |
-| [`site-data-path`](#site-data-path) | string | path relative to site |
-| [`render-page-ts`](#render-page-ts) | boolean ||
-| [`shorter-fields`](#shorter-fields) | boolean ||
+| Option | Type | Notes | Default |
+| ------ | ---- | ----- | ------- |
+| [`folder`](#folder)                 | string | path relative to project root | `src/routes/` in your site folder |
+| [`site-data-path`](#site-data-path) | string <br> none | path relative to site | none |
+| [`render-page-ts`](#render-page-ts) | boolean || `true` |
+| [`shorter-fields`](#shorter-fields) | boolean || `false` |
 
 ### `folder`
 ### `site-data-path`
@@ -110,12 +116,12 @@ Configuration options are neatly organised into categories. Throughout the docs 
 
 ## Format
 
-| Option | Type | Values | Default |
-| ------ | ---- | ------ | ------- |
-| [`inject-head`](#inject-head)             | boolean || `true` |
-| [`preserve-heading`](#preserve-heading)   | boolean || `false` |
-| [`preserve-comments`](#preserve-comments) | boolean || `false` |
-| [`externalise-links`](#externalise-links) | boolean || `true` |
+| Option | Type | Default |
+| ------ | ---- | ------- |
+| [`inject-head`](#inject-head)             | boolean | `true` |
+| [`preserve-heading`](#preserve-heading)   | boolean | `false` |
+| [`preserve-comments`](#preserve-comments) | boolean | `false` |
+| [`externalise-links`](#externalise-links) | boolean | `true` |
 
 ### `inject-head`
 ### `preserve-heading`
@@ -128,11 +134,11 @@ Configuration options are neatly organised into categories. Throughout the docs 
 
 ## Assets
 
-| Option | Type | Notes |
-| ------ | ---- | ----- |
-| [`folder`](#folder)                         | string | path relative to project root |
-| [`site-assets-folder`](#site-assets-folder) | string | path relative to project root |
-| [`extensions`](#extensions)                 | string array ||
+| Option | Type | Notes | Default |
+| ------ | ---- | ----- | ------- |
+| [`folder`](#folder)                         | string | path relative to project root | your project root |
+| [`site-assets-folder`](#site-assets-folder) | string <br> none | path relative to project root | none |
+| [`extensions`](#extensions)                 | string array || `.png`, `.jpg`, `.jpeg`, `.webp`, `.svg` files |
 
 ### `folder`
 ### `site-assets-folder`
