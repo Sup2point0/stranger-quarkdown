@@ -76,3 +76,26 @@ use path_macro::path;
 	assert_contains!( svx, "shouldn't be overwritten" );
 	assert_contains!( ts,  "Don't overwrite me" );
 }
+
+#[test] fn source_snapshot_in_errors()
+{
+	let (status, out) = capture_squarkup_from("errors/source-snapshot");
+	assert_not!( status.success() );
+	// error messages
+	assert_contains!( out, "3 errors while" );
+	assert_contains!( out, "unknown twin squark" );
+	assert_contains!( out, "unknown squark pattern" );
+	assert_contains!( out, "unpaired closing squark" );
+	// basic mention
+	assert_contains!( out, "<!-- #SQUARK unknown? -->" );
+	assert_contains!( out, "<!-- #SQUARK unknown!? -->" );
+	assert_contains!( out, "<!-- #SQUARK leave. -->" );
+	// line numbers
+	assert_contains!( out, " 8 " );
+	assert_contains!( out, " 9 " );
+	assert_contains!( out, " 10 " );
+	// count mentions
+	assert_ge!( out.match_indices("<!-- #SQUARK unknown? -->").count(), 2);
+	assert_ge!( out.match_indices("<!-- #SQUARK unknown!? -->").count(), 3);
+	assert_ge!( out.match_indices("<!-- #SQUARK leave. -->").count(), 2);
+}
