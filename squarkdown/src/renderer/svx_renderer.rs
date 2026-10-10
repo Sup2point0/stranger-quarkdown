@@ -393,7 +393,10 @@ impl Renderer<'_>
 		else {
 			if html.contains("#squark") || html.contains("#SQUARK") {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("unknown squark pattern: {W}{BOLD}{html}{UNBOLD}"),
+					msg: fmt!(
+						"unknown squark pattern: {W}{BOLD}{}{UNBOLD}",
+						html.trim_start_matches("<!--").trim_end_matches("-->").trim()
+					),
 					hint: fmt!("use squarks like this: {Y}<!-- #SQUARK leave? -->"),
 					debug: [self.source_printed(range), self.ctx.printed()].concat(),
 				});
