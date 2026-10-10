@@ -25,7 +25,10 @@ def publish-cargo [] {
 	underline
 
 	cd squarkdown
+
+	cp ../LICENCE .
 	cargo publish --allow-dirty
+	
 	cd ..
 }
 
