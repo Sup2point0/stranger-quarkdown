@@ -1,7 +1,15 @@
 # Squarkdown Changelog
 
+<!-- pass in path to squarkup.toml -->
+
 
 <br>
+
+
+## Next (v4.2.1)
+
+### Fixes
+- Strip colours from `squarkdown --version` for compatibility with other standard command-line tools
 
 
 ## v4.2.0

@@ -66,7 +66,7 @@ fn main() -> ExitCode
 
 		Mode::VERSION =>
 		{
-			println!("{P}Squarkdown v{}{W}", env!("CARGO_PKG_VERSION"));
+			println!("Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 			ExitCode::SUCCESS
 		}
 
