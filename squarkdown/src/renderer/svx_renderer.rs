@@ -438,6 +438,7 @@ impl Renderer<'_>
 							if self.ctx.contains(&squark) {
 								fmt!("did you forget to close a {:?} context?", self.ctx.current())
 							} else {
+								// FIXME should show `#SQUARK squark?`, not `#SQUARK squark.`
 								fmt!("did you forget to open a {W}{html}{G} context?")
 							}
 						},

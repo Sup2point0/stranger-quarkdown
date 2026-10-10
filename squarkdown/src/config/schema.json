@@ -187,7 +187,14 @@
           "title":       "Enable Safety Checks",
           "type":        "boolean",
           "default":     true,
-          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring [`PageData.destination`](crate::types::PageData::destination) to be explicitly provided\nChecking directories remain under your project root\nChecking multiple files don't export to the same directory"
+          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring `destination` to be explicitly provided\nChecking directories remain under your project root\nChecking multiple files don't export to the same directory"
+        },
+        
+        "debug": {
+          "title":       "Improve Debug Output",
+          "type":        "boolean",
+          "default":     false,
+          "description": "Enable more helpful debug output?\n\nThis requires Squarkdown to do more work, for instance to keep track of line numbers, so has a tiny impact on performance."
         },
 
         "on-error": {

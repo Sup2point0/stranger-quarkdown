@@ -18,6 +18,9 @@ use std::path::PathBuf;
 #[derive(Clone, Debug)]
 pub struct SquarkupConfig
 {
+	/// Error handling strategies.
+	pub errors: ErrorConfig,
+
 	/// Metadata for the user's project.
 	pub project: ProjectConfig,
 
@@ -34,9 +37,6 @@ pub struct SquarkupConfig
 
 	/// Options for Google Fonts query injection.
 	pub fonts: FontsConfig,
-
-	/// Error handling strategies.
-	pub errors: ErrorConfig,
 }
 
 
