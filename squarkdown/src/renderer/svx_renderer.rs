@@ -748,11 +748,16 @@ impl Renderer<'_>
 			FileAction::ERROR => Err(SquarkError::Recoverable {
 				msg: slash!("cannot overwrite existing file: {W}{}", filepath),
 				hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'error'"),
-				debug: vec![
-					slash!("while rendering: {}", self.page.filepath),
-				],
+				debug: vec![],
 			}),
-			FileAction::SKIP => Err(SquarkError::ABANDON),
+			FileAction::SKIP => {
+				log::error(SquarkError::Recoverable {
+					msg: slash!("warning: not overwriting existing file: {W}{}", filepath),
+					hint: fmt!("Squarkdown will not overwrite since you set {Y}errors.file-already-exists{G} to {W}'skip'"),
+					debug: vec![],
+				});
+				Err(SquarkError::ABANDON)
+			}
 		}
 	}
 }
