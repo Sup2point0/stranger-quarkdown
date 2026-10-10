@@ -393,7 +393,7 @@ impl Renderer<'_>
 				self.errors.push(SquarkError::Recoverable {
 					msg: fmt!("unknown squark pattern: {W}{BOLD}{html}{UNBOLD}"),
 					hint: fmt!("use squarks like this: {Y}<!-- #SQUARK leave? -->"),
-					debug: [self.printed_source(range), self.ctx.printed()].concat(),
+					debug: [self.source_printed(range), self.ctx.printed()].concat(),
 				});
 			}
 			return false;
@@ -412,7 +412,7 @@ impl Renderer<'_>
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("unknown twin squark: {W}{BOLD}{s}{UNBOLD}"),
 						hint: fmt!("valid twin squarks are {Y}leave{G} · {Y}slash{G} · {Y}only"),
-						debug: [self.printed_source(range), self.ctx.printed()].concat(),
+						debug: [self.source_printed(range), self.ctx.printed()].concat(),
 					});
 				}
 				return false;
@@ -436,7 +436,7 @@ impl Renderer<'_>
 								fmt!("did you forget to open a {W}{html}{G} context?")
 							}
 						},
-						debug: [self.printed_source(range), self.ctx.printed()].concat(),
+						debug: [self.source_printed(range), self.ctx.printed()].concat(),
 					});
 				}
 			}
@@ -483,7 +483,7 @@ impl Renderer<'_>
 				msg: fmt!("found a broken link"),
 				hint: str!(),
 				debug: [
-					self.printed_source(range),
+					self.source_printed(range),
 					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
 				].concat()
 			});
@@ -526,7 +526,7 @@ impl Renderer<'_>
 					msg: fmt!("found a link to an inactive page"),
 					hint: str!(),
 					debug: [
-						self.printed_source(range),
+						self.source_printed(range),
 						vec![fmt!("resolved to: {GREY1}{shard}")],
 					].concat()
 				});
@@ -553,7 +553,7 @@ impl Renderer<'_>
 				msg: fmt!("found a broken asset link"),
 				hint: str!(),
 				debug: [
-					self.printed_source(range),
+					self.source_printed(range),
 					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
 				].concat()
 			});
@@ -571,7 +571,7 @@ impl Renderer<'_>
 					msg: fmt!("found a link to an asset not processed by Squarkdown"),
 					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
 					debug: [
-						self.printed_source(range),
+						self.source_printed(range),
 						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
 					].concat()
 				});
@@ -642,7 +642,7 @@ impl Renderer<'_>
 	}
 
 	/// Print a snapshot of the source text, focused around `range`.
-	fn printed_source(&self, range: ParserRange) -> Vec<String>
+	fn source_printed(&self, range: ParserRange) -> Vec<String>
 	{
 		let Some(info) = self.line_info(range.clone())
 			else { return vec![] };
