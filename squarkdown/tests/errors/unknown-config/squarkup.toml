@@ -1,0 +1,19 @@
+#:schema ../../../src/config/schema.json
+
+unknown = true
+
+[very-weird]
+
+[super-weird]
+hmmm = ["yes", "indeed"]
+
+[errors]
+sus = "tainable"
+strict = false
+on-error = "warn"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/errors/unknown-config/"

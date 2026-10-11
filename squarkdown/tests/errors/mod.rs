@@ -4,6 +4,7 @@ use assertables::*;
 use path_macro::path;
 
 
+/// Squarkdown errors if an invalid squarkup config is provided, with all errors reported together.
 #[test] fn invalid_config()
 {
 	let (status, out) = capture_squarkup_from("errors/invalid-config");
@@ -32,6 +33,19 @@ use path_macro::path;
 	assert_contains!( out, "(filename including" );
 	assert_contains!( out, "(filepath including" );
 	assert_contains!( out, "(folder relative to your project root)" );
+}
+
+/// Squarkdown errors if a squarkup config is provided with unknown options, tables, or options in tables, but correctly ignores them if `errors.on-error = "warn"`.
+#[test] fn unknown_config()
+{
+	let (status, out) = capture_squarkup_from("errors/unknown-config");
+	assert_not!( status.success() );
+	assert_contains!( out, "unknown" );
+	assert_contains!( out, "very-weird" );
+	assert_contains!( out, "super-weird" );
+	assert_contains!( out, "hmmm" );
+	assert_contains!( out, "sus" );
+	assert_contains!( out, "tainable" );
 }
 
 /// Squarkdown exits if it finds no files to squarkup.
