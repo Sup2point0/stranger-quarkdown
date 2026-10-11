@@ -13,7 +13,7 @@
 
 <div align="center">
 
-[Docs](docs/)&ensp;·&ensp;[Quickstart](docs/walkthrough/quickstart.md)&ensp;·&ensp;[FAQ](FAQ.md)&ensp;·&ensp;[Changelog](CHANGELOG.md)&ensp;·&ensp;[Site](https://sup2point0.github.io/stranger-quarkdown/docs)
+[Docs](docs/)&ensp;·&ensp;[Quickstart](docs/walkthrough/quickstart.md)&ensp;·&ensp;[FAQ](docs/faq.md)&ensp;·&ensp;[Changelog](CHANGELOG.md)&ensp;·&ensp;[Site](https://sup2point0.github.io/stranger-quarkdown/docs)
 
 </div>
 

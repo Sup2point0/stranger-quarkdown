@@ -1,18 +1,17 @@
-# FAQ
+# Frequently Asked Questions
 <!-- #SQUARK live!
 | dest = info/faq
-| head = Frequently Asked Questions
-| update = 2026 October 10
+| update = 2026 October 11
 -->
 
 ### What is Squarkdown?
-See [What is Squarkdown?](docs/walkthrough/what-is-squarkdown.md).
+See [What is Squarkdown?](walkthrough/what-is-squarkdown.md).
 
 ### What is Squarkdown-flavoured Markdown?
-See [Squarkdown-flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md).
+See [Squarkdown-flavoured Markdown](walkthrough/squarkdown-flavoured-markdown.md).
 
 ### Can I use Squarkdown for my project?
-See [Project Requirements](docs/walkthrough/project-requirements.md).
+See [Project Requirements](walkthrough/project-requirements.md).
 
 ### Why does Squarkdown only work with SvelteKit and MDsveX?
 Yeah so, Squarkdown was made for a very particular purpose in a very particular tech stack. It’s totally geared towards my use cases, since I made it primarily for myself :P
@@ -26,7 +25,7 @@ With the Rust rewrite, fast enough. On my Windows machine the Squarkdown docs ta
 Squarkdown spends most of its time doing 3 things:
 
 - Finding `.md` files to squarkup
-- Parsing their [charm](docs/glossary.md#charm-squark) squarks for metadata
+- Parsing their [charm](docs/glossary.md#charm-squarkarks for metadata
 - Rendering each page to `+page.svx` and `+page.ts`
 
 The last part takes the longest because Squarkdown is reading, parsing, processing and rendering your entire file. So the longer the file, the more work it has to do.
@@ -34,7 +33,7 @@ The last part takes the longest because Squarkdown is reading, parsing, processi
 The first two parts are pretty fast, and Squarkdown avoids unnecessary work by skipping ignored directories and only reading files up to the end of their charm squark.
 
 ### Where does the name *Squarkdown* come from?
-*Squarkdown* is an abbreviation of the full name *Stranger Quarkdown*. It’s the successor to my original tool [*Quarkdown*](https://github.com/Sup2point0/quarkdown) (now deprecated). You can find out more in [Synopsis](synopsis.md)!
+*Squarkdown* is an abbreviation of the full name *Stranger Quarkdown*. It’s the successor to my original tool [*Quarkdown*](https://github.com/Sup2point0/quarkdown) (now deprecated). You can find out more in [Synopsis](../synopsis.md)!
 
 ### Why Ruby (originally)?
 It’s a cute language :3
@@ -55,9 +54,9 @@ Well, what can I say. It works great, feels amazing to build upon, and the test 
 <!-- #SQUARK only?
 
 ### Was this website built with Squarkdown?
-Of course! (Imagine if it weren’t!) The text you’re reading now is sourced from a `.md` file [in the Squarkdown repo](https://github.com/Sup2point0/stranger-quarkdown/blob/main/faq.md?plain=1) ;)
+Of course! (Imagine if it weren’t!) The text you’re reading now is sourced from a `.md` file [in the Squarkdown repo](https://github.com/Sup2point0/stranger-quarkdown/blob/main/docs/faq.md?plain=1) ;)
 
-More details are available in [Synopsis](synopsis.md).
+More details are available in [Synopsis](../synopsis.md).
 
      #SQUARK only. -->
 
