@@ -42,7 +42,7 @@ impl SquarkupConfig
 	/// Construct a `SquarkupConfig` from TOML `data`, with values fully validated.
 	/// 
 	/// Returns [`SquarkError::Multiple`] if any validation errors are encountered.
-	pub fn try_from_toml(data: toml::Table, root: &Path) -> SquarkResult<Self>
+	pub fn try_from_toml(mut data: toml::Table, root: &Path) -> SquarkResult<Self>
 	{
 		/* Crikey, who knew reading in a config would be such a nightmare... I guess if we want to robustly cover every error path with _user-friendly_, _aggregated_ error messages (rather than just a schema violation) we have to handroll it all ourselves */
 
@@ -59,8 +59,15 @@ impl SquarkupConfig
 			Since this may invalidate the relevant fatal errors later on (i.e. they might all be fixed by fixing `paths.site`), if this fails we'll immediately bail.
 		*/
 		let mut site = root.to_path_buf();
+		
+		/* NOTE:
+			`try_get_table_if_present()` removes the table from the config so that we can check for residual unknown tables and keys at the end.
 
-		if let Some(paths) = Self::try_get_table_if_present(&data, "paths",
+			Since we'll be reading `paths` twice, the second time there'd be no `paths` table to remove, so we'll need to cache it here.
+		*/
+		let mut paths_cached = None;
+
+		if let Some(paths) = Self::try_take_table_if_present(&mut data, "paths",
 			hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
 		)?
 		{
@@ -68,14 +75,16 @@ impl SquarkupConfig
 				let dir = Self::try_get_str(value, "paths.site", "(filepath relative to your project root)")?;
 				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
 			}
+			
+			paths_cached = Some(paths);
 		}
 
-		// now start with defaults...
+		// start with defaults...
 		let mut c = Self::init_defaults(root, &site);
 		// ...then apply the user's non-defaults on top of it
 
 		// == ErrorConfig == //
-		if let Some(errors) = Self::try_get_table_if_present(&data, "errors",
+		if let Some(errors) = Self::try_take_table_if_present(&mut data, "errors",
 			hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
 		)?
 		{
@@ -132,7 +141,7 @@ impl SquarkupConfig
 		}
 
 		// == ProjectConfig == //
-		if let Some(project) = Self::try_get_table_if_present(&data, "project",
+		if let Some(project) = Self::try_take_table_if_present(&mut data, "project",
 			hints!("write your config like this: {W}```\n\t[project]\n\tgithub = 'Sup2point0/stranger-quarkdown'\n```")
 		)?
 		{
@@ -177,7 +186,7 @@ impl SquarkupConfig
 		}
 
 		// == PathsConfig == //
-		if let Some(paths) = Self::try_get_table_if_present(&data, "paths", hints!())?
+		if let Some(paths) = paths_cached
 		{
 			if let Some(value) = paths.get("sources") { catch!(errs => {
 				let values = Self::try_get_array(value, "paths.sources", "(of folders relative to your project root)")?;
@@ -234,7 +243,7 @@ impl SquarkupConfig
 		}
 
 		// == OutConfig == //
-		if let Some(out) = Self::try_get_table_if_present(&data, "out",
+		if let Some(out) = Self::try_take_table_if_present(&mut data, "out",
 			hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
 		)?
 		{
@@ -288,7 +297,7 @@ impl SquarkupConfig
 		}
 
 		// == FormatConfig == //
-		if let Some(format) = Self::try_get_table_if_present(&data, "format",
+		if let Some(format) = Self::try_take_table_if_present(&mut data, "format",
 			hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
 		)?
 		{
@@ -306,7 +315,7 @@ impl SquarkupConfig
 		}
 
 		// == AssetsConfig == //
-		if let Some(assets) = Self::try_get_table_if_present(&data, "assets",
+		if let Some(assets) = Self::try_take_table_if_present(&mut data, "assets",
 			hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
 		)?
 		{
@@ -344,7 +353,7 @@ impl SquarkupConfig
 		}
 
 		// == FontsConfig == //
-		if let Some(fonts) = Self::try_get_table_if_present(&data, "fonts",
+		if let Some(fonts) = Self::try_take_table_if_present(&mut data, "fonts",
 			hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
 		)?
 		{
@@ -363,6 +372,8 @@ impl SquarkupConfig
 			}) }
 		}
 
+		/* Known categories have been removed from `data` by `try_take_table_if_present()`, so leftover ones are invalid. */
+
 		errs.depends(&c)?;
 		Ok(c)
 	}
@@ -374,27 +385,25 @@ impl SquarkupConfig
 	/// Try to extract the table from `data` for `setting-group`.
 	/// 
 	/// It is fine is `data` does not have `setting-group`, in which case this returns `Ok(None)`.
-	fn try_get_table_if_present<'d>(
-		data: &'d toml::Table,
+	fn try_take_table_if_present<'d>(
+		data: &'d mut toml::Table,
 		setting_group: &str,
 		hint: impl FnOnce() -> String,
-	) -> SquarkResult<Option<&'d toml::Table>>
+	) -> SquarkResult<Option<toml::Table>>
 	{
-		let Some(value) = data.get(setting_group) else {
+		let Some(value) = data.remove(setting_group) else {
 			return Ok(None);
 		};
-
-		let Some(table) = value.as_table() else {
-			unrecoverable! {
-				msg: fmt!("{Y}{setting_group}{R} must be a table, not a field"),
-				hint: hint(),
-				debug: vec![
-					fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", value.type_str()),
-				],
-			}
-		};
-
-		Ok(Some(table))
+		if let toml::Value::Table(table) = value {
+			return Ok(Some(table));			
+		}
+		unrecoverable! {
+			msg: fmt!("{Y}{setting_group}{R} must be a table, not a field"),
+			hint: hint(),
+			debug: vec![
+				fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", value.type_str()),
+			],
+		}
 	}
 
 	/// Try to extract the string from `data` for `setting`.

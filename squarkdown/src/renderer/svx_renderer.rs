@@ -168,9 +168,9 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			.inspect(|(e, _)| { println!("before = {e:?}"); })
+			// .inspect(|(e, _)| { println!("before = {e:?}"); })
 			.flat_map(Self::split_comments)
-			.inspect(|(e, _)| { println!("after = {e:?}"); })
+			// .inspect(|(e, _)| { println!("after = {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
