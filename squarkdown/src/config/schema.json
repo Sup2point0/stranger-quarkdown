@@ -193,7 +193,7 @@
         "debug": {
           "title":       "Improve Debug Output",
           "type":        "boolean",
-          "default":     false,
+          "default":     true,
           "description": "Enable more helpful debug output?\n\nThis requires Squarkdown to do more work, for instance to keep track of line numbers, so has a tiny impact on performance."
         },
 

@@ -22,6 +22,7 @@ impl SquarkupConfig
 				debug: true,
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
+				// TODO default to `ERROR`
 				link_broken: LinkRewriteAction::STRIP_EXTENSION,
 			},
 			project: ProjectConfig {
