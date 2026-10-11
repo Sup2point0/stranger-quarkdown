@@ -21,7 +21,7 @@ def test-all [] {
 
 ## Publish to crates.io
 def publish-cargo [] {
-	print $"($PINK)\n› publishing to crates.io...\n($WHITE)"
+	print $"($PINK)\n› publishing to crates.io...($WHITE)"
 	underline
 
 	cd squarkdown
@@ -34,7 +34,7 @@ def publish-cargo [] {
 
 ## Compile binaries and publish to NPM registry
 def publish-npm [] {
-	print $"($PINK)\n› publishing to NPM...\n($WHITE)"
+	print $"($PINK)\n› publishing to NPM...($WHITE)"
 	underline
 
 	cd npm
@@ -57,7 +57,7 @@ def publish-npm [] {
 }
 
 def sync-version [] {
-	print $"($PINK)\n› syncing version from Cargo.toml to package.json\n($WHITE)"
+	print $"($PINK)\n› syncing version from Cargo.toml to package.json($WHITE)"
 	underline
 
 	let $ver = (open Cargo.toml | get package.version)
@@ -74,13 +74,13 @@ def sync-version [] {
 }
 
 def compile-windows [] {
-	print $"($PINK)\n› compiling Windows binary\n($WHITE)"
+	print $"($PINK)\n› compiling Windows binary($WHITE)"
 	underline
 	cargo build --release --target-dir ../npm/target-temp/windows
 }
 
 def compile-linux [] {
-	print $"($PINK)\n› compiling Linux binary\n($WHITE)"
+	print $"($PINK)\n› compiling Linux binary($WHITE)"
 	underline
 	wsl -- bash -lc "cargo build --release --target-dir ../npm/target-temp/linux"
 }

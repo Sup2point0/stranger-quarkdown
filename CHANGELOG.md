@@ -4,7 +4,7 @@
 <br>
 
 
-## Next (v4.2.1)
+## v4.2.1
 
 ### Fixes
 - Extend `PageData<>` in `+page.ts` with your non-native fields:
