@@ -18,6 +18,8 @@ pub enum RenderCtx
 
 	// TODO stringify with key
 
+	/* NOTE: LEAVE has higher priority than SLASH. A SLASH should always be ignored if inside a LEAVE context. */
+
 	#[display("in #SQUARK leave")]
 	LEAVE { key: Option<String> },
 
@@ -31,18 +33,21 @@ pub enum RenderCtx
 
 impl ContextStack<RenderCtx>
 {
-	/// Is the current context [`RenderCtx::CODE`]?
-	pub fn is_code(&self) -> bool {
-		matches!(self.current(), RenderCtx::CODE{..})
+	/// Is [`RenderCtx::CODE`] in the context stack (at any depth)?
+	pub fn is_code(&self) -> bool
+	{
+		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE{..}))
 	}
 
-	/// Is the current context [`RenderCtx::LEAVE`]?
-	pub fn is_leave(&self) -> bool {
-		matches!(self.current(), RenderCtx::LEAVE{..})
+	/// Is [`RenderCtx::LEAVE`] in the context stack (at any depth)?
+	pub fn has_leave(&self) -> bool
+	{
+		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::LEAVE{..}))
 	}
 
-	/// Is the current context [`RenderCtx::SLASH`]?
-	pub fn is_slash(&self) -> bool {
-		matches!(self.current(), RenderCtx::SLASH{..})
+	/// Is [`RenderCtx::SLASH`] in the context stack (at any depth)?
+	pub fn has_slash(&self) -> bool
+	{
+		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::SLASH{..}))
 	}
 }

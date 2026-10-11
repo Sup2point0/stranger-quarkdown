@@ -17,6 +17,8 @@
   This page’s charm squark was not closed
   ```
 
+### Fixes
+- Fix critical issues with `#SQUARK slash` not removing all Markdown content
 
 ## v4.2.2
 

@@ -328,30 +328,34 @@ impl Renderer<'_>
 		range: ParserRange,
 	) -> Option<pd::Event<'e>>
 	{
-		match self.ctx.current()
+		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
+		if self.ctx.has_leave() {
+			return Some(event);
+		}
+
+		if self.ctx.has_slash() {
+			return None;
+		}
+
+		/* Keep comments only if `preserve_comments: true` */
+		if matches!(self.ctx.current(), RenderCtx::COMMENT) {
+			return self.config.format.preserve_comments.then_some(event);
+		}
+
+		match event
 		{
-			/* Don't transform anything */
-			RenderCtx::LEAVE{..} => Some(event),
-
-			/* Erase this content */
-			RenderCtx::SLASH{..} => None,
-
-			/* Keep comments only if `preserve_comments: true` */
-			RenderCtx::COMMENT => self.config.format.preserve_comments.then_some(event),
-
-			_ => match event
-			{
-				pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) => {
-					self.process_link(dest_url, range);
-					Some(event)
-				}
-				pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) => {
-					self.process_image(dest_url, range);
-					Some(event)
-				}
-				pd::Event::Text(text) => Some(self.process_text(text)),
-				_ => Some(event),
+			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) => {
+				self.process_link(dest_url, range);
+				Some(event)
 			}
+			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) => {
+				self.process_image(dest_url, range);
+				Some(event)
+			}
+			pd::Event::Text(text) => {
+				Some(self.process_text(text))
+			}
+			_ => Some(event),
 		}
 	}
 
@@ -362,12 +366,12 @@ impl Renderer<'_>
 		let preserve = self.config.format.preserve_comments;
 		
 		if html.starts_with("<!--") && html.ends_with("-->") {
-			if self.process_comment(html, range) || self.ctx.is_slash() {
+			if self.process_comment(html, range) || self.ctx.has_slash() {
 				return ProcessAction::ERASE;
 			}
-			return ProcessAction::from(preserve || self.ctx.is_leave());
+			return ProcessAction::from(preserve || self.ctx.has_leave());
 		}
-		else if !self.ctx.is_slash() && !self.ctx.is_leave() {
+		else if !self.ctx.has_slash() && !self.ctx.has_leave() {
 			if html.starts_with("<!--") {
 				// check `<!-- #SQUARK only?`
 				if self.process_comment(html, range) {
@@ -427,7 +431,7 @@ impl Renderer<'_>
 			s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
 			s if s.eq_ignore_ascii_case("ONLY")  => RenderCtx::ONLY,
 			s => {
-				if !self.ctx.is_leave() {
+				if !self.ctx.has_leave() {
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("unknown twin squark: {W}{BOLD}{s}{UNBOLD}"),
 						hint: fmt!("valid twin squarks are {Y}leave{G} · {Y}slash{G} · {Y}only"),
@@ -438,7 +442,7 @@ impl Renderer<'_>
 			}
 		};
 
-		if self.ctx.is_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
+		if self.ctx.has_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
 			return false;
 		}
 
@@ -1011,6 +1015,15 @@ mod code_blocks {
 			"},
 			indoc! {"
 				```md
+
+				<!-- #SQUARK slash? -->
+				test
+				<!-- #SQUARK slash. -->
+
+				```
+			"},
+			indoc! {"
+				```md
 				<!-- #SQUARK only?
 
 				This is dangerous
@@ -1272,12 +1285,13 @@ mod slash {
 	use super::*;
 
 	#[test] fn one_line() {
-		test_expected(&[
-			(
-				"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
-				"erase  please",
-			),
-		]);
+		test_expect(&[
+			"erase <!-- #SQUARK slash? -->this<!-- #SQUARK slash. --> please",
+			"erase <!-- #SQUARK slash? -->this <!-- #SQUARK slash. --> please",
+			"erase <!-- #SQUARK slash? --> this<!-- #SQUARK slash. --> please",
+			"erase <!-- #SQUARK slash? --> this <!-- #SQUARK slash. --> please",
+			"erase <!-- #SQUARK slash? -->  this  <!-- #SQUARK slash. --> please",
+		], "erase  please");
 	}
 
 	#[test] fn multi_line() {
@@ -1291,6 +1305,19 @@ mod slash {
 					please
 				"},
 				"erase\n\n\nplease"
+			),
+			(
+				indoc! {"
+					-
+					<!-- #SQUARK slash? -->
+					
+					```ts
+					console.log('sup');
+					```
+
+					<!-- #SQUARK slash. -->
+				"},
+				indoc! {"-"}
 			),
 		]);
 	}
