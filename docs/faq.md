@@ -16,16 +16,16 @@ See [Project Requirements](walkthrough/project-requirements.md).
 ### Why does Squarkdown only work with SvelteKit and MDsveX?
 Yeah so, Squarkdown was made for a very particular purpose in a very particular tech stack. It’s totally geared towards my use cases, since I made it primarily for myself :P
 
-It’s happened to be perfect for many of my projects, such as [pyco:bytes](https://sup2point0.github.io/pycobytes), [Integrity](https://sup2point0.github.io/integrity), and ofc [*Assort*](https://sup2point0.github.io/Assort). It really does make development so much easier when I don’t have to worry about where I put everything. After having all the infrastructure set up, being able to just add comments to a `.md` file and have it automatically render to a webpage complete with metadata is pretty awesome. The best part is, you can’t even see any of it when previewing the Markdown file!
+It’s happened to be perfect for many of my projects, including [pyco:bytes](https://sup2point0.github.io/pycobytes), [Integrity](https://sup2point0.github.io/integrity), [Skyscraping](https://sup2point0.github.io/skyscraping), and ofc [*Assort*](https://sup2point0.github.io/Assort). It really does make development so much easier when I don’t have to worry about where I put everything. After having all the infrastructure set up, being able to just add comments to a `.md` file and have it automatically render to a webpage is pretty awesome. The best part is being able to hide all the processing away from the Markdown preview!
 
 ### How fast is Squarkdown?
-With the Rust rewrite, fast enough. On my Windows machine the Squarkdown docs take under 50 ms to squarkup, but on GitHub Action’s Linux machine the whole thing finishes in under 10 ms. Execution time varies a lot depending on system speed and delays. Run it yourself and see, right?
+With the Rust rewrite, fast enough! On my Windows machine the Squarkdown docs take under 50 ms to squarkup, but on GitHub Action’s Linux machine the whole thing finishes in under 10 ms. Execution time varies a lot depending on system speed and delays. Run it yourself and see, right?
 
 ### What is Squarkdown spending its time doing?
 Squarkdown spends most of its time doing 3 things:
 
 - Finding `.md` files to squarkup
-- Parsing their [charm](docs/glossary.md#charm-squarkarks for metadata
+- Parsing their [charm](glossary.md#charm-squark) for metadata
 - Rendering each page to `+page.svx` and `+page.ts`
 
 The last part takes the longest because Squarkdown is reading, parsing, processing and rendering your entire file. So the longer the file, the more work it has to do.
