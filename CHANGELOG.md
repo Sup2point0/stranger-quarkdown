@@ -6,6 +6,10 @@
 
 ## Next (v4.2.2)
 
+### New
+- Check for unknown categories and options in squarkup config.
+  - If you accidentally mistype a category, it’ll no longer be silently ignored (which could be very annoying to pin down!)
+
 ### Fixes
 - Preserve `&ensp;` and `&emsp;` HTML entities.
 

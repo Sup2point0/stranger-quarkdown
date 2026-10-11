@@ -373,6 +373,18 @@ impl SquarkupConfig
 		}
 
 		/* Known categories have been removed from `data` by `try_take_table_if_present()`, so leftover ones are invalid. */
+		if !data.is_empty() {
+			for (key, value) in data {
+				errs.push(SquarkError::Recoverable {
+					msg: fmt!(
+						"unknown {} {W}{key}",
+						if value.is_table() {"group"} else {"option"},
+					),
+					hint: str!(),
+					debug: vec![],
+				});
+			}
+		}
 
 		errs.depends(&c)?;
 		Ok(c)
@@ -636,6 +648,32 @@ mod rejects {
 			let r = load_config(source);
 			assert_err!( &r );
 			assert_contains!( r.unwrap_err(), "table" );
+		}
+	}
+
+	#[test] fn unknown_options() {
+		for source in [
+			"x = 1        \n [errors] \n on-error = 'kill'",
+			"y = 2        \n [errors] \n on-error = 'kill'",
+			"z = 3        \n [errors] \n on-error = 'kill'",
+			"sources = [] \n [errors] \n on-error = 'kill'",
+		] {
+			let r = load_config(source);
+			assert_err!( &r );
+			assert_contains!( r.unwrap_err(), "unknown option" );
+		}
+	}
+
+	#[test] fn unknown_groups() {
+		for source in [
+			"[x] \n value = 1        \n [errors] \n on-error = 'kill'",
+			"[y] \n value = 2        \n [errors] \n on-error = 'kill'",
+			"[z] \n value = 3        \n [errors] \n on-error = 'kill'",
+			"[sources] \n value = [] \n [errors] \n on-error = 'kill'",
+		] {
+			let r = load_config(source);
+			assert_err!( &r );
+			assert_contains!( r.unwrap_err(), "unknown group" );
 		}
 	}
 }
