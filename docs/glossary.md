@@ -148,7 +148,7 @@ The entire processing pipeline of Squarkdown:
 ## Squarkup Config
 > Main article: [Squarkup Config](reference/squarkup-config.md)
 
-Your configuration for Squarkdown, sourced from either a `squarkup.toml` or `squarkup.json` file in your project repo.
+Your configuration for Squarkdown, sourced from either a [squarkup.toml](reference/squarkup-toml.md) or squarkup.json file in your project repo.
 
 All projects require a squarkup config to run Squarkdown. (While Squarkdown does have sensible defaults, it’s highly unlikely they’ll work out-of-the-box![^defaults])
 

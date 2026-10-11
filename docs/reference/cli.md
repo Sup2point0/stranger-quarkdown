@@ -70,6 +70,6 @@ You must have a [squarkup config](squarkup-config.md) file to run this command, 
 squarkdown init
 ```
 
-This initialises your [`squarkup.toml`](squarkup-toml.md) for you, like `npm init` or `sv create`.
+This initialises your [squarkup.toml](squarkup-toml.md) for you, like `npm init` or `sv create`.
 
 You may find this helpful if you’re new to Squarkdown and are overwhelmed by all the configuration options!

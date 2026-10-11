@@ -8,10 +8,10 @@ Squarkdown comes with sensible defaults out-of-the-box, but you’ll almost cert
 
 Squarkdown reads in your configuration from 1 of 4 places:
 
-- [`/squarkup.toml`](squarkup-toml.md)
-- `/squarkup.json`
-- [`/.squarkdown/squarkup.toml`](squarkup-toml.md)
-- `/.squarkdown/squarkup.json`
+- [/squarkup.toml](squarkup-toml.md)
+- /squarkup.json
+- [/.squarkdown/squarkup.toml](squarkup-toml.md)
+- /.squarkdown/squarkup.json
 
 <!-- TODO -->
 TOML is the recommended format. JSON support is in progress!
@@ -101,7 +101,7 @@ This can happen because either:
 - The link is *totally* broken: the linked `.md` file doesn’t exist at all!
 - The link *would* be broken: the linked file doesn’t have `#SQUARK live!`, so wouldn’t have a page in the site.
 
-<!-- TODO default -->
+Defaults to `error`, meaning Squarkdown will raise an error handled according to [`errors.on-error`](#on-error).
 
 
 <br>

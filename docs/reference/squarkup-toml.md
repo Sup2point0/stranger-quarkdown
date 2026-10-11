@@ -16,7 +16,7 @@
 
 ## Example
 
-Here’s what Squarkdown’s own `squarkup.toml` looks like:
+Here’s what Squarkdown’s own squarkup.toml looks like:
 
 ```toml
 [errors]

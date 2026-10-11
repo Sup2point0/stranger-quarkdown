@@ -77,7 +77,7 @@ squarkdown --version
 
 ## Configure Squarkdown
 
-We’ll configure Squarkdown in a `squarkup.toml` at the root of our project:
+We’ll configure Squarkdown in a [squarkup.toml](../reference/squarkup-toml.md) at the root of our project:
 
 ```diff
   project/
@@ -102,7 +102,7 @@ For now, all we need is to specify that our site lives under `/site/`:
 site = "site/"
 ```
 
-> See [Squarkup Configuration](../reference/squarkup-config.md) for full details on all the options that can go in `squarkup.toml`.
+> See [Squarkup Configuration](../reference/squarkup-config.md) for full details on all the options that can go in squarkup.toml.
 
 > [!Tip]
 > Try running `squarkdown` now. What happens?
