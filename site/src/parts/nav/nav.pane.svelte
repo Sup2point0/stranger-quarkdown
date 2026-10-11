@@ -46,21 +46,21 @@ const delay = 240;
 
   <NavSection title="Reference" intern="reference">
     <NavLink text="Squarkup Config" intern="docs/reference/squarkup-config">
-      <NavLink code="paths.site"    intern="docs/reference/squark-config#site" />
-      <NavLink code="paths.sources" intern="docs/reference/squark-config#sources" />
-      <NavLink code="paths.include" intern="docs/reference/squark-config#include" />
-      <NavLink code="paths.exclude" intern="docs/reference/squark-config#exclude" />
-      <NavLink code="out.folder" intern="docs/reference/squark-config#out-folder" />
-      <NavLink code="out.file&#8209;name" intern="docs/reference/squark-config#file-name" />
-      <NavLink code="out.site&#8209;data&#8209;path" intern="docs/reference/squark-config#site-data-path" />
-      <NavLink code="assets.folder" intern="docs/reference/squark-config#assets-folder" />
-      <NavLink code="assets.site&#8209;assets&#8209;folder" intern="docs/reference/squark-config#site-assets-folder" />
-      <NavLink code="assets.extensions" intern="docs/reference/squark-config#extensions" />
-      <NavLink code="fonts.queries" intern="docs/reference/squark-config#queries" />
-      <NavLink code="errors.strict" intern="docs/reference/squark-config#on-no-dir" />
-      <NavLink code="errors.on&#8209;error" intern="docs/reference/squark-config#on-no-dir" />
-      <NavLink code="errors.file&#8209;already&#8209;exists" intern="docs/reference/squark-config#on-no-dir" />
-      <NavLink code="errors.link&#8209;broken" intern="docs/reference/squark-config#on-no-dir" />
+      <NavLink code="paths.site"    intern="docs/reference/squarkup-config#site" />
+      <NavLink code="paths.sources" intern="docs/reference/squarkup-config#sources" />
+      <NavLink code="paths.include" intern="docs/reference/squarkup-config#include" />
+      <NavLink code="paths.exclude" intern="docs/reference/squarkup-config#exclude" />
+      <NavLink code="out.folder" intern="docs/reference/squarkup-config#out-folder" />
+      <NavLink code="out.file&#8209;name" intern="docs/reference/squarkup-config#file-name" />
+      <NavLink code="out.site&#8209;data&#8209;path" intern="docs/reference/squarkup-config#site-data-path" />
+      <NavLink code="assets.folder" intern="docs/reference/squarkup-config#assets-folder" />
+      <NavLink code="assets.site&#8209;assets&#8209;folder" intern="docs/reference/squarkup-config#site-assets-folder" />
+      <NavLink code="assets.extensions" intern="docs/reference/squarkup-config#extensions" />
+      <NavLink code="fonts.queries" intern="docs/reference/squarkup-config#queries" />
+      <NavLink code="errors.strict" intern="docs/reference/squarkup-config#on-no-dir" />
+      <NavLink code="errors.on&#8209;error" intern="docs/reference/squarkup-config#on-no-dir" />
+      <NavLink code="errors.file&#8209;already&#8209;exists" intern="docs/reference/squarkup-config#on-no-dir" />
+      <NavLink code="errors.link&#8209;broken" intern="docs/reference/squarkup-config#on-no-dir" />
     </NavLink>
     <NavLink text="Charm Squark" intern="docs/reference/charm-squark">
       <NavLink code="live!"        intern="docs/reference/charm-squark#live" />
