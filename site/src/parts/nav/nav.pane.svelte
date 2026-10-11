@@ -45,6 +45,7 @@ const delay = 240;
   </NavSection>
 
   <NavSection title="Reference" intern="reference">
+    <NavLink text="CLI" intern="docs/reference/cli" />
     <NavLink text="Squarkup Config" intern="docs/reference/squarkup-config">
       <NavLink code="paths.site"    intern="docs/reference/squarkup-config#site" />
       <NavLink code="paths.sources" intern="docs/reference/squarkup-config#sources" />
@@ -79,9 +80,7 @@ const delay = 240;
       <NavLink code="only" intern="docs/reference/squarks#only" />
       <NavLink code="leave" intern="docs/reference/squarks#leave" />
     </NavLink>
-    <!-- <NavLink text="site data" intern="docs/reference/site-data" /> -->
-    <NavLink text="CLI" intern="docs/reference/cli">
-    </NavLink>
+    <NavLink text="Site Data" intern="docs/reference/site-data" />
   </NavSection>
 
   <!-- <NavSection title="Features" intern="features">
@@ -100,6 +99,8 @@ const delay = 240;
     <NavLink text="Synopsis" intern="info/synopsis" />
     <NavLink text="Rationale" intern="info/rationale" />
     <NavLink text="Decoded" intern="info/decoded" />
+    <NavLink text="Engineering" intern="info/dev" />
+    <NavLink text="Generative AI" intern="info/ai" />
     <NavLink text="Licence" intern="info/licence" />
   </NavSection>
 
