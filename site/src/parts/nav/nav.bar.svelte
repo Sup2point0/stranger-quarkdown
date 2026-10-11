@@ -5,13 +5,16 @@ The top navigation bar.
 
 <script lang="ts">
 
+import { base } from "$app/paths";
+
 </script>
 
 
 <nav>
   <section class="left">
     <a class="nav-link" href="https://sup2point0.github.io/stranger-quarkdown">
-      Stranger Quarkdown
+      <img alt="" src="{base}/squark-icon.png" />
+      <p> Stranger Quarkdown </p>
     </a>
   </section>
 
@@ -27,7 +30,7 @@ The top navigation bar.
 
 nav {
   width: 100%;
-  padding: 0.5rem 2rem;
+  padding: 0 1rem;
   z-index: 2;
   display: flex;
   flex-flow: row;
@@ -41,14 +44,22 @@ section {
 }
 
 .nav-link {
-  display: block;
-  padding: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 1rem;
   @include font-ui;
   color: light-dark(black, white);
   text-decoration: none;
 
   @include link;
   color: unset;
+
+  img {
+    height: 1.25rem;
+    transform: scale(150%);
+  }
 }
 
 </style>
