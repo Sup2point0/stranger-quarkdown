@@ -1358,6 +1358,26 @@ mod leave {
 					this
 				"}
 			),
+			(
+				indoc! {"
+					Please
+					<!-- #SQUARK slash? -->
+					<!-- #SQUARK leave? -->
+					keep
+					<!-- #SQUARK leave. -->
+					<!-- #SQUARK slash. -->
+					this
+				"},
+				indoc! {"
+					Please
+
+
+					keep
+
+
+					this
+				"}
+			),
 		]);
 	}
 

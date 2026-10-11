@@ -18,7 +18,9 @@
   ```
 
 ### Fixes
-- Fix critical issues with `#SQUARK slash` not removing all Markdown content
+- Fix critical issues with `#SQUARK slash` not removing all Markdown content.
+- Fix issues with `#SQUARK slash` and `#SQUARK leave` interacting.
+
 
 ## v4.2.2
 
