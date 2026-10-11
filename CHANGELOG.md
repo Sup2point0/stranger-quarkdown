@@ -4,7 +4,7 @@
 <br>
 
 
-## Next (v4.2.3)
+## v4.2.3
 
 ### New
 - Error when a page has an unclosed charm squark when `errors.strict = true`:

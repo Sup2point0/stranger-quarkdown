@@ -51,6 +51,7 @@ def publish-npm [] {
 	cp target-temp/windows/release/squarkdown.exe bin/squarkdown-win.exe
 	cp target-temp/linux/release/squarkdown bin/squarkdown-linux
 
+	npm login
 	npm publish
 
 	cd ..
