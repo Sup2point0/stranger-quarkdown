@@ -1,6 +1,6 @@
 <div align="center">
 
-![Stranger Quarkdown: A Successor to Quarkdown](.github/squark-cover.png)
+[![Stranger Quarkdown: A Successor to Quarkdown](.github/squark-cover.png)](https://sup2point0.github.io/stranger-quarkdown)
 
 [![crates.io](https://img.shields.io/crates/v/squarkdown?color=fe5404&style=flat-square)](https://crates.io/crates/squarkdown)
 [![npm](https://img.shields.io/npm/v/stranger-quarkdown?color=fe5404&style=flat-square)](https://www.npmjs.com/package/stranger-quarkdown)
@@ -27,9 +27,9 @@ Write Markdown content anywhere in your project repo, with [special syntax](docs
 ```md
 # Welcome to Squarkdown!
 <!-- #SQUARK live! feat!
-| dest = walkthrough/welcome
-| capt = An introduction to what Squarkdown can do
-| date = 2024 July 1
+| destination = walkthrough/welcome
+| description = An introduction to what Squarkdown can do
+| release-date = 2024 July 1
 -->
 
 This link to [other-file.md](other-file.md) will have its `.md` extension stripped.
@@ -108,6 +108,8 @@ For more on how Squarkdown works, how to configure and customise Squarkdown, and
 </a>
 
 All lovingly handcrafted <3
+
+See [Generative AI](AI) for details.
 
 
 <br>
