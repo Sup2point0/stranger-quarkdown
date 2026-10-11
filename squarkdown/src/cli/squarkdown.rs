@@ -5,8 +5,6 @@ use crate::colours::*;
 
 use rayon::prelude::*;
 
-use std::fs::File;
-use std::io::BufWriter;
 use std::process::ExitCode;
 use std::time::Instant;
 
@@ -153,20 +151,7 @@ fn squarkup(assets: bool, fonts: bool, no_parallel: bool) -> SquarkResult
 	// == SITE DATA == //
 	if let Some(dest) = &config.out.site_data_path {
 		log::is!("saving site data...");
-
-		if config.errors.strict && !dest.starts_with(&config.paths.root) {
-			SquarkError::Recoverable {
-				msg: slash!("cannot export site data to: {}", dest),
-				hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
-				debug: vec![],
-			}.depends(&config)?;
-		}
-
-		let data_raw = site_data.to_serializable(&config);
-		let file = BufWriter::new(File::create(dest)?);
-		serde_json::to_writer_pretty(file, &data_raw)?;
-
-		log::ok!(slash!("saved site data to: {B}{}", dest));
+		extras::save_site_data(dest, &site_data, &config)?;
 	}
 	
 	Ok(())
