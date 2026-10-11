@@ -24,6 +24,13 @@ pub fn save_site_data(dest: &Path, site_data: &SiteData, config: &SquarkupConfig
 	let file = BufWriter::new(File::create(dest)?);
 	serde_json::to_writer_pretty(file, &data_raw)?;
 
+	// unindent arbitrary fields (which are always lists)
+	let data = fs::read_to_string(dest)?;
+	let data = regex!("\\[\n {8}\"").replace_all(&data, "[\"");
+	let data = regex!(",\n {8}\"").replace_all(&data, ", \"");
+	let data = regex!("\"\n {6}\\]").replace_all(&data, "\"]");
+	fs::write(&dest, data.as_bytes())?;
+
 	log::ok!(slash!("saved site data to: {B}{}", dest));
 
 	Ok(())
