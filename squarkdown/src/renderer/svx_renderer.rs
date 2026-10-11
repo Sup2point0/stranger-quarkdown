@@ -6,6 +6,7 @@ use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
+use aho_corasick::AhoCorasick;
 use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark as pd;
@@ -26,23 +27,35 @@ type ParserRange = Range<usize>;
 
 
 /// Options for parsing with `pulldown-cmark`.
-pub static PARSER_OPTIONS: LazyLock<pd::Options> = LazyLock::new(||
-	  pd::Options::ENABLE_GFM
-	| pd::Options::ENABLE_STRIKETHROUGH
-	| pd::Options::ENABLE_TABLES
-	| pd::Options::ENABLE_MATH
-	| pd::Options::ENABLE_FOOTNOTES
-	| pd::Options::ENABLE_TASKLISTS
-);
+pub static PARSER_OPTIONS: LazyLock<pd::Options>
+	= LazyLock::new(||
+		  pd::Options::ENABLE_GFM
+		| pd::Options::ENABLE_STRIKETHROUGH
+		| pd::Options::ENABLE_TABLES
+		| pd::Options::ENABLE_MATH
+		| pd::Options::ENABLE_FOOTNOTES
+		| pd::Options::ENABLE_TASKLISTS
+	);
 
 /// Options for rendering with `pulldown-cmark-to-cmark`.
-pub static RENDER_OPTIONS: LazyLock<cmark::Options<'static>> = LazyLock::new(||
-	cmark::Options {
-		code_block_token_count: 3,
-		list_token: '-',
-		..cmark::Options::default()
-	}
-);
+pub static RENDER_OPTIONS: LazyLock<cmark::Options<'static>>
+	= LazyLock::new(||
+		cmark::Options {
+			code_block_token_count: 3,
+			list_token: '-',
+			..cmark::Options::default()
+		}
+	);
+
+/// HTML entities that [`pulldown_cmark`] parses as unicode, to transform back into literal entities mapping into [`HTML_ENTITY_REPLACE_WITH`].
+pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
+	= LazyLock::new(||
+		AhoCorasick::new(["\u{2002}", "\u{2003}"]).unwrap()
+	);
+
+/// HTML entities that [`pulldown_cmark`] parses as unicode, mapped from [`HTML_ENTITY_PATTERNS`].
+pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
+	= ["&ensp;", "&emsp;"];
 
 
 /// Mutable state for tracking rendering context and errors.
@@ -155,9 +168,9 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			// .inspect(|(e, _)| { println!("before = {e:?}"); })
+			.inspect(|(e, _)| { println!("before = {e:?}"); })
 			.flat_map(Self::split_comments)
-			// .inspect(|(e, _)| { println!("after = {e:?}"); })
+			.inspect(|(e, _)| { println!("after = {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -336,6 +349,7 @@ impl Renderer<'_>
 					self.process_image(dest_url, range);
 					Some(event)
 				}
+				pd::Event::Text(text) => Some(self.process_text(text)),
 				_ => Some(event),
 			}
 		}
@@ -588,6 +602,12 @@ impl Renderer<'_>
 
 		*dest_url = pd::CowStr::Boxed(Box::from(dest));
 	}
+
+	fn process_text<'e>(&self, text: pd::CowStr) -> pd::Event<'e>
+	{
+		let text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
+		pd::Event::Text(text.into())
+	}
 }
 
 /// Miscellaneous injections
@@ -676,9 +696,12 @@ impl Renderer<'_>
 		}
 
 		// this line
-		let before = &self.source[info.line_range.start..range.start];
 		let focus = &self.source[range.clone()];
-		let after = &self.source[range.end..info.line_range.end];
+
+		let range_before = info.line_range.start..range.start;
+		let range_after  = range.end..info.line_range.end;
+		let before = if range_before.is_empty() { "" } else { &self.source[range_before] };
+		let after  = if range_after.is_empty()  { "" } else { &self.source[range_after] };
 
 		out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}", info.line_number));
 
@@ -797,8 +820,7 @@ impl From<bool> for ProcessAction {
 // 		// c.errors.strict = false;
 // 	}, &[
 // 		indoc! {"
-// 			<!-- #SQUARK unknown? -->
-// 			hi
+// 			x y
 // 		"}
 // 	]);
 // }
@@ -825,6 +847,18 @@ mod plain {
 				sup, world!
 			"},
 		]);
+	}
+
+	mod edge {
+		use super::*;
+
+		#[test] fn ensp_with_emphasis() {
+			test_preserves(&[
+				"*&ensp;*",
+				"**&ensp;**",
+				"***&ensp;***",
+			]);
+		}
 	}
 }
 

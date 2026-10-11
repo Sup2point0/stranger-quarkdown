@@ -4,6 +4,12 @@
 <br>
 
 
+## Next (v4.2.2)
+
+### Fixes
+- Preserve `&ensp;` and `&emsp;` HTML entities.
+
+
 ## v4.2.1
 
 ### Fixes
@@ -20,7 +26,7 @@
   }
   ```
 
-- Strip colours from `squarkdown --version` for compatibility with other standard command-line tools
+- Strip colours from `squarkdown --version` for compatibility with other standard command-line tools.
 
 
 ## v4.2.0

@@ -20,6 +20,7 @@ lto = true
 strip = true
 
 [dependencies]
+aho-corasick = "1.1.5"
 enum-display = "0.2.1"
 enum_stringify = "0.6.5"
 path-clean = "1.0.1"
