@@ -68,10 +68,15 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 		.output();
 
 	assert_ok!( &r );
-	let process::Output{ status, stdout, .. } = r.unwrap();
+	let process::Output{ status, stdout, stderr } = r.unwrap();
 
 	let out = String::from_utf8(stdout).unwrap();
 	print!("{out}");
+
+	if !stderr.is_empty() {
+		let err = String::from_utf8(stderr).unwrap();
+		print!("{err}");
+	}
 
 	(status, out)
 }
