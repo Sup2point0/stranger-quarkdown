@@ -16,6 +16,7 @@ mod test_utils;
 // == PUBLIC == //
 
 use crate::prelude::*;
+use crate::colours::*;
 use crate::macros::*;
 
 use std::fs::File;
@@ -40,7 +41,28 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 		let i = source.len();
 
 		if reader.read_line(&mut source)? == 0 {
-			return Ok(None);
+			if may_have_charm_squark && config.errors.strict {
+				return Err(SquarkError::Recoverable {
+					msg: str!("warning: possibly unclosed charm squark"),
+					hint: fmt!("if you aren’t trying to write a charm squark, you can ignore this"),
+					debug: [
+						vec![
+							slash!("in: {}", filepath),
+							fmt!("checked {num_lines_checked} lines:"),
+							str!(" "),
+						],
+							source.lines().map(|line|
+								fmt!("  {GREY1}{line}")
+							).collect(),
+						vec![
+							fmt!("  {R}{BOLD}<end of file>{UNBOLD}"),
+							str!(" "),
+						],
+					].concat(),
+				});
+			} else {
+				return Ok(None);
+			}
 		}
 
 		if !may_have_charm_squark && source[i..].contains("<!--") {

@@ -54,6 +54,15 @@ use path_macro::path;
 	assert_contains!( out, "no files found to squarkup" );
 }
 
+/// Squarkdown errors if a page has an incomplete charm squark (instead of silently deeming it inactive).
+#[test] fn incomplete_charm()
+{
+	let (status, out) = capture_squarkup_from("errors/incomplete-charm");
+	assert_not!( status.success() );
+	assert_contains!( out, "possibly unterminated charm squark" );
+	assert_contains!( out, "end of file" );
+}
+
 /// Squarkdown errors on 2-page conflicts with `config.errors.strict = true`.
 #[test] fn conflicts_crashes()
 {

@@ -4,6 +4,20 @@
 <br>
 
 
+## Next (v4.2.3)
+
+### New
+- Error when a page has an unclosed charm squark when `errors.strict = true`:
+
+  ```md
+  # This charm squark
+  <!-- #SQUARK live!
+  | destination = unclosed-charm-squark
+  
+  This page’s charm squark was not closed
+  ```
+
+
 ## v4.2.2
 
 ### New
