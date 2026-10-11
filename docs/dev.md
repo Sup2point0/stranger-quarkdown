@@ -1,18 +1,18 @@
 # Engineering
-<!-- #SQUARK live! dead!
-| dest = TODO
+<!-- #SQUARK live!
+| dest = info/dev
 | desc = Technicalities, challenges and decisions behind developing Stranger Quarkdown
 | date = 2026 October 10
-| update = 2026 October 10
+| update = 2026 October 11
 -->
 
 sup!
 
 Here I’ll talk about some of the technicalities, challenges and decisions behind developing Squarkdown. I’ll touch on how things were done previously in the Ruby version, and how I changed them with the Rust rewrite.
 
-If you’re interested in understanding how Squarkdown works, this is *not* the place to start! Instead, I would recommend reading the actual code, starting from [`squarkdown/lib.rs](../squarkdown/src/lib.rs). I’ve got plenty of documentation and comments explaining how everything works. You’ll also find quite a few comments noting down technical challenges and justifying strange design decisions.
+If you’re interested in understanding how Squarkdown works, this is *not* the place to start! Instead, I would recommend reading the actual code, starting from [squarkdown/lib.rs](../squarkdown/src/lib.rs). I’ve got plenty of documentation and comments explaining how everything works. You’ll also find quite a few comments noting down technical challenges and justifying strange design decisions.
 
-If those don’t satisfy you, then this page may be of interest, as an elaboration upon those challenges, providing wider context and reasoning behind them. I haven’t paid too much attention to structure or narrative here, since it’s all just little tidbits here and there for other curious developers to enjoy.
+If those don’t satisfy you, then this page may be of interest as an *elaboration* upon those challenges, providing wider context and reasoning behind them. I haven’t paid too much attention to structure or narrative here, since it’s all just little tidbits here and there for other curious developers to enjoy.
 
 
 <br>
@@ -27,17 +27,27 @@ Squarkdown is an executable build tool, so it has a linear pipeline that perform
 - Parse charm squarks
 - Render
 
+It’s very sequential, very pure, very testable and very parallelisable.
+
 
 <br>
 
 
 ## Aggregating Errors
 
+<!-- #SQUARK slash? -->
+> Relevant files: [types/squark_error.rs](../squarkdown/src/types/squark_error.rs), [cli/squarkdown.rs](../squarkdown/src/cli/squarkdown.rs)
+<!-- #SQUARK slash. -->
+
 
 <br>
 
 
 ## Parse then render... but that means duplicate work?
+
+<!-- #SQUARK slash? -->
+> Relevant files: [cli/squarkdown.rs](../squarkdown/src/cli/squarkdown.rs)
+<!-- #SQUARK slash. -->
 
 In the Ruby version, parsing the charm squarkdown and rendering Markdown happened at the same time.
 
@@ -52,6 +62,10 @@ It’s basically like the Assembler dilemma: 2-pass to scan for labels first, or
 
 
 ## Why is loading a config such a nightmare?
+
+<!-- #SQUARK slash? -->
+> Relevant files: [config/from_toml.rs](../squarkdown/src/config/from_toml.rs)
+<!-- #SQUARK slash. -->
 
 In the Ruby version, Squarkdown loaded the user’s `squarkup.json` with a simple JSON parse and JSON Schema validate. It was dead easy.
 

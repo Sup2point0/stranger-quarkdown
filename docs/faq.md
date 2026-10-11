@@ -19,7 +19,7 @@ Yeah so, Squarkdown was made for a very particular purpose in a very particular 
 It’s happened to be perfect for many of my projects, such as [pyco:bytes](https://sup2point0.github.io/pycobytes), [Integrity](https://sup2point0.github.io/integrity), and ofc [*Assort*](https://sup2point0.github.io/Assort). It really does make development so much easier when I don’t have to worry about where I put everything. After having all the infrastructure set up, being able to just add comments to a `.md` file and have it automatically render to a webpage complete with metadata is pretty awesome. The best part is, you can’t even see any of it when previewing the Markdown file!
 
 ### How fast is Squarkdown?
-With the Rust rewrite, fast enough. On my Windows machine the Squarkdown docs take under 100 ms to squarkup, but on GitHub Action’s Linux machine the whole thing finishes in under 10 ms. Execution time varies a lot depending on system speed and delays. Run it yourself and see, right?
+With the Rust rewrite, fast enough. On my Windows machine the Squarkdown docs take under 50 ms to squarkup, but on GitHub Action’s Linux machine the whole thing finishes in under 10 ms. Execution time varies a lot depending on system speed and delays. Run it yourself and see, right?
 
 ### What is Squarkdown spending its time doing?
 Squarkdown spends most of its time doing 3 things:
