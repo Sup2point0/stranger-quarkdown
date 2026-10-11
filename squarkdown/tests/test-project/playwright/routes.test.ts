@@ -72,7 +72,7 @@ test("crawl-routes", async () =>
 					pending_routes++;
 					routes_visited++;
 
-					let response = await page.goto(target, { waitUntil: "networkidle" });
+					let response = await page.goto(target);
 					if (!response?.ok()) throw Error(response?.status().toString());
 
 					let links = await page.locator("a").evaluateAll(
