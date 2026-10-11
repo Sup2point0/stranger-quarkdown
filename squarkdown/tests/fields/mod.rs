@@ -127,8 +127,17 @@ use std::fs;
 	clear_files("fields/arbitrary").unwrap();
 
 	assert!( squarkup_from("fields/arbitrary").success() );
+
 	let ts = read_file("fields/arbitrary/+page.ts");
 	assert_contains!( ts, "PageData<\"long\">" );
+	assert_contains!( ts, "PageData<\"long\"> & Record<OtherFields, string[]>" );
+	assert_contains!( ts, "| \"one\"" );
+	assert_contains!( ts, "| \"two\"" );
+	assert_contains!( ts, "| \"three\"" );
+	assert_contains!( ts, "| \"some_list\"" );
+	assert_contains!( ts, "| \"some_array\"" );
+	assert_contains!( ts, "| \"dangerous.key\"" );
+	assert_contains!( ts, "| \"arbitrary\"" );
 	assert_contains!( ts, "path: \"readme.md\"," );
 	assert_contains!( ts, "title: \"Arbitrary\"," );
 	assert_contains!( ts, "description: \"This page" );

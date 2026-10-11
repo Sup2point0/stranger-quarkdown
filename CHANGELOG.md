@@ -1,7 +1,5 @@
 # Squarkdown Changelog
 
-<!-- pass in path to squarkup.toml -->
-
 
 <br>
 
@@ -9,6 +7,19 @@
 ## Next (v4.2.1)
 
 ### Fixes
+- Extend `PageData<>` in `+page.ts` with your non-native fields:
+
+  ```ts
+  type OtherFields =
+    | "your_field"
+    | "your_other_field"
+  ;
+
+  export function load(): PageData<"long"> & Record<OtherFields, string[]> {
+    ...
+  }
+  ```
+
 - Strip colours from `squarkdown --version` for compatibility with other standard command-line tools
 
 

@@ -31,9 +31,22 @@ impl Renderer<'_>
 		let s = self.config.out.shorter_fields;
 
 		f.write_all(b"import type { PageData } from \"stranger-quarkdown\";\n\n")?;
-		f.write_all(b"export function load(): PageData<")?;
-		write!(f, "{}", if s { "\"short\"" } else { "\"long\"" })?;
-		f.write_all(b"> {\n")?;
+		
+		if !p.other.is_empty() {
+			writeln!(f, "type OtherFields =")?;
+			for key in p.other.keys() {
+				writeln!(f, "\t| \"{key}\"")?;
+			}
+			writeln!(f, ";\n")?;
+		}
+
+		write!(f, "export function load(): PageData<\"{}\">", if s { "short" } else { "long" })?;
+
+		if !p.other.is_empty() {
+			write!(f, " & Record<OtherFields, string[]>")?;
+		}
+
+		f.write_all(b" {\n")?;
 		f.write_all(b"\treturn {\n")?;
 
 		writeln!(f, "\t\tshard: {:?},", &p.shard)?;
