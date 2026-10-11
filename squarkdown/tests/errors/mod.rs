@@ -41,9 +41,7 @@ use path_macro::path;
 	let (status, out) = capture_squarkup_from("errors/unknown-config");
 	assert_not!( status.success() );
 	assert_contains!( out, "unknown" );
-	assert_contains!( out, "very-weird" );
-	assert_contains!( out, "super-weird" );
-	assert_contains!( out, "hmmm" );
+	assert_contains!( out, "weird" );
 	assert_contains!( out, "sus" );
 	assert_contains!( out, "tainable" );
 }

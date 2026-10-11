@@ -67,13 +67,13 @@ impl SquarkupConfig
 		*/
 		let mut paths_cached = None;
 
-		if let Some(paths) = Self::try_take_table_if_present(&mut data, "paths",
+		if let Some(mut paths) = Self::try_take_table_if_present(&mut data, "paths",
 			hints!("write your config like this: {W}```\n\t[paths]\n\tsite = '/your-site/'\n```")
 		)?
 		{
-			if let Some(value) = paths.get("site") {
-				let dir = Self::try_get_str(value, "paths.site", "(filepath relative to your project root)")?;
-				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
+			if let Some(value) = paths.remove("site") {
+				let dir = Self::try_get_str(&value, "paths.site", "(filepath relative to your project root)")?;
+				site = Self::try_resolve_folder(root, &dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
 			}
 			
 			paths_cached = Some(paths);
@@ -84,21 +84,21 @@ impl SquarkupConfig
 		// ...then apply the user's non-defaults on top of it
 
 		// == ErrorConfig == //
-		if let Some(errors) = Self::try_take_table_if_present(&mut data, "errors",
+		if let Some(mut errors) = Self::try_take_table_if_present(&mut data, "errors",
 			hints!("write your config like this: {W}```\n\t[errors]\n\ton-error = 'kill'\n```")
 		)?
 		{
-			if let Some(value) = errors.get("strict") { catch!(errs => {
-				c.errors.strict = Self::try_get_bool(value, "errors.strict")?;
+			if let Some(value) = errors.remove("strict") { catch!(errs => {
+				c.errors.strict = Self::try_get_bool(&value, "errors.strict")?;
 			}) }
 			
-			if let Some(value) = errors.get("debug") { catch!(errs => {
-				c.errors.debug = Self::try_get_bool(value, "errors.debug")?;
+			if let Some(value) = errors.remove("debug") { catch!(errs => {
+				c.errors.debug = Self::try_get_bool(&value, "errors.debug")?;
 			}) }
 
 			/* NOTE: This is the one field that isn't aggregated into `errs`... because all error handling depends on it, so the user _must_ provide a valid value! */
-			if let Some(value) = errors.get("on-error") {
-				let raw = Self::try_get_str(value, "errors.on-error", "(an error handling strategy)")?;
+			if let Some(value) = errors.remove("on-error") {
+				let raw = Self::try_get_str(&value, "errors.on-error", "(an error handling strategy)")?;
 
 				if let Ok(opt) = ErrorAction::try_from(raw) {
 					c.errors.on_error = opt;
@@ -111,8 +111,8 @@ impl SquarkupConfig
 				}
 			}
 			
-			if let Some(value) = errors.get("file-already-exists") { catch!(errs => {
-				let raw = Self::try_get_str(value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
+			if let Some(value) = errors.remove("file-already-exists") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "errors.file-already-exists", "(a file conflict handling strategy)")?;
 
 				if let Ok(opt) = FileAction::try_from(raw) {
 					c.errors.file_already_exists = opt;
@@ -125,8 +125,8 @@ impl SquarkupConfig
 				}
 			}) }
 			
-			if let Some(value) = errors.get("broken-link") { catch!(errs => {
-				let raw = Self::try_get_str(value, "errors.broken-link", "(a missing file handling strategy)")?;
+			if let Some(value) = errors.remove("broken-link") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "errors.broken-link", "(a missing file handling strategy)")?;
 
 				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
 					c.errors.link_broken = opt;
@@ -138,15 +138,17 @@ impl SquarkupConfig
 					}
 				}
 			}) }
+			
+			Self::check_leftover_unknowns(errors, &mut errs, false);
 		}
 
 		// == ProjectConfig == //
-		if let Some(project) = Self::try_take_table_if_present(&mut data, "project",
+		if let Some(mut project) = Self::try_take_table_if_present(&mut data, "project",
 			hints!("write your config like this: {W}```\n\t[project]\n\tgithub = 'Sup2point0/stranger-quarkdown'\n```")
 		)?
 		{
-			if let Some(value) = project.get("name") { catch!(errs => {
-				let raw = Self::try_get_str(value, "project.name", "(displayed name of project)")?;
+			if let Some(value) = project.remove("name") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "project.name", "(displayed name of project)")?;
 
 				if raw.is_empty() {
 					recoverable! {
@@ -159,8 +161,8 @@ impl SquarkupConfig
 				raw.clone_into(&mut c.project.name);
 			}) }
 			
-			if let Some(value) = project.get("github") { catch!(errs => {
-				let raw = Self::try_get_str(value, "project.github",
+			if let Some(value) = project.remove("github") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "project.github",
 					&fmt!("(GitHub repo link in {W}user/repo{G} format)")
 				)?;
 
@@ -183,39 +185,41 @@ impl SquarkupConfig
 
 				raw.clone_into(&mut c.project.github);
 			}) }
+			
+			Self::check_leftover_unknowns(project, &mut errs, false);
 		}
 
 		// == PathsConfig == //
-		if let Some(paths) = paths_cached
+		if let Some(mut paths) = paths_cached
 		{
-			if let Some(value) = paths.get("sources") { catch!(errs => {
-				let values = Self::try_get_array(value, "paths.sources", "(of folders relative to your project root)")?;
+			if let Some(value) = paths.remove("sources") { catch!(errs => {
+				let values = Self::try_get_array(&value, "paths.sources", "(of folders relative to your project root)")?;
 
 				if !values.is_empty() {
 					c.paths.sources.clear();
 				}
 
 				for value in values {
-					let raw = Self::try_get_str(value, "paths.sources", "(entry in an array)")?;
+					let raw = Self::try_get_str(&value, "paths.sources", "(entry in an array)")?;
 					let dir = Self::try_resolve_folder(
-						root, raw, "a source folder you specified",
+						root, &raw, "a source folder you specified",
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
 					c.paths.sources.push(dir);
 				}
 			}) }
 
-			if let Some(value) = paths.get("include") { catch!(errs => {
-				let values = Self::try_get_array(value, "paths.include", "(of RegEx patterns)")?;
+			if let Some(value) = paths.remove("include") { catch!(errs => {
+				let values = Self::try_get_array(&value, "paths.include", "(of RegEx patterns)")?;
 
 				if !values.is_empty() {
 					c.paths.include.clear();
 				}
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_str(value, "paths.include", "(RegEx pattern)")?;
+					let pattern = Self::try_get_str(&value, "paths.include", "(RegEx pattern)")?;
 
-					match Regex::new(pattern) {
+					match Regex::new(&pattern) {
 						Ok(compiled) => c.paths.include.push(compiled),
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
@@ -225,11 +229,11 @@ impl SquarkupConfig
 				}) }
 			}) }
 
-			if let Some(value) = paths.get("exclude") { catch!(errs => {
-				let values = Self::try_get_array(value, "paths.exclude", "(of RegEx patterns)")?;
+			if let Some(value) = paths.remove("exclude") { catch!(errs => {
+				let values = Self::try_get_array(&value, "paths.exclude", "(of RegEx patterns)")?;
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_str(value, "paths.exclude", "(RegEx pattern)")?;
+					let pattern = Self::try_get_str(&value, "paths.exclude", "(RegEx pattern)")?;
 
 					match Regex::new(pattern) {
 						Ok(compiled) => c.paths.exclude.push(compiled),
@@ -240,21 +244,23 @@ impl SquarkupConfig
 					}
 				}) }
 			}) }
+			
+			Self::check_leftover_unknowns(paths, &mut errs, false);
 		}
 
 		// == OutConfig == //
-		if let Some(out) = Self::try_take_table_if_present(&mut data, "out",
+		if let Some(mut out) = Self::try_take_table_if_present(&mut data, "out",
 			hints!("write your config like this: {W}```\n\t[out]\n\tfile = '+page.svx'\n```")
 		)?
 		{
-			if let Some(value) = out.get("folder") { catch!(errs => {
-				let raw = Self::try_get_str(value, "out.folder", "(folder relative to your SvelteKit site)")?;
-				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
+			if let Some(value) = out.remove("folder") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "out.folder", "(folder relative to your SvelteKit site)")?;
+				let dir = Self::try_resolve_folder(&site, &raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
 				c.out.folder = dir;
 			}) }
 
-			if let Some(value) = out.get("file-name") { catch!(errs => {
-				let raw = Self::try_get_str(value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
+			if let Some(value) = out.remove("file-name") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
 
 				if raw.contains('/') {
 					unrecoverable! {
@@ -267,10 +273,10 @@ impl SquarkupConfig
 				raw.clone_into(&mut c.out.file_name);
 			}) }
 
-			if let Some(value) = out.get("site-data-path") { catch!(errs => {
-				let raw = Self::try_get_str(value, "out.site-data-path", "(filepath including `.json` extension)")?;
+			if let Some(value) = out.remove("site-data-path") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "out.site-data-path", "(filepath including `.json` extension)")?;
 
-				let path = path!(site / utils::to_rel(raw));
+				let path = path!(site / utils::to_rel(&raw));
 
 				let folder = path.parent().expect("site directory always has a parent folder");
 
@@ -287,104 +293,100 @@ impl SquarkupConfig
 				c.out.site_data_path = Some(path);
 			}) }
 
-			if let Some(value) = out.get("render-page-ts") { catch!(errs => {
-				c.out.render_page_ts = Self::try_get_bool(value, "out.render-page-ts")?;
+			if let Some(value) = out.remove("render-page-ts") { catch!(errs => {
+				c.out.render_page_ts = Self::try_get_bool(&value, "out.render-page-ts")?;
 			}) }
 
-			if let Some(value) = out.get("shorter-fields") { catch!(errs => {
-				c.out.shorter_fields = Self::try_get_bool(value, "out.shorter-fields")?;
+			if let Some(value) = out.remove("shorter-fields") { catch!(errs => {
+				c.out.shorter_fields = Self::try_get_bool(&value, "out.shorter-fields")?;
 			}) }
+			
+			Self::check_leftover_unknowns(out, &mut errs, false);
 		}
 
 		// == FormatConfig == //
-		if let Some(format) = Self::try_take_table_if_present(&mut data, "format",
+		if let Some(mut format) = Self::try_take_table_if_present(&mut data, "format",
 			hints!("write your config like this: {W}```\n\t[format]\n\tpreserve-comments = true\n```")
 		)?
 		{
 			let s = &mut c.format;
 
-			if let Some(value) = format.get("preserve-heading") { catch!(errs => {
-				s.preserve_heading = Self::try_get_bool(value, "format.preserve-heading")?;
+			if let Some(value) = format.remove("preserve-heading") { catch!(errs => {
+				s.preserve_heading = Self::try_get_bool(&value, "format.preserve-heading")?;
 			}) }
-			if let Some(value) = format.get("preserve-comments") { catch!(errs => {
-				s.preserve_comments = Self::try_get_bool(value, "format.preserve-comments")?;
+			if let Some(value) = format.remove("preserve-comments") { catch!(errs => {
+				s.preserve_comments = Self::try_get_bool(&value, "format.preserve-comments")?;
 			}) }
-			if let Some(value) = format.get("externalise-links") { catch!(errs => {
-				s.externalise_links = Self::try_get_bool(value, "format.externalise-links")?;
+			if let Some(value) = format.remove("externalise-links") { catch!(errs => {
+				s.externalise_links = Self::try_get_bool(&value, "format.externalise-links")?;
 			}) }
+			
+			Self::check_leftover_unknowns(format, &mut errs, false);
 		}
 
 		// == AssetsConfig == //
-		if let Some(assets) = Self::try_take_table_if_present(&mut data, "assets",
+		if let Some(mut assets) = Self::try_take_table_if_present(&mut data, "assets",
 			hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
 		)?
 		{
-			if let Some(value) = assets.get("folder") { catch!(errs => {
-				let dir = Self::try_get_str(value, "assets.folder", "(folder relative to your project root)")?;
-				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
+			if let Some(value) = assets.remove("folder") { catch!(errs => {
+				let dir = Self::try_get_str(&value, "assets.folder", "(folder relative to your project root)")?;
+				let folder = Self::try_resolve_folder(root, &dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
 
 				c.assets.folder = folder;
 			}) }
 
-			if let Some(value) = assets.get("site-assets-folder") { catch!(errs => {
-				let dir = Self::try_get_str(value, "assets.site-assets-folder", "(folder relative to your project root)")?;
-				let folder = Self::try_resolve_folder(root, dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
+			if let Some(value) = assets.remove("site-assets-folder") { catch!(errs => {
+				let dir = Self::try_get_str(&value, "assets.site-assets-folder", "(folder relative to your project root)")?;
+				let folder = Self::try_resolve_folder(root, &dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
 
 				c.assets.site_assets_folder = Some(folder);
 			}) }
 
-			if let Some(value) = assets.get("extensions") { catch!(errs => {
-				let values = Self::try_get_array(value, "assets.extensions", "(of file extensions without .)")?;
+			if let Some(value) = assets.remove("extensions") { catch!(errs => {
+				let values = Self::try_get_array(&value, "assets.extensions", "(of file extensions without .)")?;
 
 				if !values.is_empty() {
 					c.assets.extensions.clear();
 				}
 
 				for value in values { catch!(errs => {
-					let mut raw = Self::try_get_str(value, "assets.extensions", "(file extension)")?;
+					let mut raw = Self::try_get_str(&value, "assets.extensions", "(file extension)")?;
 
 					if raw.starts_with('.') {
 						raw = &raw[1..];
 					}
-					
+
 					c.assets.extensions.push(raw.to_owned());
 				}) }
 			}) }
+			
+			Self::check_leftover_unknowns(assets, &mut errs, false);
 		}
 
 		// == FontsConfig == //
-		if let Some(fonts) = Self::try_take_table_if_present(&mut data, "fonts",
+		if let Some(mut fonts) = Self::try_take_table_if_present(&mut data, "fonts",
 			hints!("write your config like this: {W}```\n\t[fonts]\n\tqueries = ['Sora:wght@100..800']\n```")
 		)?
 		{
-			if let Some(value) = fonts.get("queries") { catch!(errs => {
-				let values = Self::try_get_array(value, "fonts.queries", "(of font query parameters)")?;
+			if let Some(value) = fonts.remove("queries") { catch!(errs => {
+				let values = Self::try_get_array(&value, "fonts.queries", "(of font query parameters)")?;
 
 				if !values.is_empty() {
 					c.fonts.queries.clear();
 				}
 
 				for value in values { catch!(errs => {
-					let raw = Self::try_get_str(value, "fonts.queries", "(font query parameter)")?;
+					let raw = Self::try_get_str(&value, "fonts.queries", "(font query parameter)")?;
 					
 					c.fonts.queries.push(raw.to_owned());
 				}) }
 			}) }
+			
+			Self::check_leftover_unknowns(fonts, &mut errs, false);
 		}
 
-		/* Known categories have been removed from `data` by `try_take_table_if_present()`, so leftover ones are invalid. */
-		if !data.is_empty() {
-			for (key, value) in data {
-				errs.push(SquarkError::Recoverable {
-					msg: fmt!(
-						"unknown {} {W}{key}",
-						if value.is_table() {"group"} else {"option"},
-					),
-					hint: str!(),
-					debug: vec![],
-				});
-			}
-		}
+		Self::check_leftover_unknowns(data, &mut errs, true);
 
 		errs.depends(&c)?;
 		Ok(c)
@@ -495,6 +497,23 @@ impl SquarkupConfig
 		}
 		else {
 			Ok(path.clean())
+		}
+	}
+
+	/// Check if `data` contains any residual (invalid) fields, after attempting to extract all known options.
+	fn check_leftover_unknowns(data: toml::Table, errs: &mut SquarkError, is_final_check: bool)
+	{
+		for (key, value) in data {
+			errs.push(SquarkError::Recoverable {
+				msg: fmt!(
+					"unknown {}: {W}{BOLD}{key}{UNBOLD}",
+					if is_final_check && value.is_table() {"group"} else {"option"},
+				),
+				hint: str!(),
+				debug: vec![
+					fmt!("received: {GREY1}{key} = {value:?}")
+				],
+			});
 		}
 	}
 }

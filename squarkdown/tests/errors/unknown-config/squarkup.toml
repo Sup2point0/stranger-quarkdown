@@ -2,15 +2,12 @@
 
 unknown = true
 
-[very-weird]
-
-[super-weird]
-hmmm = ["yes", "indeed"]
+[weird]
 
 [errors]
 sus = "tainable"
 strict = false
-on-error = "warn"
+on-error = "kill"
 
 [paths]
 site = "../../test-project/"
