@@ -4,7 +4,7 @@
 <br>
 
 
-## Next (v4.2.2)
+## v4.2.2
 
 ### New
 - Check for unknown categories and options in squarkup config.
