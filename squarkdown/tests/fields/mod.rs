@@ -105,4 +105,27 @@ use assertables::*;
 	assert_contains!( ts, "\"some_list\": [\"yes\", \"no\"]," );
 	assert_contains!( ts, "\"some_array\": [\"true\", \"false\"]," );
 	assert_contains!( ts, "\"dangerous.key\": [\"val1\", \"val2\", \"val3\"]," );
+
+	let json = read_file("../data/arbitrary.json");
+	assert_contains!( json, "\"one\": [\"1\"]" );
+	assert_contains!( json, "\"two\": [\"2\"]" );
+	assert_contains!( json, "\"three\": [\"3\"]" );
+	assert_contains!( json, "\"some_list\": [\"yes\", \"no\"]" );
+	assert_contains!( json, "\"some_array\": [\"true\", \"false\"]" );
+	assert_contains!( json, "\"dangerous.key\": [\"val1\", \"val2\", \"val3\"]" );
+	assert_contains!( json, "\"arbitrary\": [\"\\\"\\\"\"]" );
+}
+
+/// Squarkdown escapes values in `+page.ts` and `site.json`, so that characters like `"` don't break the output.
+#[test] fn escape()
+{
+	clear_files("fields/escape").unwrap();
+
+	assert!( squarkup_from("fields/escape").success() );
+	let ts = read_file("fields/escape/+page.ts");
+	assert_contains!( ts, "PageData<\"long\">" );
+	assert_contains!( ts, "title: \"This title has \\\" in it\"," );
+	assert_contains!( ts, "description: \"This description has \\\\ in it\"," );
+	assert_contains!( ts, "caption: \"This caption has \\\\n in it\"," );
+	assert_contains!( ts, "arbitrary\": [\"Maybe \\\"dangerous\\\"\"]," );
 }
