@@ -12,6 +12,8 @@ use std::path::{ PathBuf };
 
 
 /// A parser for the charm squark of a file.
+/// 
+/// This class is not publically accessible, and is only constructed inside [`parse()`](crate::parser::parse). As such it can assume that it is passed well-formed input to parse, with a _complete_ charm squark, from the opening `<!--` to the closing `-->`. The parser will terminate once it reaches the closing `-->`, so lookahead, etc. will never go out-of-bounds.
 pub(super) struct CharmParser<'d>
 {
 	// == IMMUTABLE == //

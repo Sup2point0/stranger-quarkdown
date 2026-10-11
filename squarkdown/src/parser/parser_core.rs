@@ -64,6 +64,8 @@ impl CharmParser<'_>
 	}
 
 	/// Check that `needle` is upcoming without consuming.
+	/// 
+	/// `needle` must be ASCII-only since this directly uses byte indices.
 	pub(super) fn lookahead(&self, needle: &str) -> bool
 	{
 		needle.char_indices().all(|(i, c)| self.source[self.i + i] == c)
@@ -254,40 +256,6 @@ impl CharmParser<'_>
 
 
 #[cfg(test)]
-mod advance
-{
-	use super::*;
-
-	#[test] fn and_current()
-	{
-		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
-		assert_eq!( parser.current(), Some('0') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.current(), None );
-		assert_err!( parser.advance() );
-	}
-
-	#[test] fn and_peek()
-	{
-		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
-		assert_eq!( parser.peek(), Some('1') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('3') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
-		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
-		assert_ok!( parser.advance() );
-		assert_err!( parser.advance() );
-	}
-}
-
-#[cfg(test)]
 mod preview {
 	use super::*;
 
@@ -320,6 +288,40 @@ mod preview {
 		|parser, &expected| {
 			assert_eq!( parser.preview(), expected );
 		});
+	}
+}
+
+#[cfg(test)]
+mod advance
+{
+	use super::*;
+
+	#[test] fn and_current()
+	{
+		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
+		assert_eq!( parser.current(), Some('0') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('1') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('2') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('3') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('4') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), Some('5') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.current(), None );
+		assert_err!( parser.advance() );
+	}
+
+	#[test] fn and_peek()
+	{
+		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
+		assert_eq!( parser.peek(), Some('1') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('2') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('3') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('4') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), Some('5') );
+		assert_ok!( parser.advance() ); assert_eq!( parser.peek(), None );
+		assert_ok!( parser.advance() );
+		assert_err!( parser.advance() );
 	}
 }
 

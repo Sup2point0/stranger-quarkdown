@@ -692,7 +692,7 @@ impl Renderer<'_>
 
 		// previous line
 		if let Some(r) = info.prev_line_range {
-			out.push(fmt!("{GREY1}{:6} {GREY}│  {GREY1}{}", info.line_number - 1, &self.source[r]));
+			out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{}", info.line_number - 1, &self.source[r]));
 		}
 
 		// this line
@@ -707,7 +707,7 @@ impl Renderer<'_>
 
 		// next line
 		if let Some(r) = info.next_line_range {
-			out.push(fmt!("{GREY1}{:6} {GREY}│  {GREY1}{}", info.line_number + 1, &self.source[r]));
+			out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{}", info.line_number + 1, &self.source[r]));
 		}
 
 		out.push(str!(" "));

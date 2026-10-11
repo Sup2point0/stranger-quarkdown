@@ -52,7 +52,7 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 							str!(" "),
 						],
 							source.lines().map(|line|
-								fmt!("  {GREY1}{line}")
+								fmt!("  {W}{line}")
 							).collect(),
 						vec![
 							fmt!("  {R}{BOLD}<end of file>{UNBOLD}"),
@@ -74,7 +74,7 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 		
 		/* If we still haven't seen `<!--` after reading `MAX_LINES_CHECKED` lines, bail out to avoid reading huge files into memory */
 		num_lines_checked += 1;
-
+		
 		if !may_have_charm_squark && num_lines_checked > MAX_LINES_CHECKED {
 			return Ok(None);
 		}

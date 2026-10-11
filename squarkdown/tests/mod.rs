@@ -11,6 +11,8 @@
 //! The tests invoke the Squarkdown binary under their `<feature>/<type>/` folder, then check the outputs under `src/routes/<feature>/<type>/`.
 //! 
 //! Afterwards, we also use Playwright to check all the links in the site. This makes sure all pages were rendered to the correct place, Markdown was rendered correctly, and that links were rewritten correctly.
+//! 
+//! If you’re wondering about why there are some inconsistencies and oddities, all these tests were handwritten ;) yeah it’s long, but I find it quite fun adding them, sooo
 
 
 // == CONFIG == //
