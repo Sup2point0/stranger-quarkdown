@@ -818,6 +818,8 @@ impl From<bool> for ProcessAction {
 #[cfg(test)] use assertables::*;
 #[cfg(test)] use indoc::indoc;
 
+/* NOTE: Test cases cannot _start_ immediately with a comment, because it will get stripped by `skip_charm_squark` (which assumes the input contains a charm squark) */
+
 
 // #[test] fn playground() {
 // 	test_preserves_for(|c| {

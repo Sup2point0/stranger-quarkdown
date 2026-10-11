@@ -59,7 +59,7 @@ use path_macro::path;
 {
 	let (status, out) = capture_squarkup_from("errors/incomplete-charm");
 	assert_not!( status.success() );
-	assert_contains!( out, "possibly unterminated charm squark" );
+	assert_contains!( out, "possibly unclosed charm squark" );
 	assert_contains!( out, "end of file" );
 }
 
