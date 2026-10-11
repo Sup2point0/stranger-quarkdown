@@ -4,8 +4,8 @@
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/data/basic/"
-site-data-path = "src/data/basic.json"
+folder = "src/routes/fields/site-data/"
+site-data-path = "src/data/site-data.json"
 
 [errors]
 strict = false
