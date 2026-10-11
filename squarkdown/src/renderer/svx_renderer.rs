@@ -510,18 +510,6 @@ impl Renderer<'_>
 
 		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
-		if !their_source_path.exists() {
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found a broken link"),
-				hint: str!(),
-				debug: [
-					self.source_printed(range),
-					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
-				].concat()
-			});
-			return;
-		}
-
 		// 2. find where the target file will be exported to
 		let shard = PageData::shard_for(&their_source_path, self.config);
 
@@ -539,6 +527,18 @@ impl Renderer<'_>
 
 			*dest_url = href.into();
 
+			return;
+		}
+
+		if !their_source_path.exists() {
+			self.errors.push(SquarkError::Recoverable {
+				msg: fmt!("found a broken link"),
+				hint: str!(),
+				debug: [
+					self.source_printed(range),
+					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+				].concat()
+			});
 			return;
 		}
 
