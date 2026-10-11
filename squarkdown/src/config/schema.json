@@ -217,7 +217,7 @@
           "title":       "Inactive Link Handling",
           "type":        "string",
           "enum":        ["mark-invalid", "strip-extension", "link-to-github", "error"],
-          "default":     "strip-extension",
+          "default":     "error",
           "description": "When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?"
         }
       }

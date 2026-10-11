@@ -21,6 +21,16 @@ Sometimes you may find things breaking even with `minor` updates because Squarkd
 <br>
 
 
+## v4.3
+
+### Breaking
+- Default `errors.link-broken = "error"` (was `strip-extension`).
+  - Stripping extension is rarely what you want; erroring is a much better default.
+
+
+<br>
+
+
 ## v4.2.3
 
 ### New
