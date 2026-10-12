@@ -80,9 +80,9 @@ impl<Ctx> ContextStack<Ctx>
 	}
 
 	/// Prints the stack, top-down from the last pushed context.
-	pub fn prints_with_prefix(&self, prefix: &str) -> impl Iterator<Item = String>
+	pub fn prints_with_prefix(&self, prefix: &str) -> impl DoubleEndedIterator<Item = String>
 	{
-		self.stack().iter().rev().map(move |ctx| fmt!("{prefix} {ctx}"))
+		self.stack().iter().rev().map(move |ctx| fmt!("{prefix}{ctx}"))
 	}
 }
 

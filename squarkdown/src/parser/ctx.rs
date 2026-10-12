@@ -33,7 +33,7 @@ pub enum ParseCtx
 impl ContextStack<ParseCtx>
 {
 	pub fn printed(&self) -> Vec<String> {
-		self.printed_with_prefix("while")
+		self.printed_with_prefix("while ")
 	}
 }
 

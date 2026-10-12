@@ -49,6 +49,6 @@ impl ContextStack<RenderCtx>
 	}
 
 	pub fn printed(&self) -> Vec<String> {
-		self.printed_with_prefix("in")
+		self.printed_with_prefix("in ")
 	}
 }
