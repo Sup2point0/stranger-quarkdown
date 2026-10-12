@@ -3,6 +3,8 @@ name: Site
 on:
   workflow_dispatch:
   push:
+    branches:
+      - 'main'
     paths:
       - '.github/workflows/site.yaml'
       - 'site/package-lock.json'
