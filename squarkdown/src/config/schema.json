@@ -187,7 +187,7 @@
           "title":       "Enable Safety Checks",
           "type":        "boolean",
           "default":     true,
-          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring `destination` to be explicitly provided\nChecking directories remain under your project root\nChecking multiple files don't export to the same directory"
+          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring `destination` to be explicitly provided\n- Checking directories remain under your project root\n- Checking multiple files don't export to the same directory"
         },
         
         "debug": {
