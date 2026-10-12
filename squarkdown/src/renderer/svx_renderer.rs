@@ -644,15 +644,16 @@ impl Renderer<'_>
 /// Miscellaneous injections
 impl Renderer<'_>
 {
+	/// Write a timestamp to `file`.
 	fn inject_timestamp(&self, file: &mut impl Write) -> SquarkResult
 	{
 		let now = UtcDateTime::now();
 
 		write!(
 			file,
-			"<!-- rendered by Squarkdown on {} {} {} at {:02}:{:02} -->\n\n",
-			now.year(), now.month(), now.day(),
-			now.hour(), now.minute(),
+			"<!-- rendered by Squarkdown on {YYYY} {M} {D} at {hh:02}:{mm:02} -->\n\n",
+			YYYY = now.year(), M = now.month(), D = now.day(),
+			hh = now.hour(), mm = now.minute(),
 		)?;
 
 		Ok(())

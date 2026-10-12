@@ -30,6 +30,9 @@ Sometimes you may find things breaking even with `minor` updates because Squarkd
 - Default `errors.link-inactive = "error"` (was `strip-extension`).
   - Stripping extension is rarely what you want; erroring is a much saner default.
 
+### New
+- Squarkdown adds a timestamp to rendered `+page.ts` files.
+
 
 <br>
 

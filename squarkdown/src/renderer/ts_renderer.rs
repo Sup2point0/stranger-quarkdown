@@ -5,6 +5,7 @@ use crate::utils;
 use crate::colours::*;
 
 use path_macro::path;
+use time::UtcDateTime;
 
 use std::fs::File;
 use std::io::{ BufWriter, Write };
@@ -12,7 +13,7 @@ use std::io::{ BufWriter, Write };
 
 impl Renderer<'_>
 {
-	/// Render `+page.ts` for supplying page data to SvelteKit.
+	/// Render `+page.ts` for supplying page metadata to SvelteKit.
 	pub(super) fn render_page_ts(&self) -> SquarkResult
 	{
 		log::info!(
@@ -27,6 +28,14 @@ impl Renderer<'_>
 		}
 
 		let mut f = BufWriter::new(File::create(dest)?);
+
+		let now = UtcDateTime::now();
+		write!(f,
+			"// rendered by Squarkdown on {YYYY} {M} {D} at {hh:02}:{mm:02}\n\n",
+			YYYY = now.year(), M = now.month(), D = now.day(),
+			hh = now.hour(), mm = now.minute(),
+		)?;
+
 		let p = self.page;
 		let s = self.config.out.shorter_fields;
 
