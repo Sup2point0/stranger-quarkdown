@@ -9,4 +9,4 @@ folder = "src/routes/links/broken-crash/"
 [errors]
 strict = false
 on-error = "kill"
-broken-link = "error"
+link-inactive = "error"

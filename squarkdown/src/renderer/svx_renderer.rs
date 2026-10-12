@@ -541,7 +541,7 @@ impl Renderer<'_>
 			return;
 		}
 
-		match self.config.errors.link_broken
+		match self.config.errors.link_inactive
 		{
 			LinkRewriteAction::MARK_INVALID => {
 				todo!("mark-invalid is not yet supported")

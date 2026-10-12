@@ -125,14 +125,14 @@ impl SquarkupConfig
 				}
 			}) }
 			
-			if let Some(value) = errors.remove("broken-link") { catch!(errs => {
-				let raw = Self::try_get_str(&value, "errors.broken-link", "(a missing file handling strategy)")?;
+			if let Some(value) = errors.remove("link-inactive") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "errors.link-inactive", "(a missing file handling strategy)")?;
 
 				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
-					c.errors.link_broken = opt;
+					c.errors.link_inactive = opt;
 				} else {
 					unrecoverable! {
-						msg: fmt!("unknown setting for {Y}errors.broken-link"),
+						msg: fmt!("unknown setting for {Y}errors.link-inactive"),
 						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
@@ -545,26 +545,26 @@ mod error_handling {
 			strict = true
 			on-error = 'kill'
 			file-already-exists = 'error'
-			broken-link = 'error'
+			link-inactive = 'error'
 		"}).unwrap().errors;
 
 		assert_eq!( c.strict, true );
 		assert_eq!( c.on_error, ErrorAction::KILL );
 		assert_eq!( c.file_already_exists, FileAction::ERROR );
-		assert_eq!( c.link_broken, LinkRewriteAction::ERROR );
+		assert_eq!( c.link_inactive, LinkRewriteAction::ERROR );
 		
 		let c = load_config(indoc! {"
 			[errors]
 			strict = false
 			on-error = 'warn'
 			file-already-exists = 'overwrite'
-			broken-link = 'strip-extension'
+			link-inactive = 'strip-extension'
 		"}).unwrap().errors;
 
 		assert_eq!( c.strict, false );
 		assert_eq!( c.on_error, ErrorAction::WARN );
 		assert_eq!( c.file_already_exists, FileAction::OVERWRITE );
-		assert_eq!( c.link_broken, LinkRewriteAction::STRIP_EXTENSION );
+		assert_eq!( c.link_inactive, LinkRewriteAction::STRIP_EXTENSION );
 	}
 
 	#[test] fn reject() {

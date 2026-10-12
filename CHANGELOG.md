@@ -24,8 +24,11 @@ Sometimes you may find things breaking even with `minor` updates because Squarkd
 ## v4.3
 
 ### Breaking
-- Default `errors.link-broken = "error"` (was `strip-extension`).
-  - Stripping extension is rarely what you want; erroring is a much better default.
+- Rename `errors.link-broken` to `.link-inactive` to better reflect its purpose.
+  - It only handles links to existing files that *would* break in the site.
+  - It does not handle *already* broken links to nonexistent `.md` files.
+- Default `errors.link-inactive = "error"` (was `strip-extension`).
+  - Stripping extension is rarely what you want; erroring is a much saner default.
 
 
 <br>

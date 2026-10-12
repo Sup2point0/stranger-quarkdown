@@ -213,7 +213,7 @@
           "description": "What to do when a target file to write to already exists."
         },
 
-        "broken-link": {
+        "link-inactive": {
           "title":       "Inactive Link Handling",
           "type":        "string",
           "enum":        ["mark-invalid", "strip-extension", "link-to-github", "error"],

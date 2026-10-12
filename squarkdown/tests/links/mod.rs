@@ -101,7 +101,7 @@ use assertables::*;
 	assert_contains!( out, "(./nested/side.md)" );
 }
 
-/// With `broken-link = error`, Squarkdown crashes when encountering links to inactive pages.
+/// With `link-inactive = error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crashes()
 {
 	clear_files("links/inactive-crash").unwrap();
@@ -112,7 +112,7 @@ use assertables::*;
 	assert_contains!( out, "(./inactive.md)" );
 }
 
-/// With `broken-link = strip-extension`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
+/// With `link-inactive = strip-extension`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
 #[test] fn strip_extension()
 {
 	clear_files("links/strip-extension").unwrap();
@@ -122,7 +122,7 @@ use assertables::*;
 	assert_contains!( md, "[side](side)" );
 }
 
-/// With `broken-link = link-to-github`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
+/// With `link-inactive = link-to-github`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
 #[test] fn link_to_github()
 {
 	clear_files("links/link-github").unwrap();

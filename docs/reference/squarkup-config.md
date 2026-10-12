@@ -54,7 +54,7 @@ Configuration options are neatly organised into categories. Throughout the docs 
 | [`debug`](#debug)                             | boolean | | `true` |
 | [`on-error`](#on-error)                       | string | `warn` <br> `kill` | `warn` |
 | [`file-already-exists`](#file-already-exists) | string | `overwrite` <br> `error` <br> `skip` | `overwrite` |
-| [`link-broken`](#link-broken)                 | string | `mark-invalid` <br> `strip-extension` <br> `link-to-github` <br> `error` | `strip-extension` |
+| [`link-inactive`](#link-inactive)                 | string | `mark-invalid` <br> `strip-extension` <br> `link-to-github` <br> `error` | `strip-extension` |
 
 ### `strict`
 Enable stricter safety checks?
@@ -92,7 +92,7 @@ Defaults to `overwrite`, meaning Squarkdown will overwrite the existing file.
 
 In production, you may want `error` to avoid Squarkdown overwriting a handwritten `+page.svx` without you knowing.
 
-### `link-broken`
+### `link-inactive`
 
 How should Squarkdown handle a `.md` link that does not resolve to an [active](../glossary.md#active) file?
 

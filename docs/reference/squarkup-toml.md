@@ -23,7 +23,7 @@ Here’s what Squarkdown’s own squarkup.toml looks like:
 strict = true
 on-error = "kill"
 file-already-exists = "overwrite"
-broken-link = "link-to-github"
+link-inactive = "link-to-github"
 
 [paths]
 site = "/site/"

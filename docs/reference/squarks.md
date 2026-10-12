@@ -114,7 +114,7 @@ You might need this if:
 ### `leave`
 ```md
 <!-- #SQUARK leave? -->
-Don't rewrite [this link](broken-link.md)!
+Don't rewrite [this link](link-inactive.md)!
 <!-- #SQUARK leave. -->
 ```
 

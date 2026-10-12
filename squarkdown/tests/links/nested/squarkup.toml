@@ -9,4 +9,4 @@ folder = "src/routes/links/nested/"
 [errors]
 strict = false
 on-error = "kill"
-broken-link = "error"
+link-inactive = "error"
