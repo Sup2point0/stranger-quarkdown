@@ -1,12 +1,12 @@
 #:schema ../../../src/config/schema.json
 
+[errors]
+strict = false
+debug = true
+on-error = "kill"
+
 [paths]
 site = "../../test-project/"
 
 [out]
 folder = "src/routes/errors/source-snapshot/"
-
-[errors]
-strict = false
-debug = true
-on-error = "kill"

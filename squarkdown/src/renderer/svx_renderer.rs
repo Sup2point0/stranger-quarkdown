@@ -134,8 +134,8 @@ impl<'d> Renderer<'d>
 
 		if !self.ctx.is_empty() {
 			self.errors.push(SquarkError::Recoverable {
-				msg: str!("warning: unterminated rendering context"),
-				hint: str!("this may be a bug in the Squarkdown renderering engine!"),
+				msg: str!("unclosed context"),
+				hint: fmt!("did you forget to close a {W}{}{G} context?", self.ctx.current()),
 				debug: self.ctx.printed(),
 			});
 		}
@@ -168,9 +168,9 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			// .inspect(|(e, _)| { println!("before = {e:?}"); })
+			.inspect(|(e, _)| if DEBUG { println!("{G}›{GREY} {e:?}"); })
 			.flat_map(Self::split_comments)
-			// .inspect(|(e, _)| { println!("after = {e:?}"); })
+			.inspect(|(e, _)| if DEBUG { println!("{G}›{W} {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
 
@@ -305,7 +305,7 @@ impl Renderer<'_>
 			_ => (),
 		};
 
-		match event {
+		let out = match event {
 			/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
 			| pd::Event::Html(ref html)
 			| pd::Event::InlineHtml(ref html)
@@ -319,7 +319,16 @@ impl Renderer<'_>
 
 			/* But for everything else, handling will depend on the current context */
 			_ => self.process_ctx(event, range),
+		};
+
+		if DEBUG {
+			println!(
+				"\n{G}»{B} {B}{:?}{W}",
+				self.ctx.prints_with_prefix("").rev().collect::<Vec<_>>()
+			);
 		}
+
+		out
 	}
 
 	/// Transform content depending on the current context.
@@ -454,9 +463,9 @@ impl Renderer<'_>
 						msg: fmt!("unpaired closing squark"),
 						hint: {
 							if self.ctx.contains(&squark) {
-								fmt!("did you forget to close a {:?} context?", self.ctx.current())
+								fmt!("did you forget to close a {} context?", self.ctx.current())
 							} else {
-								fmt!("did you forget to open a {W}{m1}{G} context?")
+								fmt!("did you forget to open a {W}{squark}?{G} context?")
 							}
 						},
 						debug: [self.source_printed(range), self.ctx.printed()].concat(),
@@ -699,7 +708,7 @@ impl Renderer<'_>
 		}
 
 		// this line
-		let focus = &self.source[range.clone()];
+		let focus = &self.source[range.clone()].trim_end_matches('\n');
 
 		let range_before = info.line_range.start..range.start;
 		let range_after  = range.end..info.line_range.end;
@@ -820,15 +829,29 @@ impl From<bool> for ProcessAction {
 /* NOTE: Test cases cannot _start_ immediately with a comment, because it will get stripped by `skip_charm_squark` (which assumes the input contains a charm squark) */
 
 
-// #[test] fn playground() {
-// 	test_preserves_for(|c| {
-// 		// c.errors.strict = false;
-// 	}, &[
-// 		indoc! {"
-// 			x y
-// 		"}
-// 	]);
-// }
+const DEBUG: bool
+	= true;
+
+#[test] fn playground()
+{
+	let source = indoc! {"
+		1
+		<!-- #SQUARK only?
+		2
+		<!-- #SQUARK slash. -->
+		3
+	"};
+
+	let mut config = TEST_CONFIG.clone();
+	config.errors.strict = true;
+	config.errors.strict = false;
+	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+	renderer.render_from(source.trim());
+	log::error(renderer.errors);
+}
+
+const _: bool
+	= false;
 
 
 #[cfg(test)]

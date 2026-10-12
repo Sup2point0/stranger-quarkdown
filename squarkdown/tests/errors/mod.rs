@@ -63,6 +63,24 @@ use path_macro::path;
 	assert_contains!( out, "end of file" );
 }
 
+/// Squarkdown errors when a page has unbalanced squark usages.
+#[test] fn unbalanced_contexts()
+{
+	let (status, out) = capture_squarkup_from("errors/unbalanced-contexts");
+	assert_not!( status.success() );
+
+	assert_contains!( out, "2 errors" );
+
+	assert_contains!( out, "unpaired closing squark" );
+	assert_contains!( out, "<!-- #SQUARK slash. -->" );
+	assert_contains!( out, "did you forget to open" );
+	assert_contains!( out, "#SQUARK slash?" );
+
+	assert_contains!( out, "unclosed context" );
+	assert_contains!( out, "did you forget to close" );
+	assert_contains!( out, "#SQUARK only" );
+}
+
 /// Squarkdown errors on 2-page conflicts with `config.errors.strict = true`.
 #[test] fn conflicts_crashes()
 {
