@@ -1,3 +1,5 @@
+use crate::types::ContextStack;
+
 use enum_display::EnumDisplay;
 
 
@@ -5,26 +7,34 @@ use enum_display::EnumDisplay;
 pub enum ParseCtx
 {
 	#[default]
-	#[display("while parsing charm squark")]
+	#[display("parsing charm squark")]
 	CHARM_SQUARK,
 
-	#[display("while extracting <h1> heading")]
+	#[display("extracting <h1> heading")]
 	HEADING,
 
-	#[display("while parsing flags")]
+	#[display("parsing flags")]
 	FLAGS,
 
-	#[display("while parsing fields")]
+	#[display("parsing fields")]
 	FIELDS,
 
-	#[display("while parsing a field")]
+	#[display("parsing a field")]
 	FIELD,
 
-	#[display("while parsing identifier")]
+	#[display("parsing identifier")]
 	IDENT,
 
-	#[display("while parsing values")]
+	#[display("parsing values")]
 	VALUES,
+}
+
+
+impl ContextStack<ParseCtx>
+{
+	pub fn printed(&self) -> Vec<String> {
+		self.printed_with_prefix("while")
+	}
 }
 
 
