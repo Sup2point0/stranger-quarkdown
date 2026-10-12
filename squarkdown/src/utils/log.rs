@@ -49,12 +49,12 @@ use std::fmt::Display;
 
 pub fn line() { println!("{GREY}─────────────────────────────"); }
 
-pub fn log_is(msg:    impl Display) { println!(" {}› {}{}",     GREY, Y, msg); }
-pub fn log_info(msg:  impl Display) { println!(" {}› {}",       GREY,    msg); }
-pub fn log_ok(msg:    impl Display) { println!(" {}✓ {}",       C,       msg); }
-pub fn log_bad(msg:   impl Display) { println!(" {}× {}",       R,       msg); }
-pub fn log_debug(msg: impl Display) { println!(" {}│ {}",       GREY,    msg); }
-pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {}", G,       msg); }
+pub fn log_is(msg:    impl Display) { println!(" {}› {}{msg}",     GREY, Y); }
+pub fn log_info(msg:  impl Display) { println!(" {}› {msg}",       GREY   ); }
+pub fn log_ok(msg:    impl Display) { println!(" {}✓ {msg}",       C      ); }
+pub fn log_bad(msg:   impl Display) { println!(" {}× {msg}",       R      ); }
+pub fn log_debug(msg: impl Display) { println!(" {}│ {msg}",       GREY   ); }
+pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {msg}", G      ); }
 
 
 /// Print `err`, with surrounding line delimiters.
