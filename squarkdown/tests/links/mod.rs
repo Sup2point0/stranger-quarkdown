@@ -107,7 +107,7 @@ use assertables::*;
 	assert_contains!( out, "(./nested/side.md)" );
 }
 
-/// With `broken-link: error`, Squarkdown crashes when encountering links to inactive pages.
+/// With `broken-link = error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crashes()
 {
 	clear_files("links/inactive-crash").unwrap();
@@ -116,6 +116,18 @@ use assertables::*;
 	assert_not!( status.success() );
 	assert_contains!( out, "inactive page" );
 	assert_contains!( out, "(./inactive.md)" );
+}
+
+/// With `broken-link = link-to-github`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
+#[test] fn link_to_github()
+{
+	clear_files("links/link-github").unwrap();
+
+	let (status, out) = capture_squarkup_from("links/link-github");
+	assert!( status.success() );
+
+	let md = read_file("links/link-github/+page.svx");
+	assert_contains!( md, "[github](https://github.com/Sup2point0/stranger-quarkdown/blob/main/readme.md)" );
 }
 
 

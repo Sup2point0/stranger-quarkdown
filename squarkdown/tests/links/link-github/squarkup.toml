@@ -1,0 +1,15 @@
+#:schema ../../../src/config/schema.json
+
+[errors]
+strict = false
+on-error = "kill"
+broken-link = "link-to-github"
+
+[project]
+github = "Sup2point0/stranger-quarkdown"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/links/link-github/"

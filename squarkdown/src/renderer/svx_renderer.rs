@@ -551,7 +551,14 @@ impl Renderer<'_>
 				todo!("strip-extension is not yet supported")
 			}
 			LinkRewriteAction::LINK_TO_GITHUB => {
-				todo!("link-to-github is not yet supported")
+				let href = fmt!(
+					"https://github.com/{}/blob/main/{}",
+					self.config.project.github,
+					utils::display_rel(&self.page.filepath, &self.config.paths.root),
+				);
+
+				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
+				*dest_url = href.into();
 			}
 			LinkRewriteAction::ERROR => {
 				self.errors.push(SquarkError::Recoverable {
