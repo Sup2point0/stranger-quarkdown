@@ -526,7 +526,6 @@ impl Renderer<'_>
 			}
 
 			*dest_url = href.into();
-
 			return;
 		}
 
@@ -548,7 +547,20 @@ impl Renderer<'_>
 				todo!("mark-invalid is not yet supported")
 			}
 			LinkRewriteAction::STRIP_EXTENSION => {
-				todo!("strip-extension is not yet supported")
+				let mut href =
+					their_file_name
+					.strip_suffix(".md")
+					.unwrap_or(&their_file_name)
+					.to_owned()
+				;
+
+				if let Some(a) = anchor {
+					href += "#";
+					href += a;
+				}
+
+				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
+				*dest_url = href.into();
 			}
 			LinkRewriteAction::LINK_TO_GITHUB => {
 				let href = fmt!(

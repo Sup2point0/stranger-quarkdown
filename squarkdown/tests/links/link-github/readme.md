@@ -1,4 +1,4 @@
-# Rewriting links to GitHub
+# Rewriting inactive links to GitHub
 <!-- #SQUARK live! -->
 
-[github](github.md)
+This link [github](github.md) should be rewritten to a full URL to github.com.

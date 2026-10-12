@@ -1,0 +1,12 @@
+#:schema ../../../src/config/schema.json
+
+[errors]
+strict = false
+on-error = "kill"
+broken-link = "strip-extension"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/links/strip-extension/"

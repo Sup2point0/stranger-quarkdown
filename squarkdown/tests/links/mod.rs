@@ -7,7 +7,6 @@ use assertables::*;
 #[test] fn basic()
 {
 	clear_files("links/basic").unwrap();
-
 	assert!( squarkup_from("links/basic").success() );
 
 	let main = read_file("links/basic/main/+page.svx");
@@ -22,7 +21,6 @@ use assertables::*;
 #[test] fn nested()
 {
 	clear_files("links/nested").unwrap();
-
 	assert!( squarkup_from("links/nested").success() );
 
 	let main = read_file("links/nested/main/+page.svx");
@@ -43,7 +41,6 @@ use assertables::*;
 #[test] fn external()
 {
 	clear_files("links/external").unwrap();
-
 	assert!( squarkup_from("links/external").success() );
 
 	let main = read_file("links/external/+page.svx");
@@ -55,7 +52,6 @@ use assertables::*;
 #[test] fn anchors()
 {
 	clear_files("links/anchors").unwrap();
-
 	assert!( squarkup_from("links/anchors").success() );
 	
 	let main = read_file("links/anchors/main/+page.svx");
@@ -70,7 +66,6 @@ use assertables::*;
 #[test] fn titles()
 {
 	clear_files("links/titles").unwrap();
-
 	assert!( squarkup_from("links/titles").success() );
 	
 	let main = read_file("links/titles/+page.svx");
@@ -82,7 +77,6 @@ use assertables::*;
 #[test] fn spaces()
 {
 	clear_files("links/spaces").unwrap();
-
 	assert!( squarkup_from("links/spaces").success() );
 	
 	let main = read_file("links/spaces/the-main-file/+page.svx");
@@ -118,13 +112,21 @@ use assertables::*;
 	assert_contains!( out, "(./inactive.md)" );
 }
 
+/// With `broken-link = strip-extension`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
+#[test] fn strip_extension()
+{
+	clear_files("links/strip-extension").unwrap();
+	assert!( squarkup_from("links/strip-extension").success() );
+
+	let md = read_file("links/strip-extension/+page.svx");
+	assert_contains!( md, "[side](side)" );
+}
+
 /// With `broken-link = link-to-github`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
 #[test] fn link_to_github()
 {
 	clear_files("links/link-github").unwrap();
-
-	let (status, out) = capture_squarkup_from("links/link-github");
-	assert!( status.success() );
+	assert!( squarkup_from("links/link-github").success() );
 
 	let md = read_file("links/link-github/+page.svx");
 	assert_contains!( md, "[github](https://github.com/Sup2point0/stranger-quarkdown/blob/main/readme.md)" );
@@ -135,7 +137,6 @@ use assertables::*;
 #[test] fn assets()
 {
 	clear_files("links/assets").unwrap();
-
 	assert!( squarkup!("links/assets", "--assets").success() );
 	
 	let main = read_file("links/assets/+page.svx");
@@ -150,7 +151,6 @@ use assertables::*;
 #[test] fn site_assets()
 {
 	clear_files("links/site-assets").unwrap();
-
 	assert!( squarkup!("links/site-assets", "--assets").success() );
 	
 	let main = read_file("links/site-assets/+page.svx");

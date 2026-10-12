@@ -47,6 +47,9 @@
 - [links/titles](links/titles)
 - [links/spaces/the main file](links/spaces/the-main-file)
 - [links/spaces/other file](links/spaces/other-file)
+
+- [links/strip-extension](links/strip-extension)
+- [links/link-github](links/link-github)
 - 
 - [links/assets](links/assets)
 - [links/site-assets](links/site-assets)
