@@ -5,7 +5,10 @@ use crate::resolver;
 use crate::log;
 use crate::colours::*;
 
+use git2 as git;
+
 use std::fs;
+use std::path::{ Path, PathBuf };
 use std::process::{ ExitCode };
 use std::time::{ Instant };
 
@@ -65,12 +68,17 @@ fn cleanup(force: bool) -> SquarkResult
 	log::ok!(slash!("found your output folder: {B}{}", &config.out.folder));
 
 	log::is!("checking for Git repository...");
-	let mut repo = None;
+	let mut repo_info: Option<(git::Repository, PathBuf)> = None;
 
 	match resolver::resolve_project_repo(&config.out.folder, &config.paths.root) {
-		Ok(r) => {
-			log::ok!(slash!("found your Git repository: {B}{}", r.path()));
-			repo = Some(r);
+		Ok(repo) => {
+			log::ok!(slash!("found your Git repository: {B}{}", repo.path()));
+
+			let repo_folder = repo.path().parent()
+				.expect(".git folder always has a parent folder")
+				.to_path_buf();
+
+			repo_info = Some((repo, repo_folder));
 		}
 	   Err(mut e) => if force {
 			log::bad!("no repository found, proceeding with {W}{BOLD}--force{UNBOLD}");
@@ -94,6 +102,7 @@ fn cleanup(force: bool) -> SquarkResult
 			let path = entry.into_path();
 			let path_rel = utils::display_rel(&path, &config.paths.root);
 
+			// delete folder
 			if path.is_dir() && fs::read_dir(&path)?.next().is_none() {
 				let (parent, folder) = utils::split_path(&path_rel);
 				log::info!("deleting: {GREY1}{parent}/{folder}");
@@ -101,6 +110,7 @@ fn cleanup(force: bool) -> SquarkResult
 				return Ok(());
 			}
 
+			// delete file
 			let Some(filename) = path.file_name() else {
 				return Ok(());
 			};
@@ -111,14 +121,16 @@ fn cleanup(force: bool) -> SquarkResult
 			let (folder, filename) = utils::split_path(&path_rel);
 			let path_display = fmt!("{GREY1}{folder}{GREY}/{filename}");
 			
-			if let Some(r) = &repo {
-				if !r.is_path_ignored(&path)? {
+			// check Git safety
+			if let Some((repo, repo_folder)) = &repo_info
+			{	
+				if !is_safe_to_delete(&path, repo, &repo_folder)? {
 					skipped_paths.push(fmt!("skipped: {path_display}"));
 					return Ok(());
 				}
 			}
-			log::info!("deleting: {path_display}");
 
+			log::info!("deleting: {path_display}");
 			fs::remove_file(path)?;
 		});
 	}
@@ -132,4 +144,29 @@ fn cleanup(force: bool) -> SquarkResult
 	}
 	
 	errs.or(())
+}
+
+/// Is `path` a fully uncommitted, untracked, Git-ignored file that is safe to delete?
+fn is_safe_to_delete(
+	path: &Path,
+	repo: &git::Repository,
+	repo_folder: &Path,
+) -> SquarkResult<bool>
+{
+	let path_rel = path.strip_prefix(repo_folder)
+		.expect("walkdir entries are guaranteed to be under `repo.path()`");
+
+	let ignored = repo.is_path_ignored(&path)?;
+	let tracked = repo.index()?.get_path(path_rel, 0).is_some();
+	let modified = repo.status_file(path_rel)?.intersects(
+		  git::Status::INDEX_NEW
+		| git::Status::INDEX_MODIFIED
+	);
+
+	/* NOTE: A git-ignored file can still be tracked if it was committed before the `.gitignore` rules excluded it, so we need to check both. */
+	Ok(
+			ignored
+		&& !tracked
+		&& !modified
+	)
 }
