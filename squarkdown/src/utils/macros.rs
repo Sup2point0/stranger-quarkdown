@@ -36,10 +36,12 @@ macro_rules! to {
 
 // == STRUCTS == //
 
-#[allow(unused)]
+#[cfg(test)]
 macro_rules! pair {
 	($t:expr) => { ($t, $t) }
-} pub(crate) use pair;
+}
+#[cfg(test)]
+pub(crate) use pair;
 
 macro_rules! strings {
 	() => {
