@@ -33,10 +33,12 @@ Changes to `errors.link-broken`:
   - The attached class is `broken-link`.
 - Default `errors.link-inactive = "error"` (was `strip-extension`).
   - Stripping extension is rarely what you want; erroring is a much saner default.
-- Remove `--no-parallel` CLI option
+- Remove `--no-parallel` CLI option.
 
 ### New
-- Squarkdown adds a timestamp to rendered `+page.ts` files.
+- `squarkdown clean` command to delete Squarkdown’s rendered output!
+  - This command comes with safety checks to only delete files not in Git.
+- Add a timestamp to rendered `+page.ts` files.
 
 
 <br>

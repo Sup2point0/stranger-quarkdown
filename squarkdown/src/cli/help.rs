@@ -20,6 +20,10 @@ pub fn help() -> ExitCode
 {W} Run Squarkdown on your project, with extras enabled too:
 
 {GREY}  › {C}squarkdown {Y}--assets --fonts
+
+{W} Delete Squarkdown’s output for a fresh run:
+
+{GREY}  › {C}squarkdown {G}clean
 "
 	);
 
