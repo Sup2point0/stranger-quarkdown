@@ -9,7 +9,7 @@
   {
     "build":   "vite build",
     "preview": "vite preview",
-    "test":    "cargo test && tsc --noEmit && playwright test",
+    "test":    "cargo nextest run && tsc --noEmit && playwright test",
     
     "dev":    "vite",
       "devx": "cargo test && vite --open"
