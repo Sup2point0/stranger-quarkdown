@@ -49,7 +49,7 @@ macro_rules! squarkup {
 	($path:literal $(, $arg:literal)*) => {
 		{
 			let bin = env!("CARGO_BIN_EXE_squarkdown");
-			let r = std::process::Command::new(bin)
+			let r = process::Command::new(bin)
 				.current_dir(TESTS.join($path))
 				$( .arg($arg) )*
 				.status();

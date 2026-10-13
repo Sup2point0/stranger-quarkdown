@@ -27,7 +27,7 @@ enum Mode
 
 fn main() -> ExitCode
 {
-	let mut args = std::env::args().skip(1).peekable();
+	let mut args = std::env::args().skip(1).peekable().map(|arg| arg.into());
 
 	let mut mode = Mode::SQUARKUP;
 
@@ -46,42 +46,25 @@ fn main() -> ExitCode
 
 	match mode
 	{
-		Mode::HELP => {
-			println!();
-			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
-			log::line();
-			cli::help()
-		}
+		Mode::HELP => cli::help(),
 
-		Mode::VERSION =>
-		{
+		Mode::VERSION => {
 			println!("Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 			ExitCode::SUCCESS
 		}
 
-		Mode::SQUARKUP =>
-		{
-			println!();
-			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
-			log::line();
-			cli::squarkdown(args)
-		}
+		Mode::SQUARKUP => cli::squarkdown(args),
 
 		Mode::INIT =>
 		{
 			log::line();
 			log::bad!("{W}squarkdown init{R} is not yet supported!{W}");
 			log::line();
+			// cli::init();
 			ExitCode::FAILURE
 		}
 
-		Mode::CLEAN =>
-		{
-			log::line();
-			log::bad!("{W}squarkdown clean{R} is not yet supported!{W}");
-			log::line();
-			ExitCode::FAILURE
-		}
+		Mode::CLEAN => cli::clean(args),
 	}
 }
 

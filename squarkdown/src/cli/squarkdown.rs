@@ -1,3 +1,4 @@
+use super::*;
 use crate::*;
 use crate::prelude::*;
 use crate::types::{ CollectSquark };
@@ -12,15 +13,13 @@ use std::time::Instant;
 /// Run Squarkdown on the user's project.
 /// 
 /// This includes squarkup as well as extras like fonts and assets preprocessing.
-pub fn squarkdown(args: impl Iterator<Item = impl Into<String>>) -> ExitCode
+pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 {
 	let mut assets = false;
 	let mut fonts  = false;
 	let mut unknown_args = vec![];
 
 	for arg in args {
-		let arg = arg.into();
-		
 		if      arg.eq_ignore_ascii_case("--assets") { assets = true; }
 		else if arg.eq_ignore_ascii_case("--fonts")  { fonts = true; }
 		else {
@@ -29,15 +28,11 @@ pub fn squarkdown(args: impl Iterator<Item = impl Into<String>>) -> ExitCode
 	}
 
 	if !unknown_args.is_empty() {
-		if unknown_args.len() == 1 {
-			log::bad!("unknown option: {W}{BOLD}{}{UNBOLD}", unknown_args[0]);
-		} else {
-			log::bad!("unknown options: {W}{BOLD}{}{UNBOLD}",
-				unknown_args.join(&fmt!(" {R}{UNBOLD}·{BOLD}{W} "))
-			);
-		}
+		shared::unknown_args(&unknown_args);
 		return ExitCode::FAILURE;
 	}
+
+	log::version();
 
 	let t_init = Instant::now();
 	let r = squarkup(assets, fonts);

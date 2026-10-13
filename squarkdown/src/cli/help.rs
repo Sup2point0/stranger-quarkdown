@@ -6,6 +6,8 @@ use std::process::ExitCode;
 
 pub fn help() -> ExitCode
 {
+	log::version();
+	
 	println!(
 "{W} Setup your project's {Y}squarkup.toml{W}:
 

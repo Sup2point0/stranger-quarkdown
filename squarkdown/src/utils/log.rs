@@ -4,6 +4,14 @@ use crate::colours::*;
 use std::fmt::Display;
 
 
+pub fn version()
+{
+	println!();
+	println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
+	line();
+}
+
+
 /// Log an action that Squarkdown is about to perform, to set up expectations.
 #[macro_export] macro_rules! is {
 	($msg:literal) => { $crate::log::log_is(format_args!($msg)) };
