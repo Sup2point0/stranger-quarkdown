@@ -1,0 +1,1 @@
+This route had a handwritten `+page.svx` that was committed to Git, so shouldn't be deleted!

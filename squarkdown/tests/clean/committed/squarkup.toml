@@ -1,0 +1,12 @@
+#:schema ../../../src/config/schema.json
+
+[errors]
+strict = false
+on-error = "kill"
+file-already-exists = "skip"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/clean/committed/"
