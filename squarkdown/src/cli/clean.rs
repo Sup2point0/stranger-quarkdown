@@ -5,8 +5,6 @@ use crate::resolver;
 use crate::log;
 use crate::colours::*;
 
-use git2 as git;
-
 use std::fs;
 use std::process::{ ExitCode };
 use std::time::{ Instant };
@@ -69,12 +67,14 @@ fn cleanup(force: bool) -> SquarkResult
 	log::is!("checking for Git repository...");
 	let mut repo = None;
 
-	match resolver::resolve_project_repo(&config.out.folder) {
+	match resolver::resolve_project_repo(&config.out.folder, &config.paths.root) {
 		Ok(r) => {
-			log::ok!("found your Git repository!");
+			log::ok!(slash!("found your Git repository: {B}{}", r.path()));
 			repo = Some(r);
 		}
-	   Err(mut e) => if !force {
+	   Err(mut e) => if force {
+			log::bad!("no repository found, proceeding with {W}{BOLD}--force{UNBOLD}");
+		} else {
 			e.set_hint(fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"));
 			return Err(e);
 		}
