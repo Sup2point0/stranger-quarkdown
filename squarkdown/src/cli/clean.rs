@@ -7,8 +7,9 @@ use crate::macros::*;
 
 use git2 as git;
 
-use std::process::ExitCode;
-use std::time::Instant;
+use std::fs;
+use std::process::{ ExitCode };
+use std::time::{ Instant };
 
 
 /// Delete Squarkdown's output.
@@ -20,7 +21,10 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	let mut unknown_args = vec![];
 
 	for arg in args {
-		if arg.eq_ignore_ascii_case("--force") { force = true; }
+		if arg.eq_ignore_ascii_case("--force")
+		|| arg.eq_ignore_ascii_case("-f") {
+			force = true;
+		}
 		else {
 			unknown_args.push(arg);
 		}
@@ -32,7 +36,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	}
 
 	log::version();
-	log::is!("deleting Squarkdown output...");
+	log::is!("cleaning Squarkdown output...");
 
 	let t_init = Instant::now();
 	let r = go(force);
@@ -64,14 +68,55 @@ fn go(force: bool) -> SquarkResult
 
 	log::is!("checking for Git repository...");
 
-	let _ = catch! {
-		let repo = git::Repository::open(".")?;
-		let statuses = repo.statuses(None)?;
-
-		for entry in &statuses {
-			dbg!(entry.path());
+	match git::Repository::open(&config.paths.root) {
+		Ok(repo) => {
+			log::ok!("found your Git repository!");
+			clean_with_git_checks(repo, &config)
 		}
-	};
+		Err(..) => {
+			if force {
+				todo!()
+			} else {
+				Err(SquarkError::Unrecoverable {
+					msg: str!("could not access Git repository"),
+					hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
+					debug: vec![],
+				})
+			}
+		}
+	}
+}
 
-	Ok(())
+fn clean_with_git_checks(repo: git::Repository, config: &SquarkupConfig) -> SquarkResult
+{
+	let mut errs = SquarkError::multiple("cleaning files");
+
+	let to_delete = walkdir::WalkDir::new(&config.out.folder)
+		.contents_first(true)
+	;
+
+	for entry in to_delete {
+		catch!(errs =>
+		{
+			let entry = entry?;
+			let path = entry.into_path();
+
+			if path.is_dir() && fs::read_dir(&path)?.next().is_none() {
+				fs::remove_dir(path)?;
+				return Ok(());
+			}
+
+			let Some(filename) = path.file_name() else {
+				return Ok(());
+			};
+			if *filename != *config.out.file_name && *filename != *"+page.ts" {
+				return Ok(());
+			}
+
+			println!("{}", slash!("{}", path));
+			// fs::remove_file(path)?;
+		});
+	}
+	
+	errs.or(())
 }
