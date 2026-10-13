@@ -16,6 +16,7 @@ def test-all [] {
 	cd squarkdown/tests/test-project
 	npm test
 	cd ../..
+	cargo run -- clean
 	cargo run
 }
 
