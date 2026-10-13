@@ -83,10 +83,13 @@ test("crawl-routes", async () =>
 					to_visit.push(...links.map(url => ({ url, source: target })));
 				}
 				catch (e) {
-					console.error(`${RED}!! ${WORKER} Failed: ${CYAN}${u(target)}${WHITE}; linked from: ${BLUE}${u(source)}${RED}`);
-					console.error(e.message);
+					/* NOTE: This link is meant to be broken! */
+					if (target !== "http://localhost:4173/links/side") {
+						console.error(`${RED}!! ${WORKER} Failed: ${CYAN}${u(target)}${WHITE}; linked from: ${BLUE}${u(source)}${RED}`);
+						console.error(e.message);
 
-					failed_routes.push(target);
+						failed_routes.push(target);
+					}
 				}
 
 				pending_routes--;
