@@ -17,6 +17,7 @@
 
 // == CONFIG == //
 
+/// Error handling, messages and recovery
 mod errors;
 
 
@@ -27,18 +28,26 @@ mod sources;
 
 // == RENDER == //
 
+/// Markdown rendering in `+page.svx`
 mod render;
 
+/// Link rewriting in `+page.svx`
 mod links;
 
+/// Page metadata in `+page.ts` and `site.json`
 mod fields;
 
 
 // == EXTRAS == //
 
+/// `squarkdown --assets`
 mod assets;
 
+/// `squarkdown --fonts`
 mod fonts;
+
+/// `squarkdown clean`
+mod clean;
 
 
 mod utils;
