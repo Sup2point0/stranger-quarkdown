@@ -280,6 +280,24 @@ pub trait CollectSquark<T>: Iterator<Item = SquarkResult<T>> + Sized
 
 		errs.or(vals)
 	}
+
+	/// Split an iterator of [`SquarkResult`]s into `(oks, errs)`.
+	/// 
+	/// `errs` is always a [`SquarkError::Multiple`].
+	fn partition_squark(self, when: impl Into<Cow<'static, str>>) -> (Vec<T>, SquarkError)
+	{
+		let mut oks = vec![];
+		let mut errs = SquarkError::multiple(when);
+
+		for each in self {
+			match each {
+				Ok(v)  => { oks.push(v); }
+				Err(e) => { errs.push(e); }
+			}
+		}
+
+		(oks, errs)
+	}
 }
 
 impl<I, T> CollectSquark<T> for I
