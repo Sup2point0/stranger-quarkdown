@@ -353,15 +353,24 @@ impl Renderer<'_>
 
 		match event
 		{
-			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) => {
-				self.process_link(dest_url, range);
-				Some(event)
+			// link rewriting
+			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
+			{
+				self.process_link(dest_url, range).or(Some(event))
 			}
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) => {
+			pd::Event::End(pd::TagEnd::Link)
+				if self.ctx.try_pop(&RenderCtx::LINK_REWRITE).is_ok() =>
+			{
+				Some(pd::Event::InlineHtml("</a>".into()))
+			}
+			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			{
 				self.process_image(dest_url, range);
 				Some(event)
 			}
-			pd::Event::Text(text) => {
+
+			pd::Event::Text(text) =>
+			{
 				Some(self.process_text(text))
 			}
 			_ => Some(event),
@@ -483,14 +492,17 @@ impl Renderer<'_>
 	/// For instance, suppose page P references `[q](extra.q.md)`. But `q` specifies in its charm squark that it should render to `/secrets/q`. Then we rewrite the `[q](extra/q.md)` link to `[q](/secrets/q)`, both redirecting the link and stripping the `.md` suffix.
 	/// 
 	/// If resolution fails, an error is added to `self.errors`, and as a best-effort fallback, we try to strip a `.md` suffix from the link.
-	fn process_link(&mut self, dest_url: &mut pd::CowStr, range: ParserRange)
+	fn process_link<'e>(&mut self,
+		dest_url: &mut pd::CowStr,
+		range: ParserRange,
+	) -> Option<pd::Event<'e>>
 	{
 		/* We only rewrite relative links to Markdown files */
 		if !dest_url.contains(".md")
 		|| dest_url.contains("://")
 		|| dest_url.starts_with("http")
 		|| dest_url.starts_with("mailto:") {
-			return;
+			return None;
 		}
 
 		let mut anchor: Option<&str> = None;
@@ -526,7 +538,7 @@ impl Renderer<'_>
 			}
 
 			*dest_url = href.into();
-			return;
+			return None;
 		}
 
 		if !their_source_path.exists() {
@@ -538,13 +550,26 @@ impl Renderer<'_>
 					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
 				].concat()
 			});
-			return;
+			return None;
 		}
 
 		match self.config.errors.link_inactive
 		{
 			LinkRewriteAction::MARK_INVALID => {
-				todo!("mark-invalid is not yet supported")
+				self.ctx.push(RenderCtx::LINK_REWRITE);
+				
+				log::error(SquarkError::Recoverable {
+					msg: fmt!("found a link to an inactive page"),
+					hint: str!(),
+					debug: [
+						self.source_printed(range),
+						vec![fmt!("resolved to: {GREY1}{shard}")],
+					].concat()
+				});
+
+				let href = "<a class=\"broken-link\" href=\"\">";
+				
+				return Some(pd::Event::InlineHtml(href.into()));
 			}
 			LinkRewriteAction::STRIP_EXTENSION => {
 				let mut href =
@@ -583,6 +608,8 @@ impl Renderer<'_>
 				});
 			}
 		}
+
+		None
 	}
 
 	fn process_image(&mut self, dest_url: &mut pd::CowStr, range: ParserRange)
@@ -850,27 +877,27 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-	= true;
+// 	= true;
 
-#[test] fn playground()
-{
-	let source = indoc! {"
-		1
-		<!-- #SQUARK only?
-		2
-		<!-- #SQUARK slash. -->
-		3
-	"};
+// #[test] fn playground()
+// {
+// 	let source = indoc! {"
+// 		[bad](bad.md)
+// 		<a href=\"bad\">bad</a>
+// 	"};
 
-	let mut config = TEST_CONFIG.clone();
-	config.errors.strict = true;
-	config.errors.strict = false;
-	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-	renderer.render_from(source.trim());
-	log::error(renderer.errors);
-}
+// 	let mut config = TEST_CONFIG.clone();
+// 	config.errors.strict = true;
+// 	config.errors.strict = false;
+// 	config.errors.link_inactive = LinkRewriteAction::MARK_INVALID;
+// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+// 	let out = renderer.render_from(source.trim());
+// 	log::error(renderer.errors);
+// 	println!("{C}{out}{W}");
+// 	log::line();
+// }
 
-const _: bool
+// const _: bool
 	= false;
 
 

@@ -16,6 +16,10 @@ pub enum RenderCtx
 	#[display("code block")]
 	CODE,
 
+	/// A link is being rewritten from `[Markdown](format)` to `<a href="HTML">format</a>`.
+	#[display("link")]
+	LINK_REWRITE,
+
 	// TODO stringify with key
 
 	/* NOTE: LEAVE has higher priority than SLASH. A SLASH should always be ignored if inside a LEAVE context. */
