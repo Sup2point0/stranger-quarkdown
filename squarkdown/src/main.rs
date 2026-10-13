@@ -19,37 +19,29 @@ enum Mode
 
 	/// `squarkdown init`
 	INIT,
+
+	/// `squarkdown clean`
+	CLEAN,
 }
 
 
 fn main() -> ExitCode
 {
-	let mut mode   = Mode::SQUARKUP;
-	let mut assets = false;
-	let mut fonts  = false;
+	let mut args = std::env::args().skip(1).peekable();
 
-	let mut found_unknown = false;
+	let mut mode = Mode::SQUARKUP;
 
-	for arg in std::env::args().skip(1) {
-		match arg.as_str()
-		{
-			"--help" | "-h" => { mode = Mode::HELP; break; }
-			"--version"     => { mode = Mode::VERSION; break; }
-			"init"          => { mode = Mode::INIT; break; }
+	if let Some(arg) = args.peek() {
+		if arg.eq_ignore_ascii_case("--help")    { mode = Mode::HELP;    } 
+		if arg.eq_ignore_ascii_case("-h")        { mode = Mode::HELP;    } 
+		if arg.eq_ignore_ascii_case("--version") { mode = Mode::VERSION; } 
+		if arg.eq_ignore_ascii_case("init")      { mode = Mode::INIT;    } 
+		if arg.eq_ignore_ascii_case("clean")     { mode = Mode::CLEAN;   } 
 
-			"--assets" => assets = true,
-			"--fonts"  => fonts = true,
-
-			f if f.starts_with('-') => {
-				log::bad!("unknown CLI option: {W}{f}");
-				found_unknown = true;
-			}
-			_ => mode = Mode::HELP,
+		if !arg.starts_with("-") {
+			log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
+			return ExitCode::FAILURE;
 		}
-	}
-
-	if found_unknown {
-		return ExitCode::FAILURE;
 	}
 
 	match mode
@@ -72,13 +64,21 @@ fn main() -> ExitCode
 			println!();
 			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 			log::line();
-			cli::squarkdown(assets, fonts)
+			cli::squarkdown(args)
 		}
 
 		Mode::INIT =>
 		{
 			log::line();
 			log::bad!("{W}squarkdown init{R} is not yet supported!{W}");
+			log::line();
+			ExitCode::FAILURE
+		}
+
+		Mode::CLEAN =>
+		{
+			log::line();
+			log::bad!("{W}squarkdown clean{R} is not yet supported!{W}");
 			log::line();
 			ExitCode::FAILURE
 		}
