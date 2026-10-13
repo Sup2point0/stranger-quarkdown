@@ -1,6 +1,7 @@
 use super::*;
 use crate::*;
 use crate::prelude::*;
+use crate::resolver;
 use crate::log;
 use crate::colours::*;
 
@@ -68,17 +69,14 @@ fn cleanup(force: bool) -> SquarkResult
 	log::is!("checking for Git repository...");
 	let mut repo = None;
 
-	match git::Repository::open(&config.paths.root) {
+	match resolver::resolve_project_repo(&config.out.folder) {
 		Ok(r) => {
 			log::ok!("found your Git repository!");
 			repo = Some(r);
 		}
-	   Err(..) => if !force {
-			return Err(SquarkError::Unrecoverable {
-				msg: str!("could not access Git repository"),
-				hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
-				debug: vec![],
-			});
+	   Err(mut e) => if !force {
+			e.set_hint(fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"));
+			return Err(e);
 		}
 	}
 
