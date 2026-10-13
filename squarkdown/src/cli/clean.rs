@@ -91,14 +91,15 @@ fn cleanup(force: bool) -> SquarkResult
 	log::info!(slash!("deleting files under: {}", &config.out.folder));
 
 	let mut errs = SquarkError::multiple("cleaning files");
-	let mut checked_paths = 0;
+
+	/* NOTE: walkdir walker always returns `out.folder` itself, so we don't count that. */
+	let mut checked_paths = -1;
 	let mut deleted_paths = 0;
 	let mut skipped_paths = vec![];
 
 	let walker = walkdir::WalkDir::new(&config.out.folder)
 		.contents_first(true)
 		.into_iter()
-		.skip(1)
 	;
 
 	for entry in walker {
@@ -158,7 +159,11 @@ fn cleanup(force: bool) -> SquarkResult
 		});
 	}
 
-	log::ok!("deleted {}/{} children", deleted_paths, checked_paths);
+	if checked_paths == 0 {
+		log::bad!("nothing found to cleanup!");
+	} else {
+		log::ok!("deleted {}/{} children", deleted_paths, checked_paths);
+	}
 
 	if skipped_paths.len() > 0 {
 		errs.push(SquarkError::Recoverable {
