@@ -23,6 +23,7 @@ strip = true
 aho-corasick = "1.1.5"
 enum-display = "0.2.1"
 enum_stringify = "0.6.5"
+git2 = "0.21.0"
 path-clean = "1.0.1"
 path-slash = "0.2.1"
 path_macro = "1.0.0"

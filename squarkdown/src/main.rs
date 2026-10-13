@@ -27,20 +27,23 @@ enum Mode
 
 fn main() -> ExitCode
 {
-	let mut args = std::env::args().skip(1).peekable().map(|arg| arg.into());
+	let mut args = std::env::args().skip(1).peekable();
 
 	let mut mode = Mode::SQUARKUP;
 
-	if let Some(arg) = args.peek() {
-		if arg.eq_ignore_ascii_case("--help")    { mode = Mode::HELP;    } 
-		if arg.eq_ignore_ascii_case("-h")        { mode = Mode::HELP;    } 
-		if arg.eq_ignore_ascii_case("--version") { mode = Mode::VERSION; } 
-		if arg.eq_ignore_ascii_case("init")      { mode = Mode::INIT;    } 
-		if arg.eq_ignore_ascii_case("clean")     { mode = Mode::CLEAN;   } 
+	if let Some(arg) = args.peek_mut() {
+		arg.make_ascii_lowercase();
 
-		if !arg.starts_with("-") {
-			log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
-			return ExitCode::FAILURE;
+		match arg.as_str() {
+			"--help" | "-h" => { mode = Mode::HELP;    args.next(); }
+			"--version"     => { mode = Mode::VERSION; args.next(); }
+			"init"          => { mode = Mode::INIT;    args.next(); }
+			"clean"         => { mode = Mode::CLEAN;   args.next(); }
+
+			_ => if !arg.starts_with("-") {
+				log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
+				return ExitCode::FAILURE;
+			}
 		}
 	}
 
