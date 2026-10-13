@@ -36,6 +36,7 @@ Changes to `errors.link-broken`:
 - Remove `--no-parallel` CLI option.
 
 ### New
+- `mark-broken`, `strip-extension`, `link-to-github` options for `errors.link-inactive` now work.
 - `squarkdown clean` command to delete Squarkdown’s rendered output!
   - This command comes with safety checks to only delete files not in Git.
 - Add a timestamp to rendered `+page.ts` files.
