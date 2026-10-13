@@ -27,7 +27,8 @@ def publish-cargo [] {
 
 	cd squarkdown
 
-	cp ../LICENCE .
+	# lol crates.io only accepts American spelling ._.
+	cp ../LICENCE ./LICENSE
 	cargo publish --allow-dirty
 	
 	cd ..
