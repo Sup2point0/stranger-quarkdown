@@ -122,11 +122,11 @@ impl SquarkError
 		)
 	}
 
-	/// Add an error to a [`Self::Multiple`] instance.
-	pub fn push(&mut self, error: SquarkError) -> bool
+	/// Set the `hint` text of a [`SquarkError::Recoverable`] or [`SquarkError::Unrecoverable`].
+	pub fn set_hint(&mut self, text: String) -> bool
 	{
-		if let Self::Multiple{ errs, .. } = self {
-			errs.push(error);
+		if let Self::Recoverable{ hint, .. } | Self::Unrecoverable{ hint, .. } = self {
+			*hint = text;
 			true
 		} else {
 			false
@@ -137,6 +137,17 @@ impl SquarkError
 /// Implementations specific to [`SquarkError::Multiple`]
 impl SquarkError
 {
+	/// Add an error to a [`Self::Multiple`] instance.
+	pub fn push(&mut self, error: SquarkError) -> bool
+	{
+		if let Self::Multiple{ errs, .. } = self {
+			errs.push(error);
+			true
+		} else {
+			false
+		}
+	}
+
 	/// Count the number of atomic errors contained in this [`SquarkError`].
 	/// 
 	/// For [`SquarkError::Multiple`], this recursively counts its aggregated errors. For all other error variants, this returns `1`.
