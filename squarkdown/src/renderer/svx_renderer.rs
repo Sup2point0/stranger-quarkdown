@@ -555,7 +555,7 @@ impl Renderer<'_>
 
 		match self.config.errors.link_inactive
 		{
-			LinkRewriteAction::MARK_INVALID => {
+			LinkRewriteAction::MARK_BROKEN => {
 				self.ctx.push(RenderCtx::LINK_REWRITE);
 				
 				log::error(SquarkError::Recoverable {

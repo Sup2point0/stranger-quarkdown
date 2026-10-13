@@ -54,7 +54,7 @@ Configuration options are neatly organised into categories. Throughout the docs 
 | [`debug`](#debug)                             | boolean | | `true` |
 | [`on-error`](#on-error)                       | string | `warn` <br> `kill` | `warn` |
 | [`file-already-exists`](#file-already-exists) | string | `overwrite` <br> `error` <br> `skip` | `overwrite` |
-| [`link-inactive`](#link-inactive)                 | string | `mark-invalid` <br> `strip-extension` <br> `link-to-github` <br> `error` | `strip-extension` |
+| [`link-inactive`](#link-inactive)                 | string | `mark-broken` <br> `strip-extension` <br> `link-to-github` <br> `error` | `strip-extension` |
 
 ### `strict`
 Enable stricter safety checks?

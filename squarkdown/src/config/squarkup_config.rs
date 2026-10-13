@@ -177,8 +177,8 @@ pub enum FileAction {
 #[derive(EnumStringify)] #[enum_stringify(case = "kebab")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LinkRewriteAction {
-	/// Attach `class="invalid-link"` to the link element.
-	MARK_INVALID,
+	/// Attach `class="broken-link"` to the link element.
+	MARK_BROKEN,
 
 	/// Still strip the `.md` file extension, but don't do anything else.
 	STRIP_EXTENSION,
