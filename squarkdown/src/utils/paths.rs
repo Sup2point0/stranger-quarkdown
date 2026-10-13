@@ -1,3 +1,5 @@
+use super::macros::slash;
+
 use std::path::Path;
 
 
@@ -29,4 +31,20 @@ pub fn display_rel(
 		.expect("Squarkdown only supports Unicode paths");
 
 	slashed.into_owned()
+}
+
+/// Split `path` into `(folder, filename)` (for separate highlighting in messages).
+pub fn split_path(path: impl AsRef<Path>) -> (String, String)
+{
+	let path = path.as_ref();
+
+	let folder = path.parent()
+		.expect("cannot split a path without a parent folder");
+		
+	let filename = path.file_name()
+		.expect("path always has a file name")
+		.to_string_lossy()
+		.to_string();
+
+	(slash!("{}", folder), filename)
 }

@@ -90,6 +90,7 @@ fn go(force: bool) -> SquarkResult
 fn clean_with_git_checks(repo: git::Repository, config: &SquarkupConfig) -> SquarkResult
 {
 	let mut errs = SquarkError::multiple("cleaning files");
+	let mut skipped_paths = vec![];
 
 	let to_delete = walkdir::WalkDir::new(&config.out.folder)
 		.contents_first(true)
@@ -100,8 +101,11 @@ fn clean_with_git_checks(repo: git::Repository, config: &SquarkupConfig) -> Squa
 		{
 			let entry = entry?;
 			let path = entry.into_path();
+			let path_rel = utils::display_rel(&path, &config.paths.root);
 
 			if path.is_dir() && fs::read_dir(&path)?.next().is_none() {
+				let (parent, folder) = utils::split_path(&path_rel);
+				log::info!("deleting: {GREY1}{parent}/{folder}");
 				fs::remove_dir(path)?;
 				return Ok(());
 			}
@@ -113,8 +117,24 @@ fn clean_with_git_checks(repo: git::Repository, config: &SquarkupConfig) -> Squa
 				return Ok(());
 			}
 
-			println!("{}", slash!("{}", path));
-			// fs::remove_file(path)?;
+			let (folder, filename) = utils::split_path(&path_rel);
+			let path_display = fmt!("{GREY1}{folder}{GREY}/{filename}");
+			
+			if !repo.is_path_ignored(&path)? {
+				skipped_paths.push(fmt!("skipped: {path_display}"));
+				return Ok(());
+			}
+			log::info!("deleting: {path_display}");
+
+			fs::remove_file(path)?;
+		});
+	}
+
+	if skipped_paths.len() > 0 {
+		log::error(SquarkError::Recoverable {
+			msg: fmt!("skipped {} files that are not Git-ignored", skipped_paths.len()),
+			hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
+			debug: skipped_paths,
 		});
 	}
 	
