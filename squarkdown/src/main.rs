@@ -27,7 +27,6 @@ fn main() -> ExitCode
 	let mut mode   = Mode::SQUARKUP;
 	let mut assets = false;
 	let mut fonts  = false;
-	let mut no_parallel = false;
 
 	let mut found_unknown = false;
 
@@ -40,8 +39,6 @@ fn main() -> ExitCode
 
 			"--assets" => assets = true,
 			"--fonts"  => fonts = true,
-
-			"--no-parallel" => no_parallel = true,
 
 			f if f.starts_with('-') => {
 				log::bad!("unknown CLI option: {W}{f}");
@@ -75,7 +72,7 @@ fn main() -> ExitCode
 			println!();
 			println!("{P}Squarkdown v{}", env!("CARGO_PKG_VERSION"));
 			log::line();
-			cli::squarkdown(assets, fonts, no_parallel)
+			cli::squarkdown(assets, fonts)
 		}
 
 		Mode::INIT =>

@@ -24,11 +24,16 @@ Sometimes you may find things breaking even with `minor` updates because Squarkd
 ## v4.3
 
 ### Breaking
+Changes to `errors.link-broken`:
+
 - Rename `errors.link-broken` to `.link-inactive` to better reflect its purpose.
   - It only handles links to existing files that *would* break in the site.
   - It does not handle *already* broken links to nonexistent `.md` files.
+- Rename `mark-invalid` option to `mark-broken`.
+  - The attached class is `broken-link`.
 - Default `errors.link-inactive = "error"` (was `strip-extension`).
   - Stripping extension is rarely what you want; erroring is a much saner default.
+- Remove `--no-parallel` CLI option
 
 ### New
 - Squarkdown adds a timestamp to rendered `+page.ts` files.
