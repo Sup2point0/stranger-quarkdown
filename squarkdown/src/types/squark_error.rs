@@ -57,6 +57,7 @@ pub enum SquarkError
 	External {
 		msg: String,
 		err: Box<dyn std::error::Error + Send>,
+		backtrace: std::backtrace::Backtrace,
 	},
 }
 
@@ -79,6 +80,7 @@ impl SquarkError
 		Self::External {
 			msg: str!("unexpected external error"),
 			err: Box::new(error),
+			backtrace: std::backtrace::Backtrace::capture(),
 		}
 	}
 }

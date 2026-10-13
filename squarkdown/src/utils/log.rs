@@ -105,10 +105,10 @@ pub fn error(err: SquarkError)
 				}
 			}
 
-			SquarkError::External{ err, msg } => {
+			SquarkError::External{ err, msg, backtrace } => {
 				bad!(msg);
-				line();
-				println!("{R}{err:?}");
+				println!("\n   {R}{err:?}");
+				println!("\n{backtrace}");
 			}
 
 			SquarkError::ABANDON => (),

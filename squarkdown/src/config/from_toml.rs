@@ -224,6 +224,7 @@ impl SquarkupConfig
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
+							backtrace: std::backtrace::Backtrace::capture(),
 						})
 					}
 				}) }
@@ -240,6 +241,7 @@ impl SquarkupConfig
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
 							msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
+							backtrace: std::backtrace::Backtrace::capture(),
 						})
 					}
 				}) }
