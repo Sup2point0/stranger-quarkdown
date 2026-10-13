@@ -100,6 +100,17 @@ fn cleanup(force: bool) -> SquarkResult
 		{
 			let entry = entry?;
 			let path = entry.into_path();
+
+			if let Some((_, root)) = &repo_info && path.strip_prefix(root).is_err() {
+				return Err(SquarkError::Unrecoverable {
+					msg: fmt!("critical error: received a path outside your project root"),
+					hint: str!(),
+					debug: vec![
+						slash!("would have tried deleting: {GREY1}{}", path)
+					],
+				});
+			}
+
 			let path_rel = utils::display_rel(&path, &config.paths.root);
 
 			// delete folder
