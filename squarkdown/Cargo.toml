@@ -2,7 +2,7 @@
 name = "squarkdown"
 version = "4.2.3"
 edition = "2024"
-license = "MIT"
+license-file = "LICENCE"
 
 description = "Markdown preprocessing for SvelteKit projects"
 keywords = ["svelte", "sveltekit", "mdsvex", "markdown", "squark"]
