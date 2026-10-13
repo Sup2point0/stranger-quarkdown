@@ -15,10 +15,12 @@ lazy_static!
 
 	pub static ref TEST_FILE: PathBuf = path!(*TESTS / "unit.md");
 	
-	/// A barebones testing squarkup config used for unit tests.
+	/// A barebones testing squarkup config for unit tests.
 	pub static ref TEST_CONFIG: SquarkupConfig = SquarkupConfig::init_defaults(&TESTS, &TESTS);
 
+	/// Dummy page data for unit tests (with invalid paths).
 	pub static ref TEST_PAGE: PageData = PageData::default();
 
+	// TODO rename to `TEST_SITE_DATA`
 	pub static ref TEST_SITE: SiteData = SiteData::new();
 }

@@ -112,6 +112,18 @@ use assertables::*;
 	assert_contains!( out, "(./inactive.md)" );
 }
 
+/// With `link-inactive = mark-broken`, Squarkdown rewrites links to inactive pages into HTML links with a `broken-link` class.
+#[test] fn inactive_mark()
+{
+	clear_files("links/inactive-mark").unwrap();
+	assert!( squarkup_from("links/inactive-mark").success() );
+
+	let md = read_file("links/inactive-mark/+page.svx");
+	assert_contains!( md, "<a" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">inactive</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">very inactive</a>" );
+}
+
 /// With `link-inactive = strip-extension`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.
 #[test] fn strip_extension()
 {

@@ -22,7 +22,6 @@ site-data-path = ["invalid site data path"]
 preserve-heading = 100
 preserve-comments = 200
 externalise-links = 300
-mark-invalid-links = 400
 
 [assets]
 folder = ["invalid assets folder"]

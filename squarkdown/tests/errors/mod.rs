@@ -22,6 +22,7 @@ use path_macro::path;
 	assert_contains!( out, "format.externalise-links" );
 	assert_contains!( out, "assets.folder" );
 	assert_contains!( out, "assets.site-assets-folder" );
+	// TODO update for new options
 
 	assert_contains!( out, "must be a boolean" );
 	assert_contains!( out, "must be a string" );
