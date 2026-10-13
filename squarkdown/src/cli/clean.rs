@@ -88,14 +88,22 @@ fn cleanup(force: bool) -> SquarkResult
 		}
 	}
 
+	log::info!(slash!("deleting files under: {}", &config.out.folder));
+
 	let mut errs = SquarkError::multiple("cleaning files");
+	let mut checked_paths = 0;
+	let mut deleted_paths = 0;
 	let mut skipped_paths = vec![];
 
-	let to_delete = walkdir::WalkDir::new(&config.out.folder)
+	let walker = walkdir::WalkDir::new(&config.out.folder)
 		.contents_first(true)
+		.into_iter()
+		.skip(1)
 	;
 
-	for entry in to_delete {
+	for entry in walker {
+		checked_paths += 1;
+
 		catch!(errs =>
 		{
 			let entry = entry?;
@@ -114,10 +122,13 @@ fn cleanup(force: bool) -> SquarkResult
 			let path_rel = utils::display_rel(&path, &config.paths.root);
 
 			// delete folder
-			if path.is_dir() && fs::read_dir(&path)?.next().is_none() {
+			if path.is_dir() && fs::read_dir(&path)?.next().is_none()
+			{
 				let (parent, folder) = utils::split_path(&path_rel);
 				log::info!("deleting: {GREY1}{parent}/{folder}");
+
 				fs::remove_dir(path)?;
+				deleted_paths += 1;
 				return Ok(());
 			}
 
@@ -143,8 +154,11 @@ fn cleanup(force: bool) -> SquarkResult
 
 			log::info!("deleting: {path_display}");
 			fs::remove_file(path)?;
+			deleted_paths += 1;
 		});
 	}
+
+	log::ok!("deleted {}/{} children", deleted_paths, checked_paths);
 
 	if skipped_paths.len() > 0 {
 		errs.push(SquarkError::Recoverable {
