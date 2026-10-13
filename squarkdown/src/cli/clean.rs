@@ -3,7 +3,6 @@ use crate::*;
 use crate::prelude::*;
 use crate::log;
 use crate::colours::*;
-use crate::macros::*;
 
 use git2 as git;
 
@@ -39,7 +38,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	log::is!("cleaning Squarkdown output...");
 
 	let t_init = Instant::now();
-	let r = go(force);
+	let r = cleanup(force);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -58,7 +57,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	}
 }
 
-fn go(force: bool) -> SquarkResult
+fn cleanup(force: bool) -> SquarkResult
 {
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
@@ -67,28 +66,22 @@ fn go(force: bool) -> SquarkResult
 	log::ok!(slash!("found your output folder: {B}{}", &config.out.folder));
 
 	log::is!("checking for Git repository...");
+	let mut repo = None;
 
 	match git::Repository::open(&config.paths.root) {
-		Ok(repo) => {
+		Ok(r) => {
 			log::ok!("found your Git repository!");
-			clean_with_git_checks(repo, &config)
+			repo = Some(r);
 		}
-		Err(..) => {
-			if force {
-				todo!()
-			} else {
-				Err(SquarkError::Unrecoverable {
-					msg: str!("could not access Git repository"),
-					hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
-					debug: vec![],
-				})
-			}
+	   Err(..) => if !force {
+			return Err(SquarkError::Unrecoverable {
+				msg: str!("could not access Git repository"),
+				hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
+				debug: vec![],
+			});
 		}
 	}
-}
 
-fn clean_with_git_checks(repo: git::Repository, config: &SquarkupConfig) -> SquarkResult
-{
 	let mut errs = SquarkError::multiple("cleaning files");
 	let mut skipped_paths = vec![];
 
@@ -120,9 +113,11 @@ fn clean_with_git_checks(repo: git::Repository, config: &SquarkupConfig) -> Squa
 			let (folder, filename) = utils::split_path(&path_rel);
 			let path_display = fmt!("{GREY1}{folder}{GREY}/{filename}");
 			
-			if !repo.is_path_ignored(&path)? {
-				skipped_paths.push(fmt!("skipped: {path_display}"));
-				return Ok(());
+			if let Some(r) = &repo {
+				if !r.is_path_ignored(&path)? {
+					skipped_paths.push(fmt!("skipped: {path_display}"));
+					return Ok(());
+				}
 			}
 			log::info!("deleting: {path_display}");
 
