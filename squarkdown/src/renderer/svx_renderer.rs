@@ -1135,14 +1135,23 @@ mod code_blocks {
 	}
 
 	#[test] fn escaped() {
-		test_preserves(&[
-			indoc! {"
-				```md
-				\\```math
-				y = x
-				\\```
-				```
-			"},
+		test_expected(&[
+			(
+				indoc! {"
+					```md
+					\\```math
+					y = x
+					\\```
+					```
+				"},
+				indoc! {"
+					````md
+					\\```math
+					y = x
+					\\```
+					````
+				"}
+			),
 		]);
 	}
 
@@ -1214,6 +1223,26 @@ mod tables {
 				|1|2|
 				|3|4|
 			"},
+		]);
+	}
+	
+	#[test] fn medium() {
+		
+		test_expected(&[
+			(
+				indoc! {"
+					|one|two|
+					|---|---|
+					|1|
+					|3|
+				"},
+				indoc! {"
+					|one|two|
+					|---|---|
+					|1||
+					|3||
+				"}
+			),
 		]);
 	}
 }
@@ -1290,14 +1319,14 @@ mod comments {
 				"erase\n<!-- this comment -->\nplease",
 				"erase\n<!--\nthis comment\n-->\nplease",
 				"erase\n<!--\nthis\ncomment\n-->\nplease",
-			], "erase\n\n\nplease");
+			], "erase\n\nplease");
 		}
 
 		#[test] fn multi_line_from_line_start() {
 			test_expect(&[
 				"erase\n<!-- this\ncomment -->\nplease",
 				"erase\n<!-- this\n\ncomment -->\nplease",
-			], "erase\n\n\n\nplease");
+			], "erase\n\n\nplease");
 		}
 
 		#[test] fn multi_line_from_mid_line() {
@@ -1407,7 +1436,7 @@ mod slash {
 					<!-- #SQUARK slash. -->
 					please
 				"},
-				"erase\n\n\nplease"
+				"erase\n\nplease"
 			),
 			(
 				indoc! {"
@@ -1452,9 +1481,7 @@ mod leave {
 				indoc! {"
 					Don't
 
-
 					<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
-
 
 					this
 				"}
@@ -1472,9 +1499,7 @@ mod leave {
 				indoc! {"
 					Please
 
-
 					keep
-
 
 					this
 				"}
@@ -1497,12 +1522,9 @@ mod leave {
 				indoc! {"
 					Don't
 
-
 					<!-- #SQUARK only?
 					touch
 					     #SQUARK only. -->
-
-					
 					this
 				"}
 			),
@@ -1525,13 +1547,9 @@ mod leave {
 				indoc! {"
 					1
 
-
-
 					<!-- #SQUARK only
 					2
 					     #SQUARK only. -->
-
-					
 					3
 				"},
 			),
@@ -1554,17 +1572,13 @@ mod leave {
 				indoc! {"
 					1
 
-
 					2
-
 
 					<!-- #SQUARK only
 
 					3
 
 					     #SQUARK only. -->
-
-					
 					4
 				"},
 			),
