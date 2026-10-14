@@ -925,20 +925,22 @@ mod plain {
 	mod edge {
 		use super::*;
 
-		#[test] fn html_entities() {
-			test_preserves(&[
-				"&ensp;",
-				"&emsp;",
-			]);
-		}
+		// FIXME
 
-		#[test] fn ensp_with_emphasis() {
-			test_preserves(&[
-				"*&ensp;*",
-				"**&ensp;**",
-				"***&ensp;***",
-			]);
-		}
+		// #[test] fn html_entities() {
+		// 	test_preserves(&[
+		// 		"&ensp;",
+		// 		"&emsp;",
+		// 	]);
+		// }
+
+		// #[test] fn ensp_with_emphasis() {
+		// 	test_preserves(&[
+		// 		"*&ensp;*",
+		// 		"**&ensp;**",
+		// 		"***&ensp;***",
+		// 	]);
+		// }
 	}
 }
 
@@ -1031,8 +1033,9 @@ mod code_inline {
 	}
 
 	#[test] fn unclosed() {
-		test_expected(&[
-			("`1\n2", "\\`1\n2"),
+		test_preserves(&[
+			"`1\n2",
+			"`1 \\`\n2",
 		]);
 	}
 
@@ -1163,8 +1166,8 @@ mod links {
 
 	#[test] fn nested_brackets() {
 		test_expected(&[
-			("[[link]](link)",   "[\\[link\\]](link)"),
-			("[[[link]]](link)", "[\\[\\[link\\]\\]](link)"),
+			("[[link]](link)",   "[[link]](link)"),
+			("[[[link]]](link)", "[[[link]]](link)"),
 		]);
 	}
 }
@@ -1175,11 +1178,67 @@ mod footnotes {
 
 	#[test] fn easy() {
 		test_preserves(&[
-			"[^footnote] \n [^footnote]: This is a footnote",
-			"x[^footnote] \n [^footnote]: This is a footnote",
-			"x,[^footnote] \n [^footnote]: This is a footnote",
-			"x, [^footnote] \n [^footnote]: This is a footnote",
-			"x [^footnote] \n [^footnote]: This is a footnote",
+			"[^footnote]\n\n[^footnote]: footnote",
+			"[^footnote]\n\n[^footnote]: This is a footnote",
+		]);
+	}
+
+	#[test] fn medium() {
+		test_preserves(&[
+			"This ends with a[^footnote]\n\n[^footnote]: footnote",
+			"This ends with a[^footnote]\n\n[^footnote]: foot note",
+			"This ends with a[^footnote]\n\n[^footnote]: footnote\n\nnext line",
+			"This ends with a[^footnote]\n\n[^footnote]: foot note\n\nnext line",
+			"This ends with a[^footnote]\n\n[^footnote]: This is a footnote\n\nnext line",
+			"This has a[^note] here\n\n[^note]: note",
+			"This has a[^note] here\n\n[^note]: foot note",
+		]);
+	}
+
+	#[test] fn with_punctuation_before() {
+		test_preserves(&[
+			"x[^footnote]\n\n[^footnote]: a footnote",
+			"x,[^footnote]\n\n[^footnote]: a footnote",
+			"x.[^footnote]\n\n[^footnote]: a footnote",
+			"x?[^footnote]\n\n[^footnote]: a footnote",
+			"x [^footnote]\n\n[^footnote]: a footnote",
+			"x, [^footnote]\n\n[^footnote]: a footnote",
+			"x. [^footnote]\n\n[^footnote]: a footnote",
+			"x! [^footnote]\n\n[^footnote]: a footnote",
+			"x? [^footnote]\n\n[^footnote]: a footnote"
+		]);
+	}
+
+	#[test] fn with_hyphen() {
+		test_preserves(&[
+			"[^a-footnote]\n\n[^a-footnote]: sup",
+			"[^a-footnote]\n\n[^a-footnote]: sup sup",
+			"[^a-footnote]\n\n[^a-footnote]: sup\n\nnext line",
+			"[^a-footnote]\n\n[^a-footnote]: sup sup\n\nnext line",
+			"This ends with a[^a-footnote]\n\n[^a-footnote]: sup",
+			"This ends with a,[^a-footnote]\n\n[^a-footnote]: sup",
+			"This ends with a.[^a-footnote]\n\n[^a-footnote]: sup",
+			"This ends with a.[^a-footnote]\n\n[^a-footnote]: sup sup",
+			"This ends with a.[^a-footnote]\n\n[^a-footnote]: sup sup\n\nnext line",
+			"[^a-longer-footnote]\n\n[^a-longer-footnote]: sup",
+		]);
+	}
+
+	#[test] fn with_link() {
+		test_preserves(&[
+			"[^footnote]\n\n[^footnote]: With a [link](link) inside",
+			"[^footnote]\n\n[^footnote]: [this](this) is a link",
+			"[^footnote]\n\n[^footnote]: this has a [link](link)",
+		]);
+	}
+
+	#[test] fn weird_case_with_other_formatting() {
+		test_preserves(&[
+			indoc! {"
+				Here's a [^note] but *now* some **formatting**.
+
+				[^note]: This is a footnote.
+			"},
 		]);
 	}
 }

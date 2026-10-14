@@ -2,7 +2,7 @@
 
 [errors]
 strict = false
-on-error = "kill"
+on-error = "warn"
 
 [paths]
 site = "../test-project/"
