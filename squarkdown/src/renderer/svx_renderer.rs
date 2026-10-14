@@ -130,7 +130,7 @@ impl<'d> Renderer<'d>
 		);
 
 		let source = fs::read_to_string(&self.page.filepath)?;
-		let output = self.render_from(&source);
+		let output = self.render_from(&source)?;
 
 		if !self.ctx.is_empty() {
 			self.errors.push(SquarkError::Recoverable {
@@ -151,7 +151,7 @@ impl<'d> Renderer<'d>
 	}
 
 	/// (out-of-place) Render the given Markdown `source`, without surrounding injection.
-	pub(super) fn render_from(&mut self, source: &str) -> String
+	pub(super) fn render_from(&mut self, source: &str) -> SquarkResult<String>
 	{
 		if self.config.errors.debug {
 			self.update_source(source);
@@ -176,10 +176,9 @@ impl<'d> Renderer<'d>
 
 		let mut out = str!();
 
-		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone())
-			.expect("rendering always succeeds");
+		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone())?;
 
-		out
+		Ok(out)
 	}
 }
 
@@ -882,16 +881,15 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		[bad](bad.md)
-// 		<a href=\"bad\">bad</a>
+// 		a&ensp;b
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
 // 	config.errors.strict = true;
 // 	config.errors.strict = false;
-// 	config.errors.link_inactive = LinkRewriteAction::MARK_INVALID;
+// 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
 // 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-// 	let out = renderer.render_from(source.trim());
+// 	let out = renderer.render_from(source.trim()).unwrap();
 // 	log::error(renderer.errors);
 // 	println!("{C}{out}{W}");
 // 	log::line();
