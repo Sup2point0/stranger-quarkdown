@@ -15,6 +15,10 @@
 //! If you’re wondering about why there are some inconsistencies and oddities, all these tests were handwritten ;) yeah it’s long, but I find it quite fun adding them, sooo
 
 
+/// Messy debug tests
+mod debug;
+
+
 // == CONFIG == //
 
 /// Error handling, messages and recovery
