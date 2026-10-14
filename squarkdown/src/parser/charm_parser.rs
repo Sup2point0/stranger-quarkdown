@@ -291,6 +291,8 @@ impl CharmParser<'_>
 
 	/// Parse a single field and return its key and value.
 	/// 
+	/// `-` in the key are normalised to `_`.
+	/// 
 	/// ```ts
 	/// <!-- #SQUARK live!
 	/// | field1 = value
@@ -499,7 +501,9 @@ mod full {
 			assert_eq!( page_data.caption, str!("Four") );
 			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
+			assert_eq!( page_data.release_date_raw, str!("2020 April 1") );
 			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
+			assert_eq!( page_data.last_update_raw, str!("2021 May 31") );
 		}
 	}
 

@@ -204,8 +204,8 @@ impl PageData
 				"head", "heading",
 				"capt", "caption",
 				"tags",
-				"date",   "release-date",
-				"update", "last-update",
+				"date",   "release_date",
+				"update", "last_update",
 				"clean",  "cleanse",
 			].contains(&field.as_ref()) {
 				continue;
