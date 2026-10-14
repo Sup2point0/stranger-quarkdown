@@ -925,6 +925,13 @@ mod plain {
 	mod edge {
 		use super::*;
 
+		#[test] fn html_entities() {
+			test_preserves(&[
+				"&ensp;",
+				"&emsp;",
+			]);
+		}
+
 		#[test] fn ensp_with_emphasis() {
 			test_preserves(&[
 				"*&ensp;*",
@@ -1146,6 +1153,33 @@ mod code_blocks {
 			("``````",       "```\n```"),
 			("``` ```",      "` `"),
 			("```\n```",     "```\n```"),
+		]);
+	}
+}
+
+#[cfg(test)]
+mod links {
+	use super::*;
+
+	#[test] fn nested_brackets() {
+		test_expected(&[
+			("[[link]](link)",   "[\\[link\\]](link)"),
+			("[[[link]]](link)", "[\\[\\[link\\]\\]](link)"),
+		]);
+	}
+}
+
+#[cfg(test)]
+mod footnotes {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			"[^footnote] \n [^footnote]: This is a footnote",
+			"x[^footnote] \n [^footnote]: This is a footnote",
+			"x,[^footnote] \n [^footnote]: This is a footnote",
+			"x, [^footnote] \n [^footnote]: This is a footnote",
+			"x [^footnote] \n [^footnote]: This is a footnote",
 		]);
 	}
 }
