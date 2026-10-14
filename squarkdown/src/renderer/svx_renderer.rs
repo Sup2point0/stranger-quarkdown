@@ -176,7 +176,7 @@ impl<'d> Renderer<'d>
 
 		let mut out = str!();
 
-		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone())?;
+		cmark::cmark_with_options(parser, &mut out, *PARSER_OPTIONS, RENDER_OPTIONS.clone())?;
 
 		Ok(out)
 	}
