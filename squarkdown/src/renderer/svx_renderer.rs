@@ -1033,16 +1033,24 @@ mod code_inline {
 	}
 
 	#[test] fn unclosed() {
-		test_preserves(&[
-			"`1\n2",
-			"`1 \\`\n2",
+		test_expected(&[
+			("`1\n2", "\\`1\n2"),
 		]);
 	}
 
-	#[test] fn edge() {
+	#[test] fn paragraph() {
 		test_preserves(&[
 			"`x`",
 			"`code`",
+		]);
+	}
+
+	#[test] fn double() {
+		test_preserves(&[
+			"`` ` ``",
+			"`` x` ``",
+			"`` `x ``",
+			"`` `x` ``",
 		]);
 	}
 }
@@ -1166,8 +1174,8 @@ mod links {
 
 	#[test] fn nested_brackets() {
 		test_expected(&[
-			("[[link]](link)",   "[[link]](link)"),
-			("[[[link]]](link)", "[[[link]]](link)"),
+			("[[link]](link)",   "[\\[link]](link)"),
+			("[[[link]]](link)", "[\\[[link]]](link)"),
 		]);
 	}
 }
