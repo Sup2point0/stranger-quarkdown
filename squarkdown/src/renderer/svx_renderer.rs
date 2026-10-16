@@ -1,4 +1,4 @@
-use super::*;
+use super::{ RenderCtx as Ctx };
 use crate::config::*;
 use crate::types::*;
 use crate::log;
@@ -14,7 +14,7 @@ use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
 
-use std::fs::{ File };
+use std::fs::{ self, File };
 use std::io::{ Write };
 use std::iter::{ Peekable };
 use std::ops::{ Range };
@@ -57,9 +57,6 @@ pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
 pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
 	= ["&ensp;", "&emsp;"];
 
-/// [`RenderCtx::LINK`] instance with arbitrary fields, for context stack manipulations.
-pub const CTX_LINK: RenderCtx = RenderCtx::LINK { rewrite: false };
-
 
 /// Mutable state for tracking rendering context and errors.
 pub(super) struct Renderer<'d>
@@ -91,7 +88,7 @@ pub(super) struct Renderer<'d>
 	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.
-	pub(super) ctx: ContextStack<RenderCtx>,
+	pub(super) ctx: ContextStack<Ctx>,
 
 	/// Errors accumulated during rendering.
 	pub(super) errors: SquarkError,
@@ -298,11 +295,12 @@ impl Renderer<'_>
 		match &event
 		{
 			pd::Event::Start(pd::Tag::CodeBlock(..)) => {
-				self.ctx.push(RenderCtx::CODE);
+				self.ctx.push(Ctx::CODE);
 			}
 			pd::Event::End(pd::TagEnd::CodeBlock) => {
-				/* SAFETY: A stray `-->` is fine, unlike a stray `<!--` which comments out the entire rest of the file */
-				let _ = self.ctx.try_pop_exact(&RenderCtx::CODE);
+				catch!(self.errors => {
+					self.ctx.try_pop_exact(&Ctx::CODE)?;
+				});
 			}
 			_ => (),
 		};
@@ -349,7 +347,7 @@ impl Renderer<'_>
 		}
 
 		/* Keep comments only if `preserve_comments: true` */
-		if matches!(self.ctx.current(), RenderCtx::COMMENT) {
+		if matches!(self.ctx.current(), Ctx::COMMENT) {
 			return self.config.format.preserve_comments.then_some(event);
 		}
 
@@ -358,20 +356,24 @@ impl Renderer<'_>
 			// rewrite link
 			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
 			{
-				self.ctx.push(RenderCtx::LINK { rewrite: false });
+				self.ctx.push(Ctx::LINK);
 				return self.process_link(dest_url, range).or(Some(event));
 			}
 
-			// pop link context
 			pd::Event::End(pd::TagEnd::Link)
-			if let Ok(RenderCtx::LINK { rewrite }) = self.ctx.try_pop_any(&CTX_LINK)
-				=> {
-					Some(if rewrite {
-						pd::Event::InlineHtml("</a>".into())
-					} else {
-						event
-					})
-				}
+				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
+			{
+				return Some(pd::Event::InlineHtml("</a>".into()));
+			}
+
+			// pop link context
+			pd::Event::End(pd::TagEnd::Link) =>
+			{
+				catch!(self.errors => {
+					self.ctx.try_pop_exact(&Ctx::LINK)?;
+				});
+				return Some(event);
+			}
 
 			// rewrite asset link
 			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
@@ -405,7 +407,7 @@ impl Renderer<'_>
 				if self.process_comment(html, range) {
 					return ProcessAction::ERASE;
 				}
-				self.ctx.push(RenderCtx::COMMENT);
+				self.ctx.push(Ctx::COMMENT);
 				return ProcessAction::from(preserve)
 			}
 			else if html.ends_with("-->") {
@@ -414,7 +416,7 @@ impl Renderer<'_>
 					return ProcessAction::ERASE;
 				}
 
-				if self.ctx.try_pop_exact(&RenderCtx::COMMENT).is_ok() {
+				if self.ctx.try_pop_exact(&Ctx::COMMENT).is_ok() {
 					return ProcessAction::from(preserve);
 				} else {
 					/* NOTE: If `-->` didn't terminate a comment context, it was just a stray `-->` which should be kept */
@@ -455,9 +457,9 @@ impl Renderer<'_>
 		let key = captures.get(3).map(|k| k.as_str().to_owned());
 
 		let squark = match m1 {
-			s if s.eq_ignore_ascii_case("LEAVE") => RenderCtx::LEAVE { key },
-			s if s.eq_ignore_ascii_case("SLASH") => RenderCtx::SLASH { key },
-			s if s.eq_ignore_ascii_case("ONLY")  => RenderCtx::ONLY,
+			s if s.eq_ignore_ascii_case("LEAVE") => Ctx::LEAVE { key },
+			s if s.eq_ignore_ascii_case("SLASH") => Ctx::SLASH { key },
+			s if s.eq_ignore_ascii_case("ONLY")  => Ctx::ONLY,
 			s => {
 				if !self.ctx.has_leave() {
 					self.errors.push(SquarkError::Recoverable {
@@ -470,7 +472,7 @@ impl Renderer<'_>
 			}
 		};
 
-		if self.ctx.has_leave() && !matches!(squark, RenderCtx::LEAVE{..}) {
+		if self.ctx.has_leave() && !matches!(squark, Ctx::LEAVE{..}) {
 			return false;
 		}
 
@@ -571,10 +573,10 @@ impl Renderer<'_>
 		{
 			LinkRewriteAction::MARK_BROKEN =>
 			{
-				if self.ctx.try_pop_any(&CTX_LINK).is_err() {
+				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
 					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
 				};
-				self.ctx.push(RenderCtx::LINK { rewrite: true });
+				self.ctx.push(Ctx::LINK);
 				
 				log::error(SquarkError::Recoverable {
 					msg: fmt!("found a link to an inactive page"),
@@ -687,7 +689,14 @@ impl Renderer<'_>
 
 	fn process_text<'e>(&self, text: pd::CowStr) -> pd::Event<'e>
 	{
-		let text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
+		let mut text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
+
+		if self.ctx.is_link() {
+			// FIXME
+			// text = text.replace("[", "\\[");
+			// text = text.replace("]", "\\]");
+		}
+
 		pd::Event::Text(text.into())
 	}
 }
@@ -901,26 +910,26 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-	= true;
+// 	= true;
 
-#[test] fn playground()
-{
-	let source = indoc! {"
-		[[link]](link)
-	"};
+// #[test] fn playground()
+// {
+// 	let source = indoc! {"
+// 		[[link]](link)
+// 	"};
 
-	let mut config = TEST_CONFIG.clone();
-	config.errors.strict = true;
-	config.errors.strict = false;
-	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
-	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-	let out = renderer.render_from(source.trim()).unwrap();
-	log::error(renderer.errors);
-	println!("{C}{out}{W}");
-	log::line();
-}
+// 	let mut config = TEST_CONFIG.clone();
+// 	config.errors.strict = true;
+// 	config.errors.strict = false;
+// 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
+// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+// 	let out = renderer.render_from(source.trim()).unwrap();
+// 	log::error(renderer.errors);
+// 	println!("{C}{out}{W}");
+// 	log::line();
+// }
 
-const _: bool
+// const _: bool
 	= false;
 
 
@@ -1201,11 +1210,11 @@ mod links {
 
 	#[test] fn nested_brackets() {
 		test_expected(&[
-			("[[link]](link)",   "[\\[link]](link)"),
-			("[[nested] bracketed](link)",   "[\\[nested] bracketed](link)"),
-			("[a [nested]](link)",   "[a [nested]](link)"),
-			("[a [nested] bracketed](link)",   "[a [nested] bracketed](link)"),
-			("[[[link]]](link)", "[\\[[link]]](link)"),
+			("[[link]](link)", "[\\[link\\]](link)"),
+			("[[nested] bracketed](link)", "[\\[nested\\] bracketed](link)"),
+			("[a [nested]](link)", "[a \\[nested\\]](link)"),
+			("[a [nested] bracketed](link)", "[a \\[nested\\] bracketed](link)"),
+			("[[[link]]](link)", "[\\[\\[link\\]\\]](link)"),
 		]);
 	}
 }

@@ -16,13 +16,12 @@ pub enum RenderCtx
 	#[display("code block")]
 	CODE,
 
-	/// Content inside a link.
-	/// 
-	/// If `rewrite`, a `[Markdown](markdown)` link is being rewritten to `<a href="HTML">HTML</a>` format.
 	#[display("link")]
-	LINK {
-		rewrite: bool,
-	},
+	LINK,
+
+	/// A `[Markdown](markdown)` link is being rewritten to `<a href="HTML">HTML</a>` format.
+	#[display("link to rewrite")]
+	LINK_REWRITE,
 
 	// TODO stringify with key
 
@@ -48,6 +47,11 @@ impl ContextStack<RenderCtx>
 	/// Is [`RenderCtx::CODE`] in the context stack (at any depth)?
 	pub fn is_code(&self) -> bool {
 		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE{..}))
+	}
+	
+	/// Is [`RenderCtx::LINK`] or [`RenderCtx::LINK_REWRITE`] in the context stack (at any depth)?
+	pub fn is_link(&self) -> bool {
+		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::LINK | RenderCtx::LINK_REWRITE))
 	}
 
 	/// Is [`RenderCtx::LEAVE`] in the context stack (at any depth)?
