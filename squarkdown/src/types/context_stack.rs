@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use crate::macros::*;
 
+use eq_discriminant::eq_discr;
+
 
 /// A first-in last-out stack for tracking contexts, with an always-active base context.
 #[derive(Clone, Default, Debug)]
@@ -47,26 +49,54 @@ impl<Ctx> ContextStack<Ctx>
 		self.stack.iter().rev().any(|c| c == ctx)
 	}
 
-	/// Pop `ctx` from the stack, as deep as possible.
+	/// Pop any `ctx` variant from the stack, as deep as possible.
+	/// 
+	/// This is the non-keyed version of [`try_pop_exact`](Self::try_pop_exact), only checking the context enum variant but disregarding any attached fields.
 	/// 
 	/// If there are multiple consecutive occurrences of `ctx`, this pops all of them. For instance, popping `SLASH` from `[LEAVE, SLASH, SLASH]` results in `[LEAVE]`.
 	/// 
-	/// Errors if `ctx` is not the current context.
-	pub fn try_pop(&mut self, ctx: &Ctx) -> SquarkResult
+	/// Errors if `ctx` is not the current context variant.
+	pub fn try_pop_any(&mut self, ctx: &Ctx) -> SquarkResult<Ctx>
 	{
-		if self.current() != ctx {
-			return Err(SquarkError::Recoverable {
-				msg: fmt!("failed to pop context: {ctx:?}"),
-				hint: str!("contexts must always be balanced"),
-				debug: vec![],
-			});
+		let Some(mut out) = self.stack.pop_if(|c| eq_discriminant::eq_discriminant(c, ctx))
+			else {
+				return Err(SquarkError::Recoverable {
+					msg: fmt!("failed to pop context: {ctx:?}"),
+					hint: str!("contexts must always be balanced"),
+					debug: vec![],
+				});
+			};
+
+		while let Some(popped) = self.stack.pop_if(|c| eq_discr!(c, ctx)) {
+			out = popped;
 		}
 
-		while self.stack.last() == Some(ctx) {
-			self.stack.pop();
+		Ok(out)
+	}
+
+	/// Pop exactly `ctx` from the stack, as deep as possible.
+	/// 
+	/// This is the keyed version of [`try_pop_any`](Self::try_pop_any), requiring the fields (e.g. `key`) to be equal.
+	/// 
+	/// If there are multiple consecutive occurrences of `ctx`, this pops all of them. For instance, popping `SLASH` from `[LEAVE, SLASH, SLASH]` results in `[LEAVE]`.
+	/// 
+	/// Errors if `ctx` is not the exact current context.
+	pub fn try_pop_exact(&mut self, ctx: &Ctx) -> SquarkResult<Ctx>
+	{
+		let Some(mut out) = self.stack.pop_if(|c| c == ctx)
+			else {
+				return Err(SquarkError::Recoverable {
+					msg: fmt!("failed to pop context: {ctx:?}"),
+					hint: str!("contexts must always be balanced"),
+					debug: vec![],
+				});
+			};
+
+		while let Some(popped) = self.stack.pop_if(|c| c == ctx) {
+			out = popped;
 		}
 
-		Ok(())
+		Ok(out)
 	}
 }
 
@@ -113,7 +143,7 @@ mod try_pop {
 		ctx.push(RenderCtx::LEAVE { key: None });
 		ctx.push(RenderCtx::SLASH { key: None });
 
-		let r = ctx.try_pop(&RenderCtx::SLASH { key: None });
+		let r = ctx.try_pop_exact(&RenderCtx::SLASH { key: None });
 		assert_ok!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
 	}
@@ -125,7 +155,7 @@ mod try_pop {
 		ctx.push(RenderCtx::SLASH { key: None });
 		ctx.push(RenderCtx::SLASH { key: None });
 
-		let r = ctx.try_pop(&RenderCtx::SLASH { key: None });
+		let r = ctx.try_pop_exact(&RenderCtx::SLASH { key: None });
 		assert_ok!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::LEAVE { key: None } );
 	}
@@ -137,7 +167,7 @@ mod try_pop {
 		ctx.push(RenderCtx::SLASH { key: None });
 		ctx.push(RenderCtx::LEAVE { key: None });
 
-		let r = ctx.try_pop(&RenderCtx::LEAVE { key: None });
+		let r = ctx.try_pop_exact(&RenderCtx::LEAVE { key: None });
 		assert_ok!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::SLASH { key: None } );
 	}
@@ -148,7 +178,7 @@ mod try_pop {
 		ctx.push(RenderCtx::LEAVE { key: None });
 		ctx.push(RenderCtx::SLASH { key: None });
 
-		let r = ctx.try_pop(&RenderCtx::LEAVE { key: None });
+		let r = ctx.try_pop_exact(&RenderCtx::LEAVE { key: None });
 		assert_err!( &r );
 		assert_eq!( *ctx.current(), RenderCtx::SLASH { key: None } );
 	}

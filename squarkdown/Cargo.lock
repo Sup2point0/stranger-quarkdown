@@ -266,6 +266,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "eq-discriminant"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35f2e58721f85ec87024ba3dc1035c41b0f0b3c809b1729dcdc98c370deee4f5"
+
+[[package]]
 name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -886,6 +892,7 @@ dependencies = [
  "assertables",
  "enum-display",
  "enum_stringify",
+ "eq-discriminant",
  "git2",
  "indoc",
  "lazy_static",

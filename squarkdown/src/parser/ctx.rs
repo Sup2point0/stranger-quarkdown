@@ -44,7 +44,7 @@ macro_rules! ctx
 		{
 			$self.ctx.push($ctx);
 			let r = (|| { $body })();
-			$self.ctx.try_pop(&$ctx)?;
+			$self.ctx.try_pop_exact(&$ctx)?;
 			r
 		}
 	};

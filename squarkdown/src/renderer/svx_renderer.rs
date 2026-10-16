@@ -299,7 +299,7 @@ impl Renderer<'_>
 			}
 			pd::Event::End(pd::TagEnd::CodeBlock) => {
 				/* SAFETY: A stray `-->` is fine, unlike a stray `<!--` which comments out the entire rest of the file */
-				let _ = self.ctx.try_pop(&RenderCtx::CODE);
+				let _ = self.ctx.try_pop_exact(&RenderCtx::CODE);
 			}
 			_ => (),
 		};
@@ -466,7 +466,7 @@ impl Renderer<'_>
 		match m2 {
 			"?" => self.ctx.push(squark),
 			"." => {
-				if self.ctx.try_pop(&squark).is_err() {
+				if self.ctx.try_pop_exact(&squark).is_err() {
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("unpaired closing squark"),
 						hint: {
