@@ -356,8 +356,11 @@ impl Renderer<'_>
 		match event
 		{
 			// rewrite link
-			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. })
-				=> self.process_link(dest_url, range).or(Some(event)),
+			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
+			{
+				self.ctx.push(RenderCtx::LINK { rewrite: false });
+				return self.process_link(dest_url, range).or(Some(event));
+			}
 
 			// pop link context
 			pd::Event::End(pd::TagEnd::Link)
@@ -371,13 +374,15 @@ impl Renderer<'_>
 				}
 
 			// rewrite asset link
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. })
-				=> {
-					self.process_image(dest_url, range);
-					Some(event)
-				}
+			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			{
+				self.process_image(dest_url, range);
+				return Some(event);
+			}
 
+			// sanitise text
 			pd::Event::Text(text) => Some(self.process_text(text)),
+
 			_ => Some(event),
 		}
 	}
@@ -564,7 +569,11 @@ impl Renderer<'_>
 		// 4. handle a non-broken but inactive link
 		match self.config.errors.link_inactive
 		{
-			LinkRewriteAction::MARK_BROKEN => {
+			LinkRewriteAction::MARK_BROKEN =>
+			{
+				if self.ctx.try_pop_any(&CTX_LINK).is_err() {
+					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
+				};
 				self.ctx.push(RenderCtx::LINK { rewrite: true });
 				
 				log::error(SquarkError::Recoverable {
@@ -580,7 +589,9 @@ impl Renderer<'_>
 				
 				return Some(pd::Event::InlineHtml(href.into()));
 			}
-			LinkRewriteAction::STRIP_EXTENSION => {
+
+			LinkRewriteAction::STRIP_EXTENSION =>
+			{
 				let mut href =
 					their_file_name
 					.strip_suffix(".md")
@@ -596,7 +607,9 @@ impl Renderer<'_>
 				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
 				*dest_url = href.into();
 			}
-			LinkRewriteAction::LINK_TO_GITHUB => {
+
+			LinkRewriteAction::LINK_TO_GITHUB =>
+			{
 				let href = fmt!(
 					"https://github.com/{}/blob/main/{}",
 					self.config.project.github,
@@ -606,7 +619,9 @@ impl Renderer<'_>
 				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
 				*dest_url = href.into();
 			}
-			LinkRewriteAction::ERROR => {
+
+			LinkRewriteAction::ERROR =>
+			{
 				self.errors.push(SquarkError::Recoverable {
 					msg: fmt!("found a link to an inactive page"),
 					hint: str!(),
@@ -886,26 +901,26 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-// 	= true;
+	= true;
 
-// #[test] fn playground()
-// {
-// 	let source = indoc! {"
-// 		[[link]](link)
-// 	"};
+#[test] fn playground()
+{
+	let source = indoc! {"
+		[[link]](link)
+	"};
 
-// 	let mut config = TEST_CONFIG.clone();
-// 	config.errors.strict = true;
-// 	config.errors.strict = false;
-// 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
-// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-// 	let out = renderer.render_from(source.trim()).unwrap();
-// 	log::error(renderer.errors);
-// 	println!("{C}{out}{W}");
-// 	log::line();
-// }
+	let mut config = TEST_CONFIG.clone();
+	config.errors.strict = true;
+	config.errors.strict = false;
+	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
+	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+	let out = renderer.render_from(source.trim()).unwrap();
+	log::error(renderer.errors);
+	println!("{C}{out}{W}");
+	log::line();
+}
 
-// const _: bool
+const _: bool
 	= false;
 
 
