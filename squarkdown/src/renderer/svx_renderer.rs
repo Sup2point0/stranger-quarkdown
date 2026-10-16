@@ -576,7 +576,7 @@ impl Renderer<'_>
 				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
 					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
 				};
-				self.ctx.push(Ctx::LINK);
+				self.ctx.push(Ctx::LINK_REWRITE);
 				
 				log::error(SquarkError::Recoverable {
 					msg: fmt!("found a link to an inactive page"),
