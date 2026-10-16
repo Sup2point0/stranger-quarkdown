@@ -21,6 +21,14 @@ Sometimes you may find things breaking even with `minor` updates because Squarkd
 <br>
 
 
+## v4.3.1
+
+### Fixes
+- Properly sanitise `[]` inside links when rendering.
+  - `[[link]](link)` now gets safely rewritten to `[&lbrace;link&rbrace;](link)` (instead of `[\[link]](link)`, which was broken).
+- Change more panics to errors in renderer.
+
+
 ## v4.3
 
 ### Breaking
