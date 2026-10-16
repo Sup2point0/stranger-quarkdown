@@ -57,6 +57,9 @@ pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
 pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
 	= ["&ensp;", "&emsp;"];
 
+/// [`RenderCtx::LINK`] instance with arbitrary fields, for context stack manipulations.
+pub const CTX_LINK: RenderCtx = RenderCtx::LINK { rewrite: false };
+
 
 /// Mutable state for tracking rendering context and errors.
 pub(super) struct Renderer<'d>
@@ -352,26 +355,29 @@ impl Renderer<'_>
 
 		match event
 		{
-			// link rewriting
-			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
-			{
-				self.process_link(dest_url, range).or(Some(event))
-			}
-			pd::Event::End(pd::TagEnd::Link)
-				if self.ctx.try_pop(&RenderCtx::LINK_REWRITE).is_ok() =>
-			{
-				Some(pd::Event::InlineHtml("</a>".into()))
-			}
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
-			{
-				self.process_image(dest_url, range);
-				Some(event)
-			}
+			// rewrite link
+			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. })
+				=> self.process_link(dest_url, range).or(Some(event)),
 
-			pd::Event::Text(text) =>
-			{
-				Some(self.process_text(text))
-			}
+			// pop link context
+			pd::Event::End(pd::TagEnd::Link)
+			if let Ok(RenderCtx::LINK { rewrite }) = self.ctx.try_pop_any(&CTX_LINK)
+				=> {
+					Some(if rewrite {
+						pd::Event::InlineHtml("</a>".into())
+					} else {
+						event
+					})
+				}
+
+			// rewrite asset link
+			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. })
+				=> {
+					self.process_image(dest_url, range);
+					Some(event)
+				}
+
+			pd::Event::Text(text) => Some(self.process_text(text)),
 			_ => Some(event),
 		}
 	}
@@ -403,7 +409,7 @@ impl Renderer<'_>
 					return ProcessAction::ERASE;
 				}
 
-				if self.ctx.try_pop(&RenderCtx::COMMENT).is_ok() {
+				if self.ctx.try_pop_exact(&RenderCtx::COMMENT).is_ok() {
 					return ProcessAction::from(preserve);
 				} else {
 					/* NOTE: If `-->` didn't terminate a comment context, it was just a stray `-->` which should be kept */
@@ -491,6 +497,8 @@ impl Renderer<'_>
 	/// For instance, suppose page P references `[q](extra.q.md)`. But `q` specifies in its charm squark that it should render to `/secrets/q`. Then we rewrite the `[q](extra/q.md)` link to `[q](/secrets/q)`, both redirecting the link and stripping the `.md` suffix.
 	/// 
 	/// If resolution fails, an error is added to `self.errors`, and as a best-effort fallback, we try to strip a `.md` suffix from the link.
+	/// 
+	/// If no rewriting was performed, this returns `None`.
 	fn process_link<'e>(&mut self,
 		dest_url: &mut pd::CowStr,
 		range: ParserRange,
@@ -540,6 +548,7 @@ impl Renderer<'_>
 			return None;
 		}
 
+		// 3. handle a broken link
 		if !their_source_path.exists() {
 			self.errors.push(SquarkError::Recoverable {
 				msg: fmt!("found a broken link"),
@@ -552,10 +561,11 @@ impl Renderer<'_>
 			return None;
 		}
 
+		// 4. handle a non-broken but inactive link
 		match self.config.errors.link_inactive
 		{
 			LinkRewriteAction::MARK_BROKEN => {
-				self.ctx.push(RenderCtx::LINK_REWRITE);
+				self.ctx.push(RenderCtx::LINK { rewrite: true });
 				
 				log::error(SquarkError::Recoverable {
 					msg: fmt!("found a link to an inactive page"),
@@ -881,7 +891,7 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		a&ensp;b
+// 		[[link]](link)
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
@@ -925,22 +935,24 @@ mod plain {
 	mod edge {
 		use super::*;
 
-		// FIXME
+		#[test] fn html_entities() {
+			test_preserves(&[
+				"&ensp;",
+				"&emsp;",
+				"x&ensp;y",
+				"x&ensp; y",
+				"x &ensp;y",
+				"x &ensp; y",
+			]);
+		}
 
-		// #[test] fn html_entities() {
-		// 	test_preserves(&[
-		// 		"&ensp;",
-		// 		"&emsp;",
-		// 	]);
-		// }
-
-		// #[test] fn ensp_with_emphasis() {
-		// 	test_preserves(&[
-		// 		"*&ensp;*",
-		// 		"**&ensp;**",
-		// 		"***&ensp;***",
-		// 	]);
-		// }
+		#[test] fn ensp_with_emphasis() {
+			test_preserves(&[
+				"*&ensp;*",
+				"**&ensp;**",
+				"***&ensp;***",
+			]);
+		}
 	}
 }
 
@@ -1175,6 +1187,9 @@ mod links {
 	#[test] fn nested_brackets() {
 		test_expected(&[
 			("[[link]](link)",   "[\\[link]](link)"),
+			("[[nested] bracketed](link)",   "[\\[nested] bracketed](link)"),
+			("[a [nested]](link)",   "[a [nested]](link)"),
+			("[a [nested] bracketed](link)",   "[a [nested] bracketed](link)"),
 			("[[[link]]](link)", "[\\[[link]]](link)"),
 		]);
 	}

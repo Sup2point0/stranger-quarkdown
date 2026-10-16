@@ -16,19 +16,27 @@ pub enum RenderCtx
 	#[display("code block")]
 	CODE,
 
-	/// A link is being rewritten from `[Markdown](format)` to `<a href="HTML">format</a>`.
+	/// Content inside a link.
+	/// 
+	/// If `rewrite`, a `[Markdown](markdown)` link is being rewritten to `<a href="HTML">HTML</a>` format.
 	#[display("link")]
-	LINK_REWRITE,
+	LINK {
+		rewrite: bool,
+	},
 
 	// TODO stringify with key
 
 	/* NOTE: LEAVE has higher priority than SLASH. A SLASH should always be ignored if inside a LEAVE context. */
 
 	#[display("#SQUARK leave")]
-	LEAVE { key: Option<String> },
+	LEAVE {
+		key: Option<String>,
+	},
 
 	#[display("#SQUARK slash")]
-	SLASH { key: Option<String> },
+	SLASH {
+		key: Option<String>,
+	},
 
 	#[display("#SQUARK only")]
 	ONLY,
