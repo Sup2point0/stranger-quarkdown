@@ -47,16 +47,6 @@ pub static RENDER_OPTIONS: LazyLock<cmark::Options<'static>>
 		}
 	);
 
-/// HTML entities that [`pulldown_cmark`] parses as unicode, to transform back into literal entities mapping into [`HTML_ENTITY_REPLACE_WITH`].
-pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
-	= LazyLock::new(||
-		AhoCorasick::new(["\u{2002}", "\u{2003}"]).unwrap()
-	);
-
-/// HTML entities that [`pulldown_cmark`] parses as unicode, mapped from [`HTML_ENTITY_PATTERNS`].
-pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
-	= ["&ensp;", "&emsp;"];
-
 
 /// Mutable state for tracking rendering context and errors.
 pub(super) struct Renderer<'d>
@@ -579,7 +569,7 @@ impl Renderer<'_>
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
 				log::error(SquarkError::Recoverable {
-					msg: fmt!("found a link to an inactive page"),
+					msg: fmt!("marking link to an inactive page as broken"),
 					hint: str!(),
 					debug: [
 						self.source_printed(range),
@@ -687,19 +677,39 @@ impl Renderer<'_>
 		*dest_url = pd::CowStr::Boxed(Box::from(dest));
 	}
 
+	/// Sanitise content in `text` for safety.
+	/// 
+	/// This includes:
+	/// 
+	/// - HTML entity processing
 	fn process_text<'e>(&self, text: pd::CowStr) -> pd::Event<'e>
 	{
 		let mut text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
 
 		if self.ctx.is_link() {
-			// FIXME
-			// text = text.replace("[", "\\[");
-			// text = text.replace("]", "\\]");
+			text = BRACKET_PATTERNS.replace_all(&text, &BRACKET_REPLACEMENTS);
 		}
 
 		pd::Event::Text(text.into())
 	}
 }
+
+/// HTML entities that [`pulldown_cmark`] parses as unicode, to transform back into literal entities mapping into [`HTML_ENTITY_REPLACE_WITH`].
+pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
+	= LazyLock::new(||
+		AhoCorasick::new(["\u{2002}", "\u{2003}"]).unwrap()
+	);
+
+/// HTML entities that [`pulldown_cmark`] parses as unicode, mapped from [`HTML_ENTITY_PATTERNS`].
+pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
+	= ["&ensp;", "&emsp;"];
+
+pub static BRACKET_PATTERNS: LazyLock<AhoCorasick> = LazyLock::new(||
+	AhoCorasick::new(["[", "]"]).unwrap()
+);
+pub static BRACKET_REPLACEMENTS: [&str; 2]
+	= ["&lbrack;", "&rbrack;"];
+
 
 /// Miscellaneous injections
 impl Renderer<'_>
@@ -1208,13 +1218,22 @@ mod code_blocks {
 mod links {
 	use super::*;
 
+	#[test] fn emphasis() {
+		test_preserves(&[
+			"[*link*](link)",
+			"[**link**](link)",
+			"[***link***](link)",
+			"[~~link~~](link)",
+		]);
+	}
+
 	#[test] fn nested_brackets() {
 		test_expected(&[
-			("[[link]](link)", "[\\[link\\]](link)"),
-			("[[nested] bracketed](link)", "[\\[nested\\] bracketed](link)"),
-			("[a [nested]](link)", "[a \\[nested\\]](link)"),
-			("[a [nested] bracketed](link)", "[a \\[nested\\] bracketed](link)"),
-			("[[[link]]](link)", "[\\[\\[link\\]\\]](link)"),
+			("[[link]](link)", "[&lbrack;link&rbrack;](link)"),
+			("[[nested] bracketed](link)", "[&lbrack;nested&rbrack; bracketed](link)"),
+			("[a [nested]](link)", "[a &lbrack;nested&rbrack;](link)"),
+			("[a [nested] bracketed](link)", "[a &lbrack;nested&rbrack; bracketed](link)"),
+			("[[[link]]](link)", "[&lbrack;&lbrack;link&rbrack;&rbrack;](link)"),
 		]);
 	}
 }
