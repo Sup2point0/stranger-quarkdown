@@ -8,16 +8,20 @@ use path_macro::path;
 use time::UtcDateTime;
 
 use std::fs::File;
-use std::io::{ BufWriter, Write };
+use std::io::{ self, BufWriter, Write };
 
 
 impl Renderer<'_>
 {
 	/// Render `+page.ts` for supplying page metadata to SvelteKit.
-	pub(super) fn render_page_ts(&self, wrote: &mut bool) -> SquarkResult
+	pub(super) fn render_page_ts(&self,
+		wrote: &mut bool,
+		dry_run: bool,
+	) -> SquarkResult
 	{
 		log::info!(
-			"rendering to: {GREY1}{}{GREY}/+page.ts",
+			"{} to: {GREY1}{}{GREY}/+page.ts",
+			if dry_run {"would render"} else {"rendering"},
 			utils::display_rel(&self.dest_folder, &self.config.paths.root),
 		);
 		
@@ -27,8 +31,18 @@ impl Renderer<'_>
 			self.err_exists(&dest)?;
 		}
 
-		let mut f = BufWriter::new(File::create(dest)?);
+		if dry_run {
+			self.write_page_ts(BufWriter::new(io::sink()))?;
+		} else {
+			self.write_page_ts(BufWriter::new(File::create(dest)?))?;
+		}
 
+		*wrote = true;
+		Ok(())
+	}
+
+	fn write_page_ts(&self, mut f: impl Write) -> SquarkResult
+	{
 		let now = UtcDateTime::now();
 		write!(f,
 			"// rendered by Squarkdown on {YYYY} {M} {D} at {hh:02}:{mm:02}\n\n",
@@ -103,7 +117,6 @@ impl Renderer<'_>
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;
 
-		*wrote = true;
 		Ok(())
 	}
 }
