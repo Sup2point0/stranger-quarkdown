@@ -157,6 +157,8 @@ use assertables::*;
 	assert_contains!( main, "![three](/nested/linked.jpg)" );
 	assert_contains!( main, "![four](/nested/linked.jpg)" );
 	assert_not_contains!( main, ".assets" );
+	assert_contains!( main, "![&lbrack;one&rbrack;](/link.jpg)" );
+	assert_contains!( main, "![&lbrack;&lbrack;one&rbrack;&rbrack;](/link.jpg)" );
 }
 
 /// Squarkdown rewrites links to site asset files.
