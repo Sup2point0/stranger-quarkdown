@@ -356,19 +356,21 @@ impl Renderer<'_>
 				return Some(pd::Event::InlineHtml("</a>".into()));
 			}
 
+			// rewrite asset link
+			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			{
+				self.ctx.push(Ctx::LINK);
+				self.process_image(dest_url, range);
+				return Some(event);
+			}
+
 			// pop link context
-			pd::Event::End(pd::TagEnd::Link) =>
+			  pd::Event::End(pd::TagEnd::Link)
+			| pd::Event::End(pd::TagEnd::Image) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::LINK)?;
 				});
-				return Some(event);
-			}
-
-			// rewrite asset link
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
-			{
-				self.process_image(dest_url, range);
 				return Some(event);
 			}
 
