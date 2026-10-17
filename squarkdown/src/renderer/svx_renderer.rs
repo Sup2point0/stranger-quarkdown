@@ -350,26 +350,34 @@ impl Renderer<'_>
 				return self.process_link(dest_url, range).or(Some(event));
 			}
 
+			// pop link context
 			pd::Event::End(pd::TagEnd::Link)
 				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
 			{
 				return Some(pd::Event::InlineHtml("</a>".into()));
 			}
 
-			// rewrite asset link
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
-			{
-				self.ctx.push(Ctx::LINK);
-				self.process_image(dest_url, range);
-				return Some(event);
-			}
-
-			// pop link context
-			  pd::Event::End(pd::TagEnd::Link)
-			| pd::Event::End(pd::TagEnd::Image) =>
+			pd::Event::End(pd::TagEnd::Link) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::LINK)?;
+				});
+				return Some(event);
+			}
+
+			// rewrite asset link
+			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			{
+				self.ctx.push(Ctx::IMAGE_LINK);
+				self.process_image(dest_url, range);
+				return Some(event);
+			}
+			
+			// pop asset context
+			pd::Event::End(pd::TagEnd::Image) =>
+			{
+				catch!(self.errors => {
+					self.ctx.try_pop_exact(&Ctx::IMAGE_LINK)?;
 				});
 				return Some(event);
 			}
@@ -1216,6 +1224,7 @@ mod code_blocks {
 	}
 }
 
+/// Here we test basic link preservation, not resolution and rewriting. Since these require proper filepaths and multiple pages, that functionality is left for the integration tests.
 #[cfg(test)]
 mod links {
 	use super::*;

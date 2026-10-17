@@ -23,6 +23,9 @@ pub enum RenderCtx
 	#[display("link to rewrite")]
 	LINK_REWRITE,
 
+	#[display("image")]
+	IMAGE_LINK,
+
 	// TODO stringify with key
 
 	/* NOTE: LEAVE has higher priority than SLASH. A SLASH should always be ignored if inside a LEAVE context. */
@@ -49,9 +52,13 @@ impl ContextStack<RenderCtx>
 		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE{..}))
 	}
 	
-	/// Is [`RenderCtx::LINK`] or [`RenderCtx::LINK_REWRITE`] in the context stack (at any depth)?
+	/// Is [`RenderCtx::LINK`], [`RenderCtx::LINK_REWRITE`] or [`RenderCtx::IMAGE_LINK`] in the context stack (at any depth)?
 	pub fn is_link(&self) -> bool {
-		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::LINK | RenderCtx::LINK_REWRITE))
+		self.stack().iter().any(|ctx| matches!(ctx,
+			  RenderCtx::LINK
+			| RenderCtx::LINK_REWRITE
+			| RenderCtx::IMAGE_LINK
+		))
 	}
 
 	/// Is [`RenderCtx::LEAVE`] in the context stack (at any depth)?
