@@ -29,6 +29,7 @@ pub fn render(
 	page: &PageData,
 	site: &SiteData,
 	config: &SquarkupConfig,
+	dry_run: bool,
 ) -> (SquarkResult, bool)
 {
 	let mut errs = SquarkError::multiple(fmt!(
@@ -38,28 +39,30 @@ pub fn render(
 
 	let renderer = Renderer::new(page, site, config);
 
-	let r = fs::create_dir_all(&renderer.dest_folder);
+	if !dry_run {
+		let r = fs::create_dir_all(&renderer.dest_folder);
 
-	if let Err(e) = r {
-		return (Err(e.into()), false);
+		if let Err(e) = r {
+			return (Err(e.into()), false);
+		}
 	}
 
 	/* NOTE:
 		Logically speaking the `+page.ts` renderer should be separate from the `+page.svx` renderer, but I decided with all the duplication required, it's not worth splitting them.
 
-		This means a little rigidity in that `render_page_ts()` (which borrows) must happen before `render_page_svx()` (which moves), but I doubt we're changing this, so it's not a problem :]
+		This means a little rigidity in that `render_page_ts()` (which borrows) must happen before `render_page_svx()` (which moves), but I doubt we're changing the render targets anytime soon, so it's not a problem :]
 	*/
 
 	let mut wrote_ts = true;
 
 	if config.out.render_page_ts {
 		wrote_ts = false;
-		catch!(errs => { renderer.render_page_ts(&mut wrote_ts)?; });
+		catch!(errs => { renderer.render_page_ts(&mut wrote_ts, dry_run)?; });
 	}
 	
 	let mut wrote_svx = false;
 
-	catch!(errs => { renderer.render_page_svx(&mut wrote_svx)?; });
+	catch!(errs => { renderer.render_page_svx(&mut wrote_svx, dry_run)?; });
 
 	(errs.or(()), wrote_ts && wrote_svx)
 }

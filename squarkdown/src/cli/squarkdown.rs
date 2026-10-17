@@ -14,13 +14,15 @@ use std::time::Instant;
 /// This includes squarkup as well as extras like fonts and assets preprocessing.
 pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 {
-	let mut assets = false;
-	let mut fonts  = false;
+	let mut dry_run = false;
+	let mut assets  = false;
+	let mut fonts   = false;
 	let mut unknown_args = vec![];
 
 	for arg in args {
-		if      arg.eq_ignore_ascii_case("--assets") { assets = true; }
-		else if arg.eq_ignore_ascii_case("--fonts")  { fonts = true; }
+		if      arg.eq_ignore_ascii_case("--dry-run") { dry_run = true; }
+		else if arg.eq_ignore_ascii_case("--assets")  { assets = true; }
+		else if arg.eq_ignore_ascii_case("--fonts")   { fonts = true; }
 		else {
 			unknown_args.push(arg);
 		}
@@ -34,7 +36,7 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 	log::version();
 
 	let t_init = Instant::now();
-	let r = squarkup(assets, fonts);
+	let r = squarkup(dry_run, assets, fonts);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -54,9 +56,21 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 }
 
 /// The core squarkup pipeline that is timed for performance.
-fn squarkup(assets: bool, fonts: bool) -> SquarkResult
+fn squarkup(
+	dry_run: bool,
+	assets: bool,
+	fonts: bool,
+) -> SquarkResult
 {
 	/* NOTE: We're intentionally keeping the main pipeline under one scope so all the shared variables are easily accessible instead of requiring a whole load of messy parameter-passing. Some loss in readability, but gains in concision ;) */
+
+	if dry_run || assets || fonts {
+		let mut enabled = vec![];
+		if dry_run { enabled.push("dry run"); }
+		if assets  { enabled.push("assets"); }
+		if fonts   { enabled.push("fonts"); }
+		log::info!("enabled options: {GREY1}{}", enabled.join(&fmt!("{GREY} · {GREY1}")));
+	}
 
 	// == SETUP == //
 	let project_root = resolver::resolve_project_root()?;
@@ -72,7 +86,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 		log::is!("injecting fonts queries...");
 
 		extras::prep_fonts(&config)
-			.or_else(|e| e.depends(&config))?;
+			.or_else(|e| e.depends(&config), dry_run)?;
 
 		log::ok!("injected fonts queries");
 	}
@@ -81,7 +95,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 	if assets {
 		log::is!("preprocessing assets...");
 
-		extras::prep_assets(&mut site_data, &config)
+		extras::prep_assets(&mut site_data, &config, dry_run)
 			.or_else(|e| e.depends(&config))?;
 	}
 
@@ -140,7 +154,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 			.pages_map()
 			.par_iter()
 			.map(|(_shard, page)|
-				renderer::render(page, &site_data, &config)
+				renderer::render(page, &site_data, &config, dry_run)
 			)
 			.collect()
 		;
@@ -162,7 +176,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 	// == SITE DATA == //
 	if let Some(dest) = &config.out.site_data_path {
 		log::is!("saving site data...");
-		extras::save_site_data(dest, &site_data, &config)?;
+		extras::save_site_data(dest, &site_data, &config, dry_run)?;
 	}
 	
 	Ok(())
