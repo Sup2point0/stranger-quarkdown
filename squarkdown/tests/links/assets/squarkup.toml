@@ -1,5 +1,10 @@
 #:schema ../../../src/config/schema.json
 
+[errors]
+strict = false
+on-error = "kill"
+link-inactive = "error"
+
 [paths]
 site = "../../test-project/"
 
@@ -8,8 +13,3 @@ folder = "src/routes/links/assets/"
 
 [assets]
 folder = ".assets/"
-
-[errors]
-strict = false
-on-error = "kill"
-link-inactive = "error"

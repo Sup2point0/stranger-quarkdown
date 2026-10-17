@@ -167,11 +167,26 @@ use assertables::*;
 	clear_files("links/site-assets").unwrap();
 	assert!( squarkup!("links/site-assets", "--assets").success() );
 	
-	let main = read_file("links/site-assets/+page.svx");
-	assert_contains!( main, "![one](/link.jpg)" );
-	assert_contains!( main, "![two](/link.jpg)" );
-	assert_contains!( main, "![three](/linked.jpg)" );
-	assert_contains!( main, "![four](/linked.jpg)" );
-	assert_contains!( main, "![five](/nested/linking.jpg)" );
-	assert_contains!( main, "![six](/nested/linking.jpg)" );
+	let md = read_file("links/site-assets/+page.svx");
+	assert_contains!( md, "![one](/link.jpg)" );
+	assert_contains!( md, "![two](/link.jpg)" );
+	assert_contains!( md, "![three](/linked.jpg)" );
+	assert_contains!( md, "![four](/linked.jpg)" );
+	assert_contains!( md, "![five](/nested/linking.jpg)" );
+	assert_contains!( md, "![six](/nested/linking.jpg)" );
+}
+
+/// Squarkdown rewrites links to asset files _and_ other files together.
+#[test] fn assets_linked()
+{
+	clear_files("links/assets-linked").unwrap();
+	assert!( squarkup!("links/assets-linked", "--assets").success() );
+	
+	let main = read_file("links/assets-linked/main/+page.svx");
+	assert_contains!( main, "[![one](/link.jpg)](side)" );
+	assert_contains!( main, "[![two](/link.jpg)](side)" );
+	assert_contains!( main, "[![three](/link.jpg)](side)" );
+	assert_contains!( main, "[![four](/link.jpg)](side)" );
+	assert_not_contains!( main, ".assets" );
+	assert_not_contains!( main, ".md" );
 }
