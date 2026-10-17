@@ -926,7 +926,7 @@ impl From<bool> for ProcessAction {
 #[cfg(test)] use assertables::*;
 #[cfg(test)] use indoc::indoc;
 
-/* NOTE: Test cases cannot _start_ immediately with a comment, because it will get stripped by `skip_charm_squark` (which assumes the input contains a charm squark) */
+/* NOTE: Test cases cannot _start_ immediately with HTML or a comment, because it will get stripped by `skip_charm_squark` (which assumes the input starts with a charm squark) */
 
 
 const DEBUG: bool
@@ -997,6 +997,52 @@ mod plain {
 				"***&ensp;***",
 			]);
 		}
+	}
+}
+
+#[cfg(test)]
+mod html {
+	use super::*;
+
+	#[test] fn easy() {
+		test_preserves(&[
+			"Test\n\n<div>hi</div>",
+			"Test\n\n<div>hello there</div>",
+		]);
+	}
+
+	#[test] fn medium() {
+		test_preserves(&[
+			indoc! {"
+				Test
+
+				<div class=\"sup\">
+
+				|a|table|
+				|-|-----|
+				|x|y|
+
+				</div>
+			"},
+		]);
+	}
+
+	#[test] fn hard() {
+		test_preserves(&[
+			indoc! {"
+				Test
+
+				<div class=\"sup\">
+				<div class=\"suppety\">
+
+				|a|table|
+				|-|-----|
+				|x|y|
+
+				</div>
+				</div>
+			"},
+		]);
 	}
 }
 
@@ -1349,6 +1395,48 @@ mod tables {
 				|:-:|:-:|
 				|1|2|
 				|3|4|
+			"},
+		]);
+	}
+
+	#[test] fn medium() {
+		test_expected(&[
+			(
+				indoc! {"
+					| one | two | three |
+					| --- | --- | ----- |
+					| 1   | 2   | 3     |
+				"},
+				indoc! {"
+					|one|two|three|
+					|---|---|-----|
+					|1|2|3|
+				"},
+			),
+		]);
+	}
+
+	#[test] fn empty_heading() {
+		test_preserves(&[
+			indoc! {"
+				|one||
+				|---|-|
+				|1|2|
+			"},
+			indoc! {"
+				||two|
+				|-|---|
+				|1|2|
+			"},
+			indoc! {"
+				|||
+				|-|-|
+				|1|2|
+			"},
+			indoc! {"
+				|||
+				|-|-|
+				|1|2|
 			"},
 		]);
 	}
