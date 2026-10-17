@@ -8,17 +8,23 @@
 
 Squarkdown does not use semantic versioning. (sorry :P)
 
-For version `4.major.minor`:
+Instead, we use the versioning system you’ll find in most games. For version `4.major.minor`:
 
 - Increments to `minor` bring bug fixes, improvements and optimisations.
 - Increments to `major` bring significant new features and *possibly* breaking changes.
 
 Since Squarkdown is a build tool rather than a framework, and primarily made for myself, backwards compatibility is a *nice-to-have*, but not a critical concern. I try to avoid breaking changes when I can, but I won’t hesitate to make them if it makes sense for the tool.
 
-Sometimes you may find things breaking even with `minor` updates because Squarkdown has become *stricter*.
+Sometimes you may find things breaking (usually by erroring) with `minor` updates, because Squarkdown has become *stricter* with its checks or error handling.
 
 
 <br>
+
+
+## v4.3.2
+
+### Fixes
+- Fix rendering issues when using an image inside a link, i.e. `[![img](img)](link)`.
 
 
 ## v4.3.1
