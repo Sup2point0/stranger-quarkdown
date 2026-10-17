@@ -21,6 +21,12 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
+## Next (v4.3.3)
+
+### Fixes
+- Fix render count when `errors.on-error = "warn"`.
+
+
 ## v4.3.2
 
 ### Fixes

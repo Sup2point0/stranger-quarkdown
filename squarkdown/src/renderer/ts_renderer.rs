@@ -14,7 +14,7 @@ use std::io::{ BufWriter, Write };
 impl Renderer<'_>
 {
 	/// Render `+page.ts` for supplying page metadata to SvelteKit.
-	pub(super) fn render_page_ts(&self) -> SquarkResult
+	pub(super) fn render_page_ts(&self, wrote: &mut bool) -> SquarkResult
 	{
 		log::info!(
 			"rendering to: {GREY1}{}{GREY}/+page.ts",
@@ -103,6 +103,7 @@ impl Renderer<'_>
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;
 
+		*wrote = true;
 		Ok(())
 	}
 }

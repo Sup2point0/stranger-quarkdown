@@ -1,7 +1,6 @@
 use super::*;
 use crate::*;
 use crate::prelude::*;
-use crate::types::{ CollectSquark };
 use crate::colours::*;
 
 use rayon::prelude::*;
@@ -136,7 +135,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 		// == RENDER == //
 		log::is!("rendering...");
 
-		let results: Vec<SquarkResult> =
+		let results: Vec<(SquarkResult, bool)> =
 			site_data
 			.pages_map()
 			.par_iter()
@@ -146,10 +145,18 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 			.collect()
 		;
 
-		let (oks, errs) = results.into_iter().partition_squark("");
+		let mut errs = SquarkError::multiple("");
+		let mut num_rendered = 0;
+
+		for (r, wrote) in results {
+			if wrote {
+				num_rendered += 1;
+			}
+			catch!(errs => { r?; });
+		}
 
 		errs.depends(&config)?;
-		log::ok!("rendered {}/{} pages", oks.len(), site_data.stats.active_pages);
+		log::ok!("rendered {num_rendered}/{} pages", site_data.stats.active_pages);
 	}
 
 	// == SITE DATA == //

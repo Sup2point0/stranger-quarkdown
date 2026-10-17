@@ -107,7 +107,7 @@ impl<'d> Renderer<'d>
 	}
 
 	/// Run the renderer to completion, writing the whole `+page.svx` file with all injections.
-	pub(super) fn render_page_svx(mut self) -> SquarkResult
+	pub(super) fn render_page_svx(mut self, wrote: &mut bool) -> SquarkResult
 	{
 		if self.dest_file.exists() {
 			self.err_exists(&self.dest_file)?;
@@ -135,6 +135,7 @@ impl<'d> Renderer<'d>
 			self.inject_timestamp(&mut file)?;
 			self.inject_head(&mut file)?;
 			file.write_all(output.as_bytes())?;
+			*wrote = true;
 		}
 
 		self.errors.or(())
