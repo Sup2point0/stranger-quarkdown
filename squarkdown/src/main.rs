@@ -34,11 +34,15 @@ fn main() -> ExitCode
 	if let Some(arg) = args.peek_mut() {
 		arg.make_ascii_lowercase();
 
-		match arg.as_str() {
-			"--help" | "-h" => { mode = Mode::HELP;    args.next(); }
-			"--version"     => { mode = Mode::VERSION; args.next(); }
-			"init"          => { mode = Mode::INIT;    args.next(); }
-			"clean"         => { mode = Mode::CLEAN;   args.next(); }
+		match arg.as_str()
+		{
+			  "help"
+			| "--help"
+			| "-h"
+							=> { mode = Mode::HELP;    args.next(); }
+			"--version" => { mode = Mode::VERSION; args.next(); }
+			"init"      => { mode = Mode::INIT;    args.next(); }
+			"clean"     => { mode = Mode::CLEAN;   args.next(); }
 
 			_ => if !arg.starts_with("-") {
 				log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
