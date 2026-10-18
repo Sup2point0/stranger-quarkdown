@@ -15,7 +15,7 @@ use regex::regex;
 use time::UtcDateTime;
 
 use std::fs::{ self, File };
-use std::io::{ Write };
+use std::io::{ self, Write };
 use std::iter::{ Peekable };
 use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
@@ -107,15 +107,20 @@ impl<'d> Renderer<'d>
 	}
 
 	/// Run the renderer to completion, writing the whole `+page.svx` file with all injections.
-	pub(super) fn render_page_svx(mut self, wrote: &mut bool) -> SquarkResult
+	pub(super) fn render_page_svx(mut self,
+		wrote: &mut bool,
+		dry_run: bool,
+	) -> SquarkResult
 	{
 		if self.dest_file.exists() {
 			self.err_exists(&self.dest_file)?;
 		}
+
+		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 		
 		log::info!(
-			"rendering to: {GREY1}{}{GREY}/{}",
-			utils::display_rel(&self.dest_folder, &self.config.paths.root),
+			"{} to: {base}{GREY1}{folder}{GREY}/{}",
+			if dry_run {"would render"} else {"rendering"},
 			self.config.out.file_name,
 		);
 
@@ -131,14 +136,23 @@ impl<'d> Renderer<'d>
 		}
 
 		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
-			let mut file = File::create(&self.dest_file)?;
-			self.inject_timestamp(&mut file)?;
-			self.inject_head(&mut file)?;
-			file.write_all(output.as_bytes())?;
+			if dry_run {
+				self.write_page_svx(io::sink(), &[])?;
+			} else {
+				self.write_page_svx(File::create(&self.dest_file)?, output.as_bytes())?;
+			}
 			*wrote = true;
 		}
 
 		self.errors.or(())
+	}
+
+	fn write_page_svx(&self, mut f: impl Write, content: &[u8]) -> SquarkResult
+	{
+		self.inject_timestamp(&mut f)?;
+		self.inject_head(&mut f)?;
+		f.write_all(content)?;
+		Ok(())
 	}
 
 	/// (out-of-place) Render the given Markdown `source`, without surrounding injection.
