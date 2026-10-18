@@ -45,8 +45,13 @@ pub fn save_site_data(
 	let data = regex!("\\[\n {8}\"").replace_all(&data, "[\"");
 	let data = regex!(",\n {8}\"").replace_all(&data, ", \"");
 	let data = regex!("\"\n {6}\\]").replace_all(&data, "\"]");
-	fs::write(&dest, data.as_bytes())?;
 
-	log::ok!(slash!("saved site data to: {B}{}", dest));
+	if dry_run {
+		log::ok!(slash!("would save site data to: {B}{}", dest));
+	} else {
+		fs::write(&dest, data.as_bytes())?;
+		log::ok!(slash!("saved site data to: {B}{}", dest));
+	}
+	
 	Ok(())
 }
