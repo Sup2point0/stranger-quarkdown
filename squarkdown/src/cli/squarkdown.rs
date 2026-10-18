@@ -66,10 +66,10 @@ fn squarkup(
 
 	if dry_run || assets || fonts {
 		let mut enabled = vec![];
-		if dry_run { enabled.push("dry run"); }
+		if dry_run { enabled.push("dry-run"); }
 		if assets  { enabled.push("assets"); }
 		if fonts   { enabled.push("fonts"); }
-		log::info!("enabled options: {GREY1}{}", enabled.join(&fmt!("{GREY} · {GREY1}")));
+		log::info!("enabled options: {G}{}", enabled.join(&fmt!("{GREY} · {G}")));
 	}
 
 	// == SETUP == //
@@ -111,12 +111,9 @@ fn squarkup(
 			
 			if let Some(page) = r {
 				site_data.add_page(page);
-				
-				log::info!(slash!(
-					"found active file: {}/{GREY1}{}",
-					filepath.parent().unwrap().strip_prefix(&config.paths.root).unwrap(),
-					filepath.file_name().unwrap().to_string_lossy(),
-				));
+
+				let (folder, file) = utils::split_path_from(filepath, &config.paths.root);
+				log::info!("found active file: {folder}/{GREY1}{file}");
 			}
 		}.or_else(|e| e.depends(&config))?;
 	}
@@ -147,7 +144,7 @@ fn squarkup(
 		}
 
 		// == RENDER == //
-		log::is!("rendering...");
+		log::is!(if dry_run {"simulating rendering..."} else {"rendering..."});
 
 		let results: Vec<(SquarkResult, bool)> =
 			site_data
@@ -170,7 +167,12 @@ fn squarkup(
 		}
 
 		errs.depends(&config)?;
-		log::ok!("rendered {num_rendered}/{} pages", site_data.stats.active_pages);
+
+		log::ok!(
+			"{} {num_rendered}/{} pages",
+			if dry_run {"would render"} else {"rendered"},
+			site_data.stats.active_pages
+		);
 	}
 
 	// == SITE DATA == //

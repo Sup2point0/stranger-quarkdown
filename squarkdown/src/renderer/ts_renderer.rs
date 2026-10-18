@@ -22,7 +22,7 @@ impl Renderer<'_>
 		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 
 		log::info!(
-			"{} to: {base}{GREY1}{folder}{GREY}/+page.ts",
+			"{} to: {base}/{GREY1}{folder}{GREY}/+page.ts",
 			if dry_run {"would render"} else {"rendering"},
 		);
 		

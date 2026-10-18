@@ -119,7 +119,7 @@ impl<'d> Renderer<'d>
 		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 		
 		log::info!(
-			"{} to: {base}{GREY1}{folder}{GREY}/{}",
+			"{} to: {base}/{GREY1}{folder}{GREY}/{}",
 			if dry_run {"would render"} else {"rendering"},
 			self.config.out.file_name,
 		);
