@@ -57,12 +57,23 @@ pub fn render(
 
 	if config.out.render_page_ts {
 		wrote_ts = false;
-		catch!(errs => { renderer.render_page_ts(&mut wrote_ts, dry_run)?; });
+		catch!(errs => {
+			renderer.render_page_ts(&mut wrote_ts, dry_run)?;
+		});
 	}
 	
 	let mut wrote_svx = false;
+	catch!(errs => {
+		renderer.render_page_svx(&mut wrote_svx, dry_run)?;
+	});
 
-	catch!(errs => { renderer.render_page_svx(&mut wrote_svx, dry_run)?; });
-
-	(errs.or(()), wrote_ts && wrote_svx)
+	/* NOTE:
+		Why not return a `SquarkResult<bool>`, or better yet, just check `.is_ok()` for a successful write?
+	
+		Well, we return `Err()` if _any_ errors occurred at all – even if they were recoverable errors that did not crash the write because `errors.on-error = "warn"`. In that case, we still need to know whether a file was written, so that we can accurately count the number of pages rendered for the output message. Hence we always need to return a `bool`, regardless of `Ok()` or `Err()`. Quite messy, but what can you do.
+	*/
+	(
+		errs.or(()),
+		wrote_ts && wrote_svx
+	)
 }
