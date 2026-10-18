@@ -85,8 +85,8 @@ fn squarkup(
 	if fonts {
 		log::is!("injecting fonts queries...");
 
-		extras::prep_fonts(&config)
-			.or_else(|e| e.depends(&config), dry_run)?;
+		extras::prep_fonts(&config, dry_run)
+			.or_else(|e| e.depends(&config))?;
 
 		log::ok!("injected fonts queries");
 	}
