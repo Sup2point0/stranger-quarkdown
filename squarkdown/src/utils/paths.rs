@@ -24,6 +24,7 @@ pub fn display_rel(
 	base: impl AsRef<Path>,
 ) -> String
 {
+	// TODO fallback to `absolute`?
 	let relative = pathdiff::diff_paths(absolute, base)
 		.expect("absolute and base path always have common ancestor");
 
@@ -52,5 +53,9 @@ pub fn split_path(path: impl AsRef<Path>) -> (String, String)
 /// Split `path` into `(folder_rel, filename)` relative to `base` (for separate highlighting in messages).
 pub fn split_path_from(path: impl AsRef<Path>, base: impl AsRef<Path>) -> (String, String)
 {
-	split_path(path.as_ref().strip_prefix(base).expect("`path` must be a child of `base`"))
+	split_path(
+		path.as_ref()
+			.strip_prefix(base)
+			.unwrap_or(path.as_ref())
+	)
 }
