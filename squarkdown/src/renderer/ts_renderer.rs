@@ -19,10 +19,11 @@ impl Renderer<'_>
 		dry_run: bool,
 	) -> SquarkResult
 	{
+		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
+
 		log::info!(
-			"{} to: {GREY1}{}{GREY}/+page.ts",
+			"{} to: {base}{GREY1}{folder}{GREY}/+page.ts",
 			if dry_run {"would render"} else {"rendering"},
-			utils::display_rel(&self.dest_folder, &self.config.paths.root),
 		);
 		
 		let dest = path!(self.dest_folder / "+page.ts");
