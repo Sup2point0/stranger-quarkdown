@@ -16,7 +16,7 @@
 
 
 /// Messy debug tests
-mod debug;
+mod _debug;
 
 
 // == CONFIG == //
