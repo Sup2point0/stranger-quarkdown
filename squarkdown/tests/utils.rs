@@ -81,6 +81,32 @@ pub fn capture_squarkup_from(path: &str) -> (process::ExitStatus, String)
 	(status, out)
 }
 
+#[macro_export]
+macro_rules! capture_squarkup {
+	($path:literal $(, $arg:literal)*) => {
+		{
+			let bin = env!("CARGO_BIN_EXE_squarkdown");
+			let r = std::process::Command::new(bin)
+				.current_dir(TESTS.join($path))
+				$( .arg($arg) )*
+				.output();
+
+			assertables::assert_ok!( &r );
+			let std::process::Output{ status, stdout, stderr } = r.unwrap();
+
+			let out = String::from_utf8(stdout).unwrap();
+			print!("{out}");
+
+			if !stderr.is_empty() {
+				let err = String::from_utf8(stderr).unwrap();
+				print!("{err}");
+			}
+
+			(status, out)
+		}
+	};
+}
+
 
 /// Recursively delete all files under `TEST_ROUTES / path`, except `.gitkeep`.
 pub fn clear_files(path: &str) -> io::Result<()>

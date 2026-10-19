@@ -1,0 +1,20 @@
+#:schema ../../src/config/schema.json
+
+[errors]
+strict = false
+on-error = "kill"
+
+[paths]
+site = "../test-project/"
+
+[out]
+folder = "src/routes/dry-run/"
+site-data-path = "src/data/dry-run.json"
+
+[assets]
+folder = ".assets/"
+
+[fonts]
+queries = [
+	"Nothing"
+]
