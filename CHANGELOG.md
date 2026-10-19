@@ -29,6 +29,9 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 
 ## v4.3.2
 
+### New
+- Check `paths.sources` directories do not contain dangerous `..` traversal
+
 ### Fixes
 - Fix rendering issues when using an image inside a link, i.e. `[![img](img)](link)`.
 

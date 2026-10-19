@@ -201,6 +201,19 @@ impl SquarkupConfig
 
 				for value in values {
 					let raw = Self::try_get_str(&value, "paths.sources", "(entry in an array)")?;
+
+					if raw == ".."
+					|| raw.contains("../")
+					|| raw.contains("/..")
+					{
+						errs.push(SquarkError::Recoverable {
+							msg: fmt!("illegal source directory: {W}{BOLD}{raw}{UNBOLD}"),
+							hint: fmt!("{Y}paths.sources{G} entries cannot contain {W}..{G} traversal"),
+							debug: vec![],
+						});
+						continue;
+					}
+
 					let dir = Self::try_resolve_folder(
 						root, &raw, "a source folder you specified",
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
@@ -606,12 +619,29 @@ mod paths {
 
 	#[test] fn reject_nonexistent_sources() {
 		for source in [
-			"[paths]\nsources = ['nonexistent']\n\t[errors]\non-error='kill'",
-			"[paths]\nsources = ['test-project/nonexistent']\n\t[errors]\non-error='kill'",
+			"[paths] \n sources = ['nonexistent']              \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['test-project/nonexistent'] \n [errors] \n on-error='kill'",
 		] {
 			let e = load_config(source);
 			assert_err!( &e );
 			assert_contains!( e.unwrap_err(), "doesn't exist" );
+		}
+	}
+
+	#[test] fn reject_up_traversal() {
+		for source in [
+			"[paths] \n sources = ['..']          \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['../']         \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['../dir']      \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['../dir/']     \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['dir/..']      \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['dir/../']     \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['dir/../dir']  \n [errors] \n on-error='kill'",
+			"[paths] \n sources = ['dir/../dir/'] \n [errors] \n on-error='kill'",
+		] {
+			let e = load_config(source);
+			assert_err!( &e );
+			assert_contains!( e.unwrap_err(), ".." );
 		}
 	}
 }
