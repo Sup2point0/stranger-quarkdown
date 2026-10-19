@@ -7,6 +7,7 @@ use crate::colours::*;
 use crate::macros::*;
 
 use aho_corasick::AhoCorasick;
+use map_or_original::MapOrOriginal;
 use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark as pd;
@@ -610,9 +611,8 @@ impl Renderer<'_>
 			LinkRewriteAction::STRIP_EXTENSION =>
 			{
 				let mut href =
-					their_file_name
-					.strip_suffix(".md")
-					.unwrap_or(&their_file_name)
+					their_file_name[..]
+					.map_or_orig(|f| f.strip_suffix(".md"))
 					.to_owned()
 				;
 

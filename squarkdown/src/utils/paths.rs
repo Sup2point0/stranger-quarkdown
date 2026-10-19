@@ -1,5 +1,7 @@
 use super::macros::slash;
 
+use map_or_original::MapOrOriginal;
+
 use std::path::Path;
 
 
@@ -54,8 +56,6 @@ pub fn split_path(path: impl AsRef<Path>) -> (String, String)
 pub fn split_path_from(path: impl AsRef<Path>, base: impl AsRef<Path>) -> (String, String)
 {
 	split_path(
-		path.as_ref()
-			.strip_prefix(base)
-			.unwrap_or(path.as_ref())
+		path.as_ref().map_or_orig(|p| p.strip_prefix(base).ok())
 	)
 }
