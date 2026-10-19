@@ -1884,7 +1884,7 @@ mod source_snapshots {
 	use super::*;
 
 	#[test] fn line_boundaries() {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &TEST_CONFIG);
 		renderer.update_source("012\n45\n78");
 		assert_eq!( renderer.line_boundaries, vec![0, 4, 7, 10] );
 		renderer.update_source("01234\n\n78");
@@ -1894,7 +1894,7 @@ mod source_snapshots {
 	}
 
 	#[test] fn line_number() {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &TEST_CONFIG);
 		renderer.update_source("012\n45\n78");
 		assert_eq!( renderer.line_info(0..).unwrap().line_number, 1 );
 		assert_eq!( renderer.line_info(1..).unwrap().line_number, 1 );
@@ -1908,7 +1908,7 @@ mod source_snapshots {
 	}
 
 	#[test] fn line_range() {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &TEST_CONFIG);
 		renderer.update_source("012\n45\n78");
 		assert_eq!( renderer.line_info(0..).unwrap().line_range, 0..3 );
 		assert_eq!( renderer.line_info(1..).unwrap().line_range, 0..3 );
@@ -1922,7 +1922,7 @@ mod source_snapshots {
 	}
 
 	#[test] fn source_printed() {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &TEST_CONFIG);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &TEST_CONFIG);
 		let source = "line one\nline two\nline three";
 		renderer.update_source(&source);
 

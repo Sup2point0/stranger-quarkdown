@@ -21,6 +21,5 @@ lazy_static!
 	/// Dummy page data for unit tests (with invalid paths).
 	pub static ref TEST_PAGE: PageData = PageData::default();
 
-	// TODO rename to `TEST_SITE_DATA`
-	pub static ref TEST_SITE: SiteData = SiteData::new();
+	pub static ref TEST_SITE_DATA: SiteData = SiteData::new();
 }

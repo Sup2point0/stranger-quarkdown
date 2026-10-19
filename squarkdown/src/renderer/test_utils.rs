@@ -40,7 +40,7 @@ pub(super) fn test_expect_for(
 	change_config(&mut config);
 
 	for source in cases {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 		let output = renderer.render_from(source.trim()).unwrap();
 		assert_eq!( output.trim(), expected.trim(), "{:?}", renderer.ctx.printed() );
 	}
@@ -62,7 +62,7 @@ pub(super) fn test_expected_for(
 	change_config(&mut config);
 
 	for (source, expected) in cases {
-		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+		let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 		let output = renderer.render_from(source.trim()).unwrap();
 		assert!( renderer.errors.is_fine(), "{Y}{:?}{R}", renderer.errors );
 		assert_is_empty!( renderer.ctx );
