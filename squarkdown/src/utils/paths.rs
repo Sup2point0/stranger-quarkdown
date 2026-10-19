@@ -1,8 +1,17 @@
 use super::macros::slash;
+use crate::prelude::*;
 
 use map_or_original::MapOrOriginal;
 
+use std::fs;
 use std::path::Path;
+
+
+/// Check if `dir` is an empty directory.
+pub fn is_empty_dir(dir: impl AsRef<Path>) -> SquarkResult<bool>
+{
+	Ok(fs::read_dir(&dir)?.next().is_none())
+}
 
 
 /// Make `path` relative by stripping a leading path separator.

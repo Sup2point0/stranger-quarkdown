@@ -123,7 +123,7 @@ fn cleanup(force: bool) -> SquarkResult
 			let path_rel = utils::display_rel(&path, &config.paths.root);
 
 			// delete folder
-			if path.is_dir() && fs::read_dir(&path)?.next().is_none()
+			if path.is_dir() && utils::is_empty_dir(&path)?
 			{
 				let (parent, folder) = utils::split_path(&path_rel);
 				log::info!("deleting: {GREY1}{parent}/{folder}");
