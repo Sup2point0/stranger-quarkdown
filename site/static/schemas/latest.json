@@ -1,0 +1,227 @@
+{
+  "squarkdown-version": "4.4",
+
+  "title":       "Squarkup Configuration Schema",
+  "description": "Shared schema for your squarkup.toml or squarkup.json",
+
+  "additionalProperties": false,
+
+  "properties":
+  {
+    "project": {
+      "title": "Project",
+      "additionalProperties": false,
+      "properties":
+      {
+        "name": {
+          "title":       "Project Name",
+          "type":        "string",
+          "description": "The displayed name of the repo, injected into `<title>` when `format.inject-head = true`."
+        },
+
+        "github": {
+          "title":       "GitHub Repository Name",
+          "type":        "string",
+          "description": "The GitHub repository name, e.g. `Sup2point0/stranger-quarkdown`."
+        }
+      }
+    },
+
+    "paths": {
+      "title": "Paths",
+      "additionalProperties": false,
+      "properties":
+      {
+        "site": {
+          "title":       "Site Directory",
+          "type":        "string",
+          "default":     "./",
+          "description": "[relative to root]\n\nThe folder containing your SvelteKit site."
+        },
+
+        "sources": {
+          "title":       "Source Directories",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     [],
+          "description": "[relative to root]\n\nSource folders from which to start searching for Markdown files."
+        },
+
+        "include": {
+          "title":       "Include Patterns",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     "['\\.md%']",
+          "description": "Only files whose full path matches against any of these RegEx patterns will be searched."
+        },
+
+        "exclude": {
+          "title":       "Exclude Patterns",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     "['/\\.git', '/node_modules', '/\\.svelte-kit']",
+          "description": "Files whose full path matches against any of these RegEx patterns will *not* be checked by Squarkdown."
+        }
+      }
+    },
+
+    "out": {
+      "title": "Output Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "folder": {
+          "title":       "Destination Folder",
+          "type":        "string",
+          "default":     "src/routes/",
+          "description": "[relative to `paths.site`]\n\nWhere to export files relative to.\n\n`destination` paths in files are relative to this folder."
+        },
+
+        "file-name": {
+          "title":       "SVX Filename",
+          "type":        "string",
+          "default":     "+page.svx",
+          "description": "The file name for exported files, including the (expected) `.svx` extension."
+        },
+
+        "site-data-path": {
+          "title":       "Site Data Filepath",
+          "type":        "string",
+          "default":     null,
+          "description": "[relative to `paths.site`]\n\nWhere to export site data, including the (expected) `.json` extension.\n\nIf absent, site data is not exported."
+        },
+
+        "render-page-ts": {
+          "title":       "Enable `+page.ts` Rendering",
+          "type":        "boolean",
+          "default":     true
+        },
+
+        "shorter-fields": {
+          "title":       "Shorter Field Names",
+          "type":        "boolean",
+          "default":     false,
+          "description": "Should fields in exported `+page.ts` and `site.json` use more compact identifiers?\n\nFor instance, `description` is shortened to `desc`, and `last_update` is shortened to `update`."
+        }
+      }
+    },
+
+    "format": {
+      "title": "Rendering Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "inject-head": {
+          "title":       "Inject `<head>`",
+          "type":        "boolean",
+          "default":     true
+        },
+
+        "preserve-heading": {
+          "title":       "Preserve Page Heading",
+          "type":        "boolean",
+          "default":     false
+        },
+
+        "preserve-comments": {
+          "title":       "Preserve Comments",
+          "type":        "boolean",
+          "default":     false
+        },
+
+        "externalise-links": {
+          "title":       "Externalise Links",
+          "type":        "boolean",
+          "default":     false
+        }
+      }
+    },
+
+    "assets": {
+      "title": "Assets Preprocessing Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "folder": {
+          "title":       "Assets Folder",
+          "type":        "string",
+          "default":     "./",
+          "description": "[relative to root]\n\nThe folder from which to copy assets to `site/static/`."
+        },
+
+        "site-assets-folder": {
+          "title":       "Site Assets Folder",
+          "type":        "string",
+          "default":     null,
+          "description": "[relative to root]\n\nA folder (possibly inside `assets.folder`) from which to copy assets directly to `site/static/` without any nested structure."
+        },
+
+        "extensions": {
+          "title":       "Asset File Extensions",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     "['png', 'jpg', 'jpeg', 'webp', 'svg']"
+        }
+      }
+    },
+
+    "fonts": {
+      "title": "Google Fonts Injection Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "queries": {
+          "title":       "Google Fonts Query Parameters",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     []
+        }
+      }
+    },
+
+    "errors": {
+      "title": "Error Handling",
+      "additionalProperties": false,
+      "properties":
+      {
+        "strict": {
+          "title":       "Enable Safety Checks",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring `destination` to be explicitly provided\n- Checking directories remain under your project root\n- Checking multiple files don't export to the same directory"
+        },
+        
+        "debug": {
+          "title":       "Improve Debug Output",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Enable more helpful debug output?\n\nThis requires Squarkdown to do more work, for instance to keep track of line numbers, so has a tiny impact on performance."
+        },
+
+        "on-error": {
+          "title":       "Error Handling",
+          "type":        "string",
+          "enum":        ["warn", "kill"],
+          "default":     "warn",
+          "description": "What to do when a non-fatal error is encountered (e.g. parsing a file failed)."
+        },
+
+        "file-already-exists": {
+          "title":       "File Conflict Handling",
+          "type":        "string",
+          "enum":        ["overwrite", "error", "skip"],
+          "default":     "overwrite",
+          "description": "What to do when a target file to write to already exists."
+        },
+
+        "link-inactive": {
+          "title":       "Inactive Link Handling",
+          "type":        "string",
+          "enum":        ["mark-broken", "strip-extension", "link-to-github", "error"],
+          "default":     "error",
+          "description": "When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?"
+        }
+      }
+    }
+  }
+}
