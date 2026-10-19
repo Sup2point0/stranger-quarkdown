@@ -248,22 +248,27 @@ impl Renderer<'_>
 			let mut text_left = pd::Event::Rule;
 			let mut text_right = pd::Event::Rule;
 
-			/* For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML */
-			if let Some(i) = text.find("<!--") {
+			// For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML
+			/* NOTE: `<!--` at the start of a line shouldn't be split */
+			if let Some(i) = text.find("<!--")
+				&& i > 0
+			{
 				idx = i;
 				let (l, r) = text.split_at(idx);
 				text_left = pd::Event::Text(l.to_owned().into());
 				text_right = pd::Event::InlineHtml(r.to_owned().into());
 			}
-			/* Do the opposite for a closing comment */
-			else if let Some(i) = text.find("-->") {
+			// Do the opposite for a closing comment
+			/* NOTE: `-->` at the end of a line shouldn't be split */
+			else if let Some(i) = text.find("-->")
+				&& i < text.len()
+			{
 				idx = i + "-->".len();
 				let (l, r) = text.split_at(idx);
 				text_left = pd::Event::InlineHtml(l.to_owned().into());
 				text_right = pd::Event::Text(r.to_owned().into());
 			}
 
-			/* NOTE: If it's `0` (start of the string) we shouldn't split anyway */
 			if idx != 0 {
 				let left = Some((text_left, range.clone())).into_iter();
 				let right = Some((text_right, range)).into_iter();
@@ -936,7 +941,7 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		[[link]](link)
+// 		a <!-- test -->
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
@@ -1511,11 +1516,11 @@ mod comments {
 		}
 
 		#[test] fn with_breaks_in_comment() {
-			test_expect(&[
-				"erase\n<!-- this comment -->\nplease",
-				"erase\n<!--\nthis comment\n-->\nplease",
-				"erase\n<!--\nthis\ncomment\n-->\nplease",
-			], "erase\n\n\nplease");
+			test_expected(&[
+				("erase\n<!-- this comment -->\nplease",    "erase\n\n\n\nplease"),
+				("erase\n<!--\nthis comment\n-->\nplease",  "erase\n\n\nplease"),
+				("erase\n<!--\nthis\ncomment\n-->\nplease", "erase\n\n\nplease"),
+			]);
 		}
 
 		#[test] fn multi_line_from_line_start() {
@@ -1541,11 +1546,11 @@ mod comments {
 		}
 
 		#[test] fn nested() {
-			// FIXME bugged!
-			// test_expected(&[
-			// 	("a <!-- <!-- weird --> comment", "a  comment"),
-			// 	("a \n <!-- <!-- weirder --> comment", "a comment"),
-			// ]);
+			test_expected(&[
+				("a <!-- <!-- weird --> comment", "a  comment"),
+				("a \n <!-- <!-- weirder --> comment", "a\n\n  comment"),
+				("a <!-- <!-- weird --> comment <!-- another --> one", "a  comment  one"),
+			]);
 		}
 	}
 
@@ -1632,7 +1637,13 @@ mod slash {
 					<!-- #SQUARK slash. -->
 					please
 				"},
-				"erase\n\n\nplease"
+				indoc! {"
+					erase
+					
+					
+					
+					please
+				"},
 			),
 			(
 				indoc! {"
@@ -1678,7 +1689,9 @@ mod leave {
 					Don't
 
 
+
 					<!-- #SQUARK slash? --> touch <!-- #SQUARK slash. -->
+
 
 
 					this
@@ -1698,7 +1711,9 @@ mod leave {
 					Please
 
 
+
 					keep
+
 
 
 					this
@@ -1723,11 +1738,13 @@ mod leave {
 					Don't
 
 
+
 					<!-- #SQUARK only?
 					touch
 					     #SQUARK only. -->
 
 					
+
 					this
 				"}
 			),
@@ -1752,10 +1769,13 @@ mod leave {
 
 
 
+
+
 					<!-- #SQUARK only
 					2
 					     #SQUARK only. -->
 
+					
 					
 					3
 				"},
@@ -1780,7 +1800,9 @@ mod leave {
 					1
 
 
+
 					2
+
 
 
 					<!-- #SQUARK only
@@ -1788,6 +1810,7 @@ mod leave {
 					3
 
 					     #SQUARK only. -->
+
 
 					
 					4

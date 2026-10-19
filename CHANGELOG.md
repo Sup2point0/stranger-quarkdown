@@ -34,6 +34,7 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 
 ### Fixes
 - Fix rendering issues when using an image inside a link, i.e. `[![img](img)](link)`.
+- Improve rendering reliability of inline `<!-- comment -->`s.
 
 
 ## v4.3.1
