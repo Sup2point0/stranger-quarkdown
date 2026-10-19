@@ -23,18 +23,18 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 
 ## Next (v4.3.3)
 
-### Fixes
-- Fix render count when `errors.on-error = "warn"`.
-
-
-## v4.3.2
-
 ### New
 - Check `paths.sources` directories do not contain dangerous `..` traversal
 
 ### Fixes
-- Fix rendering issues when using an image inside a link, i.e. `[![img](img)](link)`.
+- Fix render count when `errors.on-error = "warn"`.
 - Improve rendering reliability of inline `<!-- comment -->`s.
+
+
+## v4.3.2
+
+### Fixes
+- Fix rendering issues when using an image inside a link, i.e. `[![img](img)](link)`.
 
 
 ## v4.3.1
