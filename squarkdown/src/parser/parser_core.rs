@@ -88,7 +88,7 @@ impl CharmParser<'_>
 					});
 				}
 				None => return self.err_eof(),
-				_ => (),
+				_ => {}
 			}
 			self.advance()?;
 		}
@@ -130,7 +130,7 @@ impl CharmParser<'_>
 					});
 				}
 				None => return self.err_eof(),
-				_ => (),
+				_ => {}
 			}
 			
 			self.advance()?;

@@ -298,7 +298,7 @@ impl Renderer<'_>
 					self.ctx.try_pop_exact(&Ctx::CODE)?;
 				});
 			}
-			_ => (),
+			_ => {}
 		};
 
 		let out = match event {

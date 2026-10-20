@@ -111,7 +111,7 @@ pub fn error(err: SquarkError)
 				println!("\n{backtrace}");
 			}
 
-			SquarkError::ABANDON => (),
+			SquarkError::ABANDON => {}
 		}
 	}
 
