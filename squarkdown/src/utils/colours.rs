@@ -22,3 +22,7 @@ pub const C: &str = "\x1b[96m";
 pub const BOLD:   &str = "\x1b[1m";
 /// Turn bolded text back to normal!
 pub const UNBOLD: &str = "\x1b[22m";
+/// Turn text italic!
+pub const ITAL:   &str = "\x1b[3m";
+/// Turn italic text back to normal!
+pub const UNITAL: &str = "\x1b[23m";

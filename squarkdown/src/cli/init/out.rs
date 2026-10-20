@@ -6,17 +6,14 @@ use crate::colours::*;
 macro_rules! out
 {
 	() => {
-		_out_("│", "")
+		out!("")
 	};
 
 	// with implicit prefix
 	(
 		$msg:literal $(, $($args:tt)* )?
 	) => {
-		_out_(
-			&format!("{GREY}│"),
-			&format!($msg $(, $($args:tt)* )?)
-		)
+		out!(&format!($msg $(, $($args)* )?))
 	};
 
 	(
@@ -30,7 +27,8 @@ macro_rules! out
 
 	// with prefix
 	(
-		$prefix:literal $(, $($args1:tt)* )? => $msg:literal $(, $($args2:tt)* )?
+		$prefix:literal $(, $($args1:tt)* )?
+		=> $msg:literal $(, $($args2:tt)* )?
 	) => {
 		_out_(
 			&format!($prefix $(, $($args1)* )? ),
@@ -48,6 +46,15 @@ macro_rules! out
 	};
 }
 pub(super) use out;
+
+
+macro_rules! ask
+{
+	($($args:tt)*) => {
+		out!("{Y}▸" => $($args)*)
+	}
+}
+pub(super) use ask;
 
 
 pub(super) fn _out_(prefix: &str, message: &str)

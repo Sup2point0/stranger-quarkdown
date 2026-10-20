@@ -9,6 +9,7 @@ mod raw;
 mod out; use out::*;
 mod wait; use wait::*;
 mod step; use step::*;
+mod pick; use pick::*;
 
 
 pub fn init() -> ExitCode
@@ -35,7 +36,7 @@ fn initialise() -> io::Result<()>
 	println!();
 
 	println!(
-		"{GREY} ┌  {C}Welcome to Stranger Quarkdown! {GREY}v{}  ─────────────────────────",
+		"{GREY} ┌  {P}Welcome to Stranger Quarkdown! {GREY}v{}  ─────────────────────────",
 		env!("CARGO_PKG_VERSION")
 	);
 	out!();
@@ -51,9 +52,14 @@ fn initialise() -> io::Result<()>
 			if let Ok((filepath, _)) = resolver::find_config(&parent) {
 				out!();
 				out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
-				out!(&slash!("{GREY}found at: {}", filepath));
+				out!(&slash!("{GREY}found at: {GREY1}{}", filepath));
 				out!();
-				wait!()?;
+				
+				ask!("Exit?");
+				let should_quit = pick_one! {
+					true  => ("yes", ""),
+					false => ("no",  "changes may overwrite existing files"),
+				}?;
 			}
 		}
 	}
@@ -63,7 +69,7 @@ fn initialise() -> io::Result<()>
 	// }?;
 
 	out!();
-	out!("└" => "{C}Thanks for using Stranger Quarkdown, enjoy! 🥕");
+	out!("{GREY}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
 	println!();
 
 	Ok(())

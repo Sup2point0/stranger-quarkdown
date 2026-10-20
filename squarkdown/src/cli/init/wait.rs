@@ -3,7 +3,7 @@ use crate::colours::*;
 
 use crossterm::{
 	cursor::{ self },
-	event::{ self, Event, KeyCode, KeyEvent, KeyEventKind },
+	event::{ self, Event, KeyEvent, KeyCode, KeyEventKind },
 	terminal::{ Clear, ClearType },
 	execute,
 };
