@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{ PathBuf, Path };
 
 
-enum Extension { TOML, JSON }
+pub enum Extension { TOML, JSON }
 
 
 /// Find, read, load, validate and initialise the user's squarkup configuration, either from `squarkup.toml` or `squarkup.json`.
@@ -39,7 +39,7 @@ pub fn resolve_config(root: &Path) -> SquarkResult<SquarkupConfig>
 }
 
 /// Find the location of the user's squarkup configuration, in `(.squarkdown/)?squarkup.(toml|json)`.
-fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
+pub fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 {
 	if let Some(out) = find_config_from(&path!(root / ".squarkdown/")) {
 		return Ok(out);

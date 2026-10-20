@@ -23,7 +23,7 @@ macro_rules! step
 	};
 	(
 		before => $bef:literal $(, $($args1:tt)* )?;
-		after  => $aft:literal $(, $($args2:tt)* )? $(;)?
+		after  => $aft:literal $(, $($args2:tt)* )?;
 	) => {
 		{
 			_step_(

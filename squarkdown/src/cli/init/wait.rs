@@ -1,12 +1,10 @@
 use super::raw::*;
-use super::out::*;
 use crate::colours::*;
 
 use crossterm::{
 	cursor::{ self },
 	event::{ self, Event, KeyCode, KeyEvent, KeyEventKind },
 	terminal::{ Clear, ClearType },
-	ExecutableCommand,
 	execute,
 };
 
@@ -42,7 +40,7 @@ pub(super) fn _wait_(status_message: Option<&str>) -> io::Result<()>
 	stdout.flush()?;
 	execute!(stdout, cursor::RestorePosition)?;
 
-	let raw_mode = RawMode::start()?;
+	let _raw_mode = RawMode::start()?;
 
 	loop {
 		let e = event::read()?;
