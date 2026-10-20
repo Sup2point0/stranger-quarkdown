@@ -1,5 +1,4 @@
 use super::out::*;
-use super::wait::*;
 use crate::colours::*;
 
 use crossterm::{
@@ -40,7 +39,7 @@ pub(super) fn _pick_<T: Clone>(
 	loop {
 		for (i, (_, label, hint)) in choices.iter().enumerate() {
 			if i == idx {
-				out!("{C}● {W}{label} {ITAL}{hint}{UNITAL}");
+				out!("{C}● {W}{label} {GREY}{ITAL}{hint}{UNITAL}");
 			} else {
 				out!("{GREY}○ {label}");
 			}
@@ -72,9 +71,7 @@ pub(super) fn _pick_<T: Clone>(
 						idx -= 1
 					}
 				}
-				KeyCode::Enter => return Ok(
-					choices[idx].0.clone()
-				),
+				KeyCode::Enter => break,
 				_ => {}
 			}
 		}
@@ -84,4 +81,15 @@ pub(super) fn _pick_<T: Clone>(
 			Clear(ClearType::FromCursorDown),
 		)?;
 	}
+
+	execute!(stdout,
+		cursor::MoveUp(choices.len() as u16),
+		Clear(ClearType::FromCursorDown),
+	)?;
+
+	let (choice, label, _) = &choices[idx];
+
+	out!("{GREY}{label}");
+
+	Ok(choice.clone())
 }

@@ -21,6 +21,7 @@ pub fn init() -> ExitCode
 			if e.kind() == io::ErrorKind::Interrupted {
 				out!();
 				out!("└" => "{C}Thanks for using Stranger Quarkdown! 🥕");
+				println!();
 				return ExitCode::SUCCESS;
 			}
 			else {
@@ -60,6 +61,10 @@ fn initialise() -> io::Result<()>
 					true  => ("yes", ""),
 					false => ("no",  "changes may overwrite existing files"),
 				}?;
+
+				if should_quit {
+					return Err(io::Error::from(io::ErrorKind::Interrupted));
+				}
 			}
 		}
 	}
@@ -67,6 +72,15 @@ fn initialise() -> io::Result<()>
 	// step! {
 	// 	before => ""
 	// }?;
+
+	out!("Writing your {B}squarkup.toml...");
+	wait!()?;
+	print!("{PREV}{CLEAR}");
+
+	step! {
+		before => "For more help and guidance, check the docs at {C}https://sup2point0.github.io/stranger-quarkdown/docs{W}!";
+		after => "For more help and guidance, check the docs at https://sup2point0.github.io/stranger-quarkdown/docs!";
+	}?;
 
 	out!();
 	out!("{GREY}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
