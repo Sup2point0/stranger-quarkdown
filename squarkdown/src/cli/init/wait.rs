@@ -1,3 +1,4 @@
+use super::out::*;
 use crate::colours::*;
 
 use crossterm::{
@@ -20,7 +21,7 @@ macro_rules! wait
 	(
 		$msg:literal $(, $($args:tt)* )?
 	) => {
-		_wait_(Some(&format!($msg, $($($args)*)?)))
+		_wait_(Some(&format!($msg, $($($args)* )?)))
 	}
 }
 pub(super) use wait;
@@ -28,10 +29,15 @@ pub(super) use wait;
 
 pub(super) fn _wait_(status_message: Option<&str>) -> io::Result<()>
 {
+	let msg = status_message.unwrap_or(
+		"any key to continue, ESC to exit"
+	);
+
+	out!("└" => msg);
 	if let Some(msg) = status_message {
 		print!("{GREY}{msg}");
 	} else {
-		print!("{GREY}any key to continue, ESC to exit");
+		print!("{GREY}");
 	}
 
 	stdout().flush()?;
