@@ -14,12 +14,13 @@ use std::collections::{ HashMap };
 use std::path::{ Path, PathBuf };
 
 
+// == IMPLEMENTATION == //
+
 /* NOTE:
 	Like in `SquarkupConfig`, for string fields we use `""` to represent the absence of a user-provided value.
 
 	Why not `Option<String>`? Well, we're gonna check the string is non-empty before using its value anyway, so may as well collapse `None` and `Some("")` into just `""`.
 */
-
 
 /// The metadata provided for an active page, parsed from its charm squark.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -72,7 +73,7 @@ impl PageData
 		let mut errs = SquarkError::multiple(slash!("initialising {}", filepath));
 
 		let destination = {
-			if let Some(raw) = Self::take_flat(&mut fields, "destination", "dest") {
+			if let Some(raw) = fields.take_flat("destination", "dest") {
 				let dest = path!(config.out.folder / utils::to_rel(&raw.replace(' ', "-"))).clean();
 
 				if config.errors.strict && !dest.starts_with(&config.paths.root) {
@@ -114,17 +115,17 @@ impl PageData
 			}
 		};
 		
-		let heading     = Self::take_flat(&mut fields, "heading", "head").unwrap_or_default();
-		let title       = Self::take_flat(&mut fields, "title", "title").unwrap_or_else(|| heading.clone());
-		let caption     = Self::take_flat(&mut fields, "caption", "capt").unwrap_or_default();
-		let description = Self::take_flat(&mut fields, "description", "desc").unwrap_or_else(|| caption.clone());
+		let heading     = fields.take_flat("heading", "head").unwrap_or_default();
+		let title       = fields.take_flat("title", "title").unwrap_or_else(|| heading.clone());
+		let caption     = fields.take_flat("caption", "capt").unwrap_or_default();
+		let description = fields.take_flat("description", "desc").unwrap_or_else(|| caption.clone());
 
-		let tags        = Self::take(&mut fields, "tags", "tags").unwrap_or_default();
+		let tags        = fields.take("tags", "tags").unwrap_or_default();
 
 		let mut release_date = None;
 		let mut release_date_raw = str!();
 
-		if let Some(raw) = Self::take_flat(&mut fields, "release_date", "date") {
+		if let Some(raw) = fields.take_flat("release_date", "date") {
 			catch!(errs => {
 				release_date = Some(Self::try_parse_date(&raw, "release date")?);
 			});
@@ -134,7 +135,7 @@ impl PageData
 		let mut last_update = release_date;
 		let mut last_update_raw = release_date_raw.clone();
 
-		if let Some(raw) = Self::take_flat(&mut fields, "last_update", "update") {
+		if let Some(raw) = fields.take_flat("last_update", "update") {
 			catch!(errs => {
 				last_update = Some(Self::try_parse_date(&raw, "last updated")?);
 			});
@@ -158,7 +159,7 @@ impl PageData
 
 		let mut cleanse = vec![];
 
-		for raw in Self::take(&mut fields, "cleanse", "clean").unwrap_or_default() {
+		for raw in fields.take("cleanse", "clean").unwrap_or_default() {
 			match raw.parse::<CleanseOperation>()
 			{
 				Ok(value) => cleanse.push(value),
@@ -227,24 +228,6 @@ impl PageData
 		utils::display_rel(filepath, &config.paths.root)
 	}
 
-	/// Extract a multi-valued field from `fields`.
-	fn take(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<Vec<String>>
-	{
-		fields.remove(short)
-			.or_else(|| fields.remove(long))
-			.map(|t| t.into_vec())
-	}
-
-	/// Extract a single-valued field from `fields` by joining the values with ` / `.
-	fn take_flat(fields: &mut HashMap<String, Strings>, long: &str, short: &str) -> Option<String>
-	{
-		Some(
-			fields.remove(short)
-				.or_else(|| fields.remove(long))?
-				.join(" / ")
-		)
-	}
-
 	fn try_parse_date(date: &str, field: &str) -> SquarkResult<Date>
 	{
 		let date = date.replace("winter", "December");
@@ -270,7 +253,37 @@ impl PageData
 	}
 }
 
-/// Serialisation
+trait PageDataFieldsExt
+{
+	fn take(&mut self, long: &str, short: &str) -> Option<Vec<String>>;
+
+	fn take_flat(&mut self, long: &str, short: &str) -> Option<String>;
+}
+
+impl PageDataFieldsExt for HashMap<String, Strings>
+{
+	/// Extract a multi-valued field from `fields`.
+	fn take(&mut self, long: &str, short: &str) -> Option<Vec<String>>
+	{
+		self.remove(short)
+			.or_else(|| self.remove(long))
+			.map(|t| t.into_vec())
+	}
+
+	/// Extract a single-valued field from `fields` by joining the values with ` / `.
+	fn take_flat(&mut self, long: &str, short: &str) -> Option<String>
+	{
+		Some(
+			self.remove(short)
+				.or_else(|| self.remove(long))?
+				.join(" / ")
+		)
+	}
+}
+
+
+// == SERIALISATION == //
+
 impl PageData
 {
 	/// Serialise to serde applying `config`.
