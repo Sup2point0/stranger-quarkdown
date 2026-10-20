@@ -21,6 +21,7 @@ macro_rules! pick_one
 			false
 		)
 	};
+
 	(
 		$($value:expr => ($label:literal, $hint:literal) ;)+
 	) => {
@@ -29,12 +30,21 @@ macro_rules! pick_one
 			false
 		)
 	};
+
+	(
+		$choices:expr
+	) => {
+		_pick_(
+			&$choices.iter().map(|choice| (choice, choice, "")).collect::<Vec<_>>(),
+			false
+		)
+	};
 }
 pub(super) use pick_one;
 
 
 pub(super) fn _pick_<T: Clone>(
-	choices: &[(T, &str, &str)],
+	choices: &[(T, impl AsRef<str>, &str)],
 	allow_multiple: bool,
 ) -> io::Result<T>
 {
@@ -44,6 +54,8 @@ pub(super) fn _pick_<T: Clone>(
 
 	loop {
 		for (i, (_, label, hint)) in choices.iter().enumerate() {
+			let label = label.as_ref();
+
 			if i == idx {
 				out!("{C}● {W}{label} {GREY}{ITAL}{hint}{UNITAL}");
 			} else {
@@ -94,8 +106,7 @@ pub(super) fn _pick_<T: Clone>(
 	)?;
 
 	let (choice, label, _) = &choices[idx];
-
-	out!("{GREY}{label}");
+	out!("{GREY}{}", label.as_ref());
 
 	Ok(choice.clone())
 }
