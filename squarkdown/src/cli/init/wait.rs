@@ -1,3 +1,4 @@
+use super::raw::*;
 use super::out::*;
 use crate::colours::*;
 
@@ -9,7 +10,7 @@ use crossterm::{
 	execute,
 };
 
-use std::io::{ self, stdout, Write };
+use std::io::{ self, Write };
 
 
 macro_rules! wait
@@ -29,30 +30,31 @@ pub(super) use wait;
 
 pub(super) fn _wait_(status_message: Option<&str>) -> io::Result<()>
 {
-	let msg = status_message.unwrap_or(
+	let mut stdout = io::stdout();
+	
+	print!(" {GREY}└  ");
+	execute!(stdout, cursor::SavePosition)?;
+
+	print!("{}", status_message.unwrap_or(
 		"any key to continue, ESC to exit"
-	);
+	));
 
-	out!("└" => msg);
-	if let Some(msg) = status_message {
-		print!("{GREY}{msg}");
-	} else {
-		print!("{GREY}");
-	}
+	stdout.flush()?;
+	execute!(stdout, cursor::RestorePosition)?;
 
-	stdout().flush()?;
+	let raw_mode = RawMode::start()?;
 
 	loop {
 		let e = event::read()?;
 
 		if let Event::Key(KeyEvent{
 			code,
-			kind: KeyEventKind::Release,
+			kind: KeyEventKind::Press,
 			..
 		}) = e
 		{
 			execute!(
-				stdout(),
+				stdout,
 				Clear(ClearType::CurrentLine),
 				cursor::MoveToColumn(0),
 			)?;

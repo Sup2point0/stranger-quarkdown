@@ -5,6 +5,7 @@ use crate::colours::*;
 use std::io;
 use std::process::ExitCode;
 
+mod raw;
 mod out;
 mod wait; use wait::*;
 mod step; use step::*;
