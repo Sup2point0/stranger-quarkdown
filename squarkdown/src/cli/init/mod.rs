@@ -60,9 +60,7 @@ fn initialise() -> io::Result<()>
 
 	check_existing_config(&cwd)?;
 
-	out!();
-	out!("├" => "{Y}Configuring Paths");
-	out!();
+	head!("Configuring Paths");
 	configure_site(&cwd)?;
 
 	out!();
@@ -121,7 +119,7 @@ fn configure_site(cwd: &Path) -> io::Result<()>
 			let path = folder.path();
 
 			if path!(path / "src" / "app.html").exists() {
-				candidates.push(path);
+				candidates.push(slash!("{}", path));
 			}
 		}
 	}
@@ -134,7 +132,10 @@ fn configure_site(cwd: &Path) -> io::Result<()>
 		}?;
 	}
 	else {
+		candidates.push(str!("None of the above"));
+
 		ask!("Which of these contains your SvelteKit project?");
+		let choice = pick_one!(candidates);
 	}
 
 	Ok(())

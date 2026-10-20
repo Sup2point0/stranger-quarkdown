@@ -57,6 +57,17 @@ macro_rules! ask
 pub(super) use ask;
 
 
+macro_rules! head
+{
+	($msg:literal) => {
+		out!();
+		out!("├" => "{Y}{}", $msg);
+		out!();
+	}
+}
+pub(super) use head;
+
+
 pub(super) fn _out_(prefix: &str, message: &str)
 {
 	if message.is_empty() {
