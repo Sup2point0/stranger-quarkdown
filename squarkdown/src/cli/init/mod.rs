@@ -39,7 +39,14 @@ fn initialise() -> io::Result<()>
 	);
 
 	wait!()?;
-	step!("This will initialise your project’s {B}squarkup.toml{W} for you!")?;
+	step! {
+		before => "This will initialise your project’s {B}squarkup.toml{W} for you!";
+		after => "This will initialise your project’s squarkup.toml for you!";
+	}?;
+
+	out!();
+	out!("└" => "{C}Thanks for using Stranger Quarkdown, enjoy! 🥕");
+	println!();
 
 	Ok(())
 }
