@@ -14,12 +14,18 @@ use std::io;
 macro_rules! pick_one
 {
 	(
-		$($value:expr => ($label:literal, $hint:literal),)+
+		$($value:expr => $hint:literal ;)+
 	) => {
 		_pick_(
-			&[
-				$(($value, $label, $hint),)+
-			],
+			&[ $(($value, $value, $hint),)+ ],
+			false
+		)
+	};
+	(
+		$($value:expr => ($label:literal, $hint:literal) ;)+
+	) => {
+		_pick_(
+			&[ $(($value, $label, $hint),)+ ],
 			false
 		)
 	};

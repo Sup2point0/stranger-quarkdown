@@ -2,7 +2,11 @@ use crate::resolver;
 use crate::colours::*;
 use crate::macros::*;
 
+use path_macro::path;
+
+use std::fs;
 use std::io;
+use std::path::{ Path };
 use std::process::ExitCode;
 
 mod raw;
@@ -20,7 +24,7 @@ pub fn init() -> ExitCode
 		Err(e) => {
 			if e.kind() == io::ErrorKind::Interrupted {
 				out!();
-				out!("└" => "{C}Thanks for using Stranger Quarkdown! 🥕");
+				out!("└" => "{G}Thanks for using Stranger Quarkdown! 🥕");
 				println!();
 				return ExitCode::SUCCESS;
 			}
@@ -34,6 +38,8 @@ pub fn init() -> ExitCode
 
 fn initialise() -> io::Result<()>
 {
+	let cwd = std::env::current_dir()?;
+
 	println!();
 
 	println!(
@@ -47,35 +53,23 @@ fn initialise() -> io::Result<()>
 		before => "Let’s get your project’s {B}squarkup.toml{W} set up!";
 		after  => "Let’s get your project’s squarkup.toml set up!";
 	}?;
+	step! {
+		before => "Heads up, Squarkdown is for {Y}SvelteKit{W} + {Y}MDsveX{W} projects.";
+		after  => "Heads up, Squarkdown is for SvelteKit + MDsveX projects.";
+	}?;
 
-	if let Ok(cwd) = std::env::current_dir() {
-		for parent in cwd.ancestors() {
-			if let Ok((filepath, _)) = resolver::find_config(&parent) {
-				out!();
-				out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
-				out!(&slash!("{GREY}found at: {GREY1}{}", filepath));
-				out!();
-				
-				ask!("Exit?");
-				let should_quit = pick_one! {
-					true  => ("yes", ""),
-					false => ("no",  "changes may overwrite existing files"),
-				}?;
+	check_existing_config(&cwd)?;
 
-				if should_quit {
-					return Err(io::Error::from(io::ErrorKind::Interrupted));
-				}
-			}
-		}
-	}
+	out!();
+	out!("├" => "{Y}Configuring Paths");
+	out!();
+	configure_site(&cwd)?;
 
-	// step! {
-	// 	before => ""
-	// }?;
-
+	out!();
 	out!("Writing your {B}squarkup.toml...");
 	wait!()?;
 	print!("{PREV}{CLEAR}");
+	out!("Wrote your squarkup.toml!");
 
 	step! {
 		before => "For more help and guidance, check the docs at {C}https://sup2point0.github.io/stranger-quarkdown/docs{W}!";
@@ -85,6 +79,63 @@ fn initialise() -> io::Result<()>
 	out!();
 	out!("{GREY}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
 	println!();
+
+	Ok(())
+}
+
+fn check_existing_config(cwd: &Path) -> io::Result<()>
+{
+	for parent in cwd.ancestors() {
+		if let Ok((filepath, _)) = resolver::find_config(&parent) {
+			out!();
+			out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
+			out!(&slash!("{GREY}found at: {GREY1}{}", filepath));
+			out!();
+			
+			ask!("Exit?");
+			let should_quit = pick_one! {
+				true  => ("yes", "");
+				false => ("no",  "changes may overwrite existing files");
+			}?;
+
+			if should_quit {
+				return Err(io::Error::from(io::ErrorKind::Interrupted));
+			}
+			else {
+				break;
+			}
+		}
+	}
+
+	Ok(())
+}
+
+fn configure_site(cwd: &Path) -> io::Result<()>
+{
+	let mut candidates = vec![];
+
+	for folder in fs::read_dir(cwd)? {
+		let folder = folder?;
+
+		if folder.file_type().is_ok_and(|t| t.is_dir()) {
+			let path = folder.path();
+
+			if path!(path / "src" / "app.html").exists() {
+				candidates.push(path);
+			}
+		}
+	}
+
+	if candidates.is_empty() {
+		ask!("Could not find your SvelteKit folder. How to proceed?");
+		let choice = pick_one! {
+			"create" => "Squarkdown will create a new folder for your SvelteKit project";
+			"skip" => "Skip this question";
+		}?;
+	}
+	else {
+		ask!("Which of these contains your SvelteKit project?");
+	}
 
 	Ok(())
 }
