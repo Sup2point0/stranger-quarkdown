@@ -53,25 +53,14 @@ fn main() -> ExitCode
 
 	match mode
 	{
-		Mode::HELP => cli::help(),
-
 		Mode::VERSION => {
-			println!("Squarkdown v{}", env!("CARGO_PKG_VERSION"));
+			println!("Stranger Quarkdown v{}", env!("CARGO_PKG_VERSION"));
 			ExitCode::SUCCESS
 		}
-
+		Mode::HELP     => cli::help(),
 		Mode::SQUARKUP => cli::squarkdown(args),
-
-		Mode::INIT =>
-		{
-			log::line();
-			log::bad!("{W}squarkdown init{R} is not yet supported!{W}");
-			log::line();
-			// cli::init();
-			ExitCode::FAILURE
-		}
-
-		Mode::CLEAN => cli::clean(args),
+		Mode::INIT     => cli::init(),
+		Mode::CLEAN    => cli::clean(args),
 	}
 }
 
