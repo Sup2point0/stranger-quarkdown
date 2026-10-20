@@ -1,9 +1,18 @@
+use crate::colours::*;
+
+
 // lmao I'm just having fun at this point
 
 macro_rules! out
 {
 	() => {
 		_out_("│", "")
+	};
+
+	(
+		$msg:literal $(, $($args:tt)* )?
+	) => {
+		out!("{GREY}│", $msg:literal $(, $($args:tt)* )?)
 	};
 
 	(
@@ -16,9 +25,12 @@ macro_rules! out
 	};
 
 	(
-		$msg:literal $(, $($args:tt)* )?
+		$prefix:literal $(, $($args1:tt)* )? => $msg:literal $(, $($args2:tt)* )?
 	) => {
-		out!("{GREY}│", $msg:literal $(, $($args:tt)* )?)
+		_out_(
+			&format!($prefix $(, $($args1)* )? ),
+			&format!($msg $(, $($args2)* )?)
+		)
 	};
 
 	(
@@ -27,15 +39,6 @@ macro_rules! out
 		_out_(
 			&format!($prefix $(, $($args)* )? ),
 			$msg
-		)
-	};
-
-	(
-		$prefix:literal $(, $($args1:tt)* )? => $msg:literal $(, $($args2:tt)* )?
-	) => {
-		_out_(
-			&format!($prefix $(, $($args1)* )? ),
-			&format!($msg $(, $($args2)* )?)
 		)
 	};
 }
@@ -47,6 +50,6 @@ pub(super) fn _out_(prefix: &str, message: &str)
 	if message.is_empty() {
 		println!(" {prefix}");
 	} else {
-		println!(" {prefix}  {message}");
+		println!(" {prefix}  {W}{message}");
 	}
 }

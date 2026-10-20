@@ -6,7 +6,7 @@ use std::io;
 use std::process::ExitCode;
 
 mod raw;
-mod out;
+mod out; use out::*;
 mod wait; use wait::*;
 mod step; use step::*;
 
@@ -16,7 +16,17 @@ pub fn init() -> ExitCode
 	match initialise()
 	{
 		Ok(..)  => ExitCode::SUCCESS,
-		Err(..) => ExitCode::FAILURE,
+		Err(e) => {
+			if e.kind() == io::ErrorKind::Interrupted {
+				out!();
+				out!("└" => "{C}Thanks for using Stranger Quarkdown! 🥕");
+				return ExitCode::SUCCESS;
+			}
+			else {
+				println!("{e:?}");
+				return ExitCode::FAILURE;
+			}
+		}
 	}
 }
 
