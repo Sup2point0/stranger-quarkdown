@@ -110,7 +110,7 @@ fn squarkup(assets: bool, fonts: bool) -> SquarkResult
 	if site_data.stats.checked_files == 0 {
 		SquarkError::Recoverable {
 			msg: str!("no files found to squarkup"),
-			hint: fmt!("check your {Y}paths.sources{G}, {Y}paths.include{G}, {Y}paths.exclude{G} are configured correctly?"),
+			hint: fmt!("check your {Y}paths.sources{G} · {Y}.include{G} · {Y}.exclude{G} are configured correctly?"),
 			debug: vec![],
 		}.depends(&config)?;
 	}

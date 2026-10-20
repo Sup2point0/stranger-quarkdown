@@ -119,7 +119,7 @@ impl SquarkupConfig
 				} else {
 					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
-						hint: fmt!("valid values are {W}'overwrite'{G} (default), {W}'error'{G}, {W}'skip'"),
+						hint: fmt!("valid values are {W}'overwrite'{G} (default) · {W}'error'{G} · {W}'skip'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
@@ -133,7 +133,7 @@ impl SquarkupConfig
 				} else {
 					unrecoverable! {
 						msg: fmt!("unknown setting for {Y}errors.link-inactive"),
-						hint: fmt!("valid values are {W}'strip-extension'{G} (default), {W}'link-to-github'{G} or {W}'error'"),
+						hint: fmt!("valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}

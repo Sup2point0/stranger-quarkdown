@@ -165,7 +165,7 @@ impl PageData
 				Err(_) => {
 					errs.push(SquarkError::Recoverable {
 						msg: fmt!("invalid value for {W}cleanse{R}: {W}{raw}"),
-						hint: fmt!("valid values are {W}angles{G}, {W}braces{G}, {W}comments{G}, {W}line-breaks"),
+						hint: fmt!("valid values are {W}'angles'{G} · {W}'braces'{G} · {W}'comments'{G} · {W}'line-breaks'"),
 						debug: vec![
 							slash!("in file: {}", filepath),
 						],

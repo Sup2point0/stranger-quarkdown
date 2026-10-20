@@ -31,7 +31,7 @@ pub fn prep_assets(site_data: &mut SiteData, config: &SquarkupConfig) -> SquarkR
 	if site_data.stats.assets == 0 {
 		errs.push(SquarkError::Recoverable {
 			msg: str!("no assets found to copy"),
-			hint: fmt!("check your {Y}assets.folder{G}, {Y}assets.site-assets-folder{G}, {Y}assets.extensions{G} are configured correctly?"),
+			hint: fmt!("check your {Y}assets.folder{G} · {Y}.site-assets-folder{G} · {Y}.extensions{G} are configured correctly?"),
 			debug: vec![],
 		});
 	}
