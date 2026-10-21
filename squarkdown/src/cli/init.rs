@@ -15,6 +15,7 @@ mod ui; use ui::*;
 mod steps; use steps::*;
 
 
+/// Setup the user's `squarkup.toml` by interactively asking them questions.
 pub fn init() -> ExitCode
 {
 	match initialise()
@@ -23,7 +24,7 @@ pub fn init() -> ExitCode
 		Err(e) => {
 			if e.kind() == io::ErrorKind::Interrupted {
 				out!();
-				out!("└" => "{G}Thanks for using Stranger Quarkdown! 🥕");
+				out!("└" => "{G}Thanks for using Stranger Quarkdown! 🫧");
 				println!();
 				return ExitCode::SUCCESS;
 			}
@@ -39,6 +40,30 @@ fn initialise() -> io::Result<()>
 {
 	let cwd = std::env::current_dir()?;
 
+	preamble()?;
+	check_existing_config(&cwd)?;
+
+	head!("Configuring Paths");
+	let mut paths = str!("[paths]\n");
+	configure_site(&mut paths, &cwd)?;
+	configure_sources(&mut paths, &cwd)?;
+
+	head!("Error Handling");
+	let mut errors = str!("[errors]\n");
+	configure_error_handling(&mut errors)?;
+
+	head!("Final Touches");
+	write_squarkup_toml(&cwd, &[
+		errors, paths,
+	])?;
+
+	wrapup()?;
+
+	Ok(())
+}
+
+fn preamble() -> io::Result<()>
+{
 	println!();
 	println!(
 		"{GREY} ┌  {P}Welcome to Stranger Quarkdown! {GREY}v{}  ─────────────────────────",
@@ -55,31 +80,6 @@ fn initialise() -> io::Result<()>
 		before => "Heads up, Squarkdown is for {Y}SvelteKit{W} + {Y}MDsveX{W} projects.";
 		after  => "Heads up, Squarkdown is for SvelteKit + MDsveX projects.";
 	}?;
-
-	check_existing_config(&cwd)?;
-
-	head!("Configuring Paths");
-	let mut paths = str!("[paths]\n");
-	configure_site(&mut paths, &cwd)?;
-	configure_sources(&mut paths, &cwd)?;
-
-	head!("Error Handling");
-	let mut errors = str!("[errors]\n");
-	configure_error_handling(&mut errors, &cwd)?;
-
-	head!("Final Touches");
-	write_squarkup_toml(&cwd, &[
-		errors, paths,
-	])?;
-
-	step! {
-		before => "For more help and guidance, check the docs at {C}https://sup2point0.github.io/stranger-quarkdown/docs{W}!";
-		after => "For more help and guidance, check the docs at https://sup2point0.github.io/stranger-quarkdown/docs!";
-	}?;
-
-	out!();
-	out!("{GREY}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
-	println!();
 
 	Ok(())
 }
@@ -130,6 +130,20 @@ fn write_squarkup_toml(cwd: &Path, config: &[impl Display]) -> io::Result<()>
 	
 	print!("{PREV}{CLEAR}");
 	out!("{GREY}Wrote your squarkup.toml!");
+
+	Ok(())
+}
+
+fn wrapup() -> io::Result<()>
+{
+	step! {
+		before => "For more help and guidance, check the docs at {C}https://sup2point0.github.io/stranger-quarkdown/docs{W}!";
+		after => "For more help and guidance, check the docs at https://sup2point0.github.io/stranger-quarkdown/docs!";
+	}?;
+
+	out!();
+	out!("{GREY}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
+	println!();
 
 	Ok(())
 }

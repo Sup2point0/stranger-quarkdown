@@ -10,7 +10,7 @@ use std::io;
 use std::path::{ Path };
 
 
-pub fn configure_error_handling(config: &mut String, cwd: &Path) -> io::Result<()>
+pub fn configure_error_handling(config: &mut String) -> io::Result<()>
 {
 	ask!("How should Squarkdown handle non-fatal errors?");
 	let choice = pick_one! {
