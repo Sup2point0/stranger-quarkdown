@@ -62,8 +62,7 @@ macro_rules! head
 {
 	($msg:literal) => {
 		out!();
-		out!("├" => "{Y}{}", $msg);
-		out!();
+		out!("├" => "{Y}{} {GREY}─────────────────", $msg);
 	}
 }
 pub(super) use head;

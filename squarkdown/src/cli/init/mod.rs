@@ -16,6 +16,7 @@ mod out; use out::*;
 mod wait; use wait::*;
 mod step; use step::*;
 mod pick; use pick::*;
+mod input; use input::*;
 
 
 pub fn init() -> ExitCode
@@ -121,7 +122,8 @@ fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 		if folder.file_type().is_ok_and(|t| t.is_dir()) {
 			let path = folder.path();
-			let path_rel = utils::display_rel(&path, cwd);
+			let mut path_rel = utils::display_rel(&path, cwd);
+			path_rel += "/";
 
 			if path!(path / "src" / "app.html").exists() {
 				candidates.push(path_rel.clone());
@@ -146,12 +148,13 @@ fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 			PICK => {
 				folders.push(str!("None of the above"));
 
-				ask!("Which directory contains your SvelteKit folder?");
+				ask!("Which folder contains your SvelteKit project?");
 				let choice = pick_one!(folders)?;
 				*config += &fmt!("site = '{choice}/'");
 			}
 			CREATE => {
-
+				let folder_name = input!("Enter the folder name for your SvelteKit project:");
+				
 			}
 		}
 	}
@@ -173,7 +176,7 @@ fn write_squarkup_toml(config: &str, cwd: &Path) -> io::Result<()>
 	fs::write(path!(cwd / "squarkup.toml"), config.as_bytes())?;
 	
 	print!("{PREV}{CLEAR}");
-	out!("Wrote your squarkup.toml!");
+	out!("{GREY}Wrote your squarkup.toml!");
 
 	Ok(())
 }
