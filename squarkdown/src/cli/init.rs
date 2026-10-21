@@ -5,6 +5,7 @@ use crate::macros::*;
 use indoc::indoc;
 use path_macro::path;
 
+use std::fmt::{ Write };
 use std::fs;
 use std::io;
 use std::path::{ Path };
@@ -65,6 +66,7 @@ fn initialise() -> io::Result<()>
 	check_existing_config(&cwd)?;
 
 	head!("Configuring Paths");
+	append!(config, "[paths]");
 	configure_site(&mut config, &cwd)?;
 	configure_sources(&mut config, &cwd)?;
 
