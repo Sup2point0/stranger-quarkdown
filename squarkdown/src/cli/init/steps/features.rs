@@ -9,7 +9,7 @@ use std::io;
 
 #[derive(EnumDisplay)] #[enum_display(case = "Title")]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-enum Features
+pub(crate) enum Features
 {
 	#[display("Render +page.ts")]
 	PAGE_TS,
@@ -18,7 +18,7 @@ enum Features
 }
 
 
-pub fn enable_features() -> io::Result<()>
+pub fn enable_features() -> io::Result<Vec<Features>>
 {
 	ask!("What features would you like to use?");
 
@@ -32,5 +32,5 @@ pub fn enable_features() -> io::Result<()>
 			=> "Copy assets from anywhere in your repo to static/";
 	}?;
 
-	Ok(())
+	Ok(choices)
 }

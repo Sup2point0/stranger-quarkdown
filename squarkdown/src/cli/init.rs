@@ -5,9 +5,9 @@ use crate::macros::*;
 use indoc::indoc;
 use path_macro::path;
 
-use std::fmt::{ Display };
+use std::fmt::{ Display, Write as _ };
 use std::fs::{ File };
-use std::io::{ self, BufWriter, Write };
+use std::io::{ self, BufWriter, Write as _ };
 use std::path::{ Path };
 use std::process::ExitCode;
 
@@ -42,22 +42,32 @@ fn initialise() -> io::Result<()>
 
 	preamble()?;
 	check_existing_config(&cwd)?;
+	
+	let mut project = str!("[project]\n");
+	let mut paths = str!("[paths]\n");
+	let mut out = str!("[out]\n");
+	let mut errors = str!("[errors]\n");
 
 	head!("Paths Resolution")?;
-	let mut paths = str!("[paths]\n");
 	configure_site(&mut paths, &cwd)?;
 	configure_sources(&mut paths, &cwd)?;
+	// TODO `out.folder`
 
 	head!("Squarkdown Features")?;
 	let features = enable_features()?;
 
+	append!(out, "render-page-ts = {}", features.contains(&Features::PAGE_TS));
+
+	// TODO `out.site-data-path`
+	// TODO `assets.*`
+
 	head!("Error Handling")?;
-	let mut errors = str!("[errors]\n");
 	configure_error_handling(&mut errors)?;
 
 	head!("Final Touches")?;
+	// TODO `project.*`
 	write_squarkup_toml(&cwd, &[
-		errors, paths,
+		project, errors, paths, out,
 	])?;
 
 	wrapup()?;
