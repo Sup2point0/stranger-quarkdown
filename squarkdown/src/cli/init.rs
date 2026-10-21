@@ -43,19 +43,19 @@ fn initialise() -> io::Result<()>
 	preamble()?;
 	check_existing_config(&cwd)?;
 
-	head!("Paths Resolution");
+	head!("Paths Resolution")?;
 	let mut paths = str!("[paths]\n");
 	configure_site(&mut paths, &cwd)?;
 	configure_sources(&mut paths, &cwd)?;
 
-	head!("Squarkdown Features");
+	head!("Squarkdown Features")?;
 	let features = enable_features()?;
 
-	head!("Error Handling");
+	head!("Error Handling")?;
 	let mut errors = str!("[errors]\n");
 	configure_error_handling(&mut errors)?;
 
-	head!("Final Touches");
+	head!("Final Touches")?;
 	write_squarkup_toml(&cwd, &[
 		errors, paths,
 	])?;

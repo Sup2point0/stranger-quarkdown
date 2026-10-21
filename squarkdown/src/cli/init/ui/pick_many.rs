@@ -25,15 +25,17 @@ macro_rules! pick_many
 		)+
 	) => {
 		_pick_many_(
-			&mut [ $(
-				PickManyChoice {
-					value: $value,
-					enabled: $enabled_by_default,
-					label: $value,
-					hint: $hint,
-					is_singleton: false,
-				},
-			)+ ]
+			&mut [
+				$(
+					PickManyChoice {
+						value: $value,
+						enabled: $enabled_by_default,
+						label: $value,
+						hint: $hint,
+						is_singleton: false,
+					},
+				)+
+			]
 		)
 	};
 
@@ -82,11 +84,26 @@ pub(crate) fn _pick_many_<T: Clone>(
 			PickManyChoice{ value, enabled, label, hint, is_singleton }
 		) in choices.iter_mut().enumerate()
 		{
-			if i == idx {
-				out!("{C}● {W}{label} {GREY}{ITAL}{hint}{UNITAL}");
+			let is_selected = (i == idx);
+
+			print!(" {GREY}│  ");
+
+			if *enabled {
+				print!("{C}●  ");
 			} else {
-				out!("{GREY}○ {label}");
+				if is_selected {
+					print!("{C}");
+				}
+				print!("○  ");
 			}
+
+			if is_selected {
+				print!("{W}{label} {GREY}{ITAL}{hint}{UNITAL}");
+			} else {
+				print!("{GREY}{label}");
+			}
+
+			println!();
 		}
 
 		let e = event::read()?;
@@ -118,8 +135,11 @@ pub(crate) fn _pick_many_<T: Clone>(
 					if idx == 0 {
 						idx = choices.len() - 1;
 					} else {
-						idx -= 1
+						idx -= 1;
 					}
+				}
+				KeyCode::Char(' ') => {
+					choices[idx].enabled = !choices[idx].enabled;
 				}
 				KeyCode::Enter => break,
 				_ => {}
@@ -137,9 +157,17 @@ pub(crate) fn _pick_many_<T: Clone>(
 		Clear(ClearType::FromCursorDown),
 	)?;
 
-	// let (choice, label, _) = &choices[idx];
-	// out!("{GREY}{label}");
+	let choices = choices.iter().filter(|c| c.enabled);
 
-	// Ok(choice.clone())
-	todo!()
+	let labels =
+		choices.clone()
+		.map(|c| c.label.to_string())
+		.collect::<Vec<_>>()
+		.join(" · ")
+	;
+	out!("{GREY}{labels}");
+
+	Ok(
+		choices.map(|c| c.value.clone()).collect()
+	)
 }

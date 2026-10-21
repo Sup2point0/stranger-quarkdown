@@ -61,8 +61,11 @@ pub(crate) use ask;
 macro_rules! head
 {
 	($msg:literal) => {
-		out!();
-		out!("├" => "{Y}{}  {GREY}─────────────────", $msg);
+		{
+			out!();
+			out!("├" => "{Y}{}  {GREY}─────────────────", $msg);
+			wait!()
+		}
 	}
 }
 pub(crate) use head;

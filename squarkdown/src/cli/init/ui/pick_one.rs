@@ -90,7 +90,7 @@ pub(crate) fn _pick_one_<T: Clone>(
 					if idx == 0 {
 						idx = choices.len() - 1;
 					} else {
-						idx -= 1
+						idx -= 1;
 					}
 				}
 				KeyCode::Enter => break,

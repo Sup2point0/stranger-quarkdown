@@ -19,6 +19,7 @@
 
 #![allow(unused_doc_comments)]
 #![allow(non_camel_case_types)]
+#![allow(unused_parens)]
 
 pub mod cli;
 
