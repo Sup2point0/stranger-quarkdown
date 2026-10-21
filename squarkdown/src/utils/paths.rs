@@ -3,6 +3,7 @@ use crate::prelude::*;
 
 use map_or_original::MapOrOriginal;
 
+use std::io;
 use std::fs;
 use std::path::Path;
 
@@ -12,7 +13,6 @@ pub fn is_empty_dir(dir: impl AsRef<Path>) -> SquarkResult<bool>
 {
 	Ok(fs::read_dir(&dir)?.next().is_none())
 }
-
 
 /// Make `path` relative by stripping a leading path separator.
 /// 
@@ -67,4 +67,22 @@ pub fn split_path_from(path: impl AsRef<Path>, base: impl AsRef<Path>) -> (Strin
 	split_path(
 		path.as_ref().map_or_orig(|p| p.strip_prefix(base).ok())
 	)
+}
+
+/// Read all of the folders under `path`, and apply `f` to each.
+pub fn for_folders(
+	path: impl AsRef<Path>,
+	mut f: impl FnMut(fs::DirEntry),
+) -> io::Result<()>
+{
+	for dir in fs::read_dir(path)? {
+		let dir = dir?;
+
+		if let Ok(file_type) = dir.file_type()
+			&& file_type.is_dir()
+		{
+			f(dir);
+		}
+	}
+	Ok(())
 }

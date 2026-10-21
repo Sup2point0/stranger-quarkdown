@@ -5,7 +5,7 @@ use crate::macros::*;
 
 use path_macro::path;
 
-use std::fs;
+use std::fmt::{ Write };
 use std::io;
 use std::path::{ Path };
 
@@ -15,20 +15,16 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 	let mut folders = vec![];
 	let mut candidates = vec![];
 
-	for folder in fs::read_dir(cwd)? {
-		let folder = folder?;
+	utils::for_folders(cwd, |folder| {
+		let path = folder.path();
+		let mut path_rel = utils::display_rel(&path, cwd);
+		path_rel += "/";
 
-		if folder.file_type().is_ok_and(|t| t.is_dir()) {
-			let path = folder.path();
-			let mut path_rel = utils::display_rel(&path, cwd);
-			path_rel += "/";
-
-			if path!(path / "src" / "app.html").exists() {
-				candidates.push(path_rel.clone());
-			}
-			folders.push(path_rel);
+		if path!(path / "src" / "app.html").exists() {
+			candidates.push(path_rel.clone());
 		}
-	}
+		folders.push(path_rel);
+	})?;
 
 	if candidates.is_empty() {
 		ask!("Could not find an existing SvelteKit folder. How to proceed?");
@@ -48,7 +44,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 				ask!("Which folder contains your SvelteKit project?");
 				let choice = pick_one!(folders)?;
-				*config += &fmt!("site = '{choice}/'");
+				append!(config, "site = '{choice}/'");
 			}
 			CREATE => {
 				let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
@@ -63,7 +59,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 					folder += "/";
 				}
 
-				*config += &fmt!("site = '{folder}'");
+				append!(config, "site = '{folder}'");
 			}
 		}
 	}
@@ -72,6 +68,8 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 		ask!("Which of these contains your SvelteKit project?");
 		let choice = pick_one!(candidates)?;
+
+		todo!();
 	}
 
 	Ok(())
@@ -79,5 +77,24 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 {
+	let mut candidates = vec![];
+
+	utils::for_folders(cwd, |folder| {
+		let mut path_rel = utils::display_rel(folder.path(), cwd);
+		path_rel += "/";
+		candidates.push(path_rel);
+	})?;
+
+	candidates.push(str!("Skip this question"));
+
+	ask!("Where should Squarkdown look for .md files? (You can add more folders later)");
+	let choice = pick_one!(candidates)?;
+
+	if choice == "Skip this question" {
+		return Ok(());
+	}
+
+	append!(config, "sources = ['{choice}']");
+
 	Ok(())
 }
