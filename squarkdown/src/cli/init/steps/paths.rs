@@ -19,7 +19,10 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 	utils::for_folders(cwd, |folder| {
 		let path = folder.path();
 		let mut path_rel = utils::display_rel(&path, cwd);
-		path_rel += "/";
+		
+		if !path_rel.ends_with('/') {
+			path_rel += "/";
+		}
 
 		if path!(path / "src" / "app.html").exists() {
 			candidates.push(path_rel.clone());
