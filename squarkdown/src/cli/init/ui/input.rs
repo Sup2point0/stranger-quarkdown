@@ -20,10 +20,10 @@ macro_rules! input
 		}
 	}
 }
-pub(super) use input;
+pub(crate) use input;
 
 
-pub(super) fn _input_() -> io::Result<String>
+pub(crate) fn _input_() -> io::Result<String>
 {
 	let mut stdout = io::stdout();
 	let mut out = str!();

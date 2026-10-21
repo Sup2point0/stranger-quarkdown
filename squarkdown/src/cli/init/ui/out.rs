@@ -45,7 +45,7 @@ macro_rules! out
 		)
 	};
 }
-pub(super) use out;
+pub(crate) use out;
 
 
 macro_rules! ask
@@ -55,7 +55,7 @@ macro_rules! ask
 		out!("{Y}▸" => $($args)*);
 	}
 }
-pub(super) use ask;
+pub(crate) use ask;
 
 
 macro_rules! head
@@ -65,10 +65,10 @@ macro_rules! head
 		out!("├" => "{Y}{} {GREY}─────────────────", $msg);
 	}
 }
-pub(super) use head;
+pub(crate) use head;
 
 
-pub(super) fn _out_(prefix: &str, message: &str)
+pub(crate) fn _out_(prefix: &str, message: &str)
 {
 	if message.is_empty() {
 		println!(" {prefix}");

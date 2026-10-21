@@ -11,12 +11,7 @@ use std::io;
 use std::path::{ Path };
 use std::process::ExitCode;
 
-mod raw;
-mod out; use out::*;
-mod wait; use wait::*;
-mod step; use step::*;
-mod pick; use pick::*;
-mod input; use input::*;
+mod ui; use ui::*;
 
 
 pub fn init() -> ExitCode
@@ -71,6 +66,7 @@ fn initialise() -> io::Result<()>
 
 	head!("Configuring Paths");
 	configure_site(&mut config, &cwd)?;
+	configure_sources(&mut config, &cwd)?;
 
 	write_squarkup_toml(&config, &cwd)?;
 
@@ -153,8 +149,19 @@ fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 				*config += &fmt!("site = '{choice}/'");
 			}
 			CREATE => {
-				let folder_name = input!("Enter the folder name for your SvelteKit project:");
-				
+				let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
+
+				if folder.starts_with("/") {
+					folder.remove(0);
+				} else if folder.starts_with("./") {
+					folder.replace_range(0..2, "");
+				}
+
+				if !folder.ends_with("/") {
+					folder += "/";
+				}
+
+				*config += &fmt!("site = '{folder}'");
 			}
 		}
 	}
@@ -165,6 +172,11 @@ fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		let choice = pick_one!(candidates)?;
 	}
 
+	Ok(())
+}
+
+fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
+{
 	Ok(())
 }
 

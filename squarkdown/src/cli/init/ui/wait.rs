@@ -23,10 +23,10 @@ macro_rules! wait
 		_wait_(Some(&format!($msg, $($($args)* )?)))
 	}
 }
-pub(super) use wait;
+pub(crate) use wait;
 
 
-pub(super) fn _wait_(status_message: Option<&str>) -> io::Result<()>
+pub(crate) fn _wait_(status_message: Option<&str>) -> io::Result<()>
 {
 	let mut stdout = io::stdout();
 	

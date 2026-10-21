@@ -27,7 +27,7 @@ macro_rules! choices
 		$(use _Choice::$rest;)*
 	}
 }
-pub(super) use choices;
+pub(crate) use choices;
 
 
 macro_rules! pick_one
@@ -59,10 +59,10 @@ macro_rules! pick_one
 		)
 	};
 }
-pub(super) use pick_one;
+pub(crate) use pick_one;
 
 
-pub(super) fn _pick_<T: Clone>(
+pub(crate) fn _pick_<T: Clone>(
 	choices: &[(T, impl Display, &str)],
 	allow_multiple: bool,
 ) -> io::Result<T>
