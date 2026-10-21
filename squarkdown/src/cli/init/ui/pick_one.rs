@@ -1,3 +1,4 @@
+use super::raw::*;
 use super::out::*;
 use crate::colours::*;
 
@@ -12,74 +13,45 @@ use std::fmt::Display;
 use std::io;
 
 
-macro_rules! choices
-{
-	(
-		$variant:ident
-		$(
-			, $rest:ident $(= $display:literal)?
-		)*
-		$(,)?
-	) =>
-	{
-		#[derive(Clone, Copy, Debug, PartialEq, Eq, enum_display::EnumDisplay)]
-		#[enum_display(case = "Kebab")]
-		enum _Choice {
-			$variant,
-			$(
-				$(#[display($display)])?
-				$rest,
-			)*
-		}
-
-		use _Choice::$variant;
-		$(use _Choice::$rest;)*
-	}
-}
-pub(crate) use choices;
-
-
 macro_rules! pick_one
 {
 	(
 		$($value:expr => $hint:literal ;)+
 	) => {
-		_pick_(
-			&[ $(($value, $value, $hint),)+ ],
-			false
+		_pick_one_(
+			&[ $(($value, $value, $hint),)+ ]
 		)
 	};
 
 	(
 		$($value:expr => ($label:literal, $hint:literal) ;)+
 	) => {
-		_pick_(
-			&[ $(($value, $label, $hint),)+ ],
-			false
+		_pick_one_(
+			&[ $(($value, $label, $hint),)+ ]
 		)
 	};
 
 	(
 		$choices:expr
 	) => {
-		_pick_(
-			&$choices.iter().map(|choice| (choice, choice, "")).collect::<Vec<_>>(),
-			false
+		_pick_one_(
+			&$choices.iter().map(|choice| (choice, choice, "")).collect::<Vec<_>>()
 		)
 	};
 }
 pub(crate) use pick_one;
 
 
-pub(crate) fn _pick_<T: Clone>(
+pub(crate) fn _pick_one_<T: Clone>(
 	choices: &[(T, impl Display, &str)],
-	allow_multiple: bool,
 ) -> io::Result<T>
 {
 	let mut stdout = io::stdout();
 
 	let mut idx = 0;
 
+	let _raw_mode = RawMode::start()?;
+	
 	loop {
 		for (i, (_, label, hint)) in choices.iter().enumerate() {
 			if i == idx {

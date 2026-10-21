@@ -43,10 +43,13 @@ fn initialise() -> io::Result<()>
 	preamble()?;
 	check_existing_config(&cwd)?;
 
-	head!("Configuring Paths");
+	head!("Paths Resolution");
 	let mut paths = str!("[paths]\n");
 	configure_site(&mut paths, &cwd)?;
 	configure_sources(&mut paths, &cwd)?;
+
+	head!("Squarkdown Features");
+	let features = enable_features()?;
 
 	head!("Error Handling");
 	let mut errors = str!("[errors]\n");
