@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::macros::*;
+use crate::utils::macros::*;
 
 use git2 as git;
 use path_clean::PathClean;

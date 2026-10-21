@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use crate::log;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::log;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use regex::regex;
 

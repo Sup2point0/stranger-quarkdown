@@ -30,7 +30,6 @@ pub mod extras;
 
 pub mod types;
 pub mod utils;
-pub use utils::{ log, colours, macros };
 
 /// Central Squarkdown types packaged for convenience.
 pub mod prelude

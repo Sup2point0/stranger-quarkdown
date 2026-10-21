@@ -1,5 +1,5 @@
-use crate::log;
-use crate::colours::*;
+use crate::utils::log;
+use crate::utils::colours::*;
 
 use std::process::ExitCode;
 

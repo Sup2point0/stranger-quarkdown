@@ -2,8 +2,8 @@ use super::*;
 use crate::prelude::*;
 use crate::types::*;
 use crate::utils;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use tinyvec::tiny_vec;
 
@@ -397,7 +397,7 @@ impl CharmParser<'_>
 
 #[cfg(test)] use super::test_utils::*;
 #[cfg(test)] use crate::utils::testing::*;
-#[cfg(test)] use crate::log;
+#[cfg(test)] use crate::utils::log;
 
 #[cfg(test)] use assertables::*;
 #[cfg(test)] use indoc::indoc;

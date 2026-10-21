@@ -1,8 +1,8 @@
 use super::*;
 use crate::prelude::*;
-use crate::log;
+use crate::utils::log;
 use crate::utils;
-use crate::colours::*;
+use crate::utils::colours::*;
 
 use path_macro::path;
 use time::UtcDateTime;

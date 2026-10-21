@@ -1,10 +1,10 @@
 use super::{ RenderCtx as Ctx };
 use crate::config::*;
 use crate::types::*;
-use crate::log;
+use crate::utils::log;
 use crate::utils;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use aho_corasick::AhoCorasick;
 use path_clean::PathClean;

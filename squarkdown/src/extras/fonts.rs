@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use path_macro::path;
 use regex::regex;

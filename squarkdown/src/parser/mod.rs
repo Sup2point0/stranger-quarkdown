@@ -16,8 +16,8 @@ mod test_utils;
 // == PUBLIC == //
 
 use crate::prelude::*;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use std::fs::File;
 use std::io::{ BufReader, BufRead };

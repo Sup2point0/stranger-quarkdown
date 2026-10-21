@@ -1,8 +1,8 @@
 use super::*;
 use crate::prelude::*;
 use crate::utils;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use path_clean::PathClean;
 use path_macro::path;

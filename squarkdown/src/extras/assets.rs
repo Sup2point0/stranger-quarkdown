@@ -1,8 +1,8 @@
 use crate::resolver;
 use crate::prelude::*;
-use crate::log;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::log;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 
 pub fn prep_assets(site_data: &mut SiteData, config: &SquarkupConfig) -> SquarkResult

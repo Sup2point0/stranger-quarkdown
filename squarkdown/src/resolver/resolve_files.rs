@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use crate::log;
-use crate::macros::*;
+use crate::utils::log;
+use crate::utils::macros::*;
 
 use path_macro::path;
 use path_slash::PathExt;

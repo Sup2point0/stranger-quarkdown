@@ -2,8 +2,8 @@ use super::*;
 use crate::*;
 use crate::prelude::*;
 use crate::resolver;
-use crate::log;
-use crate::colours::*;
+use crate::utils::log;
+use crate::utils::colours::*;
 
 use git2 as git;
 

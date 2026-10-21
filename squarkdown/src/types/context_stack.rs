@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::macros::*;
+use crate::utils::macros::*;
 
 use eq_discriminant::eq_discr;
 

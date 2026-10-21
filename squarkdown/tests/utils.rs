@@ -1,4 +1,4 @@
-use squarkdown::macros::*;
+use squarkdown::utils::macros::*;
 
 use assertables::*;
 use lazy_static::lazy_static;

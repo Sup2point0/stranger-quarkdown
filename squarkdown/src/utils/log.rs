@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::colours::*;
+use crate::utils::colours::*;
 
 use std::fmt::Display;
 
@@ -14,44 +14,44 @@ pub fn version()
 
 /// Log an action that Squarkdown is about to perform, to set up expectations.
 #[macro_export] macro_rules! is {
-	($msg:literal) => { $crate::log::log_is(format_args!($msg)) };
-	($var:expr)    => { $crate::log::log_is(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_is(format_args!($($args)*)) };
+	($msg:literal) => { $crate::utils::log::log_is(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_is(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_is(format_args!($($args)*)) };
 } pub use is;
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! info {
-	($msg:literal) => { $crate::log::log_info(format_args!($msg)) };
-	($var:expr)    => { $crate::log::log_info(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_info(format_args!($($args)*)) };
+	($msg:literal) => { $crate::utils::log::log_info(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_info(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_info(format_args!($($args)*)) };
 } pub use info;
 
 /// Log a checkpoint that has successfully been reached.
 #[macro_export] macro_rules! ok {
-	($msg:literal) => { $crate::log::log_ok(format_args!($msg)) };
-	($var:expr)    => { $crate::log::log_ok(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_ok(format_args!($($args)*)) };
+	($msg:literal) => { $crate::utils::log::log_ok(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_ok(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_ok(format_args!($($args)*)) };
 } pub use ok;
 
 /// Log an error, failure or issue the user should be aware of.
 #[macro_export] macro_rules! bad {
-	($msg:literal) => { $crate::log::log_bad(format_args!($msg)) };
-	($var:expr)    => { $crate::log::log_bad(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_bad(format_args!($($args)*)) };
+	($msg:literal) => { $crate::utils::log::log_bad(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_bad(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_bad(format_args!($($args)*)) };
 } pub use bad;
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! debug {
-	($msg:literal) => { $crate::log::log_debug(format_args!($msg)) };
-	($var:expr)    => { $crate::log::log_debug(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_debug(format_args!($($args)*)) };
+	($msg:literal) => { $crate::utils::log::log_debug(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_debug(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_debug(format_args!($($args)*)) };
 } pub use debug;
 
 /// Log a hint to the user that may help them fix an error.
 #[macro_export] macro_rules! hint {
-	($msg:literal) => { $crate::log::log_hint(format_args!($msg)) };
-	($var:expr)    => { $crate::log::log_hint(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::log::log_hint(format_args!($($args)*)) };
+	($msg:literal) => { $crate::utils::log::log_hint(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_hint(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_hint(format_args!($($args)*)) };
 } pub use hint;
 
 

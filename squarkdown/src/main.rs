@@ -1,6 +1,6 @@
 use squarkdown::cli;
-use squarkdown::log;
-use squarkdown::colours::*;
+use squarkdown::utils::log;
+use squarkdown::utils::colours::*;
 
 use std::process::ExitCode;
 
