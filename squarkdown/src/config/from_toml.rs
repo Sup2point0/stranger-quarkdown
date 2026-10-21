@@ -73,7 +73,7 @@ impl SquarkupConfig
 		{
 			if let Some(value) = paths.remove("site") {
 				let dir = Self::try_get_str(&value, "paths.site", "(filepath relative to your project root)")?;
-				site = Self::try_resolve_folder(root, &dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
+				site = Self::try_resolve_folder(root, dir, "for your SvelteKit site", hints!("{W}paths.site{G} is relative to your project root"))?;
 			}
 			
 			paths_cached = Some(paths);
@@ -200,9 +200,9 @@ impl SquarkupConfig
 				}
 
 				for value in values {
-					let raw = Self::try_get_str(&value, "paths.sources", "(entry in an array)")?;
+					let raw = Self::try_get_str(value, "paths.sources", "(entry in an array)")?;
 					let dir = Self::try_resolve_folder(
-						root, &raw, "a source folder you specified",
+						root, raw, "a source folder you specified",
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
 					c.paths.sources.push(dir);
@@ -217,9 +217,9 @@ impl SquarkupConfig
 				}
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_str(&value, "paths.include", "(RegEx pattern)")?;
+					let pattern = Self::try_get_str(value, "paths.include", "(RegEx pattern)")?;
 
-					match Regex::new(&pattern) {
+					match Regex::new(pattern) {
 						Ok(compiled) => c.paths.include.push(compiled),
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
@@ -234,7 +234,7 @@ impl SquarkupConfig
 				let values = Self::try_get_array(&value, "paths.exclude", "(of RegEx patterns)")?;
 
 				for value in values { catch!(errs => {
-					let pattern = Self::try_get_str(&value, "paths.exclude", "(RegEx pattern)")?;
+					let pattern = Self::try_get_str(value, "paths.exclude", "(RegEx pattern)")?;
 
 					match Regex::new(pattern) {
 						Ok(compiled) => c.paths.exclude.push(compiled),
@@ -257,7 +257,7 @@ impl SquarkupConfig
 		{
 			if let Some(value) = out.remove("folder") { catch!(errs => {
 				let raw = Self::try_get_str(&value, "out.folder", "(folder relative to your SvelteKit site)")?;
-				let dir = Self::try_resolve_folder(&site, &raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
+				let dir = Self::try_resolve_folder(&site, raw, "for Squarkdown output", hints!("{W}out.folder{G} is relative to your site folder"))?;
 				c.out.folder = dir;
 			}) }
 
@@ -278,7 +278,7 @@ impl SquarkupConfig
 			if let Some(value) = out.remove("site-data-path") { catch!(errs => {
 				let raw = Self::try_get_str(&value, "out.site-data-path", "(filepath including `.json` extension)")?;
 
-				let path = path!(site / utils::to_rel(&raw));
+				let path = path!(site / utils::to_rel(raw));
 
 				let folder = path.parent().expect("site directory always has a parent folder");
 
@@ -333,14 +333,14 @@ impl SquarkupConfig
 		{
 			if let Some(value) = assets.remove("folder") { catch!(errs => {
 				let dir = Self::try_get_str(&value, "assets.folder", "(folder relative to your project root)")?;
-				let folder = Self::try_resolve_folder(root, &dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
+				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
 
 				c.assets.folder = folder;
 			}) }
 
 			if let Some(value) = assets.remove("site-assets-folder") { catch!(errs => {
 				let dir = Self::try_get_str(&value, "assets.site-assets-folder", "(folder relative to your project root)")?;
-				let folder = Self::try_resolve_folder(root, &dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
+				let folder = Self::try_resolve_folder(root, dir, "for site assets", hints!("{Y}assets.site-assets-folder{G} is relative to your project root"))?;
 
 				c.assets.site_assets_folder = Some(folder);
 			}) }
@@ -353,7 +353,7 @@ impl SquarkupConfig
 				}
 
 				for value in values { catch!(errs => {
-					let mut raw = Self::try_get_str(&value, "assets.extensions", "(file extension)")?;
+					let mut raw = Self::try_get_str(value, "assets.extensions", "(file extension)")?;
 
 					if raw.starts_with('.') {
 						raw = &raw[1..];
@@ -379,7 +379,7 @@ impl SquarkupConfig
 				}
 
 				for value in values { catch!(errs => {
-					let raw = Self::try_get_str(&value, "fonts.queries", "(font query parameter)")?;
+					let raw = Self::try_get_str(value, "fonts.queries", "(font query parameter)")?;
 					
 					c.fonts.queries.push(raw.to_owned());
 				}) }
@@ -401,8 +401,8 @@ impl SquarkupConfig
 	/// Try to extract the table from `data` for `setting-group`.
 	/// 
 	/// It is fine is `data` does not have `setting-group`, in which case this returns `Ok(None)`.
-	fn try_take_table_if_present<'d>(
-		data: &'d mut toml::Table,
+	fn try_take_table_if_present(
+		data: &mut toml::Table,
 		setting_group: &str,
 		hint: impl FnOnce() -> String,
 	) -> SquarkResult<Option<toml::Table>>

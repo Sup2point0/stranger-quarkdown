@@ -26,11 +26,11 @@ pub fn init() -> ExitCode
 				out!();
 				out!("└" => "{G}Thanks for using Stranger Quarkdown! 🫧");
 				println!();
-				return ExitCode::SUCCESS;
+				ExitCode::SUCCESS
 			}
 			else {
 				println!("{e:?}");
-				return ExitCode::FAILURE;
+				ExitCode::FAILURE
 			}
 		}
 	}
@@ -100,7 +100,7 @@ fn preamble() -> io::Result<()>
 fn check_existing_config(cwd: &Path) -> io::Result<()>
 {
 	for parent in cwd.ancestors() {
-		if let Ok((filepath, _)) = resolver::find_config(&parent) {
+		if let Ok((filepath, _)) = resolver::find_config(parent) {
 			out!();
 			out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
 			out!(&slash!("{GREY}found at: {GREY1}{}", filepath));

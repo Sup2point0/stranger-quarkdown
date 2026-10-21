@@ -164,7 +164,7 @@ impl<'d> Renderer<'d>
 		}
 
 		let mut parser =
-			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
+			pd::Parser::new_ext(source, *PARSER_OPTIONS)
 			.into_offset_iter()
 			.peekable()
 		;
@@ -285,7 +285,7 @@ impl Renderer<'_>
 				return left.chain(right)
 			}
 		}
-		Some((event, range)).into_iter().chain(None.into_iter())
+		Some((event, range)).into_iter().chain(None)
 	}
 }
 

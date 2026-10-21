@@ -49,7 +49,7 @@ impl ContextStack<RenderCtx>
 {
 	/// Is [`RenderCtx::CODE`] in the context stack (at any depth)?
 	pub fn is_code(&self) -> bool {
-		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE{..}))
+		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE))
 	}
 	
 	/// Is [`RenderCtx::LINK`], [`RenderCtx::LINK_REWRITE`] or [`RenderCtx::IMAGE_LINK`] in the context stack (at any depth)?

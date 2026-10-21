@@ -146,11 +146,10 @@ fn cleanup(force: bool) -> SquarkResult
 			
 			// check Git safety
 			if let Some((repo, repo_folder)) = &repo_info
-			{	
-				if !is_safe_to_delete(&path, repo, &repo_folder)? {
-					skipped_paths.push(fmt!("skipped: {path_display}"));
-					return Ok(());
-				}
+				&& !is_safe_to_delete(&path, repo, repo_folder)?
+			{
+				skipped_paths.push(fmt!("skipped: {path_display}"));
+				return Ok(());
 			}
 
 			log::info!("deleting: {path_display}");
@@ -165,7 +164,7 @@ fn cleanup(force: bool) -> SquarkResult
 		log::ok!("deleted {}/{} children", deleted_paths, checked_paths);
 	}
 
-	if skipped_paths.len() > 0 {
+	if !skipped_paths.is_empty() {
 		errs.push(SquarkError::Recoverable {
 			msg: fmt!("skipped {} files that are not Git-ignored", skipped_paths.len()),
 			hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
@@ -186,7 +185,7 @@ fn is_safe_to_delete(
 	let path_rel = path.strip_prefix(repo_folder)
 		.expect("walkdir entries are guaranteed to be under `repo.path()`");
 
-	let ignored = repo.is_path_ignored(&path)?;
+	let ignored = repo.is_path_ignored(path)?;
 	let tracked = repo.index()?.get_path(path_rel, 0).is_some();
 	let modified = repo.status_file(path_rel)?.intersects(
 		  git::Status::INDEX_NEW

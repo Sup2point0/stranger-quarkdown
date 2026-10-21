@@ -23,10 +23,10 @@ pub fn save_site_data(
 			msg: slash!("cannot export site data to: {}", dest),
 			hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
 			debug: vec![],
-		}.depends(&config)?;
+		}.depends(config)?;
 	}
 
-	let data_raw = site_data.to_serializable(&config);
+	let data_raw = site_data.to_serializable(config);
 
 	let mut data = str!();
 
@@ -49,7 +49,7 @@ pub fn save_site_data(
 	if dry_run {
 		log::ok!(slash!("would save site data to: {B}{}", dest));
 	} else {
-		fs::write(&dest, data.as_bytes())?;
+		fs::write(dest, data.as_bytes())?;
 		log::ok!(slash!("saved site data to: {B}{}", dest));
 	}
 	
