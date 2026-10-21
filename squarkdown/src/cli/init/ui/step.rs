@@ -48,12 +48,9 @@ pub(crate) fn _step_(
 
 	wait!()?;
 
-	execute!(
-		stdout, 
-		cursor::MoveUp(1),
-		Clear(ClearType::CurrentLine),
-		cursor::MoveUp(1),
-		Clear(ClearType::CurrentLine),
+	execute!(stdout, 
+		cursor::MoveUp(2),
+		Clear(ClearType::FromCursorDown),
 		cursor::MoveToColumn(0),
 	)?;
 	out!("{GREY}{after}");
