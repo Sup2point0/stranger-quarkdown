@@ -51,7 +51,8 @@ pub(super) use out;
 macro_rules! ask
 {
 	($($args:tt)*) => {
-		out!("{Y}▸" => $($args)*)
+		out!();
+		out!("{Y}▸" => $($args)*);
 	}
 }
 pub(super) use ask;

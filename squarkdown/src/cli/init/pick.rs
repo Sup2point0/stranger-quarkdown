@@ -8,7 +8,26 @@ use crossterm::{
 	execute,
 };
 
+use std::fmt::Display;
 use std::io;
+
+
+macro_rules! choices
+{
+	(  $variant:ident $(, $rest:ident)* $(,)?  ) =>
+	{
+		#[derive(Clone, Copy, Debug, PartialEq, Eq, enum_display::EnumDisplay)]
+		#[enum_display(case = "Kebab")]
+		enum _Choice {
+			$variant,
+			$($rest,)*
+		}
+		
+		use _Choice::$variant;
+		$(use _Choice::$rest;)*
+	}
+}
+pub(super) use choices;
 
 
 macro_rules! pick_one
@@ -44,7 +63,7 @@ pub(super) use pick_one;
 
 
 pub(super) fn _pick_<T: Clone>(
-	choices: &[(T, impl AsRef<str>, &str)],
+	choices: &[(T, impl Display, &str)],
 	allow_multiple: bool,
 ) -> io::Result<T>
 {
@@ -54,8 +73,6 @@ pub(super) fn _pick_<T: Clone>(
 
 	loop {
 		for (i, (_, label, hint)) in choices.iter().enumerate() {
-			let label = label.as_ref();
-
 			if i == idx {
 				out!("{C}● {W}{label} {GREY}{ITAL}{hint}{UNITAL}");
 			} else {
@@ -106,7 +123,7 @@ pub(super) fn _pick_<T: Clone>(
 	)?;
 
 	let (choice, label, _) = &choices[idx];
-	out!("{GREY}{}", label.as_ref());
+	out!("{GREY}{label}");
 
 	Ok(choice.clone())
 }
