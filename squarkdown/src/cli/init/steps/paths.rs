@@ -70,13 +70,13 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 	let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
 
-	if folder.starts_with("/") {
+	if folder.starts_with('/') {
 		folder.remove(0);
 	} else if folder.starts_with("./") {
 		folder.replace_range(0..2, "");
 	}
 
-	if !folder.ends_with("/") {
+	if !folder.ends_with('/') {
 		folder += "/";
 	}
 

@@ -113,13 +113,11 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 
 			if should_quit {
 				return Err(io::Error::from(io::ErrorKind::Interrupted));
-			}
-			else {
+			} else {
 				break;
 			}
 		}
 	}
-
 	Ok(())
 }
 

@@ -54,6 +54,7 @@ impl SiteData
 		Self::default()
 	}
 
+	#[must_use]
 	pub fn pages_map(&self) -> &BTreeMap<String, PageData> {
 		&self.pages
 	}

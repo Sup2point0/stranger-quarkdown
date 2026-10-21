@@ -766,14 +766,14 @@ impl Renderer<'_>
 		let project = &self.config.project.name;
 		
 		if project.is_empty() {
-			writeln!(file, "\t<title> {title} </title>", )?;
+			writeln!(file, "\t<title> {title} </title>")?;
 		} else {
-			writeln!(file, "\t<title> {title} · {project} </title>", )?;
+			writeln!(file, "\t<title> {title} · {project} </title>")?;
 		}
 
 		if !self.page.description.is_empty()
 		{
-			let content = self.page.description.replace("\"", "\\\"");
+			let content = self.page.description.replace('\"', "\\\"");
 			writeln!(file, "\t<meta name=\"description\" content=\"{content}\" />")?;
 		}
 
@@ -789,7 +789,7 @@ impl Renderer<'_>
 	/// Update `self.source` and `self.line_boundaries` with `source` for debug information.
 	fn update_source(&mut self, source: &str)
 	{
-		self.source = source.to_owned();
+		source.clone_into(&mut self.source);
 
 		/* First character is the first character in a new line */
 		self.line_boundaries = vec![0];
@@ -800,7 +800,7 @@ impl Renderer<'_>
 		);
 
 		/* NOTE: Line boundaries assume each line is `\n`-terminated, so making sure the last line has this too makes things a little nicer */
-		if !self.source.ends_with("\n") {
+		if !self.source.ends_with('\n') {
 			self.source.push('\n');
 		}
 

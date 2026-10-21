@@ -173,7 +173,7 @@ impl SquarkupConfig
 						debug: vec![],
 					}
 				}
-				else if !raw.contains("/") {
+				else if !raw.contains('/') {
 					errs.push(SquarkError::Recoverable {
 						msg: fmt!("warning: your {Y}project.github{R} does not contain a {W}/"),
 						hint: fmt!("use the format {W}user/project"),

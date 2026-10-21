@@ -44,7 +44,7 @@ fn main() -> ExitCode
 			"init"      => { mode = Mode::INIT;    args.next(); }
 			"clean"     => { mode = Mode::CLEAN;   args.next(); }
 
-			_ => if !arg.starts_with("-") {
+			_ => if !arg.starts_with('-') {
 				log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
 				return ExitCode::FAILURE;
 			}
