@@ -1,0 +1,83 @@
+use super::super::ui::*;
+use crate::utils;
+use crate::colours::*;
+use crate::macros::*;
+
+use path_macro::path;
+
+use std::fs;
+use std::io;
+use std::path::{ Path };
+
+
+pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
+{
+	let mut folders = vec![];
+	let mut candidates = vec![];
+
+	for folder in fs::read_dir(cwd)? {
+		let folder = folder?;
+
+		if folder.file_type().is_ok_and(|t| t.is_dir()) {
+			let path = folder.path();
+			let mut path_rel = utils::display_rel(&path, cwd);
+			path_rel += "/";
+
+			if path!(path / "src" / "app.html").exists() {
+				candidates.push(path_rel.clone());
+			}
+			folders.push(path_rel);
+		}
+	}
+
+	if candidates.is_empty() {
+		ask!("Could not find an existing SvelteKit folder. How to proceed?");
+
+		choices! { PICK, CREATE, SKIP }
+
+		let choice = pick_one! {
+			PICK   => "Pick an existing directory";
+			CREATE => "Create a new directory";
+			SKIP   => "Configure manually";
+		}?;
+
+		match choice {
+			SKIP => return Ok(()),
+			PICK => {
+				folders.push(str!("None of the above"));
+
+				ask!("Which folder contains your SvelteKit project?");
+				let choice = pick_one!(folders)?;
+				*config += &fmt!("site = '{choice}/'");
+			}
+			CREATE => {
+				let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
+
+				if folder.starts_with("/") {
+					folder.remove(0);
+				} else if folder.starts_with("./") {
+					folder.replace_range(0..2, "");
+				}
+
+				if !folder.ends_with("/") {
+					folder += "/";
+				}
+
+				*config += &fmt!("site = '{folder}'");
+			}
+		}
+	}
+	else {
+		candidates.push(str!("None of the above"));
+
+		ask!("Which of these contains your SvelteKit project?");
+		let choice = pick_one!(candidates)?;
+	}
+
+	Ok(())
+}
+
+pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
+{
+	Ok(())
+}
