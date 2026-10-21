@@ -93,6 +93,12 @@ pub(crate) fn _pick_one_<T: Clone>(
 						idx -= 1;
 					}
 				}
+				KeyCode::Home => {
+					idx = 0;
+				}
+				KeyCode::End => {
+					idx = choices.len() - 1;
+				}
 				KeyCode::Enter => break,
 				_ => {}
 			}

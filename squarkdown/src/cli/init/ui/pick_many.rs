@@ -81,7 +81,7 @@ pub(crate) fn _pick_many_<T: Clone>(
 	loop {
 		for (
 			i,
-			PickManyChoice{ value, enabled, label, hint, is_singleton }
+			PickManyChoice{ enabled, label, hint, is_singleton, .. }
 		) in choices.iter_mut().enumerate()
 		{
 			let is_selected = (i == idx);
@@ -137,6 +137,12 @@ pub(crate) fn _pick_many_<T: Clone>(
 					} else {
 						idx -= 1;
 					}
+				}
+				KeyCode::Home => {
+					idx = 0;
+				}
+				KeyCode::End => {
+					idx = choices.len() - 1;
 				}
 				KeyCode::Char(' ') => {
 					choices[idx].enabled = !choices[idx].enabled;
