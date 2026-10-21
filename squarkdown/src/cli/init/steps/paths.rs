@@ -1,4 +1,5 @@
 use super::super::ui::*;
+
 use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
@@ -43,12 +44,12 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		ask!("Could not find an existing SvelteKit folder. How to proceed?");
 	}
 
-	choices! { PICK, CREATE, SKIP }
+	choices! { PICK, CREATE, SKIP = "Skip this question" }
 
 	let choice = pick_one! {
 		PICK   => "Pick an existing directory";
 		CREATE => "Create a new directory";
-		SKIP   => "Configure manually";
+		SKIP   => "";
 	}?;
 
 	if choice == SKIP { return Ok(()); }

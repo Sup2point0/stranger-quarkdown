@@ -14,13 +14,22 @@ use std::io;
 
 macro_rules! choices
 {
-	(  $variant:ident $(, $rest:ident)* $(,)?  ) =>
+	(
+		$variant:ident
+		$(
+			, $rest:ident $(= $display:literal)?
+		)*
+		$(,)?
+	) =>
 	{
 		#[derive(Clone, Copy, Debug, PartialEq, Eq, enum_display::EnumDisplay)]
 		#[enum_display(case = "Kebab")]
 		enum _Choice {
 			$variant,
-			$($rest,)*
+			$(
+				$(#[display($display)])?
+				$rest,
+			)*
 		}
 
 		use _Choice::$variant;
