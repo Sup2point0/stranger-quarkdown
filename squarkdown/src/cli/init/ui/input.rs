@@ -1,4 +1,5 @@
 use super::out::*;
+use crate::utils;
 use crate::colours::*;
 use crate::macros::*;
 
@@ -32,6 +33,7 @@ pub(crate) fn _input_() -> io::Result<String>
 	stdout.flush()?; 
 
 	io::stdin().read_line(&mut out)?;
+	out = utils::trim_end(out);
 
 	execute!(stdout,
 		cursor::MoveUp(1),
