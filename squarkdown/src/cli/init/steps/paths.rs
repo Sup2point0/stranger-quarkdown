@@ -26,51 +26,60 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		folders.push(path_rel);
 	})?;
 
-	if candidates.is_empty() {
-		ask!("Could not find an existing SvelteKit folder. How to proceed?");
-
-		choices! { PICK, CREATE, SKIP }
-
-		let choice = pick_one! {
-			PICK   => "Pick an existing directory";
-			CREATE => "Create a new directory";
-			SKIP   => "Configure manually";
-		}?;
-
-		match choice {
-			SKIP => return Ok(()),
-			PICK => {
-				folders.push(str!("None of the above"));
-
-				ask!("Which folder contains your SvelteKit project?");
-				let choice = pick_one!(folders)?;
-				append!(config, "site = '{choice}/'");
-			}
-			CREATE => {
-				let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
-
-				if folder.starts_with("/") {
-					folder.remove(0);
-				} else if folder.starts_with("./") {
-					folder.replace_range(0..2, "");
-				}
-
-				if !folder.ends_with("/") {
-					folder += "/";
-				}
-
-				append!(config, "site = '{folder}'");
-			}
-		}
-	}
-	else {
+	if !candidates.is_empty() {
 		candidates.push(str!("None of the above"));
 
 		ask!("Which of these contains your SvelteKit project?");
 		let choice = pick_one!(candidates)?;
 
-		todo!();
+		if choice != "None of the above" {
+			append!(config, "site = '{choice}'");
+			return Ok(());
+		}
+
+		ask!("How to proceed?");
 	}
+	else {
+		ask!("Could not find an existing SvelteKit folder. How to proceed?");
+	}
+
+	choices! { PICK, CREATE, SKIP }
+
+	let choice = pick_one! {
+		PICK   => "Pick an existing directory";
+		CREATE => "Create a new directory";
+		SKIP   => "Configure manually";
+	}?;
+
+	if choice == SKIP { return Ok(()); }
+
+	if choice == PICK {
+		folders.push(str!("None of the above"));
+
+		ask!("Which folder contains your SvelteKit project?");
+		let choice = pick_one!(folders)?;
+
+		if choice != "None of the above" {
+			append!(config, "site = '{choice}/'");
+			return Ok(());
+		}
+
+		// If the user picks "None of the above", fall back to manually entering
+	}
+
+	let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
+
+	if folder.starts_with("/") {
+		folder.remove(0);
+	} else if folder.starts_with("./") {
+		folder.replace_range(0..2, "");
+	}
+
+	if !folder.ends_with("/") {
+		folder += "/";
+	}
+
+	append!(config, "site = '{folder}'");
 
 	Ok(())
 }
