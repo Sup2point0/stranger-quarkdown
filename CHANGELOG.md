@@ -21,10 +21,10 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
-## Next (v4.3.3)
+## v4.3.3
 
 ### New
-- Check `paths.sources` directories do not contain dangerous `..` traversal
+- Check `paths.sources` directories do not contain dangerous `..` traversal.
 
 ### Fixes
 - Fix render count when `errors.on-error = "warn"`.
@@ -325,7 +325,7 @@ While this release means more stability for Squarkdown, there’s still a fair a
 ### Breaking
 - Squarkdown is now installable as a cross-platform binary from [crates.io](https://crates.io/crates/squarkdown) or [npm](https://www.npmjs.com/package/stranger-quarkdown), instead of requiring a local Ruby installation.
   - Install it with `cargo install squarkdown`/`npm install stranger-quarkdown`
-  - Run it with `squarkdown`/`npx squarkdown`
+  - Run it with `squarkdown`
 - Squarkup configuration has been overhauled; see [config](#config)
 - `+page.svelte` and `+page.js` bases have been removed, since they were unnecessary
 - SCSS preprocessing has been removed, since it wasn’t that useful
