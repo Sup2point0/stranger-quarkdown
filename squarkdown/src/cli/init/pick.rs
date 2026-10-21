@@ -22,7 +22,7 @@ macro_rules! choices
 			$variant,
 			$($rest,)*
 		}
-		
+
 		use _Choice::$variant;
 		$(use _Choice::$rest;)*
 	}
@@ -90,9 +90,15 @@ pub(super) fn _pick_<T: Clone>(
 		{
 			match code
 			{
-				KeyCode::Esc => return Err(
-					io::Error::from(io::ErrorKind::Interrupted)
-				),
+				KeyCode::Esc => {
+					execute!(stdout,
+						cursor::MoveUp(choices.len() as u16),
+						Clear(ClearType::FromCursorDown),
+					)?;
+
+					out!("{R}cancelled");
+					return Err(io::Error::from(io::ErrorKind::Interrupted));
+				}
 				KeyCode::Down | KeyCode::Right => {
 					idx += 1;
 					if idx == choices.len() {
