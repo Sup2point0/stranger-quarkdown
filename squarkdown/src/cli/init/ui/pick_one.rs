@@ -77,10 +77,10 @@ pub(crate) fn _pick_one_<T: Clone>(
 						Clear(ClearType::FromCursorDown),
 					)?;
 
-					out!("{R}cancelled");
+					out!("{R}{ITAL}cancelled{UNITAL}");
 					return Err(io::Error::from(io::ErrorKind::Interrupted));
 				}
-				KeyCode::Down | KeyCode::Right => {
+				KeyCode::Down | KeyCode::Right | KeyCode::Char(' ') => {
 					idx += 1;
 					if idx == choices.len() {
 						idx = 0;

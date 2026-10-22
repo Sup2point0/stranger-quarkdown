@@ -33,8 +33,8 @@ pub(crate) fn _wait_(status_message: Option<&str>) -> io::Result<()>
 	print!(" {GREY}└  ");
 	execute!(stdout, cursor::SavePosition)?;
 
-	print!("{}", status_message.unwrap_or(
-		"any key to continue, ESC to exit"
+	print!("{GREY}{}", status_message.unwrap_or(
+		"any key to continue · ESC to exit"
 	));
 
 	stdout.flush()?;
@@ -51,8 +51,7 @@ pub(crate) fn _wait_(status_message: Option<&str>) -> io::Result<()>
 			..
 		}) = e
 		{
-			execute!(
-				stdout,
+			execute!(stdout,
 				Clear(ClearType::CurrentLine),
 				cursor::MoveToColumn(0),
 			)?;
