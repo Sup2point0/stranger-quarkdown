@@ -13,9 +13,15 @@ pub fn configure_project(config: &mut String) -> io::Result<()>
 		append!(config, "name = '{project_name}'");
 	}
 	
-	let github = input!("What’s the GitHub ID of your project? (e.g. Sup2point0/stranger-quarkdown)")?;
-	if !github.is_empty() {
-		append!(config, "github = '{github}'");
+	let mut github = input!("What’s the GitHub ID of your project? (e.g. Sup2point0/stranger-quarkdown)")?;
+
+	while !github.is_empty() {
+		if github.chars().filter(|&c| c == '/').count() == 1 {
+			append!(config, "github = '{github}'");
+			break;
+		}
+
+		github = input!("Invalid GitHub ID, try again? {GREY}(e.g. Sup2point0/stranger-quarkdown)")?;
 	}
 
 	Ok(())
