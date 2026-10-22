@@ -19,7 +19,7 @@ macro_rules! input
 			ask!($($args)*);
 			_input_()
 		}
-	}
+	};
 }
 pub(crate) use input;
 
@@ -41,7 +41,11 @@ pub(crate) fn _input_() -> io::Result<String>
 		cursor::MoveToColumn(0),
 	)?;
 
-	out!("{GREY}{out}");
+	if out.is_empty() {
+		out!("{R}{ITAL}skipped{UNITAL}");
+	} else {
+		out!("{GREY}{out}");
+	}
 
 	Ok(out)
 }
