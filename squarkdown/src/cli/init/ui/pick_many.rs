@@ -309,12 +309,14 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	}
 
 	refresh(true)?;
-	out!("{after}");
 
 	if is_skipping {
+		out!("{R}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
 		return Ok(None);
 	}
+	
+	out!("{C}✓" => "{after}");
 
 	let choices = choices.iter().filter(|c| c.enabled);
 
