@@ -19,10 +19,13 @@ use std::io;
 /// Allow the user to pick any number of entries from the given choices.
 /// 
 /// ```ignore
-/// pick_many! {
-///    [true]  choice1 => hint1;
-///    [false] choice2 => hint2;
-/// }?;
+/// pick_many!(
+///    ask: "Pick any number";
+///    choices: {
+///       [true]  choice1 => hint1;
+///       [false] choice2 => hint2;
+///    }
+/// )?;
 /// ```
 /// 
 /// # See Also
@@ -31,15 +34,29 @@ use std::io;
 macro_rules! pick_many
 {
 	(
-		$(
-			[$enabled_by_default:literal]
-			$value:expr
-			=>
-			$hint:literal
-			;
-		)+
+		ask : $bef:literal $(, $($args1:tt)* )?;
+		$($rest:tt)*
+	) => {
+		pick_many! {
+			before: $bef $(, $($args1)* )?;
+			after:  $bef $(, $($args1)* )?;
+			$($rest)*
+		}
+	};
+
+	(
+		before  : $bef:literal $(, $($args1:tt)* )?;
+		after   : $aft:literal $(, $($args2:tt)* )?;
+		choices : {
+			$(
+				[$enabled_by_default:literal]
+				$value:expr => $hint:literal;
+			)+
+		}
 	) => {
 		_pick_many_(
+			format_args!($bef $(, $($args1)* )?),
+			format_args!($aft $(, $($args2)* )?),
 			vec![
 				$(
 					PickManyChoice {
@@ -54,9 +71,13 @@ macro_rules! pick_many
 	};
 
 	(
-		$choices:expr
+		before  : $bef:literal $(, $($args1:tt)* )?;
+		after   : $aft:literal $(, $($args2:tt)* )?;
+		choices : $choices:expr
 	) => {
 		_pick_many_(
+			format_args!($bef $(, $($args1)* )?),
+			format_args!($aft $(, $($args2)* )?),
 			$choices.into_iter()
 				.map(|(choice, hint)| PickManyChoice {
 					label: format!("{choice}"),
@@ -88,15 +109,29 @@ pub(crate) use pick_many;
 macro_rules! pick_many_or_skip
 {
 	(
-		$(
-			[$enabled_by_default:literal]
-			$value:expr
-			=>
-			$hint:literal
-			;
-		)+
+		ask : $bef:literal $(, $($args1:tt)* )?;
+		$($rest:tt)*
+	) => {
+		pick_many_or_skip! {
+			before: $bef $(, $($args1)* )?;
+			after:  $bef $(, $($args1)* )?;
+			$($rest)*
+		}
+	};
+
+	(
+		before  : $bef:literal $(, $($args1:tt)* )?;
+		after   : $aft:literal $(, $($args2:tt)* )?;
+		choices : {
+			$(
+				[$enabled_by_default:literal]
+				$value:expr => $hint:literal;
+			)+
+		}
 	) => {
 		_pick_many_or_skip_(
+			format_args!($bef $(, $($args1)* )?),
+			format_args!($aft $(, $($args2)* )?),
 			vec![
 				$(
 					PickManyChoice {
@@ -112,9 +147,13 @@ macro_rules! pick_many_or_skip
 	};
 
 	(
-		$choices:expr
+		before  : $bef:literal $(, $($args1:tt)* )?;
+		after   : $aft:literal $(, $($args2:tt)* )?;
+		choices : $choices:expr
 	) => {
 		_pick_many_or_skip_(
+			format!($bef $(, $($args1)* )?),
+			format!($aft $(, $($args2)* )?),
 			$choices.into_iter()
 				.map(|(choice, hint)| PickManyChoice {
 					label: format!("{choice}"),
@@ -140,10 +179,12 @@ pub(crate) struct PickManyChoice<T, L: Display>
 
 
 pub(crate) fn _pick_many_<T: Clone>(
+	before: impl Display,
+	after: impl Display,
 	choices: Vec<PickManyChoice<T, impl Display>>,
 ) -> io::Result<Vec<T>>
 {
-	_pick_many_or_skip_(choices, false)
+	_pick_many_or_skip_(before, after, choices, false)
 		.map(|r| r.expect("Cannot return `None` if not `skippable`"))
 }
 
@@ -151,6 +192,8 @@ pub(crate) fn _pick_many_<T: Clone>(
 /// 
 /// - `choices` is non-empty.
 pub(crate) fn _pick_many_or_skip_<T: Clone>(
+	before: impl Display,
+	after: impl Display,
 	mut choices: Vec<PickManyChoice<T, impl Display>>,
 	skippable: bool,
 ) -> io::Result<Option<Vec<T>>>
@@ -163,14 +206,17 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	let _raw_mode = RawMode::start()?;
 	execute!(stdout, cursor::Hide)?;
 
-	let mut refresh = || {
+	let mut refresh = |is_final: bool| {
 		execute!(stdout,
 			/* NOTE: +1 cuz max_idx = len() - 1 */
 			/* NOTE: +2 for "SPACE to ..." hint */
-			cursor::MoveUp(max_idx as u16 + 3),
+			/* NOTE: +1 if also clearing question line */
+			cursor::MoveUp(max_idx as u16 + if is_final {4} else {3}),
 			Clear(ClearType::FromCursorDown),
 		)
 	};
+
+	ask!("{before}");
 
 	#[allow(unused_assignments)]
 	let mut is_skipping = false;
@@ -226,8 +272,10 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			match code
 			{
 				KeyCode::Esc => {
-					refresh()?;
+					refresh(true)?;
+					out!("{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
+					
 					return Err(io::Error::from(io::ErrorKind::Interrupted));
 				}
 				KeyCode::Down | KeyCode::Right => {
@@ -257,10 +305,11 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			}
 		}
 
-		refresh()?;
+		refresh(false)?;
 	}
 
-	refresh()?;
+	refresh(true)?;
+	out!("{after}");
 
 	if is_skipping {
 		out!("{R}{ITAL}skipped{UNITAL}");

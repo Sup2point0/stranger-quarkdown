@@ -1,7 +1,5 @@
 use super::super::ui::*;
 
-use crate::colours::*;
-
 use enum_display::EnumDisplay;
 
 use std::io;
@@ -20,17 +18,17 @@ pub(crate) enum Features
 
 pub fn enable_features() -> io::Result<Vec<Features>>
 {
-	ask!("What features would you like to use?");
-
-	let choices = pick_many!
-	{
-		[true] Features::PAGE_TS
-			=> "Render +page.ts files alongside +page.svx files";
-		[true] Features::SITE_DATA
-			=> "Produce a JSON file containing aggregated site data";
-		[true] Features::ASSETS
-			=> "Copy assets from anywhere in your repo to static/";
-	}?;
+	let choices = pick_many!(
+		ask: "What features would you like to enable?";
+		choices: {
+			[true] Features::PAGE_TS
+				=> "Render +page.ts files alongside +page.svx files";
+			[true] Features::SITE_DATA
+				=> "Produce a JSON file containing aggregated site data";
+			[true] Features::ASSETS
+				=> "Copy assets from anywhere in your repo to static/";
+		}
+	)?;
 
 	Ok(choices)
 }

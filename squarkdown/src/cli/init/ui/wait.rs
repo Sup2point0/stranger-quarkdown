@@ -14,28 +14,30 @@ use std::io::{ self, Write };
 macro_rules! wait
 {
 	() => {
-		_wait_(None)
+		_wait_("")
 	};
 
 	(
 		$msg:literal $(, $($args:tt)* )?
 	) => {
-		_wait_(Some(&format!($msg, $($($args)* )?)))
+		_wait_(&format!($msg, $($($args)* )?))
 	}
 }
 pub(crate) use wait;
 
 
-pub(crate) fn _wait_(status_message: Option<&str>) -> io::Result<()>
+pub(crate) fn _wait_(mut hint: &str) -> io::Result<()>
 {
 	let mut stdout = io::stdout();
 	
 	print!(" {GREY}└  ");
 	execute!(stdout, cursor::SavePosition)?;
 
-	print!("{GREY}{}", status_message.unwrap_or(
-		"any key to continue · ESC to exit"
-	));
+	if hint.is_empty() {
+		hint = "any key to continue · ESC to exit";
+	}
+
+	print!("{GREY}{hint}");
 
 	stdout.flush()?;
 	execute!(stdout, cursor::RestorePosition)?;

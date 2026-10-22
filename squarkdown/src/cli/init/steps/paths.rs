@@ -100,10 +100,12 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 		candidates.push((path_rel, ""));
 	})?;
 
-	ask!("Where should Squarkdown look for .md files?");
-	let Some(choices) = pick_many_or_skip!(candidates)? else {
-		return Ok(());
-	};
+	let Some(choices) = pick_many_or_skip!(
+		before: "Where should Squarkdown look for {B}.md{W} files?";
+		after: "Where should Squarkdown look for .md files?";
+		choices: candidates
+	)?
+		else { return Ok(()); };
 
 	append!(config, "sources = [\n\t'{}'\n]", choices.join("',\n\t'"));
 
