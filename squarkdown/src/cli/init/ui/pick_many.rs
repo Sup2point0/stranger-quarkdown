@@ -160,14 +160,17 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	let mut idx = 0;
 	let max_idx = choices.len() - if skippable {0} else {1};
 
+	let _raw_mode = RawMode::start()?;
+	execute!(stdout, cursor::Hide)?;
+
 	let mut refresh = || {
 		execute!(stdout,
-			cursor::MoveUp(max_idx as u16 + 1),
+			/* NOTE: +1 cuz max_idx = len() - 1 */
+			/* NOTE: +2 for "SPACE to ..." hint */
+			cursor::MoveUp(max_idx as u16 + 3),
 			Clear(ClearType::FromCursorDown),
 		)
 	};
-
-	let _raw_mode = RawMode::start()?;
 
 	#[allow(unused_assignments)]
 	let mut is_skipping = false;
@@ -184,13 +187,10 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 
 			print!(" {GREY}│  ");
 
-			if *enabled && !is_skipping {
-				print!("{C}●  ");
+			if *enabled {
+				print!("{}●  ", if is_skipping {GREY} else {C});
 			} else {
-				if is_selected {
-					print!("{C}");
-				}
-				print!("○  ");
+				print!("{}○  ", if is_selected {C} else {GREY});
 			}
 
 			if is_selected {
@@ -212,8 +212,10 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			}
 
 			println!("{}Skip this question", if is_skipping {W} else {GREY});
-
 		}
+
+		out!();
+		out!("└" => "{GREY}SPACE to select · ENTER to submit · ESC to exit");
 
 		if let Event::Key(KeyEvent{
 			code,
@@ -277,6 +279,8 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 		labels = str!("none");
 	}
 	out!("{GREY}{labels}");
+
+	execute!(stdout, cursor::Show)?;
 
 	Ok(Some(
 		choices.map(|c| c.value.clone()).collect()
