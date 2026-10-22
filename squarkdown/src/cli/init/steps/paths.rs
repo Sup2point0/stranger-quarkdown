@@ -90,24 +90,22 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 {
-	let mut candidates = vec![];
+	let mut candidates = vec![
+		(str!("/"), "project root (non-recursive)")
+	];
 
 	utils::for_folders(cwd, |folder| {
 		let mut path_rel = utils::display_rel(folder.path(), cwd);
 		path_rel += "/";
-		candidates.push(path_rel);
+		candidates.push((path_rel, ""));
 	})?;
 
-	candidates.push(str!("Skip this question"));
-
-	ask!("Where should Squarkdown look for .md files? (You can add more folders later)");
-	let choice = pick_one!(candidates)?;
-
-	if choice == "Skip this question" {
+	ask!("Where should Squarkdown look for .md files?");
+	let Some(choices) = pick_many_or_skip!(candidates)? else {
 		return Ok(());
-	}
+	};
 
-	append!(config, "sources = ['{choice}']");
+	append!(config, "sources = [\n\t'{}'\n]", choices.join("',\n\t'"));
 
 	Ok(())
 }

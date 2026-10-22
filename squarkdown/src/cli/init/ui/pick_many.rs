@@ -1,6 +1,7 @@
 use super::raw::*;
 use super::out::*;
 use crate::colours::*;
+use crate::utils::macros::*;
 
 use crossterm::{
 	cursor,
@@ -13,6 +14,20 @@ use std::fmt::Display;
 use std::io;
 
 
+/// `:: Result<Vec<String>>`
+/// 
+/// Allow the user to pick any number of entries from the given choices.
+/// 
+/// ```ignore
+/// pick_many! {
+///    [true]  choice1 => hint1;
+///    [false] choice2 => hint2;
+/// }?;
+/// ```
+/// 
+/// # See Also
+/// 
+/// [`pick_many_or_skip`] to add a "Skip this question" choice.
 macro_rules! pick_many
 {
 	(
@@ -25,37 +40,94 @@ macro_rules! pick_many
 		)+
 	) => {
 		_pick_many_(
-			&mut [
+			vec![
 				$(
 					PickManyChoice {
 						value: $value,
 						enabled: $enabled_by_default,
 						label: $value,
 						hint: $hint,
-						is_singleton: false,
 					},
 				)+
 			]
 		)
 	};
 
-	// (
-	// 	$($value:expr => ($label:literal, $hint:literal) ;)+
-	// ) => {
-	// 	_pick_many_(
-	// 		&[ $(($value, $label, $hint),)+ ]
-	// 	)
-	// };
-
-	// (
-	// 	$choices:expr
-	// ) => {
-	// 	_pick_many_(
-	// 		&$choices.iter().map(|choice| (choice, choice, "")).collect::<Vec<_>>()
-	// 	)
-	// };
+	(
+		$choices:expr
+	) => {
+		_pick_many_(
+			$choices.into_iter()
+				.map(|(choice, hint)| PickManyChoice {
+					label: format!("{choice}"),
+					value: choice,
+					enabled: false,
+					hint,
+				})
+				.collect::<Vec<_>>()
+		)
+	};
 }
 pub(crate) use pick_many;
+
+
+/// `:: Result<Option<Vec<String>>>`
+/// 
+/// Allow the user to pick any number of entries from the given choices, or skip (in which case `None` is returned).
+/// 
+/// ```ignore
+/// pick_many_or_skip! {
+///    [true]  choice1 => hint1;
+///    [false] choice2 => hint2;
+/// }?;
+/// ```
+/// 
+/// # See Also
+/// 
+/// [`pick_many`] to remove the "Skip this question" choice.
+macro_rules! pick_many_or_skip
+{
+	(
+		$(
+			[$enabled_by_default:literal]
+			$value:expr
+			=>
+			$hint:literal
+			;
+		)+
+	) => {
+		_pick_many_or_skip_(
+			vec![
+				$(
+					PickManyChoice {
+						value: $value,
+						enabled: $enabled_by_default,
+						label: $value,
+						hint: $hint,
+					},
+				)+
+			],
+			true
+		)
+	};
+
+	(
+		$choices:expr
+	) => {
+		_pick_many_or_skip_(
+			$choices.into_iter()
+				.map(|(choice, hint)| PickManyChoice {
+					label: format!("{choice}"),
+					value: choice,
+					enabled: false,
+					hint,
+				})
+				.collect::<Vec<_>>(),
+			true
+		)
+	};
+}
+pub(crate) use pick_many_or_skip;
 
 
 pub(crate) struct PickManyChoice<T, L: Display>
@@ -64,31 +136,55 @@ pub(crate) struct PickManyChoice<T, L: Display>
 	pub enabled: bool,
 	pub label: L,
 	pub hint: &'static str,
-	pub is_singleton: bool,
 }
 
 
 pub(crate) fn _pick_many_<T: Clone>(
-	choices: &mut [PickManyChoice<T, impl Display>],
+	choices: Vec<PickManyChoice<T, impl Display>>,
 ) -> io::Result<Vec<T>>
+{
+	_pick_many_or_skip_(choices, false)
+		.map(|r| r.expect("Cannot return `None` if not `skippable`"))
+}
+
+/// # Pre-Conditions
+/// 
+/// - `choices` is non-empty.
+pub(crate) fn _pick_many_or_skip_<T: Clone>(
+	mut choices: Vec<PickManyChoice<T, impl Display>>,
+	skippable: bool,
+) -> io::Result<Option<Vec<T>>>
 {
 	let mut stdout = io::stdout();
 
 	let mut idx = 0;
+	let max_idx = choices.len() - if skippable {0} else {1};
+
+	let mut refresh = || {
+		execute!(stdout,
+			cursor::MoveUp(max_idx as u16 + 1),
+			Clear(ClearType::FromCursorDown),
+		)
+	};
 
 	let _raw_mode = RawMode::start()?;
+
+	#[allow(unused_assignments)]
+	let mut is_skipping = false;
 	
 	loop {
+		is_skipping = (skippable && idx == max_idx);
+
 		for (
 			i,
-			PickManyChoice{ enabled, label, hint, is_singleton, .. }
-		) in choices.iter_mut().enumerate()
+			PickManyChoice{ enabled, label, hint, .. }
+		) in choices.iter().enumerate()
 		{
 			let is_selected = (i == idx);
 
 			print!(" {GREY}│  ");
 
-			if *enabled {
+			if *enabled && !is_skipping {
 				print!("{C}●  ");
 			} else {
 				if is_selected {
@@ -106,34 +202,41 @@ pub(crate) fn _pick_many_<T: Clone>(
 			println!();
 		}
 
-		let e = event::read()?;
+		if skippable {
+			print!(" {GREY}│  ");
+
+			if is_skipping {
+				print!("{C}●  ");
+			} else {
+				print!("○  ");
+			}
+
+			println!("{}Skip this question", if is_skipping {W} else {GREY});
+
+		}
 
 		if let Event::Key(KeyEvent{
 			code,
 			kind: KeyEventKind::Press,
 			..
-		}) = e
+		}) = event::read()?
 		{
 			match code
 			{
 				KeyCode::Esc => {
-					execute!(stdout,
-						cursor::MoveUp(choices.len() as u16),
-						Clear(ClearType::FromCursorDown),
-					)?;
-
-					out!("{R}cancelled");
+					refresh()?;
+					out!("{R}{ITAL}cancelled{UNITAL}");
 					return Err(io::Error::from(io::ErrorKind::Interrupted));
 				}
 				KeyCode::Down | KeyCode::Right => {
 					idx += 1;
-					if idx == choices.len() {
+					if idx > max_idx {
 						idx = 0;
 					}
 				}
 				KeyCode::Up | KeyCode::Left => {
 					if idx == 0 {
-						idx = choices.len() - 1;
+						idx = max_idx;
 					} else {
 						idx -= 1;
 					}
@@ -142,7 +245,7 @@ pub(crate) fn _pick_many_<T: Clone>(
 					idx = 0;
 				}
 				KeyCode::End => {
-					idx = choices.len() - 1;
+					idx = max_idx;
 				}
 				KeyCode::Char(' ') => {
 					choices[idx].enabled = !choices[idx].enabled;
@@ -152,28 +255,30 @@ pub(crate) fn _pick_many_<T: Clone>(
 			}
 		}
 
-		execute!(stdout,
-			cursor::MoveUp(choices.len() as u16),
-			Clear(ClearType::FromCursorDown),
-		)?;
+		refresh()?;
 	}
 
-	execute!(stdout,
-		cursor::MoveUp(choices.len() as u16),
-		Clear(ClearType::FromCursorDown),
-	)?;
+	refresh()?;
+
+	if is_skipping {
+		out!("{R}{ITAL}skipped{UNITAL}");
+		return Ok(None);
+	}
 
 	let choices = choices.iter().filter(|c| c.enabled);
 
-	let labels =
+	let mut labels =
 		choices.clone()
 		.map(|c| c.label.to_string())
 		.collect::<Vec<_>>()
 		.join(" · ")
 	;
+	if labels.is_empty() {
+		labels = str!("none");
+	}
 	out!("{GREY}{labels}");
 
-	Ok(
+	Ok(Some(
 		choices.map(|c| c.value.clone()).collect()
-	)
+	))
 }
