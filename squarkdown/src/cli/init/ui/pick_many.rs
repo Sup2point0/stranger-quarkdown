@@ -20,7 +20,7 @@ use std::io;
 /// 
 /// ```ignore
 /// pick_many!(
-///    ask: "Pick any number";
+///    ask: "Pick any options";
 ///    choices: {
 ///       [true]  choice1 => hint1;
 ///       [false] choice2 => hint2;
@@ -97,10 +97,13 @@ pub(crate) use pick_many;
 /// Allow the user to pick any number of entries from the given choices, or skip (in which case `None` is returned).
 /// 
 /// ```ignore
-/// pick_many_or_skip! {
-///    [true]  choice1 => hint1;
-///    [false] choice2 => hint2;
-/// }?;
+/// pick_many_or_skip!(
+///    ask: "Pick any options";
+///    choices: {
+///       [true]  choice1 => hint1;
+///       [false] choice2 => hint2;
+///    }
+/// )?;
 /// ```
 /// 
 /// # See Also
@@ -190,7 +193,7 @@ pub(crate) fn _pick_many_<T: Clone>(
 
 /// # Pre-Conditions
 /// 
-/// - `choices` is non-empty.
+/// - `choices` is non-empty (guaranteed by macro).
 pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	before: impl Display,
 	after: impl Display,
@@ -241,6 +244,8 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 
 			if is_selected {
 				print!("{W}{label} {GREY}{ITAL}{hint}{UNITAL}");
+			} else if *enabled {
+				print!("{GREY1}{label}");
 			} else {
 				print!("{GREY}{label}");
 			}

@@ -47,18 +47,17 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		out!("Could not find an existing SvelteKit folder.");
 	}
 
-	choices! { PICK, CREATE, SKIP = "Skip this question" }
+	choices! { PICK, CREATE }
 
-	let choice = pick_one!(
+	let Some(choice) = pick_one_or_skip!(
 		ask: "How to proceed?";
 		choices: {
 			PICK   => "Pick an existing directory";
 			CREATE => "Create a new directory";
-			SKIP   => "";
 		}
-	)?;
-
-	if choice == SKIP { return Ok(()); }
+	)? else {
+		return Ok(());
+	};
 
 	if choice == PICK {
 		folders.push(str!("None of the above"));
