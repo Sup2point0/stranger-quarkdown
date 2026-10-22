@@ -147,10 +147,12 @@ pub(crate) fn _pick_one_<T: Clone>(
 	}
 
 	refresh(true)?;
-	out!("{after}");
+	out!("{C}✓" => "{after}");
 
 	let (choice, label, _) = &choices[idx];
 	out!("{GREY}{label}");
+
+	execute!(stdout, cursor::Show)?;
 
 	Ok(choice.clone())
 }
