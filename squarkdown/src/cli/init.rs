@@ -106,11 +106,13 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 			out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
 			out!(&slash!("{GREY}found at: {GREY1}{}", filepath));
 			
-			ask!("Exit?");
-			let should_quit = pick_one! {
-				true  => ("yes", "");
-				false => ("no",  "changes may overwrite existing files");
-			}?;
+			let should_quit = pick_one!(
+				ask: "Exit?";
+				choices: {
+					true  => ("yes", "");
+					false => ("no",  "changes may overwrite existing files");
+				}
+			)?;
 
 			if should_quit {
 				return Err(io::Error::from(io::ErrorKind::Interrupted));

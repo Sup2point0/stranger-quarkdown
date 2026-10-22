@@ -34,29 +34,29 @@ use std::io;
 macro_rules! pick_many
 {
 	(
-		ask : $bef:literal $(, $($args1:tt)* )?;
-		$($rest:tt)*
+		ask : $msg:literal $(, $($args:tt)*)?;
+		$($rest:tt)+
 	) => {
 		pick_many! {
-			before: $bef $(, $($args1)* )?;
-			after:  $bef $(, $($args1)* )?;
-			$($rest)*
+			before: $msg $(, $($args)*)?;
+			after:  $msg $(, $($args)*)?;
+			$($rest)+
 		}
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)?;
+		after   : $aft:literal $(, $($args2:tt)*)?;
 		choices : {
 			$(
 				[$enabled_by_default:literal]
-				$value:expr => $hint:literal;
+				$value:expr => $hint:literal ;
 			)+
 		}
 	) => {
 		_pick_many_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			vec![
 				$(
 					PickManyChoice {
@@ -71,13 +71,13 @@ macro_rules! pick_many
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)?;
+		after   : $aft:literal $(, $($args2:tt)*)?;
 		choices : $choices:expr
 	) => {
 		_pick_many_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			$choices.into_iter()
 				.map(|(choice, hint)| PickManyChoice {
 					label: format!("{choice}"),
@@ -109,29 +109,29 @@ pub(crate) use pick_many;
 macro_rules! pick_many_or_skip
 {
 	(
-		ask : $bef:literal $(, $($args1:tt)* )?;
+		ask : $msg:literal $(, $($args:tt)*)?;
 		$($rest:tt)*
 	) => {
 		pick_many_or_skip! {
-			before: $bef $(, $($args1)* )?;
-			after:  $bef $(, $($args1)* )?;
+			before: $msg $(, $($args)*)?;
+			after:  $msg $(, $($args)*)?;
 			$($rest)*
 		}
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)?;
+		after   : $aft:literal $(, $($args2:tt)*)?;
 		choices : {
 			$(
 				[$enabled_by_default:literal]
-				$value:expr => $hint:literal;
+				$value:expr => $hint:literal ;
 			)+
 		}
 	) => {
 		_pick_many_or_skip_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			vec![
 				$(
 					PickManyChoice {
@@ -147,13 +147,13 @@ macro_rules! pick_many_or_skip
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)?;
+		after   : $aft:literal $(, $($args2:tt)*)?;
 		choices : $choices:expr
 	) => {
 		_pick_many_or_skip_(
-			format!($bef $(, $($args1)* )?),
-			format!($aft $(, $($args2)* )?),
+			format!($bef $(, $($args1)*)?),
+			format!($aft $(, $($args2)*)?),
 			$choices.into_iter()
 				.map(|(choice, hint)| PickManyChoice {
 					label: format!("{choice}"),

@@ -33,35 +33,40 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 	if !candidates.is_empty() {
 		candidates.push(str!("None of the above"));
 
-		ask!("Which of these contains your SvelteKit project?");
-		let choice = pick_one!(candidates)?;
+		let choice = pick_one!(
+			ask: "Which of these contains your SvelteKit project?";
+			choices: candidates
+		)?;
 
 		if choice != "None of the above" {
 			append!(config, "site = '{choice}'");
 			return Ok(());
 		}
-
-		ask!("How to proceed?");
 	}
 	else {
-		ask!("Could not find an existing SvelteKit folder. How to proceed?");
+		out!("Could not find an existing SvelteKit folder.");
 	}
 
 	choices! { PICK, CREATE, SKIP = "Skip this question" }
 
-	let choice = pick_one! {
-		PICK   => "Pick an existing directory";
-		CREATE => "Create a new directory";
-		SKIP   => "";
-	}?;
+	let choice = pick_one!(
+		ask: "How to proceed?";
+		choices: {
+			PICK   => "Pick an existing directory";
+			CREATE => "Create a new directory";
+			SKIP   => "";
+		}
+	)?;
 
 	if choice == SKIP { return Ok(()); }
 
 	if choice == PICK {
 		folders.push(str!("None of the above"));
 
-		ask!("Which folder contains your SvelteKit project?");
-		let choice = pick_one!(folders)?;
+		let choice = pick_one!(
+			ask: "Which folder contains your SvelteKit project?";
+			choices: folders
+		)?;
 
 		if choice != "None of the above" {
 			append!(config, "site = '{choice}/'");
