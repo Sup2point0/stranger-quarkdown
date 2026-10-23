@@ -17,7 +17,10 @@ pub fn configure_project(config: &mut String) -> io::Result<()>
 
 fn configure_name(config: &mut String) -> io::Result<()>
 {
-	if let Some(project_name) = input!("What displayed name should Squarkdown use for your project?")?
+	if let Some(project_name) = input!(
+		before: "What displayed name should Squarkdown use for your project? {GREY}(capitalisation will be preserved)";
+		after: "What displayed name should Squarkdown use for your project?";
+	)?
 		&& !project_name.is_empty()
 	{
 		append!(config, "name = {project_name:?}");
@@ -32,7 +35,8 @@ fn configure_github(config: &mut String) -> io::Result<()>
 	let mut answer = None;
 	
 	if let Some(github) = input!(
-		"What’s the GitHub ID of your project? {GREY}(e.g. Sup2point0/stranger-quarkdown)"
+		before: "What’s the GitHub ID of your project? {GREY}(in {GREY1}user/project{GREY} format, e.g. {GREY1}Sup2point0/stranger-quarkdown{GREY})";
+		after: "What’s the GitHub ID of your project?";
 	)?
 	{
 		if is_valid_github(&github) {
@@ -40,7 +44,8 @@ fn configure_github(config: &mut String) -> io::Result<()>
 		}
 		else {
 			while let Some(github) = input!(
-				"Invalid GitHub ID, try again? {GREY}(e.g. Sup2point0/stranger-quarkdown)"
+				before: "Invalid GitHub ID! Try again? {GREY}(provide {GREY1}user/project{GREY}, e.g. {GREY1}Sup2point0/stranger-quarkdown{GREY})";
+				after: "Invalid GitHub ID! Try again?";
 			)?
 			{
 				if is_valid_github(&github) {

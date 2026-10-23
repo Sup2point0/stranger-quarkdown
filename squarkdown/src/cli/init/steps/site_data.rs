@@ -26,7 +26,10 @@ pub fn configure_site_data(config: &mut String, site: &str) -> io::Result<()>
 	};
 
 	if filepath == "Enter manually" {
-		let Some(answer) = input!("Where should Squarkdown export your site data?")?
+		let Some(answer) = input!(
+			before: "Enter the file path for exported site data: {GREY}(relative to your SvelteKit folder)";
+			after: "Enter the file path for exported site data:";
+		)?
 			else { return Ok(()) };
 
 		filepath = answer;

@@ -77,7 +77,9 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<Option<Stri
 		// If the user picks "None of the above", fall back to manually entering
 	}
 
-	let Some(mut folder) = input!("Enter the folder name for your SvelteKit project:")?
+	let Some(mut folder) = input!(
+		"Enter the folder name for your SvelteKit project:"
+	)?
 		else { return Ok(None) };
 
 	if !folder.ends_with('/') {
@@ -110,7 +112,7 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 
 	append!(config, "sources = [");
 	if choices.is_empty() {
-		append!(config, "\t#  unconfigured");
+		append!(config, "\t# unconfigured");
 	} else {
 		// TODO sanitise for safety
 		append!(config, "\t'{}',", choices.join("',\n\t'"));
