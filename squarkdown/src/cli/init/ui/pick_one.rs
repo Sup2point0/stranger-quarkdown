@@ -33,7 +33,7 @@ use std::io;
 macro_rules! pick_one
 {
 	(
-		ask : $msg:literal $(, $($args:tt)* )?;
+		ask : $msg:literal $(, $($args:tt)*)? ;
 		$($rest:tt)+
 	) => {
 		pick_one!(
@@ -44,8 +44,8 @@ macro_rules! pick_one
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : {
 			$(
 				$value:expr => $hint:literal ;
@@ -53,8 +53,8 @@ macro_rules! pick_one
 		}
 	) => {
 		_pick_one_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			vec![
 				$(
 					PickOneChoice {
@@ -68,8 +68,8 @@ macro_rules! pick_one
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : {
 			$(
 				$value:expr => ($label:literal, $hint:literal) ;
@@ -77,8 +77,8 @@ macro_rules! pick_one
 		}
 	) => {
 		_pick_one_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			vec![
 				$(
 					PickOneChoice {
@@ -92,13 +92,13 @@ macro_rules! pick_one
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : $choices:expr
 	) => {
 		_pick_one_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			$choices.into_iter()
 				.map(|choice| PickOneChoice {
 					label: format!("{choice}"),
@@ -143,8 +143,8 @@ macro_rules! pick_one_or_skip
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : {
 			$(
 				$value:expr => $hint:literal ;
@@ -152,8 +152,8 @@ macro_rules! pick_one_or_skip
 		}
 	) => {
 		_pick_one_or_skip_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			vec![
 				$(
 					PickOneChoice {
@@ -168,8 +168,8 @@ macro_rules! pick_one_or_skip
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : {
 			$(
 				$value:expr => ($label:literal, $hint:literal) ;
@@ -177,8 +177,8 @@ macro_rules! pick_one_or_skip
 		}
 	) => {
 		_pick_one_or_skip_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			vec![
 				$(
 					PickOneChoice {
@@ -193,13 +193,13 @@ macro_rules! pick_one_or_skip
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)* )?;
-		after   : $aft:literal $(, $($args2:tt)* )?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : $choices:expr
 	) => {
 		_pick_one_or_skip_(
-			format_args!($bef $(, $($args1)* )?),
-			format_args!($aft $(, $($args2)* )?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			$choices.iter()
 				.map(|(choice, hint)| PickOneChoice {
 					label: choice,

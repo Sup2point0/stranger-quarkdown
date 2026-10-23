@@ -34,7 +34,7 @@ use std::io;
 macro_rules! pick_many
 {
 	(
-		ask : $msg:literal $(, $($args:tt)*)?;
+		ask : $msg:literal $(, $($args:tt)*)? ;
 		$($rest:tt)+
 	) => {
 		pick_many! {
@@ -45,8 +45,8 @@ macro_rules! pick_many
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)*)?;
-		after   : $aft:literal $(, $($args2:tt)*)?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : {
 			$(
 				[$enabled_by_default:literal]
@@ -71,8 +71,8 @@ macro_rules! pick_many
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)*)?;
-		after   : $aft:literal $(, $($args2:tt)*)?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : $choices:expr
 	) => {
 		_pick_many_(
@@ -112,7 +112,7 @@ pub(crate) use pick_many;
 macro_rules! pick_many_or_skip
 {
 	(
-		ask : $msg:literal $(, $($args:tt)*)?;
+		ask : $msg:literal $(, $($args:tt)*)? ;
 		$($rest:tt)*
 	) => {
 		pick_many_or_skip! {
@@ -123,8 +123,8 @@ macro_rules! pick_many_or_skip
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)*)?;
-		after   : $aft:literal $(, $($args2:tt)*)?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : {
 			$(
 				[$enabled_by_default:literal]
@@ -150,8 +150,8 @@ macro_rules! pick_many_or_skip
 	};
 
 	(
-		before  : $bef:literal $(, $($args1:tt)*)?;
-		after   : $aft:literal $(, $($args2:tt)*)?;
+		before  : $bef:literal $(, $($args1:tt)*)? ;
+		after   : $aft:literal $(, $($args2:tt)*)? ;
 		choices : $choices:expr
 	) => {
 		_pick_many_or_skip_(
