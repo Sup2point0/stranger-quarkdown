@@ -12,7 +12,7 @@ use std::io;
 use std::path::{ Path };
 
 
-pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
+pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<Option<String>>
 {
 	let mut folders = vec![];
 	let mut candidates = vec![];
@@ -35,13 +35,13 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		candidates.push(str!("None of the above"));
 
 		let choice = pick_one!(
-			ask: "Which of these contains your SvelteKit project?";
+			ask: "Do any of these contain your SvelteKit project?";
 			choices: candidates
 		)?;
 
 		if choice != "None of the above" {
 			append!(config, "site = {choice:?}");
-			return Ok(());
+			return Ok(Some(choice));
 		}
 	}
 	else {
@@ -58,7 +58,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		}
 	)? else {
 		append!(config, "site = ''  # unconfigured");
-		return Ok(());
+		return Ok(None);
 	};
 
 	if choice == PICK {
@@ -70,29 +70,24 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		)?;
 
 		if choice != "None of the above" {
-			// TODO check trailing slash
 			append!(config, "site = {choice:?}");
-			return Ok(());
+			return Ok(Some(choice));
 		}
 
 		// If the user picks "None of the above", fall back to manually entering
 	}
 
-	let mut folder = input!("Enter the folder name for your SvelteKit project:")?;
-
-	if folder.starts_with('/') {
-		folder.remove(0);
-	} else if folder.starts_with("./") {
-		folder.replace_range(0..2, "");
-	}
+	let Some(mut folder) = input!("Enter the folder name for your SvelteKit project:")?
+		else { return Ok(None) };
 
 	if !folder.ends_with('/') {
 		folder += "/";
 	}
 
+	folder = utils::to_rel(&folder).to_owned();
 	append!(config, "site = {folder:?}");
 
-	Ok(())
+	Ok(Some(folder))
 }
 
 pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
@@ -114,14 +109,13 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 	)?.unwrap_or_default();
 
 	append!(config, "sources = [");
-	if !choices.is_empty() {
+	if choices.is_empty() {
+		append!(config, "\t#  unconfigured");
+	} else {
 		// TODO sanitise for safety
-		append!(config, "\t'{}'", choices.join("',\n\t'"));
+		append!(config, "\t'{}',", choices.join("',\n\t'"));
 	}
-	append!(config,
-		"]{}",
-		if choices.is_empty() {"  # unconfigured"} else {""}
-	);
+	append!(config, "]");
 
 	Ok(())
 }

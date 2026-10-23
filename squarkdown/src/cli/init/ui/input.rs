@@ -12,6 +12,7 @@ use crossterm::{
 use std::io::{ self, Write };
 
 
+/// `:: str -> Result (Option String)`
 macro_rules! input
 {
 	(  $($args:tt)*  ) => {
@@ -24,7 +25,7 @@ macro_rules! input
 pub(crate) use input;
 
 
-pub(crate) fn _input_() -> io::Result<String>
+pub(crate) fn _input_() -> io::Result<Option<String>>
 {
 	let mut stdout = io::stdout();
 	let mut out = str!();
@@ -43,9 +44,9 @@ pub(crate) fn _input_() -> io::Result<String>
 
 	if out.is_empty() {
 		out!("{R}{ITAL}skipped{UNITAL}");
+		Ok(None)
 	} else {
 		out!("{GREY}{out}");
+		Ok(Some(out))
 	}
-
-	Ok(out)
 }
