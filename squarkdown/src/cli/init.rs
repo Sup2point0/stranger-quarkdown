@@ -1,6 +1,7 @@
 use crate::resolver;
-use crate::colours::*;
-use crate::macros::*;
+use crate::config::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use indoc::indoc;
 use path_macro::path;
@@ -135,7 +136,8 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 	out!();
 	out!("Writing your {B}squarkup.toml...");
 
-	let file = File::create(path!(cwd / "squarkup.toml"))?;
+	let dest = path!(cwd / "squarkup.toml");
+	let file = File::create(&dest)?;
 	let mut f = BufWriter::new(file);
 
 	writeln!(f, indoc! {"
@@ -154,7 +156,25 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 	}
 	
 	print!("{PREV}{CLEAR}");
-	out!("{GREY}Wrote your squarkup.toml!");
+	out!("Wrote your config to:");
+	out!(&slash!("   {GREY1}{}", dest));
+	out!();
+	
+	out!("Verifying config...");
+	io::stdout().flush()?;
+
+	if let Ok(toml) = resolver::read_toml_config(&dest) {
+		if let Ok(..) = SquarkupConfig::try_from_toml(toml, cwd) {
+			print!("{PREV}{CLEAR}");
+			out!("{G}✓" => "Verified that config is valid!");
+		} else {
+			print!("{PREV}{CLEAR}");
+			out!("{R}×" => "{R}Hmm, we seem to have written an invalid config!");
+		}
+	} else {
+		print!("{PREV}{CLEAR}");
+		out!("{R}×" => "Error when verifying config!");
+	}
 
 	Ok(())
 }

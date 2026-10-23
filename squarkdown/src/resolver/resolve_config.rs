@@ -86,7 +86,7 @@ fn find_config_from(folder: &Path) -> Option<(PathBuf, Extension)>
 }
 
 /// Read the user's squarkup configuration from `squarkup.toml`.
-fn read_toml_config(filepath: &Path) -> SquarkResult<toml::Table>
+pub fn read_toml_config(filepath: &Path) -> SquarkResult<toml::Table>
 {
 	let content = fs::read_to_string(filepath)?;
 	let data = content.parse::<toml::Table>()?;
