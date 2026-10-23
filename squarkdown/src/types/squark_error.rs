@@ -275,6 +275,22 @@ impl<E> From<E> for SquarkError
 	}
 }
 
+impl IntoIterator for SquarkError
+{
+	type Item = SquarkError;
+	type IntoIter = <Vec<SquarkError> as IntoIterator>::IntoIter;
+
+	/// Iterate over the children of a [`SquarkError::Multiple`].
+	fn into_iter(self) -> Self::IntoIter
+	{
+		if let Self::Multiple{ errs, .. } = self {
+			errs.into_iter()
+		} else {
+			vec![self].into_iter()
+		}
+	}
+}
+
 impl std::fmt::Display for SquarkError
 {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
