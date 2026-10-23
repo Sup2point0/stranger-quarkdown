@@ -59,7 +59,7 @@ fn initialise() -> io::Result<()>
 	let mut assets  = str!("[assets]\n");
 
 	head!("Paths Resolution")?;
-	configure_site(&mut paths, &cwd)?;
+	let site = configure_site(&mut paths, &cwd)?;
 	configure_sources(&mut paths, &cwd)?;
 	// TODO `out.folder`
 
@@ -68,7 +68,12 @@ fn initialise() -> io::Result<()>
 
 	append!(out, "render-page-ts = {}", features.contains(&Features::PAGE_TS));
 
-	// TODO `out.site-data-path`
+	if features.contains(&Features::SITE_DATA)
+	&& let Some(site) = site
+	{
+		head!("Site Data")?;
+		configure_site_data(&mut out, &site)?;
+	}
 
 	if features.contains(&Features::ASSETS) {
 		head!("Assets Preprocessing")?;
@@ -166,23 +171,29 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 	
 	print!("{PREV}{CLEAR}");
 	out!("Wrote your config to:");
-	out!(&slash!("   {B}{}", dest));
+	out!(&slash!("{B}{}", dest));
 	out!();
 	
 	out!("Verifying config...");
 	io::stdout().flush()?;
 
-	if let Ok(toml) = resolver::read_toml_config(&dest) {
-		if let Ok(..) = SquarkupConfig::try_from_toml(toml, cwd) {
-			print!("{PREV}{CLEAR}");
-			out!("{G}✓" => "Verified that config is valid!");
-		} else {
-			print!("{PREV}{CLEAR}");
-			out!("{R}×" => "{R}Hmm, we seem to have written an invalid config!");
+	match resolver::read_toml_config(&dest) {
+		Ok(toml) => match SquarkupConfig::try_from_toml(toml, cwd) {
+			Ok(..) => {
+				print!("{PREV}{CLEAR}");
+				out!("{G}✓" => "Verified that config is valid!");
+			}
+			Err(e) => {
+				print!("{PREV}{CLEAR}");
+				out!("{R}×" => "{R}Warning: Invalid config!");
+				out!("{GREY}{e}");
+			}
 		}
-	} else {
-		print!("{PREV}{CLEAR}");
-		out!("{R}×" => "Error when verifying config!");
+		Err(e) => {
+			print!("{PREV}{CLEAR}");
+			out!("{R}×" => "Warning: Error when verifying config!");
+			out!("{GREY}{e}");
+		}
 	}
 
 	Ok(())
