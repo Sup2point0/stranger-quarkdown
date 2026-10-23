@@ -22,7 +22,7 @@ use std::io;
 ///    ask: "Pick one option";
 ///    choices: {
 ///       choice1 => hint1;
-///       choice2 => hint2;
+///       choice2 => label2 => hint2;
 ///    }
 /// )?;
 /// ```
@@ -46,48 +46,12 @@ macro_rules! pick_one
 	(
 		before  : $bef:literal $(, $($args1:tt)*)? ;
 		after   : $aft:literal $(, $($args2:tt)*)? ;
-		choices : {
-			$(
-				$value:expr => $hint:literal ;
-			)+
-		}
+		choices : { $($choices:tt)+ }
 	) => {
 		_pick_one_(
 			format_args!($bef $(, $($args1)*)?),
 			format_args!($aft $(, $($args2)*)?),
-			vec![
-				$(
-					PickOneChoice {
-						value: $value,
-						label: $value,
-						hint: $hint,
-					},
-				)+
-			]
-		)
-	};
-
-	(
-		before  : $bef:literal $(, $($args1:tt)*)? ;
-		after   : $aft:literal $(, $($args2:tt)*)? ;
-		choices : {
-			$(
-				$value:expr => ($label:literal, $hint:literal) ;
-			)+
-		}
-	) => {
-		_pick_one_(
-			format_args!($bef $(, $($args1)*)?),
-			format_args!($aft $(, $($args2)*)?),
-			vec![
-				$(
-					PickOneChoice {
-						value: $value,
-						label: $label,
-						hint: $hint,
-					},
-				)+
-			]
+			_define_choice!($($choices)+)
 		)
 	};
 
@@ -103,7 +67,7 @@ macro_rules! pick_one
 				.map(|choice| PickOneChoice {
 					label: format!("{choice}"),
 					value: choice,
-					hint: "",
+					hint: String::new(),
 				})
 				.collect::<Vec<_>>()
 		)
@@ -204,7 +168,7 @@ macro_rules! pick_one_or_skip
 				.map(|(choice, hint)| PickOneChoice {
 					label: choice,
 					value: choice,
-					hint,
+					hint: hint.to_string(),
 				})
 				.collect::<Vec<_>>(),
 			true
@@ -214,11 +178,11 @@ macro_rules! pick_one_or_skip
 pub(crate) use pick_one_or_skip;
 
 
-pub(crate) struct PickOneChoice<T, L: Display>
+pub(crate) struct PickOneChoice<T, L: Display, H: Display>
 {
 	pub value: T,
 	pub label: L,
-	pub hint: &'static str,
+	pub hint: H,
 }
 
 
@@ -228,7 +192,7 @@ pub(crate) struct PickOneChoice<T, L: Display>
 pub(crate) fn _pick_one_<T>(
 	before: impl Display,
 	after: impl Display,
-	choices: Vec<PickOneChoice<T, impl Display>>,
+	choices: Vec<PickOneChoice<T, impl Display, impl Display>>,
 ) -> io::Result<T>
 {
 	_pick_one_or_skip_(before, after, choices, false)
@@ -241,7 +205,7 @@ pub(crate) fn _pick_one_<T>(
 pub(crate) fn _pick_one_or_skip_<T>(
 	before: impl Display,
 	after: impl Display,
-	mut choices: Vec<PickOneChoice<T, impl Display>>,
+	mut choices: Vec<PickOneChoice<T, impl Display, impl Display>>,
 	skippable: bool,
 ) -> io::Result<Option<T>>
 {
