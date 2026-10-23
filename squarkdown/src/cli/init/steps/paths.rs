@@ -114,7 +114,9 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 	};
 
 	append!(config, "sources = [");
-	append!(config, "\t'{}'", choices.join("',\n\t'"));
+	if !choices.is_empty() {
+		append!(config, "\t'{}'", choices.join("',\n\t'"));
+	}
 	append!(config, "]");
 
 	Ok(())
