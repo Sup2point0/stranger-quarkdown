@@ -166,7 +166,7 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 	
 	print!("{PREV}{CLEAR}");
 	out!("Wrote your config to:");
-	out!(&slash!("   {GREY1}{}", dest));
+	out!(&slash!("   {B}{}", dest));
 	out!();
 	
 	out!("Verifying config...");

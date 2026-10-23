@@ -78,7 +78,7 @@ fn configure_assets_extensions(config: &mut String) -> AbandonOrResult<io::Error
 	}
 
 	append!(config, "extensions = [");
-	append!(config, "\t'{}'", choices.join("',\n\t'"));
+	append!(config, "\t\"{}\"", choices.join("\",\n\t\""));
 	append!(config, "]");
 
 	Ok(())

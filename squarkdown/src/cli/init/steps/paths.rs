@@ -71,7 +71,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 
 		if choice != "None of the above" {
 			// TODO check trailing slash
-			append!(config, "site = {choice:?}/");
+			append!(config, "site = {choice:?}");
 			return Ok(());
 		}
 

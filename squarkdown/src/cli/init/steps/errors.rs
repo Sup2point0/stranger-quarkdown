@@ -25,7 +25,7 @@ pub fn configure_error_handling(config: &mut String) -> io::Result<()>
 		}
 	)?;
 
-	append!(config, "on-error = '{on_error}'");
+	append!(config, "on-error = \"{on_error}\"");
 	append!(config, "strict = {strict}");
 
 	Ok(())
