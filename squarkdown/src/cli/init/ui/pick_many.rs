@@ -209,15 +209,25 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	let _raw_mode = RawMode::start()?;
 	execute!(stdout, cursor::Hide)?;
 
-	let mut refresh = |is_final: bool| {
-		execute!(stdout,
-			/* NOTE: +1 cuz max_idx = len() - 1 */
-			/* NOTE: +2 for "SPACE to ..." hint */
-			/* NOTE: +1 if also clearing question line */
-			cursor::MoveUp(max_idx as u16 + if is_final {4} else {3}),
-			Clear(ClearType::FromCursorDown),
-		)
-	};
+	macro_rules! reset_cursor {
+		(  finish : $is_final:expr  ) =>
+		{
+			if $is_final {
+				execute!(stdout,
+					/* NOTE: +1 cuz max_idx = len() - 1 */
+					/* NOTE: +2 for "SPACE to ..." hint */
+					/* NOTE: +1 if also clearing question line */
+					cursor::MoveUp(max_idx as u16 + 4),
+					Clear(ClearType::FromCursorDown),
+				)
+			} else {
+				execute!(stdout,
+					cursor::MoveUp(max_idx as u16 + 3),
+					// Clearing on a normal refresh is left to each individual line
+				)
+			}
+		};
+	}
 
 	ask!("{before}");
 
@@ -250,19 +260,17 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 				print!("{GREY}{label}");
 			}
 
+			execute!(stdout, Clear(ClearType::UntilNewLine))?;
 			println!();
 		}
 
 		if skippable {
-			print!(" {GREY}│  ");
-
-			if is_skipping {
-				print!("{C}● ");
-			} else {
-				print!("○ ");
-			}
-
-			println!("{}Skip this question", if is_skipping {W} else {GREY});
+			println!(
+				" {GREY}│  {col1}{dot} {col2}Skip this question",
+				col1 = if is_skipping {C} else {""},
+				dot = if is_skipping {"●"} else {"○"},
+				col2 = if is_skipping {W} else {GREY},
+			);
 		}
 
 		out!();
@@ -277,7 +285,7 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			match code
 			{
 				KeyCode::Esc => {
-					refresh(true)?;
+					reset_cursor!(finish: true)?;
 					out!("{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
 					
@@ -312,10 +320,10 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			}
 		}
 
-		refresh(false)?;
+		reset_cursor!(finish: false)?;
 	}
 
-	refresh(true)?;
+	reset_cursor!(finish: true)?;
 
 	if is_skipping {
 		out!("{R}×" => "{after}");
