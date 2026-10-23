@@ -1,3 +1,4 @@
+use super::super::shared::*;
 use super::super::ui::*;
 
 use crate::utils;
@@ -108,8 +109,9 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 		before: "Where should Squarkdown look for {B}.md{W} files?";
 		after: "Where should Squarkdown look for .md files?";
 		choices: candidates
-	)?
-		else { return Ok(()); };
+	)? else {
+		return Ok(());
+	};
 
 	append!(config, "sources = [\n\t'{}'\n]", choices.join("',\n\t'"));
 

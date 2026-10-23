@@ -11,6 +11,7 @@ use std::io::{ self, BufWriter, Write as _ };
 use std::path::{ Path };
 use std::process::ExitCode;
 
+mod shared; use shared::*;
 mod ui; use ui::*;
 mod steps; use steps::*;
 
