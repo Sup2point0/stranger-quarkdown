@@ -181,7 +181,7 @@ pub(crate) struct PickManyChoice<T, L: Display>
 }
 
 
-pub(crate) fn _pick_many_<T: Clone>(
+pub(crate) fn _pick_many_<T>(
 	before: impl Display,
 	after: impl Display,
 	choices: Vec<PickManyChoice<T, impl Display>>,
@@ -194,7 +194,7 @@ pub(crate) fn _pick_many_<T: Clone>(
 /// # Pre-Conditions
 /// 
 /// - `choices` is non-empty (guaranteed by macro).
-pub(crate) fn _pick_many_or_skip_<T: Clone>(
+pub(crate) fn _pick_many_or_skip_<T>(
 	before: impl Display,
 	after: impl Display,
 	mut choices: Vec<PickManyChoice<T, impl Display>>,
@@ -336,10 +336,13 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	
 	out!("{C}✓" => "{after}");
 
-	let choices = choices.iter().filter(|c| c.enabled);
+	let choices: Vec<_> =
+		choices.into_iter()
+		.filter(|c| c.enabled)
+		.collect();
 
 	let mut labels =
-		choices.clone()
+		choices.iter()
 		.map(|c| c.label.to_string())
 		.collect::<Vec<_>>()
 		.join(" · ")
@@ -352,6 +355,6 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	execute!(stdout, cursor::Show)?;
 
 	Ok(Some(
-		choices.map(|c| c.value.clone()).collect()
+		choices.into_iter().map(|c| c.value).collect()
 	))
 }

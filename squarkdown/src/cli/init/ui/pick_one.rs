@@ -225,7 +225,7 @@ pub(crate) struct PickOneChoice<T, L: Display>
 /// # Pre-Conditions
 /// 
 /// - `choices` is non-empty (guaranteed by macro).
-pub(crate) fn _pick_one_<T: Clone>(
+pub(crate) fn _pick_one_<T>(
 	before: impl Display,
 	after: impl Display,
 	choices: Vec<PickOneChoice<T, impl Display>>,
@@ -238,10 +238,10 @@ pub(crate) fn _pick_one_<T: Clone>(
 /// # Pre-Conditions
 /// 
 /// - `choices` is non-empty (guaranteed by macro).
-pub(crate) fn _pick_one_or_skip_<T: Clone>(
+pub(crate) fn _pick_one_or_skip_<T>(
 	before: impl Display,
 	after: impl Display,
-	choices: Vec<PickOneChoice<T, impl Display>>,
+	mut choices: Vec<PickOneChoice<T, impl Display>>,
 	skippable: bool,
 ) -> io::Result<Option<T>>
 {
@@ -349,10 +349,10 @@ pub(crate) fn _pick_one_or_skip_<T: Clone>(
 
 	out!("{C}✓" => "{after}");
 
-	let PickOneChoice{ value, label, .. } = &choices[idx];
+	let PickOneChoice{ value, label, .. } = choices.swap_remove(idx);
 	out!("{GREY}{label}");
 
 	execute!(stdout, cursor::Show)?;
 
-	Ok(Some(value.clone()))
+	Ok(Some(value))
 }
