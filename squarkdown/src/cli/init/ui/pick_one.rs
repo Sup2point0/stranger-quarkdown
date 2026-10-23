@@ -201,10 +201,10 @@ macro_rules! pick_one_or_skip
 			format_args!($bef $(, $($args1)* )?),
 			format_args!($aft $(, $($args2)* )?),
 			$choices.iter()
-				.map(|choice| PickOneChoice {
+				.map(|(choice, hint)| PickOneChoice {
 					label: choice,
 					value: choice,
-					hint: "",
+					hint,
 				})
 				.collect::<Vec<_>>(),
 			true
@@ -281,9 +281,9 @@ pub(crate) fn _pick_one_or_skip_<T: Clone>(
 			print!(" {GREY}│  ");
 
 			if is_skipping {
-				print!("{C}●  ");
+				print!("{C}● ");
 			} else {
-				print!("○  ");
+				print!("○ ");
 			}
 
 			println!("{}Skip this question", if is_skipping {W} else {GREY});
@@ -302,7 +302,9 @@ pub(crate) fn _pick_one_or_skip_<T: Clone>(
 			{
 				KeyCode::Esc => {
 					refresh(true)?;
+					out!("{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
+					
 					return Err(io::Error::from(io::ErrorKind::Interrupted));
 				}
 				KeyCode::Down | KeyCode::Right | KeyCode::Char(' ') => {

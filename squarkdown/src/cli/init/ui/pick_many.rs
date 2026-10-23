@@ -237,9 +237,9 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			print!(" {GREY}│  ");
 
 			if *enabled {
-				print!("{}●  ", if is_skipping {GREY} else {C});
+				print!("{}● ", if is_skipping {GREY} else {C});
 			} else {
-				print!("{}○  ", if is_selected {C} else {GREY});
+				print!("{}○ ", if is_selected {C} else {GREY});
 			}
 
 			if is_selected {
