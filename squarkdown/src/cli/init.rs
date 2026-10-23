@@ -154,6 +154,8 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 			writeln!(f, "{each}")?;
 		}
 	}
+
+	f.flush()?;
 	
 	print!("{PREV}{CLEAR}");
 	out!("Wrote your config to:");
