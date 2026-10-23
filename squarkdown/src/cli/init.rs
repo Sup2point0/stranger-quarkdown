@@ -61,7 +61,6 @@ fn initialise() -> io::Result<()>
 	append!(out, "render-page-ts = {}", features.contains(&Features::PAGE_TS));
 
 	// TODO `out.site-data-path`
-	// TODO `assets.*`
 
 	if features.contains(&Features::ASSETS) {
 		head!("Assets Preprocessing")?;

@@ -257,9 +257,9 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 			print!(" {GREY}│  ");
 
 			if is_skipping {
-				print!("{C}●  ");
+				print!("{C}● ");
 			} else {
-				print!("○  ");
+				print!("○ ");
 			}
 
 			println!("{}Skip this question", if is_skipping {W} else {GREY});

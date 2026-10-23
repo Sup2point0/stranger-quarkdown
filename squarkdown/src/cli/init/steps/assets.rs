@@ -25,6 +25,7 @@ pub fn configure_assets(config: &mut String, cwd: &Path) -> io::Result<()>
 fn _configure_assets_(config: &mut String, cwd: &Path) -> AbandonOrResult<io::Error>
 {
 	configure_assets_folder(config, cwd)?;
+	configure_assets_extensions(config)?;
 	Ok(())
 }
 
@@ -47,9 +48,38 @@ fn configure_assets_folder(config: &mut String, cwd: &Path) -> AbandonOrResult<i
 		if *choice == "Cancel" {
 			return Err(AbandonError::ABANDON);
 		}
-
 		append!(config, "folder = '{choice}'");
 	} 
+
+	Ok(())
+}
+
+fn configure_assets_extensions(config: &mut String) -> AbandonOrResult<io::Error>
+{
+	let Some(mut choices) = pick_many_or_skip!(
+		ask: "What extensions do your assets have?";
+		choices: {
+			[true]  "png" => "";
+			[true]  "jpg" => "";
+			[true]  "webp" => "";
+			[true]  "svg" => "";
+			[false] "gif" => "";
+			[false] "mp3" => "";
+			[false] "mp4" => "";
+			[false] "pdf" => "";
+			[false] "ttf" => "";
+		}
+	)? else {
+		return Ok(());
+	};
+
+	if let Some(i) = choices.iter().position(|&ext| ext == "jpg") {
+		choices.insert(i + 1, "jpeg");
+	}
+
+	append!(config, "extensions = [");
+	append!(config, "\t'{}'", choices.join("',\n\t'"));
+	append!(config, "]");
 
 	Ok(())
 }
