@@ -16,7 +16,7 @@ use std::io;
 
 /// `:: Result<Vec<String>>`
 /// 
-/// Allow the user to pick any number of entries from the given choices.
+/// Allow the user to pick any number (even 0) of entries from the given choices.
 /// 
 /// ```ignore
 /// pick_many!(
@@ -94,7 +94,7 @@ pub(crate) use pick_many;
 
 /// `:: Result<Option<Vec<String>>>`
 /// 
-/// Allow the user to pick any number of entries from the given choices, or skip (in which case `None` is returned).
+/// Allow the user to pick any number (even 0) of entries from the given choices, or skip (in which case `None` is returned).
 /// 
 /// ```ignore
 /// pick_many_or_skip!(
@@ -201,6 +201,8 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 	skippable: bool,
 ) -> io::Result<Option<Vec<T>>>
 {
+	debug_assert!(!choices.is_empty());
+	
 	let mut stdout = io::stdout();
 
 	let mut idx = 0;

@@ -99,9 +99,9 @@ macro_rules! pick_one
 		_pick_one_(
 			format_args!($bef $(, $($args1)* )?),
 			format_args!($aft $(, $($args2)* )?),
-			$choices.iter()
+			$choices.into_iter()
 				.map(|choice| PickOneChoice {
-					label: choice,
+					label: format!("{choice}"),
 					value: choice,
 					hint: "",
 				})
@@ -117,7 +117,7 @@ pub(crate) use pick_one;
 /// Allow the user to pick exactly one entry from the given choices, or skip (in which case `None` is returned).
 /// 
 /// ```ignore
-/// pick_one!(
+/// pick_one_or_skip!(
 ///    ask: "Pick one option";
 ///    choices: {
 ///       choice1 => hint1;
@@ -235,7 +235,9 @@ pub(crate) fn _pick_one_<T: Clone>(
 		.map(|r| r.expect("Cannot return `None` if not `skipable`"))
 }
 
-
+/// # Pre-Conditions
+/// 
+/// - `choices` is non-empty (guaranteed by macro).
 pub(crate) fn _pick_one_or_skip_<T: Clone>(
 	before: impl Display,
 	after: impl Display,
@@ -243,6 +245,8 @@ pub(crate) fn _pick_one_or_skip_<T: Clone>(
 	skippable: bool,
 ) -> io::Result<Option<T>>
 {
+	debug_assert!(!choices.is_empty());
+
 	let mut stdout = io::stdout();
 
 	let mut idx = 0;
