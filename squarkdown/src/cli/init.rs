@@ -5,7 +5,7 @@ use crate::macros::*;
 use indoc::indoc;
 use path_macro::path;
 
-use std::fmt::{ Display, Write as _ };
+use std::fmt::{ Write as _ };
 use std::fs::{ File };
 use std::io::{ self, BufWriter, Write as _ };
 use std::path::{ Path };
@@ -45,9 +45,10 @@ fn initialise() -> io::Result<()>
 	check_existing_config(&cwd)?;
 	
 	let mut project = str!("[project]\n");
+	let mut errors = str!("[errors]\n");
 	let mut paths = str!("[paths]\n");
 	let mut out = str!("[out]\n");
-	let mut errors = str!("[errors]\n");
+	let mut assets = str!("[assets]\n");
 
 	head!("Paths Resolution")?;
 	configure_site(&mut paths, &cwd)?;
@@ -61,6 +62,11 @@ fn initialise() -> io::Result<()>
 
 	// TODO `out.site-data-path`
 	// TODO `assets.*`
+
+	if features.contains(&Features::ASSETS) {
+		head!("Assets Preprocessing")?;
+		configure_assets(&mut assets, &cwd)?;
+	}
 
 	head!("Error Handling")?;
 	configure_error_handling(&mut errors)?;
@@ -125,7 +131,7 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 	Ok(())
 }
 
-fn write_squarkup_toml(cwd: &Path, config: &[impl Display]) -> io::Result<()>
+fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 {
 	out!();
 	out!("Writing your {B}squarkup.toml...");
@@ -143,7 +149,9 @@ fn write_squarkup_toml(cwd: &Path, config: &[impl Display]) -> io::Result<()>
 	"})?;
 
 	for each in config {
-		writeln!(f, "{each}")?;
+		if !each.is_empty() {
+			writeln!(f, "{each}")?;
+		}
 	}
 	
 	print!("{PREV}{CLEAR}");
