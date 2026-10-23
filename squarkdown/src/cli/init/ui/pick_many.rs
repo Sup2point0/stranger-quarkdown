@@ -303,7 +303,9 @@ pub(crate) fn _pick_many_or_skip_<T: Clone>(
 					idx = max_idx;
 				}
 				KeyCode::Char(' ') => {
-					choices[idx].enabled = !choices[idx].enabled;
+					if !is_skipping {
+						choices[idx].enabled = !choices[idx].enabled;
+					}
 				}
 				KeyCode::Enter => break,
 				_ => {}
