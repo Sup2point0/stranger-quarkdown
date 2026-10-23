@@ -275,6 +275,29 @@ impl<E> From<E> for SquarkError
 	}
 }
 
+impl std::fmt::Display for SquarkError
+{
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result
+	{
+		match self
+		{
+			Self::ABANDON => write!(f, "ABANDONED"),
+
+			  Self::Recoverable{ msg, .. }
+			| Self::Unrecoverable{ msg, .. }
+			| Self::External{ msg, .. }
+				=> write!(f, "{msg}"),
+
+			Self::Multiple{ errs, .. } => {
+				for err in errs {
+					writeln!(f, "{err}")?;
+				}
+				Ok(())
+			}
+		}
+	}
+}
+
 
 pub trait CollectSquark<T>: Iterator<Item = SquarkResult<T>> + Sized
 {
