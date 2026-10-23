@@ -45,11 +45,18 @@ fn initialise() -> io::Result<()>
 	preamble()?;
 	check_existing_config(&cwd)?;
 	
+	/* NOTE:
+		Why not build a literal `SquarkupConfig` and serialise to TOML?
+
+		Well, `SquarkupConfig` contains _resolved_ values, like fully-qualified paths or precompiled RegEx. That’s not what we want; we want the very simple, human-enterable text that _produced_ that config.
+
+		As such, it’s really a lot easier to just manually fiddle with the strings rather than 
+	 */
 	let mut project = str!("[project]\n");
-	let mut errors = str!("[errors]\n");
-	let mut paths = str!("[paths]\n");
-	let mut out = str!("[out]\n");
-	let mut assets = str!("[assets]\n");
+	let mut errors  = str!("[errors]\n");
+	let mut paths   = str!("[paths]\n");
+	let mut out     = str!("[out]\n");
+	let mut assets  = str!("[assets]\n");
 
 	head!("Paths Resolution")?;
 	configure_site(&mut paths, &cwd)?;
@@ -75,7 +82,7 @@ fn initialise() -> io::Result<()>
 	configure_project(&mut project)?;
 	
 	write_squarkup_toml(&cwd, &[
-		project, errors, paths, out,
+		project, errors, paths, out, assets,
 	])?;
 
 	wrapup()?;
@@ -116,8 +123,8 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 			let should_quit = pick_one!(
 				ask: "Exit?";
 				choices: {
-					true  => ("yes", "");
-					false => ("no",  "changes may overwrite existing files");
+					true  => ("yes", "stop this script");
+					false => ("no",  "existing config may be overwritten");
 				}
 			)?;
 
