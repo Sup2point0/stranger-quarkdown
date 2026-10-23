@@ -4,6 +4,8 @@ use super::super::ui::*;
 use crate::utils::macros::*;
 use crate::utils::colours::*;
 
+use map_or_original::MapOrOriginal;
+
 use std::fmt::{ Write };
 use std::io;
 
@@ -30,7 +32,10 @@ pub fn configure_site_data(config: &mut String, site: &str) -> io::Result<()>
 		filepath = answer;
 	}
 
-	append!(config, "site-data-path = {filepath:?}");
+	append!(config,
+		"site-data-path = {:?}",
+		filepath.as_str().map_or_orig(|p| p.strip_prefix(site))
+	);
 
 	Ok(())
 }
