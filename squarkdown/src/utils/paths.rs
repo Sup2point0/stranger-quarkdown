@@ -25,7 +25,9 @@ pub fn is_empty_dir(dir: impl AsRef<Path>) -> SquarkResult<bool>
 #[must_use]
 pub fn to_rel(path: &str) -> &str
 {
-	path.trim_start_matches(['/', '\\'])
+	path
+		.trim_start_matches(['/', '\\'])
+		.trim_start_matches("./")
 }
 
 /// Display an `absolute` path relative to `base`.
