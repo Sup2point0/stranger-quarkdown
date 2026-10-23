@@ -57,6 +57,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 			CREATE => "Create a new directory";
 		}
 	)? else {
+		append!(config, "site = ''  # unconfigured");
 		return Ok(());
 	};
 
@@ -106,20 +107,21 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 		candidates.push((path_rel, ""));
 	})?;
 
-	let Some(choices) = pick_many_or_skip!(
+	let choices = pick_many_or_skip!(
 		before: "Where should Squarkdown look for {B}.md{W} files?";
 		after: "Where should Squarkdown look for .md files?";
 		choices: candidates
-	)? else {
-		return Ok(());
-	};
+	)?.unwrap_or_default();
 
 	append!(config, "sources = [");
 	if !choices.is_empty() {
 		// TODO sanitise for safety
 		append!(config, "\t'{}'", choices.join("',\n\t'"));
 	}
-	append!(config, "]");
+	append!(config,
+		"]{}",
+		if choices.is_empty() {"  # unconfigured"} else {""}
+	);
 
 	Ok(())
 }
