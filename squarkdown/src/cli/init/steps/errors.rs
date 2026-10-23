@@ -20,8 +20,8 @@ pub fn configure_error_handling(config: &mut String) -> io::Result<()>
 	let strict = pick_one!(
 		ask: "Enable stricter safety checks?";
 		choices: {
-			true => ("yes", "default");
-			false => ("no", "");
+			true  => "yes" => "default";
+			false => "no"  => "";
 		}
 	)?;
 

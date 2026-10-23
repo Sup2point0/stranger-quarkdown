@@ -56,7 +56,9 @@ fn initialise() -> io::Result<()>
 	let mut errors  = str!("[errors]\n");
 	let mut paths   = str!("[paths]\n");
 	let mut out     = str!("[out]\n");
+	let mut format  = str!("[format]\n");
 	let mut assets  = str!("[assets]\n");
+	let defaults = SquarkupConfig::init_defaults(&cwd, &cwd);
 
 	head!("Paths Resolution")?;
 	let site = configure_site(&mut paths, &cwd)?;
@@ -78,6 +80,16 @@ fn initialise() -> io::Result<()>
 	if features.contains(&Features::ASSETS) {
 		head!("Assets Preprocessing")?;
 		configure_assets(&mut assets, &cwd)?;
+	}
+
+	if let "yes" = pick_yes_or_no!("Would you like to configure Markdown formatting?")? {
+		head!("Markdown Formatting")?;
+		configure_formatting(&mut format, &defaults.format)?;
+	} else {
+		append!(format, "inject-head = {:?}", defaults.format.inject_head);
+		append!(format, "preserve-heading = {:?}", defaults.format.preserve_heading);
+		append!(format, "preserve-comments = {:?}", defaults.format.preserve_comments);
+		append!(format, "externalise-links = {:?}", defaults.format.externalise_links);
 	}
 
 	head!("Error Handling")?;
@@ -128,8 +140,8 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 			let should_quit = pick_one!(
 				ask: "Exit?";
 				choices: {
-					true  => ("yes", "stop this script");
-					false => ("no",  "existing config may be overwritten");
+					true  => "yes" => "stop this script";
+					false => "no"  => "existing config may be overwritten";
 				}
 			)?;
 
