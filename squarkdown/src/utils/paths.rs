@@ -37,9 +37,11 @@ pub fn display_rel(
 	base: impl AsRef<Path>,
 ) -> String
 {
-	// TODO fallback to `absolute`?
-	let relative = pathdiff::diff_paths(absolute, base)
-		.expect("absolute and base path always have common ancestor");
+	let relative =
+		absolute.as_ref()
+		.to_path_buf()
+		.map_or_original(|abs| pathdiff::diff_paths(abs, base))
+	;
 
 	let slashed = path_slash::PathBufExt::to_slash(&relative)
 		.expect("Squarkdown only supports Unicode paths");
