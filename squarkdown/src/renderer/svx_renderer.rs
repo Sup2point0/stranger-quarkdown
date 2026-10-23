@@ -7,6 +7,7 @@ use crate::utils::colours::*;
 use crate::utils::macros::*;
 
 use aho_corasick::AhoCorasick;
+use map_or_original::MapOrOriginal;
 use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark as pd;
@@ -15,7 +16,7 @@ use regex::regex;
 use time::UtcDateTime;
 
 use std::fs::{ self, File };
-use std::io::{ Write };
+use std::io::{ self, Write };
 use std::iter::{ Peekable };
 use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
@@ -107,15 +108,20 @@ impl<'d> Renderer<'d>
 	}
 
 	/// Run the renderer to completion, writing the whole `+page.svx` file with all injections.
-	pub(super) fn render_page_svx(mut self, wrote: &mut bool) -> SquarkResult
+	pub(super) fn render_page_svx(mut self,
+		wrote: &mut bool,
+		dry_run: bool,
+	) -> SquarkResult
 	{
 		if self.dest_file.exists() {
 			self.err_exists(&self.dest_file)?;
 		}
+
+		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 		
 		log::info!(
-			"rendering to: {GREY1}{}{GREY}/{}",
-			utils::display_rel(&self.dest_folder, &self.config.paths.root),
+			"{} to: {base}/{GREY1}{folder}{GREY}/{}",
+			if dry_run {"would render"} else {"rendering"},
 			self.config.out.file_name,
 		);
 
@@ -131,14 +137,23 @@ impl<'d> Renderer<'d>
 		}
 
 		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
-			let mut file = File::create(&self.dest_file)?;
-			self.inject_timestamp(&mut file)?;
-			self.inject_head(&mut file)?;
-			file.write_all(output.as_bytes())?;
+			if dry_run {
+				self.write_page_svx(io::sink(), &[])?;
+			} else {
+				self.write_page_svx(File::create(&self.dest_file)?, output.as_bytes())?;
+			}
 			*wrote = true;
 		}
 
 		self.errors.or(())
+	}
+
+	fn write_page_svx(&self, mut f: impl Write, content: &[u8]) -> SquarkResult
+	{
+		self.inject_timestamp(&mut f)?;
+		self.inject_head(&mut f)?;
+		f.write_all(content)?;
+		Ok(())
 	}
 
 	/// (out-of-place) Render the given Markdown `source`, without surrounding injection.
@@ -149,7 +164,7 @@ impl<'d> Renderer<'d>
 		}
 
 		let mut parser =
-			pd::Parser::new_ext(&source, *PARSER_OPTIONS)
+			pd::Parser::new_ext(source, *PARSER_OPTIONS)
 			.into_offset_iter()
 			.peekable()
 		;
@@ -275,7 +290,7 @@ impl Renderer<'_>
 				return left.chain(right)
 			}
 		}
-		Some((event, range)).into_iter().chain(None.into_iter())
+		Some((event, range)).into_iter().chain(None)
 	}
 }
 
@@ -601,9 +616,8 @@ impl Renderer<'_>
 			LinkRewriteAction::STRIP_EXTENSION =>
 			{
 				let mut href =
-					their_file_name
-					.strip_suffix(".md")
-					.unwrap_or(&their_file_name)
+					their_file_name[..]
+					.map_or_orig(|f| f.strip_suffix(".md"))
 					.to_owned()
 				;
 
@@ -757,14 +771,14 @@ impl Renderer<'_>
 		let project = &self.config.project.name;
 		
 		if project.is_empty() {
-			writeln!(file, "\t<title> {title} </title>", )?;
+			writeln!(file, "\t<title> {title} </title>")?;
 		} else {
-			writeln!(file, "\t<title> {title} · {project} </title>", )?;
+			writeln!(file, "\t<title> {title} · {project} </title>")?;
 		}
 
 		if !self.page.description.is_empty()
 		{
-			let content = self.page.description.replace("\"", "\\\"");
+			let content = self.page.description.replace('\"', "\\\"");
 			writeln!(file, "\t<meta name=\"description\" content=\"{content}\" />")?;
 		}
 
@@ -780,7 +794,7 @@ impl Renderer<'_>
 	/// Update `self.source` and `self.line_boundaries` with `source` for debug information.
 	fn update_source(&mut self, source: &str)
 	{
-		self.source = source.to_owned();
+		source.clone_into(&mut self.source);
 
 		/* First character is the first character in a new line */
 		self.line_boundaries = vec![0];
@@ -791,7 +805,7 @@ impl Renderer<'_>
 		);
 
 		/* NOTE: Line boundaries assume each line is `\n`-terminated, so making sure the last line has this too makes things a little nicer */
-		if !self.source.ends_with("\n") {
+		if !self.source.ends_with('\n') {
 			self.source.push('\n');
 		}
 

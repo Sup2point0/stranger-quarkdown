@@ -34,13 +34,17 @@ fn main() -> ExitCode
 	if let Some(arg) = args.peek_mut() {
 		arg.make_ascii_lowercase();
 
-		match arg.as_str() {
-			"--help" | "-h" => { mode = Mode::HELP;    args.next(); }
-			"--version"     => { mode = Mode::VERSION; args.next(); }
-			"init"          => { mode = Mode::INIT;    args.next(); }
-			"clean"         => { mode = Mode::CLEAN;   args.next(); }
+		match arg.as_str()
+		{
+			  "help"
+			| "--help"
+			| "-h"
+							=> { mode = Mode::HELP;    args.next(); }
+			"--version" => { mode = Mode::VERSION; args.next(); }
+			"init"      => { mode = Mode::INIT;    args.next(); }
+			"clean"     => { mode = Mode::CLEAN;   args.next(); }
 
-			_ => if !arg.starts_with("-") {
+			_ => if !arg.starts_with('-') {
 				log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
 				return ExitCode::FAILURE;
 			}
@@ -49,25 +53,14 @@ fn main() -> ExitCode
 
 	match mode
 	{
-		Mode::HELP => cli::help(),
-
 		Mode::VERSION => {
-			println!("Squarkdown v{}", env!("CARGO_PKG_VERSION"));
+			println!("Stranger Quarkdown v{}", env!("CARGO_PKG_VERSION"));
 			ExitCode::SUCCESS
 		}
-
+		Mode::HELP     => cli::help(),
 		Mode::SQUARKUP => cli::squarkdown(args),
-
-		Mode::INIT =>
-		{
-			log::line();
-			log::bad!("{W}squarkdown init{R} is not yet supported!{W}");
-			log::line();
-			// cli::init();
-			ExitCode::FAILURE
-		}
-
-		Mode::CLEAN => cli::clean(args),
+		Mode::INIT     => cli::init(),
+		Mode::CLEAN    => cli::clean(args),
 	}
 }
 

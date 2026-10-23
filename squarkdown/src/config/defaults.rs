@@ -61,7 +61,9 @@ impl SquarkupConfig
 					str!("png"), str!("jpg"), str!("jpeg"), str!("webp"), str!("svg"),
 				],
 			},
-			fonts:  FontsConfig { queries: vec![] },
+			fonts: FontsConfig {
+				queries: vec![],
+			},
 		}
 	}
 }

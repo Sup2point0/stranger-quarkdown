@@ -16,7 +16,7 @@
 
 
 /// Messy debug tests
-mod debug;
+mod _debug;
 
 
 // == CONFIG == //
@@ -49,6 +49,9 @@ mod assets;
 
 /// `squarkdown --fonts`
 mod fonts;
+
+/// `squarkdown --dry-run`
+mod dry_run;
 
 /// `squarkdown clean`
 mod clean;

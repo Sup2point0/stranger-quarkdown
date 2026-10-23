@@ -8,7 +8,7 @@ use regex::regex;
 use std::fs;
 
 
-pub fn prep_fonts(config: &SquarkupConfig) -> SquarkResult
+pub fn prep_fonts(config: &SquarkupConfig, dry_run: bool) -> SquarkResult
 {
 	if config.fonts.queries.is_empty() {
 		return Err(SquarkError::Recoverable {
@@ -47,6 +47,9 @@ pub fn prep_fonts(config: &SquarkupConfig) -> SquarkResult
 		}
 	};
 
-	fs::write(path, after.as_bytes())?;
+	if !dry_run {
+		fs::write(path, after.as_bytes())?;
+	}
+	
 	Ok(())
 }

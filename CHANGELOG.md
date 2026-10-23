@@ -21,6 +21,16 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
+## Next Major (v4.4)
+
+### New
+- `squarkdown --dry-run` to run Squarkdown without producing side effects!
+- Accept `squarkdown help` alongside `squarkdown --help`.
+
+
+<br>
+
+
 ## v4.3.3
 
 ### New

@@ -48,11 +48,13 @@ pub enum RenderCtx
 impl ContextStack<RenderCtx>
 {
 	/// Is [`RenderCtx::CODE`] in the context stack (at any depth)?
+	#[must_use]
 	pub fn is_code(&self) -> bool {
-		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE{..}))
+		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::CODE))
 	}
 	
 	/// Is [`RenderCtx::LINK`], [`RenderCtx::LINK_REWRITE`] or [`RenderCtx::IMAGE_LINK`] in the context stack (at any depth)?
+	#[must_use]
 	pub fn is_link(&self) -> bool {
 		self.stack().iter().any(|ctx| matches!(ctx,
 			  RenderCtx::LINK
@@ -62,15 +64,18 @@ impl ContextStack<RenderCtx>
 	}
 
 	/// Is [`RenderCtx::LEAVE`] in the context stack (at any depth)?
+	#[must_use]
 	pub fn has_leave(&self) -> bool {
 		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::LEAVE{..}))
 	}
 
 	/// Is [`RenderCtx::SLASH`] in the context stack (at any depth)?
+	#[must_use]
 	pub fn has_slash(&self) -> bool {
 		self.stack().iter().any(|ctx| matches!(ctx, RenderCtx::SLASH{..}))
 	}
 
+	#[must_use]
 	pub fn printed(&self) -> Vec<String> {
 		self.printed_with_prefix("in ")
 	}

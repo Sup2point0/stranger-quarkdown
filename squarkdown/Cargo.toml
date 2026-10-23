@@ -21,10 +21,13 @@ strip = true
 
 [dependencies]
 aho-corasick = "1.1.5"
+crossterm = "0.29.0"
 enum-display = "0.2.1"
 enum_stringify = "0.6.5"
 eq-discriminant = "1.0.0"
 git2 = "0.21.0"
+indoc = "2.0.7"
+map-or-original = "0.1.0"
 path-clean = "1.0.1"
 path-slash = "0.2.1"
 path_macro = "1.0.0"
@@ -43,13 +46,13 @@ walkdir = "2.5.0"
 
 [dev-dependencies]
 assertables = "10.1.0"
-indoc = "2.0.7"
 lazy_static = "1.5.0"
 pretty_assertions = "1.4.1"
 
 [lints.clippy]
 partialeq_to_none = "allow"
 upper-case-acronyms = "allow"
+needless_return = "allow"
 
 # pedantic = { level = "warn", priority = -1 }
 # doc-markdown = "allow"
@@ -58,3 +61,4 @@ upper-case-acronyms = "allow"
 # semicolon-if-nothing-returned = "allow"
 # uninlined-format-args = "allow"
 # wildcard_imports = "allow"
+# used_underscore_items = "allow"

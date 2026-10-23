@@ -32,6 +32,7 @@ pub enum ParseCtx
 
 impl ContextStack<ParseCtx>
 {
+	#[must_use]
 	pub fn printed(&self) -> Vec<String> {
 		self.printed_with_prefix("while ")
 	}
@@ -40,7 +41,7 @@ impl ContextStack<ParseCtx>
 
 macro_rules! ctx
 {
-	($self:ident, $ctx:expr => $body:block) => {
+	(  $self:ident, $ctx:expr => $body:block  ) => {
 		{
 			$self.ctx.push($ctx);
 			let r = (|| { $body })();

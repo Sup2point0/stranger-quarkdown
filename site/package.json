@@ -9,7 +9,7 @@
       "devx": "npm run prep && vite --open",
     
     "prep":    "npx squarkdown",
-      "prepx": "npx squarkdown --fonts",
+      "prepx": "npx squarkdown --fonts && nu prep.nu",
     
     "build":    "vite build",
       "buildx": "npm run prepx && vite build",

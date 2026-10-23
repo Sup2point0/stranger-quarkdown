@@ -4,7 +4,7 @@
 
 mod help;       pub use help::help;
 mod squarkdown; pub use squarkdown::squarkdown;
-// mod init;       pub use init::init;
+mod init;       pub use init::init;
 mod clean;      pub use clean::clean;
 
 mod shared;
