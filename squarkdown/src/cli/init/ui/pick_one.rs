@@ -339,6 +339,7 @@ pub(crate) fn _pick_one_or_skip_<T: Clone>(
 	if is_skipping {
 		out!("{R}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
+		execute!(stdout, cursor::Show)?;
 		return Ok(None);
 	}
 
