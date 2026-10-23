@@ -143,6 +143,7 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 	Ok(())
 }
 
+/// Write and verify the final `squarkup.toml`.
 fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 {
 	out!();
@@ -183,18 +184,26 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 				print!("{PREV}{CLEAR}");
 				out!("{G}✓" => "Verified that config is valid!");
 			}
-			Err(e) => {
+			Err(errs) => {
 				print!("{PREV}{CLEAR}");
-				out!("{R}×" => "{R}Warning: Invalid config!");
-				out!("{GREY}{e}");
+				let c = errs.len();
+				out!("{R}×" =>
+					"{R}Warning: {c} issue{s} when verifying config!",
+					s = if c == 1 {""} else {"s"}
+				);
+				for err in errs {
+					out!("{GREY}▸ {err}");
+				}
 			}
 		}
 		Err(e) => {
 			print!("{PREV}{CLEAR}");
-			out!("{R}×" => "Warning: Error when verifying config!");
+			out!("{R}×" => "Warning: Error when parsing config!");
 			out!("{GREY}{e}");
 		}
 	}
+
+	out!();
 
 	Ok(())
 }
