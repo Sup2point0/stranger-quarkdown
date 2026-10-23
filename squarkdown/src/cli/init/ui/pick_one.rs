@@ -178,6 +178,21 @@ macro_rules! pick_one_or_skip
 pub(crate) use pick_one_or_skip;
 
 
+macro_rules! pick_yes_or_no
+{
+	(  $($args:tt)*  ) => {
+		pick_one!(
+			ask: $($args)*;
+			choices: {
+				true  => "yes";
+				false => "no";
+			}
+		)
+	}
+}
+pub(crate) use pick_yes_or_no;
+
+
 pub(crate) struct PickOneChoice<T, L: Display, H: Display>
 {
 	pub value: T,
