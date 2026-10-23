@@ -1,6 +1,6 @@
 use super::raw::*;
 use super::out::*;
-use crate::colours::*;
+use crate::utils::colours::*;
 
 use crossterm::{
 	cursor,

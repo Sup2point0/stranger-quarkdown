@@ -1,7 +1,7 @@
 use super::super::shared::*;
 use super::super::ui::*;
 
-use crate::colours::*;
+use crate::utils::colours::*;
 
 use std::fmt::{ Write };
 use std::io;

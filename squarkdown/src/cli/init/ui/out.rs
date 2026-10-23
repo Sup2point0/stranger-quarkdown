@@ -1,4 +1,4 @@
-use crate::colours::*;
+use crate::utils::colours::*;
 
 
 // lmao I'm just having fun at this point

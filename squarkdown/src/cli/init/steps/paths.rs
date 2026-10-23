@@ -2,8 +2,8 @@ use super::super::shared::*;
 use super::super::ui::*;
 
 use crate::utils;
-use crate::colours::*;
-use crate::macros::*;
+use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use path_macro::path;
 
