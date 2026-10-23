@@ -306,7 +306,7 @@ pub(crate) fn _pick_one_or_skip_<T>(
 			{
 				KeyCode::Esc => {
 					refresh(true)?;
-					out!("{after}");
+					out!("{GREY}×" => "{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
 					
 					return Err(io::Error::from(io::ErrorKind::Interrupted));
@@ -341,7 +341,7 @@ pub(crate) fn _pick_one_or_skip_<T>(
 	refresh(true)?;
 
 	if is_skipping {
-		out!("{R}×" => "{after}");
+		out!("{GREY}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
 		execute!(stdout, cursor::Show)?;
 		return Ok(None);
