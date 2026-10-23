@@ -40,7 +40,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		)?;
 
 		if choice != "None of the above" {
-			append!(config, "site = '{choice}'");
+			append!(config, "site = {choice:?}");
 			return Ok(());
 		}
 	}
@@ -69,7 +69,8 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		)?;
 
 		if choice != "None of the above" {
-			append!(config, "site = '{choice}/'");
+			// TODO check trailing slash
+			append!(config, "site = {choice:?}/");
 			return Ok(());
 		}
 
@@ -88,7 +89,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<()>
 		folder += "/";
 	}
 
-	append!(config, "site = '{folder}'");
+	append!(config, "site = {folder:?}");
 
 	Ok(())
 }
@@ -115,6 +116,7 @@ pub fn configure_sources(config: &mut String, cwd: &Path) -> io::Result<()>
 
 	append!(config, "sources = [");
 	if !choices.is_empty() {
+		// TODO sanitise for safety
 		append!(config, "\t'{}'", choices.join("',\n\t'"));
 	}
 	append!(config, "]");

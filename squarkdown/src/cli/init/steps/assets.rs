@@ -48,7 +48,7 @@ fn configure_assets_folder(config: &mut String, cwd: &Path) -> AbandonOrResult<i
 		if *choice == "Cancel" {
 			return Err(AbandonError::ABANDON);
 		}
-		append!(config, "folder = '{choice}'");
+		append!(config, "folder = {choice:?}");
 	} 
 
 	Ok(())
