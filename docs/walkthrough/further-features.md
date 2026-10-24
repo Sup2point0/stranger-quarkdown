@@ -1,23 +1,35 @@
 # Making Full Use of Squarkdown
 <!-- #SQUARK live!
 | dest = docs/walkthrough/further-features
-| desc = A further walkthrough of additional Squarkdown features
-| capt = A Further Walkthrough of Additional Squarkdown Features
-| update = 2026 July 11
+| desc = Further walkthrough for additional Squarkdown features
+| capt = More Squarkdown Features
+| update = 2026 October 19
 -->
 
 > [!Warning]
 > This page is outdated as of Squarkdown v4.0, which rewrites Squarkdown in Rust. Bear with me while I bring it up to date!
 
-Squarkdown has grown much beyond moving Markdown files around into a feature-rich content preprocessing framework.[^framework] There are many other features that can help with automating the process of building up a website, which can be enabled at an instant.
+Beyond just Markdown, Squarkdown can also help with other preprocessing. It’s all opt-in, so you don’t need to use it if it’s not relevant to you =)
 
-[^framework]: Okay, “framework” is a bit of a stretch.
+
+<br>
+
+
+## Site Data
+
+> Main article: [Site Data](../reference/site-data.md)
+
+After parsing every active file’s charm squark, Squarkdown has collected *quite a lot* of data about your site that you may want to keep. Squarkdown exports that data to a JSON file for you to use however you see fit.
 
 
 <br>
 
 
 ## Fonts
+
+```bash
+> squarkdown --fonts
+```
 
 Squarkdown can build a Google Fonts API request for you, so that you don’t have to manually tweak the exact request string.
 
@@ -29,25 +41,16 @@ https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..
 
 But most of that’s boilerplate! And in fact, when you use multiple fonts you can combine them into one request, without changing any of that boilerplate. The other fonts just get added in as more `family` parameters.
 
-So, we only really care about the actual info about the font, which looks like `Montserrat:ital,wght@0,100..900;1,100..900`. We take this, and add it to the `fonts` option in `squarkup.json`:
+So, we only really care about the actual info about the font, which looks like `Montserrat:ital,wght@0,100..900;1,100..900`. Take that, and add it to `fonts.queries`:
 
-```json
-{
-  ...
-
-  "fonts": [
-    "Montserrat:ital,wght@0,100..900;1,100..900"
-  ]
-}
+```toml
+[fonts]
+queries = [
+  "Montserrat:ital,wght@0,100..900;1,100..900",
+]
 ```
 
-Squarkdown will take the fragments from this `fonts` option, build them into a single request, and inject it into `app.html`. Naturally, Squarkdown looks in our `site` directory as configured in `squarkup.json` for `/src/app.html`.
-
-To enable this feature, add the `fonts` option when running the task:
-
-``` console
-rake run squark[fonts]
-```
+Squarkdown will take the fragments, build them into a single request, and inject it into `app.html`.
 
 
 <br>
@@ -55,10 +58,16 @@ rake run squark[fonts]
 
 ## Assets
 
+```bash
+> squarkdown --assets
+```
+
 > [!Note]
 > “Assets” refers to images, videos, audio files, and other media.
 
-SvelteKit wants assets in `static/`, but this isn’t always practical. Oftentimes, the site is just part of a larger project, so your asset files need to be shared across the entire project. They probably end up in their own folder at the project root, like so:
+SvelteKit wants assets in `static/`, but this isn’t always practical.
+
+Oftentimes, the site is just part of a larger project, so your asset files need to be shared across the entire project. Maybe they’re alongside the `docs/`, or they’re in their own folder at the project root:
 
 ```py
 your-project/
@@ -82,13 +91,7 @@ Getting SvelteKit to look there for assets is gonna be more than a little fiddly
 > [!Tip]
 > If you store all your assets in `assets/` and gitignore `static/`, then you can safely delete it when you’re not working on a project to save on storage space – Squarkdown will regenerate all the assets next time you need it anyway!
 
-To enable this feature, add the `assets` option when running the task:
-
-```bash
-your-project/stranger-quarkdown> rake run squark[assets]
-```
-
-Squarkdown copies the file structure exactly, transferring all `.png`, `.jpg`, `.jpeg`, `.svg` files and ignoring those with other extensions. So after running Squarkdown, our repo will look like so:
+Squarkdown copies the file structure exactly. So after running Squarkdown, our repo will look like so:
 
 ```diff
   your-project/
@@ -139,14 +142,6 @@ Just provide a directory to the `site-assets` option in `squarkup.json`, and Squ
 +          favicon.png
            ...
 ```
-
-
-<br>
-
-
-## SCSS
-
-TODO
 
 
 <br>
