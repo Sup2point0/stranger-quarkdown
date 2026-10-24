@@ -132,24 +132,29 @@ fn preamble() -> io::Result<()>
 fn check_existing_config(cwd: &Path) -> io::Result<()>
 {
 	for parent in cwd.ancestors() {
-		if let Ok((filepath, _)) = resolver::find_config(parent) {
-			out!();
-			out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
-			out!(&slash!("{GREY}found at: {GREY1}{}", filepath));
-			
-			let should_quit = pick_one!(
-				ask: "Exit?";
-				choices: {
-					true  => "yes" => "stop this script";
-					false => "no"  => "existing config may be overwritten";
-				}
-			)?;
+		let Ok((filepath, _)) = resolver::find_config(parent) else { continue };
 
-			if should_quit {
-				return Err(io::Error::from(io::ErrorKind::Interrupted));
-			} else {
-				break;
+		out!();
+		out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
+		out!(&slash!("{GREY}found at: {B}{}", filepath));
+		
+		let should_quit = pick_one!(
+			ask: "Exit?";
+			choices: {
+				true  => "yes" => "stop this script";
+				false => "no"  =>
+					if filepath == path!(cwd / "squarkup.toml") {
+						"the existing config will be overwritten"
+					} else {
+						"the existing config will not be overwritten"
+					};
 			}
+		)?;
+
+		if should_quit {
+			return Err(io::Error::from(io::ErrorKind::Interrupted));
+		} else {
+			break;
 		}
 	}
 	Ok(())
