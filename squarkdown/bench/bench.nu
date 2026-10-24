@@ -1,5 +1,7 @@
+const BENCH_FOLDER = path self | path dirname
+
 const MAX_DEPTH = 3
-const FILE_COUNT = 1000
+const FILE_COUNT = 100
 const FOLDER_NAMES = [
 	"prot",
 	"deut",
@@ -19,7 +21,9 @@ def main [] {
 }
 
 def create-source-dirs [] {
-	let $bench_sources = [(pwd), "bench-sources"] | path join
+
+	let $bench_sources = [$BENCH_FOLDER, "bench-sources"] | path join
+
 	create-source-dir-from 0 $bench_sources
 }
 
@@ -29,19 +33,29 @@ def create-source-dir-from [depth: int, parent: path] {
 
 	for folder_name in $FOLDER_NAMES {
 		let $subfolder = [$parent, $folder_name] | path join
-		# rm $folder
-		print $"creating: ($subfolder)"
+		print $"rebuilding: ($subfolder)"
+		check-safe-to-delete $subfolder
+		# rm -rf $subfolder
 		mkdir $subfolder
 
 		for i in 0..$FILE_COUNT {
 			let $filepath = [$subfolder, $"page-($i).md"] | path join
-			print $filepath
 
-			# $"# Page #($i)
-			# <!-- #SQUARK live! -->
-			# " | save $filepath
+			$"# Page #($i)
+			<!-- #SQUARK live! -->
+			" | save $filepath
 		}
 
 		create-source-dir-from ($depth + 1) $subfolder
+	}
+}
+
+def check-safe-to-delete [target: path] {
+	try {
+		$target | path relative-to $BENCH_FOLDER
+	} catch {
+		error make {
+			msg: $"refusing to delete path outside bench/ folder: ($target)"
+		}
 	}
 }
