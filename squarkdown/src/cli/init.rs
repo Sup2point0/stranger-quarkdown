@@ -82,7 +82,7 @@ fn initialise() -> io::Result<()>
 		configure_assets(&mut assets, &cwd)?;
 	}
 
-	if let "yes" = pick_yes_or_no!("Would you like to configure Markdown formatting?")? {
+	if pick_yes_or_no!("Would you like to configure Markdown formatting?")? {
 		head!("Markdown Formatting")?;
 		configure_formatting(&mut format, &defaults.format)?;
 	} else {
@@ -190,28 +190,25 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 	out!("Verifying config...");
 	io::stdout().flush()?;
 
-	match resolver::read_toml_config(&dest) {
-		Ok(toml) => match SquarkupConfig::try_from_toml(toml, cwd) {
-			Ok(..) => {
-				print!("{PREV}{CLEAR}");
-				out!("{G}✓" => "Verified that config is valid!");
-			}
-			Err(errs) => {
-				print!("{PREV}{CLEAR}");
-				let c = errs.len();
-				out!("{R}×" =>
-					"{R}Warning: {c} issue{s} when verifying config!",
-					s = if c == 1 {""} else {"s"}
-				);
-				for err in errs {
-					out!("{GREY}▸ {err}");
-				}
-			}
-		}
-		Err(e) => {
+	match
+		resolver::read_toml_config(&dest)
+		.map(|toml| SquarkupConfig::try_from_toml(toml, cwd))
+		.flatten()
+	{
+		Ok(..) => {
 			print!("{PREV}{CLEAR}");
-			out!("{R}×" => "Warning: Error when parsing config!");
-			out!("{GREY}{e}");
+			out!("{G}✓" => "Verified that config is valid!");
+		}
+		Err(errs) => {
+			print!("{PREV}{CLEAR}");
+			let c = errs.len();
+			out!("{R}×" =>
+				"{R}Warning: {c} issue{s} when verifying config!",
+				s = if c == 1 {""} else {"s"}
+			);
+			for err in errs {
+				out!("{GREY}▸ {err}");
+			}
 		}
 	}
 
