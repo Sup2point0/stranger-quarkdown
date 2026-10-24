@@ -1,4 +1,6 @@
 const BENCH_FOLDER = path self | path dirname
+const BENCH_SOURCES = [$BENCH_FOLDER, "bench-sources"] | path join
+const BENCH_FILE = [$BENCH_SOURCES, "fixed", "page.md"] | path join
 
 const MAX_DEPTH = 3
 const FILE_COUNT = 100
@@ -22,9 +24,7 @@ def main [] {
 
 def create-source-dirs [] {
 
-	let $bench_sources = [$BENCH_FOLDER, "bench-sources"] | path join
-
-	create-source-dir-from 0 $bench_sources
+	create-source-dir-from 0 $BENCH_SOURCES
 }
 
 def create-source-dir-from [depth: int, parent: path] {
@@ -40,10 +40,7 @@ def create-source-dir-from [depth: int, parent: path] {
 
 		for i in 0..$FILE_COUNT {
 			let $filepath = [$subfolder, $"page-($i).md"] | path join
-
-			$"# Page #($i)
-			<!-- #SQUARK live! -->
-			" | save $filepath
+			cp $BENCH_FILE $filepath
 		}
 
 		create-source-dir-from ($depth + 1) $subfolder
