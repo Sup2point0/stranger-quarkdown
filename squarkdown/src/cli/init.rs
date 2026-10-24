@@ -80,6 +80,8 @@ fn initialise() -> io::Result<()>
 	if features.contains(&Features::ASSETS) {
 		head!("Assets Preprocessing")?;
 		configure_assets(&mut assets, &cwd)?;
+	} else {
+		assets.clear();
 	}
 
 	head!("Markdown Formatting")?;
