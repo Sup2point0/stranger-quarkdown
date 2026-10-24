@@ -82,14 +82,15 @@ fn initialise() -> io::Result<()>
 		configure_assets(&mut assets, &cwd)?;
 	}
 
+	head!("Markdown Formatting")?;
+
 	if pick_yes_or_no!("Would you like to configure Markdown formatting?")? {
-		head!("Markdown Formatting")?;
 		configure_formatting(&mut format, &defaults.format)?;
 	} else {
 		append!(format, "inject-head = {:?}", defaults.format.inject_head);
 		append!(format, "preserve-heading = {:?}", defaults.format.preserve_heading);
 		append!(format, "preserve-comments = {:?}", defaults.format.preserve_comments);
-		append!(format, "externalise-links = {:?}", defaults.format.externalise_links);
+		// append!(format, "externalise-links = {:?}", defaults.format.externalise_links);  // TODO
 	}
 
 	head!("Error Handling")?;
