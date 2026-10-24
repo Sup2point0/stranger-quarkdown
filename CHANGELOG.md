@@ -21,6 +21,15 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
+## Next Major (v4.5)
+
+### New
+- `squarkdown --quiet` option to hide info output.
+
+
+<br>
+
+
 ## v4.4
 
 ### New

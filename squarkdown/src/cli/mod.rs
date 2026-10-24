@@ -8,3 +8,7 @@ mod init;       pub use init::init;
 mod clean;      pub use clean::clean;
 
 mod shared;
+
+
+pub static QUIET: std::sync::OnceLock<()>
+	= std::sync::OnceLock::new();

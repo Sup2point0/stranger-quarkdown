@@ -19,7 +19,7 @@ def main [] {
 	create-source-dirs
 	print $"done!"
 
-	cargo run --release
+	cargo run --release -- --quiet
 }
 
 def create-source-dirs [] {
