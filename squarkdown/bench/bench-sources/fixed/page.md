@@ -2,14 +2,14 @@
 <!-- #SQUARK live!
 | title = Testing Squarkdown’s Performance at Scale
 | description = How does Squarkdown hold up for thousands of files?
-| index = tests / benches
+| tags = tests / benches
 | date = 2026 October
 -->
 
 The aim here is to test how Squarkdown’s performance holds up for colossal input sizes.
 
 > [!Important]
-> This page aims to use *as much **nested** [Markdown ~~syntax~~](page.md) as possible*, to push the limits of context tracking.
+> This page aims to use *as much **nested** [Markdown ~~syntax~~](page) as possible*, to push the limits of context tracking.
 
 We also want each file to be pretty long to test real large input, so here goes:
 

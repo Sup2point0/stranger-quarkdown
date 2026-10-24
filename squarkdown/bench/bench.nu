@@ -17,14 +17,16 @@ const FOLDER_NAMES = [
 def main [] {
 	print "creating source directories..."
 	create-source-dirs
-	print "done!"
+	print $"done!"
 
-	# cargo run
+	cargo run --release
 }
 
 def create-source-dirs [] {
 
-	create-source-dir-from 0 $BENCH_SOURCES
+	let generated = [$BENCH_SOURCES, "dyna"] | path join
+	rm -rf $generated
+	create-source-dir-from 0 $generated
 }
 
 def create-source-dir-from [depth: int, parent: path] {
@@ -34,25 +36,13 @@ def create-source-dir-from [depth: int, parent: path] {
 	for folder_name in $FOLDER_NAMES {
 		let $subfolder = [$parent, $folder_name] | path join
 		print $"rebuilding: ($subfolder)"
-		check-safe-to-delete $subfolder
-		# rm -rf $subfolder
 		mkdir $subfolder
 
-		0..$FILE_COUNT | par-each {|i|
+		1..$FILE_COUNT | par-each {|i|
 			let $filepath = [$subfolder, $"page-($i).md"] | path join
 			cp $BENCH_FILE $filepath
 		}
 
 		create-source-dir-from ($depth + 1) $subfolder
-	}
-}
-
-def check-safe-to-delete [target: path] {
-	try {
-		$target | path relative-to $BENCH_FOLDER
-	} catch {
-		error make {
-			msg: $"refusing to delete path outside bench/ folder: ($target)"
-		}
 	}
 }

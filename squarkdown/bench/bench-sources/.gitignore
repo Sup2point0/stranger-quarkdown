@@ -1,3 +1,5 @@
-*/**
+*/
+
 !.gitignore
+!fixed/
 !fixed/page.md
