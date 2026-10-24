@@ -49,7 +49,9 @@ fn configure_assets_folder(config: &mut String, cwd: &Path) -> AbandonOrResult<i
 			return Err(AbandonError::ABANDON);
 		}
 		append!(config, "folder = {choice:?}");
-	} 
+	} else {
+		append!(config, "folder = \"\"  # unconfigured");
+	}
 
 	Ok(())
 }
@@ -78,7 +80,11 @@ fn configure_assets_extensions(config: &mut String) -> AbandonOrResult<io::Error
 	}
 
 	append!(config, "extensions = [");
-	append!(config, "\t\"{}\"", choices.join("\",\n\t\""));
+	if choices.is_empty() {
+		append!(config, "\t# unconfigured");
+	} else {
+		append!(config, "\t\"{}\"", choices.join("\",\n\t\""));
+	}
 	append!(config, "]");
 
 	Ok(())
