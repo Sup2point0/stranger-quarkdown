@@ -13,6 +13,92 @@ use std::fmt::Display;
 use std::io;
 
 
+/// Turn each line of the `choices:` parameter of [`pick_one`] onto a [`PickOneChoice`] instance.
+/// 
+/// The supported syntax variants are:
+/// 
+/// ```ignore
+/// value => label => hint;
+/// value => hint;
+/// value;
+/// ```
+/// 
+/// `label` and `hint` can implicitly use `format!` syntax, e.g.
+/// 
+/// ```ignore
+/// "default" => "default ({})", default_value => "{GREY}hint";
+/// ```
+/// 
+/// Each line must end with a `;`.
+macro_rules! _define_one_choices
+{
+	(  @go [$($acc:expr ,)+]  ) => {
+		vec![$($acc ,)+]
+	};
+
+	(
+		@go [$($acc:tt)*] $value:expr => $label:expr => $hint:expr ; $($rest:tt)*
+	) => {
+		_define_one_choices!(@go
+			[
+				$($acc)*
+				PickOneChoice { value: $value, label: $label, hint: $hint },
+			]
+			$($rest)*
+		)
+	};
+
+	(
+		@go [$($acc:tt)*] $value:expr => $hint:literal $(, $($args:tt)*)+ ; $($rest:tt)*
+	) => {
+		_define_one_choices!(@go
+			[
+				$($acc)*
+				PickOneChoice {
+					value: $value,
+					label: $value,
+					hint: format!($hint $(, $($args)*)+),
+				},
+			]
+			$($rest)*
+		)
+	};
+
+	(
+		@go [$($acc:tt)*] $value:expr => $hint:expr ; $($rest:tt)*
+	) => {
+		_define_one_choices!(@go
+			[
+				$($acc)*
+				PickOneChoice { value: $value, label: $value, hint: $hint },
+			]
+			$($rest)*
+		)
+	};
+
+	(
+		@go [$($acc:tt)*] $value:expr ; $($rest:tt)*
+	) => {
+		_define_one_choices!(@go
+			[
+				$($acc)*
+				PickOneChoice {
+					value: $value,
+					label: $value,
+					hint: String::new(),
+				},
+			]
+			$($rest)*
+		)
+	};
+
+	(  $($choices:tt)+  ) => {
+		_define_one_choices!(@go [] $($choices)+)
+	};
+}
+pub(crate) use _define_one_choices;
+
+
 /// `:: str | (str, str) -> Map T str -> Result T`
 /// 
 /// Allow the user to pick exactly one entry from the given choices.
@@ -51,7 +137,7 @@ macro_rules! pick_one
 		_pick_one_(
 			format_args!($bef $(, $($args1)*)?),
 			format_args!($aft $(, $($args2)*)?),
-			_define_choice!($($choices)+)
+			_define_one_choices!($($choices)+)
 		)
 	};
 
@@ -109,49 +195,12 @@ macro_rules! pick_one_or_skip
 	(
 		before  : $bef:literal $(, $($args1:tt)*)? ;
 		after   : $aft:literal $(, $($args2:tt)*)? ;
-		choices : {
-			$(
-				$value:expr => $hint:literal ;
-			)+
-		}
+		choices : { $($choices:tt)+ }
 	) => {
 		_pick_one_or_skip_(
 			format_args!($bef $(, $($args1)*)?),
 			format_args!($aft $(, $($args2)*)?),
-			vec![
-				$(
-					PickOneChoice {
-						value: $value,
-						label: $value,
-						hint: $hint,
-					},
-				)+
-			],
-			true
-		)
-	};
-
-	(
-		before  : $bef:literal $(, $($args1:tt)*)? ;
-		after   : $aft:literal $(, $($args2:tt)*)? ;
-		choices : {
-			$(
-				$value:expr => ($label:literal, $hint:literal) ;
-			)+
-		}
-	) => {
-		_pick_one_or_skip_(
-			format_args!($bef $(, $($args1)*)?),
-			format_args!($aft $(, $($args2)*)?),
-			vec![
-				$(
-					PickOneChoice {
-						value: $value,
-						label: $label,
-						hint: $hint,
-					},
-				)+
-			],
+			_define_one_choices!($($choices)+),
 			true
 		)
 	};

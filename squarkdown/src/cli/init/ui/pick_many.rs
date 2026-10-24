@@ -14,6 +14,108 @@ use std::fmt::Display;
 use std::io;
 
 
+/// Turn each line of the `choices:` parameter of [`pick_many`] onto a [`PickManyChoice`] instance.
+/// 
+/// The supported syntax variants are:
+/// 
+/// ```ignore
+/// [enabled-by-default] value => label => hint;
+/// [enabled-by-default] value => hint;
+/// [enabled-by-default] value;
+/// ```
+/// 
+/// `label` and `hint` can implicitly use `format!` syntax, e.g.
+/// 
+/// ```ignore
+/// "default" => "default ({})", default_value => "{GREY}hint";
+/// ```
+/// 
+/// Each line must end with a `;`.
+macro_rules! _define_many_choices
+{
+	(  @go [$($acc:expr ,)+]  ) => {
+		vec![$($acc ,)+]
+	};
+
+	(
+		@go [$($acc:tt)*]
+		[$enabled:expr] $value:expr => $label:expr => $hint:expr ;
+		$($rest:tt)*
+	) => {
+		_define_many_choices!(@go
+			[
+				$($acc)*
+				PickManyChoice {
+					enabled: $enabled, value: $value,
+					label: $label, hint: $hint,
+				},
+			]
+			$($rest)*
+		)
+	};
+
+	(
+		@go [$($acc:tt)*]
+		[$enabled:expr] $value:expr => $hint:literal $(, $($args:tt)*)+ ;
+		$($rest:tt)*
+	) => {
+		_define_many_choices!(@go
+			[
+				$($acc)*
+				PickManyChoice {
+					enabled: $enabled,
+					value: $value,
+					label: $value,
+					hint: format!($hint $(, $($args)*)+),
+				},
+			]
+			$($rest)*
+		)
+	};
+
+	(
+		@go [$($acc:tt)*]
+		[$enabled:expr] $value:expr => $hint:expr ;
+		$($rest:tt)*
+	) => {
+		_define_many_choices!(@go
+			[
+				$($acc)*
+				PickManyChoice {
+					enabled: $enabled, value: $value,
+					label: $value,     hint: $hint,
+				},
+			]
+			$($rest)*
+		)
+	};
+
+	(
+		@go [$($acc:tt)*]
+		[$enabled:expr] $value:expr ;
+		$($rest:tt)*
+	) => {
+		_define_many_choices!(@go
+			[
+				$($acc)*
+				PickManyChoice {
+					enabled: $enabled,
+					value: $value,
+					label: $value,
+					hint: String::new(),
+				},
+			]
+			$($rest)*
+		)
+	};
+
+	(  $($choices:tt)+  ) => {
+		_define_many_choices!(@go [] $($choices)+)
+	};
+}
+pub(crate) use _define_many_choices;
+
+
 /// `:: Result<Vec<String>>`
 /// 
 /// Allow the user to pick any number (even 0) of entries from the given choices.
@@ -47,26 +149,12 @@ macro_rules! pick_many
 	(
 		before  : $bef:literal $(, $($args1:tt)*)? ;
 		after   : $aft:literal $(, $($args2:tt)*)? ;
-		choices : {
-			$(
-				[$enabled_by_default:literal]
-				$value:expr => $hint:literal ;
-			)+
-		}
+		choices : { $($choices:tt)+ }
 	) => {
 		_pick_many_(
 			format_args!($bef $(, $($args1)*)?),
 			format_args!($aft $(, $($args2)*)?),
-			vec![
-				$(
-					PickManyChoice {
-						value: $value,
-						enabled: $enabled_by_default,
-						label: $value,
-						hint: $hint,
-					},
-				)+
-			]
+			_define_many_choices!($($choices)+)
 		)
 	};
 
@@ -80,7 +168,7 @@ macro_rules! pick_many
 			format_args!($aft $(, $($args2)*)?),
 			$choices.into_iter()
 				.map(|(choice, hint)| PickManyChoice {
-					label: format!("{choice}"),
+					label: format_args!("{choice}"),
 					value: choice,
 					enabled: false,
 					hint,
@@ -125,26 +213,12 @@ macro_rules! pick_many_or_skip
 	(
 		before  : $bef:literal $(, $($args1:tt)*)? ;
 		after   : $aft:literal $(, $($args2:tt)*)? ;
-		choices : {
-			$(
-				[$enabled_by_default:literal]
-				$value:expr => $hint:literal ;
-			)+
-		}
+		choices : { $($choices:tt)+ }
 	) => {
 		_pick_many_or_skip_(
 			format_args!($bef $(, $($args1)*)?),
 			format_args!($aft $(, $($args2)*)?),
-			vec![
-				$(
-					PickManyChoice {
-						value: $value,
-						enabled: $enabled_by_default,
-						label: $value,
-						hint: $hint,
-					},
-				)+
-			],
+			_define_many_choices!($($choices)+),
 			true
 		)
 	};
@@ -155,8 +229,8 @@ macro_rules! pick_many_or_skip
 		choices : $choices:expr
 	) => {
 		_pick_many_or_skip_(
-			format!($bef $(, $($args1)*)?),
-			format!($aft $(, $($args2)*)?),
+			format_args!($bef $(, $($args1)*)?),
+			format_args!($aft $(, $($args2)*)?),
 			$choices.into_iter()
 				.map(|(choice, hint)| PickManyChoice {
 					label: format!("{choice}"),
@@ -172,19 +246,19 @@ macro_rules! pick_many_or_skip
 pub(crate) use pick_many_or_skip;
 
 
-pub(crate) struct PickManyChoice<T, L: Display>
+pub(crate) struct PickManyChoice<T, L: Display, H: Display>
 {
-	pub value: T,
 	pub enabled: bool,
+	pub value: T,
 	pub label: L,
-	pub hint: &'static str,
+	pub hint: H,
 }
 
 
 pub(crate) fn _pick_many_<T>(
 	before: impl Display,
 	after: impl Display,
-	choices: Vec<PickManyChoice<T, impl Display>>,
+	choices: Vec<PickManyChoice<T, impl Display, impl Display>>,
 ) -> io::Result<Vec<T>>
 {
 	_pick_many_or_skip_(before, after, choices, false)
@@ -197,7 +271,7 @@ pub(crate) fn _pick_many_<T>(
 pub(crate) fn _pick_many_or_skip_<T>(
 	before: impl Display,
 	after: impl Display,
-	mut choices: Vec<PickManyChoice<T, impl Display>>,
+	mut choices: Vec<PickManyChoice<T, impl Display, impl Display>>,
 	skippable: bool,
 ) -> io::Result<Option<Vec<T>>>
 {
