@@ -233,8 +233,8 @@ macro_rules! pick_yes_or_no
 		pick_one!(
 			ask: $($args)*;
 			choices: {
-				true  => "yes";
-				false => "no";
+				true => "yes" => "";
+				false => "no" => "";
 			}
 		)
 	}
