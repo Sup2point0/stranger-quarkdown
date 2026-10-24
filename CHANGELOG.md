@@ -21,11 +21,16 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
-## Next Major (v4.4)
+## v4.4
 
 ### New
+- `squarkdown init` to set up Squarkdown in a project!
 - `squarkdown --dry-run` to run Squarkdown without producing side effects!
 - Accept `squarkdown help` alongside `squarkdown --help`.
+
+### Fixes
+- Highlighting improvements
+- Internal optimisations
 
 
 <br>

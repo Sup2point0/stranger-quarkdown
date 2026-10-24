@@ -9,7 +9,7 @@ pub fn help() -> ExitCode
 	log::version();
 	
 	println!(
-"{W} Setup your project's {Y}squarkup.toml{W}:
+"{W} Setup your project’s {Y}squarkup.toml{W}:
 
 {GREY}   › {C}squarkdown {G}init
 
