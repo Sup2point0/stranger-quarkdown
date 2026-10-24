@@ -2,22 +2,25 @@ const BENCH_FOLDER = path self | path dirname
 const BENCH_SOURCES = [$BENCH_FOLDER, "bench-sources"] | path join
 const BENCH_FILE = [$BENCH_SOURCES, "fixed", "page.md"] | path join
 
-const MAX_DEPTH = 3
-const FILE_COUNT = 42
+const MAX_DEPTH = 5
+const FILE_COUNT = 20
 const FOLDER_NAMES = [
 	"prot",
 	"deut",
 	"trit",
-	"quat",
-	"quint",
-	"hexa",
+	# "quat",
+	# "quint",
+	# "hexa",
 ]
 
 
-def main [] {
-	print "creating source directories..."
-	create-source-dirs
-	print $"done!"
+def main [--fresh] {
+	
+	if $fresh {
+		print "creating source directories..."
+		create-source-dirs
+		print $"done!"
+	}
 
 	cargo run --release -- --quiet
 }
