@@ -12,6 +12,12 @@ Please visit [the GitHub](https://github.com/Sup2point0/stranger-quarkdown#readm
 
 ## Quickstart
 
+Setup:
+
+```bash
+> squarkdown init
+```
+
 Run:
 
 ```bash
@@ -22,6 +28,12 @@ With extras:
 
 ```bash
 > squarkdown --assets --fonts
+```
+
+Cleanup:
+
+```bash
+> squarkdown clean
 ```
 
 Remind yourself:
@@ -57,10 +69,10 @@ Remind yourself:
 
 ```md
 # Welcome to Squarkdown!
-<!-- #SQUARK live!
-| dest = walkthrough/welcome
-| capt = An introduction to what Squarkdown can do
-| date = 2024 July 1
+<!-- #SQUARK live! feat!
+| destination = walkthrough/welcome
+| description = An introduction to what Squarkdown can do
+| release-date = 2024 July 1
 -->
 
 This link to [other-file.md](other-file.md) will have its `.md` extension stripped.

@@ -17,9 +17,6 @@
 
 </div>
 
-> [!Warning]
-> Squarkdown has been freshly rewritten in Rust, so it might be rough around the edges in some places!
-
 **Stranger Quarkdown** (*Squarkdown*) is a build tool for [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.at) projects.
 
 Write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to mass-export them into `+page.svx` and `+page.ts` files in your SvelteKit project.
@@ -79,9 +76,9 @@ NPM (Windows/Linux):
 > npm install stranger-quarkdown
 ```
 
-### Check
+### Setup
 ```bash
-> squarkdown --version
+> squarkdown init
 ```
 
 ### Run
@@ -90,6 +87,14 @@ NPM (Windows/Linux):
 
 # With extras:
 > squarkdown --assets --fonts
+
+# Test run:
+> squarkdown --dry-run
+```
+
+### Cleanup
+```bash
+> squarkdown clean
 ```
 
 > [!Tip]
