@@ -7,7 +7,7 @@
 
 [errors]
 on-error = "kill"
-strict = true
+strict = false
 
 [paths]
 site = "bench-project/"

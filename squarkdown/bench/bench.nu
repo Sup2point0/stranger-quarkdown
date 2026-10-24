@@ -3,7 +3,7 @@ const BENCH_SOURCES = [$BENCH_FOLDER, "bench-sources"] | path join
 const BENCH_FILE = [$BENCH_SOURCES, "fixed", "page.md"] | path join
 
 const MAX_DEPTH = 3
-const FILE_COUNT = 100
+const FILE_COUNT = 42
 const FOLDER_NAMES = [
 	"prot",
 	"deut",

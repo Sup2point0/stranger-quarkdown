@@ -1,5 +1,7 @@
+/src/routes/
+
 /package-lock.json
-/src/app.html
+/src/site.json
 
 /node_modules/
 /build/
