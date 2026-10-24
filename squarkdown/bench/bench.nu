@@ -38,7 +38,7 @@ def create-source-dir-from [depth: int, parent: path] {
 		# rm -rf $subfolder
 		mkdir $subfolder
 
-		for i in 0..$FILE_COUNT {
+		0..$FILE_COUNT | par-each {|i|
 			let $filepath = [$subfolder, $"page-($i).md"] | path join
 			cp $BENCH_FILE $filepath
 		}
