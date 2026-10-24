@@ -19,11 +19,14 @@ pub fn configure_site_data(config: &mut String, site: &str) -> io::Result<()>
 			fmt!("{site}src/site.json")      => "";
 			fmt!("{site}src/site-data.json") => "";
 			fmt!("{site}src/data/site.json") => "";
-			fmt!("Enter manually")           => "";
+			str!("Enter manually")           => "";
+			str!("Cancel")                   => "skip this feature";
 		}
 	)? else {
 		return Ok(());
 	};
+
+	if filepath == "Cancel" { return Ok(()); }
 
 	if filepath == "Enter manually" {
 		let Some(answer) = input!(

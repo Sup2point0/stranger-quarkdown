@@ -26,7 +26,7 @@ pub fn enable_features() -> io::Result<Vec<Features>>
 			[true] Features::SITE_DATA
 				=> "Produce a JSON file containing aggregated site data";
 			[true] Features::ASSETS
-				=> "Copy assets from anywhere in your repo to static/";
+				=> "Copy assets from anywhere in your repo to SvelteKit’s static/ folder";
 		}
 	)?;
 
