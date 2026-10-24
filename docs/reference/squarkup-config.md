@@ -1,23 +1,23 @@
 # Squarkup Configuration
 <!-- #SQUARK live!
 | dest = docs/reference/squarkup-config
-| update = 2026 October 10
+| update = 2026 October 24
 -->
 
-Squarkdown comes with sensible defaults out-of-the-box, but you’ll almost certainly want to configure it to suit your need.
+Squarkdown comes with sensible defaults out-of-the-box, but you’ll almost certainly want to configure it to suit your needs.
 
 Squarkdown reads in your configuration from 1 of 4 places:
 
 - [/squarkup.toml](squarkup-toml.md)
-- /squarkup.json
+- /squarkup.json (not yet unsupported)
 - [/.squarkdown/squarkup.toml](squarkup-toml.md)
-- /.squarkdown/squarkup.json
+- /.squarkdown/squarkup.json (not yet unsupported)
 
 <!-- TODO -->
 TOML is the recommended format. JSON support is in progress!
 
 > [!Important]
-> You need a squarkup config file – even if empty – to run Squarkdown, otherwise Squarkdown can’t find your project root!
+> You need a squarkup config file – even if empty – to run Squarkdown, because Squarkdown uses it to resolve your project root!
 
 
 <br>
@@ -209,20 +209,3 @@ Defaults to `error`, meaning Squarkdown will raise an error handled according to
 
 
 <br>
-
-
-<!--
-| Field | Type | Values | Default | Description |
-| :---- | :--- | :----- | :------ | :---------- |
-| `repo` | string |  | `~` | Displayed name of the repository. This is injected into `<title>` in `<head>` of exported pages. |
-| `paths / site` | string |  | `site/` | [ relative to root ]<br>Base directory of the site. Many other fields will provide paths relative to this directory. If your entire repo is the site, set this to `"."`. |
-| `paths / sources` | `array` `null` |  |  | [ relative to root ]<br>Squarkdown recursively searches these directories for `.md` files to squarkup.<br>Use `"."` to target `.md` files in your project’s root.<br>Set this field to `null` to disable Markdown exporting entirely. |
-| `paths / exclude` | `array` `null` |  |  | If a file’s path matches any of these RegEx patterns, squarkup will be skipped for it.<br>Note the RegEx is matched against the file’s absolute path. |
-| `paths / dest` | string |  | `src/routes/` | [ relative to site ]<br>Markdown files are exported relative to this directory. |
-| `out / file-name` | string |  | `~content` | Name of exported `.svx` files (without the `.svx` file extension). |
-| `out / site-data` | string |  | `src/site.json` | File where Squarkdown exports the site data. Relative to site. |
-| `asses / path` | string |  |  | [ relative to root ]<br>Squarkdown looks here for static assets to preprocess. |
-| `assets / site-assets` | string `null` |  |  | [ relative to root ]<br>Squarkdown moves assets in this directory straight to the root of `site`/`static`. |
-| `assets / extensions` | `string[]` |  | `["jpg", "jpeg", "png", "svg", "webp"]` | Only files with these extensions will be preprocessed by Squarkdown. |
-| `fonts / queries` | `string[]` |  |  | Individual URL query params for requesting fonts from Google Fonts. |
--->
