@@ -15,6 +15,7 @@ use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
 
+use std::collections::{ VecDeque };
 use std::fs::{ self, File };
 use std::io::{ self, Write };
 use std::iter::{ Peekable };
@@ -172,10 +173,17 @@ impl<'d> Renderer<'d>
 		self.skip_heading(&mut parser);
 		self.skip_charm_squark(&mut parser);
 
+		let externalise_links = self.config.format.externalise_links;
+
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{GREY} {e:?}"); })
 			.flat_map(Self::split_comments)
+		;
+
+		let parser = std::iter::from_fn(Self::externalise_links(parser, externalise_links));
+
+		let parser = parser
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{W} {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
@@ -291,6 +299,28 @@ impl Renderer<'_>
 			}
 		}
 		Some((event, range)).into_iter().chain(None)
+	}
+
+	fn externalise_links<'e>(
+		mut parser: impl Iterator<Item = (pd::Event<'e>, ParserRange)>,
+		enabled: bool,
+	) -> impl FnMut() -> Option<(pd::Event<'e>, ParserRange)>
+	{
+		let mut buffer = VecDeque::new();
+
+		(move || {
+			if !enabled {
+				return parser.next()
+			}
+
+			if buffer.is_empty() {
+				let Some((event, range)) = parser.next() else { return None };
+
+				buffer.push_back((event, range));
+			}
+
+			buffer.pop_front()
+		})
 	}
 }
 
@@ -950,26 +980,26 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-// 	= true;
+	= true;
 
-// #[test] fn playground()
-// {
-// 	let source = indoc! {"
-// 		a <!-- test -->
-// 	"};
+#[test] fn playground()
+{
+	let source = indoc! {"
+		[link<sup>↗</sup>](test)
+	"};
 
-// 	let mut config = TEST_CONFIG.clone();
-// 	config.errors.strict = true;
-// 	config.errors.strict = false;
-// 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
-// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
-// 	let out = renderer.render_from(source.trim()).unwrap();
-// 	log::error(renderer.errors);
-// 	println!("{C}{out}{W}");
-// 	log::line();
-// }
+	let mut config = TEST_CONFIG.clone();
+	config.errors.strict = true;
+	config.errors.strict = false;
+	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
+	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
+	let out = renderer.render_from(source.trim()).unwrap();
+	log::error(renderer.errors);
+	println!("{C}{out}{W}");
+	log::line();
+}
 
-// const _: bool
+const _: bool
 	= false;
 
 
