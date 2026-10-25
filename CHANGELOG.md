@@ -21,6 +21,12 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
+## v4.4.1
+
+### Fixes
+- Internal optimisations
+
+
 ## v4.4
 
 ### New
