@@ -45,7 +45,7 @@ use assertables::*;
 
 	let main = read_file("links/external/+page.svx");
 	assert_contains!( main, "[GitHub](https://github.com/Sup2point0/stranger-quarkdown)" );
-	// assert_contains!( main, "<a target=\"_blank\" href=\"https://svelte.dev\">Svelte</a>" );
+	assert_contains!( main, "<a target=\"_blank\" href=\"https://svelte.dev\">Svelte</a>" );
 }
 
 /// Squarkdown rewrites links with anchors (`path/to/page.md#anchor`) while keeping the anchor.

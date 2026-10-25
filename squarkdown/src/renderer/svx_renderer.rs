@@ -12,20 +12,22 @@ use path_clean::PathClean;
 use path_macro::path;
 use pulldown_cmark::{
 	self as pd,
+	Event,
 	Event::{ Start, End },
+	Tag, TagEnd,
 };
 use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
 
 use std::collections::{ VecDeque };
+use std::fmt::{ Write as _ };
 use std::fs::{ self, File };
-use std::io::{ self, Write };
+use std::io;
 use std::iter::{ Peekable };
 use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
-use std::debug_assert_matches;
 
 
 /// A span in the source text returned by [`pd::Parser`](pulldown_cmark::Parser).
@@ -153,7 +155,7 @@ impl<'d> Renderer<'d>
 		self.errors.or(())
 	}
 
-	fn write_page_svx(&self, mut f: impl Write, content: &[u8]) -> SquarkResult
+	fn write_page_svx(&self, mut f: impl io::Write, content: &[u8]) -> SquarkResult
 	{
 		self.inject_timestamp(&mut f)?;
 		self.inject_head(&mut f)?;
@@ -207,12 +209,12 @@ impl Renderer<'_>
 	fn skip_heading(&self, parser: &mut Peekable<pd::OffsetIter>)
 	{
 		if !self.config.format.preserve_heading
-		&& let Some((Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
+		&& let Some((Start(Tag::Heading{ level, .. }), _)) = parser.peek()
 		{
 			let level = *level;
 
 			for (event, _range) in parser.by_ref() {
-				if let End(pd::TagEnd::Heading(lv)) = event
+				if let End(TagEnd::Heading(lv)) = event
 				&& lv == level {
 					break;
 				}
@@ -232,13 +234,13 @@ impl Renderer<'_>
 
 		if !matches!(
 			parser.peek(),
-			Some((Start(pd::Tag::HtmlBlock), _))
+			Some((Start(Tag::HtmlBlock), _))
 		) {
 			return;
 		}
 
 		for (event, _range) in parser.by_ref() {
-			if matches!(event, End(pd::TagEnd::HtmlBlock)) {
+			if matches!(event, End(TagEnd::HtmlBlock)) {
 				break;
 			}
 		}
@@ -260,20 +262,20 @@ impl Renderer<'_>
 	/// ```
 	/// 
 	/// Gets parsed to `[Text("a <!-- perhaps"), Text("strange --> comment")]` instead of the more structurally correct `[Text("A"), InlineHtml("<!-- perhaps\n\nstrange -->"), Text("comment")]`.
-	fn split_comments((event, range): (pd::Event, ParserRange))
-		-> impl Iterator<Item = (pd::Event, ParserRange)>
+	fn split_comments((event, range): (Event, ParserRange))
+		-> impl Iterator<Item = (Event, ParserRange)>
 	{
-		if let pd::Event::Text(text)
-				| pd::Event::Html(text)
-				| pd::Event::InlineHtml(text)
+		if let Event::Text(text)
+				| Event::Html(text)
+				| Event::InlineHtml(text)
 				= &event
 			&& text.trim() != "<!--"
 			&& text.trim() != "-->"
 		{
 			let mut idx = 0;
 			/* NOTE: `Rule` is a temporary placeholder, we never read it */
-			let mut text_left = pd::Event::Rule;
-			let mut text_right = pd::Event::Rule;
+			let mut text_left = Event::Rule;
+			let mut text_right = Event::Rule;
 
 			// For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML
 			/* NOTE: `<!--` at the start of a line shouldn't be split */
@@ -282,8 +284,8 @@ impl Renderer<'_>
 			{
 				idx = i;
 				let (l, r) = text.split_at(idx);
-				text_left = pd::Event::Text(l.to_owned().into());
-				text_right = pd::Event::InlineHtml(r.to_owned().into());
+				text_left = Event::Text(l.to_owned().into());
+				text_right = Event::InlineHtml(r.to_owned().into());
 			}
 			// Do the opposite for a closing comment
 			/* NOTE: `-->` at the end of a line shouldn't be split */
@@ -292,8 +294,8 @@ impl Renderer<'_>
 			{
 				idx = i + "-->".len();
 				let (l, r) = text.split_at(idx);
-				text_left = pd::Event::InlineHtml(l.to_owned().into());
-				text_right = pd::Event::Text(r.to_owned().into());
+				text_left = Event::InlineHtml(l.to_owned().into());
+				text_right = Event::Text(r.to_owned().into());
 			}
 
 			if idx != 0 {
@@ -311,9 +313,9 @@ impl Renderer<'_>
 	/// 
 	/// If `enabled` is not `true`, this is a no-op – the returned iterator is equivalent to `.map(id)`.
 	fn externalise_links<'e>(
-		mut parser: impl Iterator<Item = (pd::Event<'e>, ParserRange)>,
+		mut parser: impl Iterator<Item = (Event<'e>, ParserRange)>,
 		enabled: bool,
-	) -> impl Iterator<Item = (pd::Event<'e>, ParserRange)>
+	) -> impl Iterator<Item = (Event<'e>, ParserRange)>
 	{
 		/*
 			Links arrive as multiple events, e.g. [Start(Link), Text, Html, ..., End(Link)] so we won't know whether a link is external until many events down the line. That either requires mutating past iterator events or arbitrary-length lookahead, which ~~both suck~~ aren't feasible.
@@ -324,19 +326,18 @@ impl Renderer<'_>
 		*/
 		let mut buffer = VecDeque::new();
 
-		/* NOTE: `is-in-ext-link == true` if and only if `!buffer.is_empty()` */
-		let mut is_in_ext_link = false;
-
 		std::iter::from_fn(move ||
 		{
 			if !enabled {
 				return parser.next()
 			}
 
-			if buffer.is_empty()
-				&& let Some((event, range)) = parser.next()
+			if buffer.is_empty() && let Some((event, range)) = parser.next()
 			{
-				let mut is_in_link = matches!(event, Start(pd::Tag::Link{..}));
+				let is_in_link = matches!(event, Start(Tag::Link{..}));
+
+				/// The next fragment of `<sup>↗</sup>` we need to consume. `None` once we've found all of them.
+				let mut next_frag = Some("<sup>");
 
 				buffer.push_back((event, range));
 
@@ -345,36 +346,56 @@ impl Renderer<'_>
 				{
 					let Some((event, range)) = parser.next() else { break };
 
-					let End(pd::TagEnd::Link) = event
-						else {
-							// vents before `End(Link)` get queued into the `buffer``
+					match event
+					{
+						End(TagEnd::Link) =>
+						{
+							// if this was not an external link, preserve the normal `End(Link)`
+							if let Some(..) = next_frag {
+								buffer.push_back((event, range));
+								break;
+							}
+
+							/* When we reach the end of a link which contained <sup>↗</sup>, the only thing we need to touch is the opening `Start(Link)` event, turning into the raw `<a target="_blank" ...` HTML. */
+							let Some((Start(Tag::Link{ dest_url, title, id, .. }), ..)) = buffer.get_mut(0)
+								else {
+									unreachable!("element 0 of `buffer` is always `Start(Link)` if `is_in_link`")
+								};
+
+							let mut html = str!("<a target=\"_blank\" ");
+							if !id.is_empty()       { let _ = write!(html, "id={:?}", id.to_string()); }
+							if !dest_url.is_empty() { let _ = write!(html, "href={:?}", dest_url.to_string()); }
+							if !title.is_empty()    { let _ = write!(html, "title={:?}", title.to_string()); }
+							let _ = write!(html, ">");
+
+							buffer.front_mut().expect("literally just accessed").0
+								= Event::InlineHtml(html.into());
+							
+							buffer.push_back(
+								(Event::InlineHtml("</a>".into()), range)
+							);
+
+							break;
+						}
+						Event::InlineHtml(pd::CowStr::Borrowed("<sup>")) if next_frag == Some("<sup>") => {
+							next_frag = Some("↗");
+						}
+						Event::Text(pd::CowStr::Borrowed("↗")) if next_frag == Some("↗") => {
+							next_frag = Some("</sup>");
+						}
+						Event::InlineHtml(pd::CowStr::Borrowed("</sup>")) if next_frag == Some("</sup>") => {
+							next_frag = None;  // done!
+						}
+						_ => {
+							// events before `End(Link)` get queued into the `buffer``
 							buffer.push_back((event, range));
-							continue;
-						};
-					
-					is_in_link = false;
 
-					if !is_in_ext_link {
-						// if this was not an external link, preserve the normal `End(Link)`
-						buffer.push_back((event, range));
-						break;
+							// if we did not find the next required fragment, and we're _still looking_, then reset
+							if let Some(..) = next_frag {
+								next_frag = Some("<sup>");
+							}
+						}
 					}
-
-					/* When we reach the end of a link which contained <sup>↗</sup>, the only thing we need to touch is the opening `Start(Link)` event, turning into the raw `<a target="_blank" ...` HTML. */
-					let Some((Start(pd::Tag::Link{ dest_url, .. }), _)) = buffer.get_mut(0)
-						else {
-							unreachable!("element 0 of `buffer` is always `Start(Link)` if `is_in_link`")
-						};
-
-					buffer.front_mut().expect("literally just accessed").0
-						= pd::Event::InlineHtml(fmt!("<a target=\"_blank\" href={dest_url:?}").into());
-					
-					buffer.push_back(
-						(
-							pd::Event::InlineHtml("</a>".into()),
-							range
-						)
-					);
 				}
 			}
 
@@ -388,16 +409,16 @@ impl Renderer<'_>
 {
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
-		event: pd::Event<'e>,
+		event: Event<'e>,
 		range: ParserRange,
-	) -> Option<pd::Event<'e>>
+	) -> Option<Event<'e>>
 	{
 		match &event
 		{
-			Start(pd::Tag::CodeBlock(..)) => {
+			Start(Tag::CodeBlock(..)) => {
 				self.ctx.push(Ctx::CODE);
 			}
-			End(pd::TagEnd::CodeBlock) => {
+			End(TagEnd::CodeBlock) => {
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::CODE)?;
 				});
@@ -407,8 +428,8 @@ impl Renderer<'_>
 
 		let out = match event {
 			/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
-			| pd::Event::Html(ref html)
-			| pd::Event::InlineHtml(ref html)
+			| Event::Html(ref html)
+			| Event::InlineHtml(ref html)
 			if !self.ctx.is_code()
 			=>
 				match self.process_html(html, range.clone()) {
@@ -433,9 +454,9 @@ impl Renderer<'_>
 
 	/// Transform content depending on the current context.
 	fn process_ctx<'e>(&mut self,
-		mut event: pd::Event<'e>,
+		mut event: Event<'e>,
 		range: ParserRange,
-	) -> Option<pd::Event<'e>>
+	) -> Option<Event<'e>>
 	{
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
 		if self.ctx.has_leave() {
@@ -454,20 +475,20 @@ impl Renderer<'_>
 		match event
 		{
 			// rewrite link
-			Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
+			Start(Tag::Link{ ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::LINK);
 				return self.process_link(dest_url, range).or(Some(event));
 			}
 
 			// pop link context
-			End(pd::TagEnd::Link)
+			End(TagEnd::Link)
 				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
 			{
-				return Some(pd::Event::InlineHtml("</a>".into()));
+				return Some(Event::InlineHtml("</a>".into()));
 			}
 
-			End(pd::TagEnd::Link) =>
+			End(TagEnd::Link) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::LINK)?;
@@ -476,7 +497,7 @@ impl Renderer<'_>
 			}
 
 			// rewrite asset link
-			Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			Start(Tag::Image { ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::IMAGE_LINK);
 				self.process_image(dest_url, range);
@@ -484,7 +505,7 @@ impl Renderer<'_>
 			}
 			
 			// pop asset context
-			End(pd::TagEnd::Image) =>
+			End(TagEnd::Image) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::IMAGE_LINK)?;
@@ -493,7 +514,7 @@ impl Renderer<'_>
 			}
 
 			// sanitise text
-			pd::Event::Text(text) => Some(self.process_text(text)),
+			Event::Text(text) => Some(self.process_text(text)),
 
 			_ => Some(event),
 		}
@@ -619,7 +640,7 @@ impl Renderer<'_>
 	fn process_link<'e>(&mut self,
 		dest_url: &mut pd::CowStr,
 		range: ParserRange,
-	) -> Option<pd::Event<'e>>
+	) -> Option<Event<'e>>
 	{
 		/* We only rewrite relative links to Markdown files */
 		if !dest_url.contains(".md")
@@ -699,7 +720,7 @@ impl Renderer<'_>
 
 				let href = "<a class=\"broken-link\" href=\"\">";
 				
-				return Some(pd::Event::InlineHtml(href.into()));
+				return Some(Event::InlineHtml(href.into()));
 			}
 
 			LinkRewriteAction::STRIP_EXTENSION =>
@@ -801,7 +822,7 @@ impl Renderer<'_>
 	/// This includes:
 	/// 
 	/// - HTML entity processing
-	fn process_text<'e>(&self, text: pd::CowStr) -> pd::Event<'e>
+	fn process_text<'e>(&self, text: pd::CowStr) -> Event<'e>
 	{
 		let mut text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
 
@@ -809,7 +830,7 @@ impl Renderer<'_>
 			text = BRACKET_PATTERNS.replace_all(&text, &BRACKET_REPLACEMENTS);
 		}
 
-		pd::Event::Text(text.into())
+		Event::Text(text.into())
 	}
 }
 
@@ -834,7 +855,7 @@ pub static BRACKET_REPLACEMENTS: [&str; 2]
 impl Renderer<'_>
 {
 	/// Write a timestamp to `file`.
-	fn inject_timestamp(&self, file: &mut impl Write) -> SquarkResult
+	fn inject_timestamp(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		let now = UtcDateTime::now();
 
@@ -848,7 +869,7 @@ impl Renderer<'_>
 		Ok(())
 	}
 
-	fn inject_head(&self, file: &mut impl Write) -> SquarkResult
+	fn inject_head(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		if self.page.title.is_empty() {
 			return Ok(());
@@ -1054,6 +1075,7 @@ const DEBUG: bool
 // 	config.errors.strict = true;
 // 	config.errors.strict = false;
 // 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
+// 	config.format.externalise_links = true;
 // 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 // 	let out = renderer.render_from(source.trim()).unwrap();
 // 	log::error(renderer.errors);
