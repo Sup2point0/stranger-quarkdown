@@ -147,32 +147,42 @@ fn squarkup(
 		// == RENDER == //
 		log::is!(if dry_run {"simulating rendering..."} else {"rendering..."});
 
-		let results: Vec<(SquarkResult, bool)> =
+		let (errs, num_rendered) =
 			site_data
 			.pages_map()
 			.par_iter()
 			.map(|(_shard, page)|
 				renderer::render(page, &site_data, &config, dry_run)
 			)
-			.collect()
+			.fold(
+				|| (SquarkError::multiple(""), 0),
+				|(mut errs, mut count), (r, wrote)| {
+					if let Err(e) = r {
+						let did_push = errs.push(e);
+						debug_assert!(did_push);
+					}
+					if wrote {
+						count += 1;
+					}
+					return (errs, count)
+				}
+			)
+			.reduce(
+				|| (SquarkError::multiple(""), 0),
+				|(mut e1, c1), (e2, c2)| {
+					let did_push = e1.push(e2);
+					debug_assert!(did_push);
+					return (e1, c1 + c2)
+				}
+			)
 		;
-
-		let mut errs = SquarkError::multiple("");
-		let mut num_rendered = 0;
-
-		for (r, wrote) in results {
-			if wrote {
-				num_rendered += 1;
-			}
-			catch!(errs => { r?; });
-		}
 
 		errs.depends(&config)?;
 
 		log::ok!(
-			"{} {num_rendered}/{} pages",
+			"{} {num_rendered}/{total} pages",
 			if dry_run {"would render"} else {"rendered"},
-			site_data.stats.active_pages
+			total = site_data.stats.active_pages
 		);
 	}
 
