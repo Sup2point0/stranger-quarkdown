@@ -10,7 +10,10 @@ use aho_corasick::AhoCorasick;
 use map_or_original::MapOrOriginal;
 use path_clean::PathClean;
 use path_macro::path;
-use pulldown_cmark as pd;
+use pulldown_cmark::{
+	self as pd,
+	Event::{ Start, End },
+};
 use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
@@ -22,6 +25,7 @@ use std::iter::{ Peekable };
 use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
 use std::sync::{ LazyLock };
+use std::debug_assert_matches;
 
 
 /// A span in the source text returned by [`pd::Parser`](pulldown_cmark::Parser).
@@ -181,7 +185,7 @@ impl<'d> Renderer<'d>
 			.flat_map(Self::split_comments)
 		;
 
-		let parser = std::iter::from_fn(Self::externalise_links(parser, externalise_links));
+		let parser = Self::externalise_links(parser, externalise_links);
 
 		let parser = parser
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{W} {e:?}"); })
@@ -203,12 +207,12 @@ impl Renderer<'_>
 	fn skip_heading(&self, parser: &mut Peekable<pd::OffsetIter>)
 	{
 		if !self.config.format.preserve_heading
-		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
+		&& let Some((Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
 		{
 			let level = *level;
 
 			for (event, _range) in parser.by_ref() {
-				if let pd::Event::End(pd::TagEnd::Heading(lv)) = event
+				if let End(pd::TagEnd::Heading(lv)) = event
 				&& lv == level {
 					break;
 				}
@@ -228,13 +232,13 @@ impl Renderer<'_>
 
 		if !matches!(
 			parser.peek(),
-			Some((pd::Event::Start(pd::Tag::HtmlBlock), _))
+			Some((Start(pd::Tag::HtmlBlock), _))
 		) {
 			return;
 		}
 
 		for (event, _range) in parser.by_ref() {
-			if matches!(event, pd::Event::End(pd::TagEnd::HtmlBlock)) {
+			if matches!(event, End(pd::TagEnd::HtmlBlock)) {
 				break;
 			}
 		}
@@ -301,22 +305,77 @@ impl Renderer<'_>
 		Some((event, range)).into_iter().chain(None)
 	}
 
+	/// Transform the sequence of events for a `[link<sup>↗</sup>](linK)` into events that would render to `<a target="_blank" href="link">link</a>`.
+	/// 
+	/// This is an iterator adapter that wraps `parser` and returns a new iterator.
+	/// 
+	/// If `enabled` is not `true`, this is a no-op – the returned iterator is equivalent to `.map(id)`.
 	fn externalise_links<'e>(
 		mut parser: impl Iterator<Item = (pd::Event<'e>, ParserRange)>,
 		enabled: bool,
-	) -> impl FnMut() -> Option<(pd::Event<'e>, ParserRange)>
+	) -> impl Iterator<Item = (pd::Event<'e>, ParserRange)>
 	{
+		/*
+			Links arrive as multiple events, e.g. [Start(Link), Text, Html, ..., End(Link)] so we won't know whether a link is external until many events down the line. That either requires mutating past iterator events or arbitrary-length lookahead, which ~~both suck~~ aren't feasible.
+		
+			This adapter is necessary so that we can store a buffer of pending events, and if we find that a link _is_ external, we can then transform that buffer appropriately before actually yielding those events.
+
+			So in a way, I guess this is arbitrary-length lookahead ;P
+		*/
 		let mut buffer = VecDeque::new();
 
-		(move || {
+		/* NOTE: `is-in-ext-link == true` if and only if `!buffer.is_empty()` */
+		let mut is_in_ext_link = false;
+
+		std::iter::from_fn(move ||
+		{
 			if !enabled {
 				return parser.next()
 			}
 
-			if buffer.is_empty() {
-				let Some((event, range)) = parser.next() else { return None };
+			if buffer.is_empty()
+				&& let Some((event, range)) = parser.next()
+			{
+				let mut is_in_link = matches!(event, Start(pd::Tag::Link{..}));
 
 				buffer.push_back((event, range));
+
+				// when we encounter a `Start(Link)`, read ahead until we see `End(Link)`
+				while is_in_link
+				{
+					let Some((event, range)) = parser.next() else { break };
+
+					let End(pd::TagEnd::Link) = event
+						else {
+							// vents before `End(Link)` get queued into the `buffer``
+							buffer.push_back((event, range));
+							continue;
+						};
+					
+					is_in_link = false;
+
+					if !is_in_ext_link {
+						// if this was not an external link, preserve the normal `End(Link)`
+						buffer.push_back((event, range));
+						break;
+					}
+
+					/* When we reach the end of a link which contained <sup>↗</sup>, the only thing we need to touch is the opening `Start(Link)` event, turning into the raw `<a target="_blank" ...` HTML. */
+					let Some((Start(pd::Tag::Link{ dest_url, .. }), _)) = buffer.get_mut(0)
+						else {
+							unreachable!("element 0 of `buffer` is always `Start(Link)` if `is_in_link`")
+						};
+
+					buffer.front_mut().expect("literally just accessed").0
+						= pd::Event::InlineHtml(fmt!("<a target=\"_blank\" href={dest_url:?}").into());
+					
+					buffer.push_back(
+						(
+							pd::Event::InlineHtml("</a>".into()),
+							range
+						)
+					);
+				}
 			}
 
 			buffer.pop_front()
@@ -335,10 +394,10 @@ impl Renderer<'_>
 	{
 		match &event
 		{
-			pd::Event::Start(pd::Tag::CodeBlock(..)) => {
+			Start(pd::Tag::CodeBlock(..)) => {
 				self.ctx.push(Ctx::CODE);
 			}
-			pd::Event::End(pd::TagEnd::CodeBlock) => {
+			End(pd::TagEnd::CodeBlock) => {
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::CODE)?;
 				});
@@ -395,20 +454,20 @@ impl Renderer<'_>
 		match event
 		{
 			// rewrite link
-			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
+			Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::LINK);
 				return self.process_link(dest_url, range).or(Some(event));
 			}
 
 			// pop link context
-			pd::Event::End(pd::TagEnd::Link)
+			End(pd::TagEnd::Link)
 				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
 			{
 				return Some(pd::Event::InlineHtml("</a>".into()));
 			}
 
-			pd::Event::End(pd::TagEnd::Link) =>
+			End(pd::TagEnd::Link) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::LINK)?;
@@ -417,7 +476,7 @@ impl Renderer<'_>
 			}
 
 			// rewrite asset link
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			Start(pd::Tag::Image { ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::IMAGE_LINK);
 				self.process_image(dest_url, range);
@@ -425,7 +484,7 @@ impl Renderer<'_>
 			}
 			
 			// pop asset context
-			pd::Event::End(pd::TagEnd::Image) =>
+			End(pd::TagEnd::Image) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::IMAGE_LINK)?;
@@ -980,26 +1039,29 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-	= true;
+// 	= true;
 
-#[test] fn playground()
-{
-	let source = indoc! {"
-		[link<sup>↗</sup>](test)
-	"};
+// #[test] fn playground()
+// {
+// 	let source = indoc! {"
+// 		[link<sup>↗</sup>](test)
+// 	"};
+// 	// let source = indoc! {"
+// 	// 	<a target=\"_blank\" href=\"test\">link<sup>↗</sup></a>
+// 	// "};
 
-	let mut config = TEST_CONFIG.clone();
-	config.errors.strict = true;
-	config.errors.strict = false;
-	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
-	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
-	let out = renderer.render_from(source.trim()).unwrap();
-	log::error(renderer.errors);
-	println!("{C}{out}{W}");
-	log::line();
-}
+// 	let mut config = TEST_CONFIG.clone();
+// 	config.errors.strict = true;
+// 	config.errors.strict = false;
+// 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
+// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
+// 	let out = renderer.render_from(source.trim()).unwrap();
+// 	log::error(renderer.errors);
+// 	println!("{C}{out}{W}");
+// 	log::line();
+// }
 
-const _: bool
+// const _: bool
 	= false;
 
 
