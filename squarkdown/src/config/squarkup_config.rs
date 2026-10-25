@@ -2,7 +2,8 @@ use crate::utils::macros::*;
 
 use enum_stringify::EnumStringify;
 
-use std::path::PathBuf;
+use std::collections::{ HashSet };
+use std::path::{ PathBuf };
 
 
 /* NOTE:
@@ -116,7 +117,7 @@ pub struct FormatConfig {
 pub struct AssetsConfig {
 	pub folder: PathBuf,
 	pub site_assets_folder: Option<PathBuf>,
-	pub extensions: Vec<String>,
+	pub extensions: HashSet<String>,
 }
 
 #[derive(Clone, Debug)]

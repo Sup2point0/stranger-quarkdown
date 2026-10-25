@@ -372,7 +372,7 @@ impl SquarkupConfig
 						raw = &raw[1..];
 					}
 
-					c.assets.extensions.push(raw.to_owned());
+					c.assets.extensions.insert(raw.to_owned());
 				}) }
 			}) }
 			

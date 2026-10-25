@@ -4,6 +4,7 @@ use crate::utils::macros::*;
 use path_macro::path;
 use regex::regex;
 
+use std::collections::{ HashSet };
 use std::path::{ Path, PathBuf };
 
 
@@ -57,9 +58,9 @@ impl SquarkupConfig
 			assets: AssetsConfig {
 				folder: root.to_owned(),
 				site_assets_folder: None,
-				extensions: vec![
+				extensions: HashSet::from([
 					str!("png"), str!("jpg"), str!("jpeg"), str!("webp"), str!("svg"),
-				],
+				]),
 			},
 			fonts: FontsConfig {
 				queries: vec![],
