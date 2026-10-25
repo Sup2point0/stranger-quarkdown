@@ -102,7 +102,7 @@ pub struct FormatConfig {
 	/// Inject a `<head>` element containing `<title>` and `<meta name="description">`?
 	pub inject_head: bool,
 
-	/// Keep the first heading in the rendered output
+	/// Keep the first `# Heading` in the rendered output?
 	pub preserve_heading: bool,
 
 	/// Keep `<!-- comments -->` in the rendered output?
