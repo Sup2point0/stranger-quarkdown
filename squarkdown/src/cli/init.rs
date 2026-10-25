@@ -200,8 +200,7 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 
 	match
 		resolver::read_toml_config(&dest)
-		.map(|toml| SquarkupConfig::try_from_toml(toml, cwd))
-		.flatten()
+		.and_then(|toml| SquarkupConfig::try_from_toml(toml, cwd))
 	{
 		Ok(..) => {
 			print!("{PREV}{CLEAR}");
