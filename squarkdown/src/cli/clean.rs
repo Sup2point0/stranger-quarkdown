@@ -33,7 +33,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 
 	if !unknown_args.is_empty() {
 		shared::unknown_args(&unknown_args);
-		return ExitCode::FAILURE;
+		return ExitCode::FAILURE
 	}
 
 	log::version();
@@ -84,7 +84,7 @@ fn cleanup(force: bool) -> SquarkResult
 			log::bad!("no repository found, proceeding with {W}{BOLD}--force{UNBOLD}");
 		} else {
 			e.set_hint(fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"));
-			return Err(e);
+			return Err(e)
 		}
 	}
 
@@ -130,15 +130,15 @@ fn cleanup(force: bool) -> SquarkResult
 
 				fs::remove_dir(path)?;
 				deleted_paths += 1;
-				return Ok(());
+				return Ok(())
 			}
 
 			// delete file
 			let Some(filename) = path.file_name() else {
-				return Ok(());
+				return Ok(())
 			};
 			if *filename != *config.out.file_name && *filename != *"+page.ts" {
-				return Ok(());
+				return Ok(())
 			}
 
 			let (folder, filename) = utils::split_path(&path_rel);
@@ -149,7 +149,7 @@ fn cleanup(force: bool) -> SquarkResult
 				&& !is_safe_to_delete(&path, repo, repo_folder)?
 			{
 				skipped_paths.push(fmt!("skipped: {path_display}"));
-				return Ok(());
+				return Ok(())
 			}
 
 			log::info!("deleting: {path_display}");

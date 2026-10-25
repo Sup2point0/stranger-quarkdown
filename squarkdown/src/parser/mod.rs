@@ -61,7 +61,7 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 					].concat(),
 				});
 			} else {
-				return Ok(None);
+				return Ok(None)
 			}
 		}
 
@@ -76,7 +76,7 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 		num_lines_checked += 1;
 		
 		if !may_have_charm_squark && num_lines_checked > MAX_LINES_CHECKED {
-			return Ok(None);
+			return Ok(None)
 		}
 	}
 

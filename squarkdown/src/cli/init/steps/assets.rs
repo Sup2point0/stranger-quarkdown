@@ -46,7 +46,7 @@ fn configure_assets_folder(config: &mut String, cwd: &Path) -> AbandonOrResult<i
 		choices: candidates
 	)? {
 		if *choice == "Cancel" {
-			return Err(AbandonError::ABANDON);
+			return Err(AbandonError::ABANDON)
 		}
 		append!(config, "folder = {choice:?}");
 	} else {
@@ -72,7 +72,7 @@ fn configure_assets_extensions(config: &mut String) -> AbandonOrResult<io::Error
 			[false] "ttf" => "";
 		}
 	)? else {
-		return Ok(());
+		return Ok(())
 	};
 
 	if let Some(i) = choices.iter().position(|&ext| ext == "jpg") {

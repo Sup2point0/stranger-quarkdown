@@ -365,7 +365,7 @@ pub(crate) fn _pick_many_or_skip_<T>(
 					out!("{GREY}×" => "{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
 					
-					return Err(io::Error::from(io::ErrorKind::Interrupted));
+					return Err(io::Error::from(io::ErrorKind::Interrupted))
 				}
 				KeyCode::Down | KeyCode::Right => {
 					idx += 1;
@@ -405,7 +405,7 @@ pub(crate) fn _pick_many_or_skip_<T>(
 		out!("{GREY}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
 		execute!(stdout, cursor::Show)?;
-		return Ok(None);
+		return Ok(None)
 	}
 	
 	out!("{C}✓" => "{after}");

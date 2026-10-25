@@ -421,7 +421,7 @@ impl SquarkupConfig
 	) -> SquarkResult<Option<toml::Table>>
 	{
 		let Some(value) = data.remove(setting_group) else {
-			return Ok(None);
+			return Ok(None)
 		};
 		if let toml::Value::Table(table) = value {
 			return Ok(Some(table));			

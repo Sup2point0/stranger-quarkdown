@@ -155,7 +155,7 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 		)?;
 
 		if should_quit {
-			return Err(io::Error::from(io::ErrorKind::Interrupted));
+			return Err(io::Error::from(io::ErrorKind::Interrupted))
 		} else {
 			break;
 		}

@@ -49,11 +49,11 @@ fn should_include(entry: &walkdir::DirEntry, config: &SquarkupConfig) -> bool
 	let path_str = path.to_slash().expect("Squarkdown does not support non-Unicode filepaths");
 
 	if config.paths.exclude.iter().any(|p| p.is_match(&path_str)) {
-		return false;
+		return false
 	}
 
 	if entry.file_type().is_file() && !config.paths.include.is_empty() {
-		return config.paths.include.iter().any(|p| p.is_match(&path_str));
+		return config.paths.include.iter().any(|p| p.is_match(&path_str))
 	}
 
 	true

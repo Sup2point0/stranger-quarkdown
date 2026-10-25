@@ -350,16 +350,16 @@ impl Renderer<'_>
 	{
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
 		if self.ctx.has_leave() {
-			return Some(event);
+			return Some(event)
 		}
 
 		if self.ctx.has_slash() {
-			return None;
+			return None
 		}
 
 		/* Keep comments only if `preserve_comments: true` */
 		if matches!(self.ctx.current(), Ctx::COMMENT) {
-			return self.config.format.preserve_comments.then_some(event);
+			return self.config.format.preserve_comments.then_some(event)
 		}
 
 		match event
@@ -368,14 +368,14 @@ impl Renderer<'_>
 			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::LINK);
-				return self.process_link(dest_url, range).or(Some(event));
+				return self.process_link(dest_url, range).or(Some(event))
 			}
 
 			// pop link context
 			pd::Event::End(pd::TagEnd::Link)
 				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
 			{
-				return Some(pd::Event::InlineHtml("</a>".into()));
+				return Some(pd::Event::InlineHtml("</a>".into()))
 			}
 
 			pd::Event::End(pd::TagEnd::Link) =>
@@ -383,7 +383,7 @@ impl Renderer<'_>
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::LINK)?;
 				});
-				return Some(event);
+				return Some(event)
 			}
 
 			// rewrite asset link
@@ -391,7 +391,7 @@ impl Renderer<'_>
 			{
 				self.ctx.push(Ctx::IMAGE_LINK);
 				self.process_image(dest_url, range);
-				return Some(event);
+				return Some(event)
 			}
 			
 			// pop asset context
@@ -400,7 +400,7 @@ impl Renderer<'_>
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::IMAGE_LINK)?;
 				});
-				return Some(event);
+				return Some(event)
 			}
 
 			// sanitise text
@@ -418,15 +418,15 @@ impl Renderer<'_>
 		
 		if html.starts_with("<!--") && html.ends_with("-->") {
 			if self.process_comment(html, range) || self.ctx.has_slash() {
-				return ProcessAction::ERASE;
+				return ProcessAction::ERASE
 			}
-			return ProcessAction::from(preserve || self.ctx.has_leave());
+			return ProcessAction::from(preserve || self.ctx.has_leave())
 		}
 		else if !self.ctx.has_slash() && !self.ctx.has_leave() {
 			if html.starts_with("<!--") {
 				// check `<!-- #SQUARK only?`
 				if self.process_comment(html, range) {
-					return ProcessAction::ERASE;
+					return ProcessAction::ERASE
 				}
 				self.ctx.push(Ctx::COMMENT);
 				return ProcessAction::from(preserve)
@@ -434,14 +434,14 @@ impl Renderer<'_>
 			else if html.ends_with("-->") {
 				// check `#SQUARK only. -->`
 				if self.process_comment(html, range) {
-					return ProcessAction::ERASE;
+					return ProcessAction::ERASE
 				}
 
 				if self.ctx.try_pop_exact(&Ctx::COMMENT).is_ok() {
-					return ProcessAction::from(preserve);
+					return ProcessAction::from(preserve)
 				} else {
 					/* NOTE: If `-->` didn't terminate a comment context, it was just a stray `-->` which should be kept */
-					return ProcessAction::KEEP;
+					return ProcessAction::KEEP
 				}
 			}
 		}
@@ -470,7 +470,7 @@ impl Renderer<'_>
 					debug: [self.source_printed(range), self.ctx.printed()].concat(),
 				});
 			}
-			return false;
+			return false
 		};
 
 		let m1 = &captures[1];
@@ -489,12 +489,12 @@ impl Renderer<'_>
 						debug: [self.source_printed(range), self.ctx.printed()].concat(),
 					});
 				}
-				return false;
+				return false
 			}
 		};
 
 		if self.ctx.has_leave() && !matches!(squark, Ctx::LEAVE{..}) {
-			return false;
+			return false
 		}
 
 		match m2 {
@@ -537,7 +537,7 @@ impl Renderer<'_>
 		|| dest_url.contains("://")
 		|| dest_url.starts_with("http")
 		|| dest_url.starts_with("mailto:") {
-			return None;
+			return None
 		}
 
 		let mut anchor: Option<&str> = None;
@@ -573,7 +573,7 @@ impl Renderer<'_>
 			}
 
 			*dest_url = href.into();
-			return None;
+			return None
 		}
 
 		// 3. handle a broken link
@@ -586,7 +586,7 @@ impl Renderer<'_>
 					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
 				].concat()
 			});
-			return None;
+			return None
 		}
 
 		// 4. handle a non-broken but inactive link
@@ -610,7 +610,7 @@ impl Renderer<'_>
 
 				let href = "<a class=\"broken-link\" href=\"\">";
 				
-				return Some(pd::Event::InlineHtml(href.into()));
+				return Some(pd::Event::InlineHtml(href.into()))
 			}
 
 			LinkRewriteAction::STRIP_EXTENSION =>
@@ -762,7 +762,7 @@ impl Renderer<'_>
 	fn inject_head(&self, file: &mut impl Write) -> SquarkResult
 	{
 		if self.page.title.is_empty() {
-			return Ok(());
+			return Ok(())
 		}
 
 		writeln!(file, "<svelte:head>")?;

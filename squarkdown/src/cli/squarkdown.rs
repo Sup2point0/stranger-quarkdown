@@ -31,7 +31,7 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 
 	if !unknown_args.is_empty() {
 		shared::unknown_args(&unknown_args);
-		return ExitCode::FAILURE;
+		return ExitCode::FAILURE
 	}
 
 	log::version();
@@ -43,15 +43,15 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 
 	match r
 	{
-		Ok(()) => {
+		Ok(..) => {
 			log::line();
 			println!("{P}squarkup finished! {GREY}{perf:.1?} ms{W}");
-			ExitCode::SUCCESS
+			return ExitCode::SUCCESS
 		},
 		Err(e) => {
 			log::error(e);
 			println!("{R}squarkup failed! {GREY}{perf:.1?} ms\n{W}");
-			ExitCode::FAILURE
+			return ExitCode::FAILURE
 		},
 	}
 }
@@ -147,7 +147,7 @@ fn squarkup(
 		// == RENDER == //
 		log::is!(if dry_run {"simulating rendering..."} else {"rendering..."});
 
-		let (errs, num_rendered) =
+		let (errs, num_oks) =
 			site_data
 			.pages_map()
 			.par_iter()
@@ -180,7 +180,7 @@ fn squarkup(
 		errs.depends(&config)?;
 
 		log::ok!(
-			"{} {num_rendered}/{total} pages",
+			"{} {num_oks}/{total} pages",
 			if dry_run {"would render"} else {"rendered"},
 			total = site_data.stats.active_pages
 		);

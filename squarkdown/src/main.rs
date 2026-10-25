@@ -46,7 +46,7 @@ fn main() -> ExitCode
 
 			_ => if !arg.starts_with('-') {
 				log::bad!("unknown command: {W}{BOLD}{arg}{UNBOLD}");
-				return ExitCode::FAILURE;
+				return ExitCode::FAILURE
 			}
 		}
 	}

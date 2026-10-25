@@ -41,7 +41,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<Option<Stri
 
 		if choice != "None of the above" {
 			append!(config, "site = {choice:?}");
-			return Ok(Some(choice));
+			return Ok(Some(choice))
 		}
 	}
 	else {
@@ -58,7 +58,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<Option<Stri
 		}
 	)? else {
 		append!(config, "site = ''  # unconfigured");
-		return Ok(None);
+		return Ok(None)
 	};
 
 	if choice == PICK {
@@ -71,7 +71,7 @@ pub fn configure_site(config: &mut String, cwd: &Path) -> io::Result<Option<Stri
 
 		if choice != "None of the above" {
 			append!(config, "site = {choice:?}");
-			return Ok(Some(choice));
+			return Ok(Some(choice))
 		}
 
 		// If the user picks "None of the above", fall back to manually entering

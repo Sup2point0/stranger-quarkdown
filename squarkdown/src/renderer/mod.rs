@@ -43,7 +43,7 @@ pub fn render(
 		let r = fs::create_dir_all(&renderer.dest_folder);
 
 		if let Err(e) = r {
-			return (Err(e.into()), false);
+			return (Err(e.into()), false)
 		}
 	}
 

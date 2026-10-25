@@ -51,7 +51,7 @@ impl CharmParser<'_>
 	pub(super) fn advance(&mut self) -> SquarkResult
 	{
 		if self.is_out_of_bounds() {
-			return self.err_eof();
+			return self.err_eof()
 		}
 
 		self.i += 1;
@@ -104,7 +104,7 @@ impl CharmParser<'_>
 		{
 			if self.current() != Some(expected) {
 				self.i = init;
-				return Err(SquarkError::ABANDON);
+				return Err(SquarkError::ABANDON)
 			}
 			self.advance()?;
 		}
@@ -147,7 +147,7 @@ impl CharmParser<'_>
 		{
 			if !self.current().is_some_and(|c| c.eq_ignore_ascii_case(&expected)) {
 				self.i = init;
-				return Err(SquarkError::ABANDON);
+				return Err(SquarkError::ABANDON)
 			}
 			self.advance()?;
 		}

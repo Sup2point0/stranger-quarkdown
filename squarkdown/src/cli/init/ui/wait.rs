@@ -59,9 +59,9 @@ pub(crate) fn _wait_(mut hint: &str) -> io::Result<()>
 			)?;
 
 			if code == KeyCode::Esc {
-				return Err(io::Error::from(io::ErrorKind::Interrupted));
+				return Err(io::Error::from(io::ErrorKind::Interrupted))
 			} else {
-				return Ok(());
+				return Ok(())
 			}
 		}
 	}

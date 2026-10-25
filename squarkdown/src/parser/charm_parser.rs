@@ -128,7 +128,7 @@ impl CharmParser<'_>
 
 		if flags.iter().any(|flag| flag == "dead") {
 			self.is_live = false;
-			return Err(SquarkError::ABANDON);
+			return Err(SquarkError::ABANDON)
 		}
 
 		self.eat_whitespace();

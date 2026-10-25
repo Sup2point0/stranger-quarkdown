@@ -22,7 +22,7 @@ pub fn resolve_project_root() -> SquarkResult<PathBuf>
 		|| path!(dir / "squarkdown.toml").is_file()
 		|| path!(dir / "squarkdown.json").is_file()
 		{
-			return Ok(dir.to_owned());
+			return Ok(dir.to_owned())
 		}
 		checked.push(dir);
 	}

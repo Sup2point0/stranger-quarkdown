@@ -19,7 +19,7 @@ pub fn resolve_project_repo(
 
 	for dir in from.as_ref().ancestors() {
 		if let Ok(repo) = git::Repository::open(dir) {
-			return Ok(repo);
+			return Ok(repo)
 		}
 		if dir == root {
 			break;

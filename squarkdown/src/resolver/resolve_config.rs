@@ -42,11 +42,11 @@ pub fn resolve_config(root: &Path) -> SquarkResult<SquarkupConfig>
 pub fn find_config(root: &Path) -> SquarkResult<(PathBuf, Extension)>
 {
 	if let Some(out) = find_config_from(&path!(root / ".squarkdown/")) {
-		return Ok(out);
+		return Ok(out)
 	}
 
 	if let Some(out) = find_config_from(root) {
-		return Ok(out);
+		return Ok(out)
 	}
 
 	Err(SquarkError::Unrecoverable {
@@ -64,22 +64,22 @@ fn find_config_from(folder: &Path) -> Option<(PathBuf, Extension)>
 {
 	let file = path!(folder / "squarkup.toml");
 	if file.is_file() {
-		return Some((file, Extension::TOML));
+		return Some((file, Extension::TOML))
 	}
 	
 	let file = path!(folder / "squarkdown.toml");
 	if file.is_file() {
-		return Some((file, Extension::TOML));
+		return Some((file, Extension::TOML))
 	}
 	
 	let file = path!(folder / "squarkup.json");
 	if file.is_file() {
-		return Some((file, Extension::JSON));
+		return Some((file, Extension::JSON))
 	}
 	
 	let file = path!(folder / "squarkdown.json");
 	if file.is_file() {
-		return Some((file, Extension::JSON));
+		return Some((file, Extension::JSON))
 	}
 
 	None

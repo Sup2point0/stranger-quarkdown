@@ -23,7 +23,7 @@ pub fn configure_site_data(config: &mut String, site: &str) -> io::Result<()>
 			str!("Cancel")                   => "skip this feature";
 		}
 	)? else {
-		return Ok(());
+		return Ok(())
 	};
 
 	if filepath == "Cancel" { return Ok(()); }
