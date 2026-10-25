@@ -12,6 +12,5 @@ For more focused guidance on specific Squarkdown features, see the below pages. 
 
 - [What is Squarkdown?](what-is-squarkdown.md)
 - [Project Requirements](project-requirements.md)
-- [Project Structure](project-structure.md)
 - [Squarkdown-flavoured Markdown](squarkdown-flavoured-markdown.md)
 - [Making Full Use of Squarkdown](further-features.md)
