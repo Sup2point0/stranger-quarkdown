@@ -1,7 +1,9 @@
 def main [] {
-	print "syncing squarkup schema..."
+	cd ../squarkdown
+	cargo run
 
-	cd ../squarkdown/src/config
+	print "syncing squarkup schema..."
+	cd src/config
 	let $ver = (open schema.json | get "squarkdown-version")
 	print $"received version: ($ver)"
 

@@ -6,7 +6,7 @@
 
   "scripts": {
     "dev":    "vite",
-      "devx": "nu prep.nu && vite --open",
+      "devx": "nu dev.nu && vite --open",
     
     "prep":    "squarkdown",
       "prepx": "squarkdown --fonts",
