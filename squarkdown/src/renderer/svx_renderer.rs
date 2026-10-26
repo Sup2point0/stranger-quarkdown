@@ -664,20 +664,26 @@ impl Renderer<'_>
 		let own_source_folder = self.page.filepath.parent()
 			.expect("active files always have a parent folder");
 
-		let mut their_source_path = path!(own_source_folder / their_file_name).clean();
+		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
-		match their_source_path.extension() {
-			// only rewrite `.md` files
-			Some(ext) if ext != "md" => return None,
-			// folder links resolve to the README of that folder
-			None => their_source_path.push("readme.md"),
-			_ => {}
+		// only rewrite file links to `.md` files
+		if let Some(ext) = their_source_path.extension() && ext != "md" {
+			return None
 		}
 
 		// 2. find where the target file will be exported to
-		let shard = PageData::shard_for(&their_source_path, self.config);
+		let mut shard = PageData::shard_for(&their_source_path, self.config);
+		let mut lookup = self.site.get_page(&shard);
 
-		if let Some(dest_page) = self.site.get_page(&shard)
+		// folder links resolve to the README of that folder
+		for readme in ["readme.md", "README.md"] {
+			if lookup.is_none() && their_source_path.extension().is_none() {
+				shard = PageData::shard_for(&path!(their_source_path / readme), self.config);
+				lookup = self.site.get_page(&shard);
+			}
+		}
+
+		if let Some(dest_page) = lookup
 		{
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
@@ -761,7 +767,6 @@ impl Renderer<'_>
 
 			LinkRewriteAction::ERROR =>
 			{
-				dbg!(&self.site.pages_map());
 				self.errors.push(SquarkError::Recoverable {
 					msg: fmt!("found a link to an inactive page"),
 					hint: str!(),
