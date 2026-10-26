@@ -20,28 +20,38 @@ impl CharmParser<'_>
 
 	/// The current character in the current line to process.
 	/// 
+	/// This returns `\n` if the parser is at the end of the current line.
+	/// 
 	/// Errors if the parser is out of bounds.
 	pub(super) fn current(&self) -> SquarkResult<char>
 	{
-		self.line()?
-			.get(self.i)
-			.copied()
-			.ok_or_else(|| self.err_eof())
+		Ok(
+			self.line()?
+				.get(self.i)
+				.copied()
+				.unwrap_or('\n')
+		)
 	}
 
 	/// Peek the next character in the source immediately after the current character.
 	/// 
-	/// If the current character is at the end of a line, this returns `\n` instead of the first character of the next line
+	/// If the current character is at the end of a line, this returns `\n` instead of the first character of the next line.
 	/// 
 	/// Errors if the parser is out of bounds.
 	pub(super) fn peek(&self) -> Option<char>
 	{
-		self.line().ok()?
-			.get(self.i + 1)
-			.copied()
-			.or(
-				self.peek_line()?.first().copied()
-			)
+		let line = self.line().ok()?;
+		let i = self.i + 1;
+
+		if i < line.len() {
+			line.get(i).copied()
+		}
+		else if i == line.len() {
+			Some('\n')
+		}
+		else {
+			self.peek_line()?.first().copied()
+		}
 	}
 
 	pub(super) fn peek_line(&self) -> Option<&[char]>
@@ -68,13 +78,14 @@ impl CharmParser<'_>
 	/// Skips `\r` characters.
 	pub(super) fn advance(&mut self) -> SquarkResult
 	{
-		self.i += 1;
 		let line = self.line()?;
 
-		// advance to next line
 		if self.i >= line.len() {
+			// advance to next line
 			self.l += 1;
 			self.i = 0;
+		} else {
+			self.i += 1;
 		}
 
 		Ok(())
@@ -318,9 +329,11 @@ mod advance
 		assert_matches!( parser.current(), Ok('0') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('1') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('2') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('\n') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('3') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('4') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('5') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('\n') );
 		assert_ok!( parser.advance() ); assert_err!( parser.current() );
 		assert_err!( parser.advance() );
 	}
@@ -331,10 +344,12 @@ mod advance
 		assert_matches!( parser.peek(), Some('1') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('2') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('3') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('4') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('5') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('\n') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), None );
+		assert_ok!( parser.advance() );
 		assert_err!( parser.advance() );
 	}
 }
