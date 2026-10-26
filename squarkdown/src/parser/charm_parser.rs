@@ -118,6 +118,8 @@ impl CharmParser<'_>
 					.unwrap_or(&[])
 					.into_iter().collect()
 			);
+
+			self.advance_line()?;
 			Ok(heading)
 		})
 	}
@@ -1028,14 +1030,13 @@ mod partial {
 	#[test] fn parse_field()
 	{
 		test_expected(&[
-			("| field = value",       ("field", vec!["value"])),
-			("| field = one / two",   ("field", vec!["one", "two"])),
-			("| field = / one / two", ("field", vec!["one", "two"])),
+			("| field = value\n-->",       ("field", vec!["value"])),
+			("| field = one / two\n-->",   ("field", vec!["one", "two"])),
+			("| field = / one / two\n-->", ("field", vec!["one", "two"])),
 		],
 		|mut parser, (key, targets)| {
 			let (field, values) = parser.parse_field().unwrap();
 			assert_eq!( field, *key );
-
 			assert_eq!( values.as_slice(), targets );
 		});
 	}

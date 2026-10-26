@@ -81,13 +81,23 @@ impl CharmParser<'_>
 		let line = self.line()?;
 
 		if self.i >= line.len() {
-			// advance to next line
-			self.l += 1;
-			self.i = 0;
+			self.advance_line()?;
 		} else {
 			self.i += 1;
 		}
 
+		Ok(())
+	}
+
+	pub(super) fn advance_line(&mut self) -> SquarkResult
+	{
+		if self.l >= self.source_lines.len() {
+			return Err(self.err_eof())
+		}
+
+		self.l += 1;
+		self.i = 0;
+		
 		Ok(())
 	}
 
@@ -259,7 +269,13 @@ impl CharmParser<'_>
 	{
 		let msg = str!("unexpected end of file");
 		let hint = str!();
-		let debug = self.ctx.printed();
+		let debug = [
+			vec![
+				fmt!("l = {}", self.l),
+				fmt!("i = {}", self.i),
+			],
+			self.ctx.printed(),
+		].concat();
 
 		if self.is_live {
 			SquarkError::Unrecoverable { msg, hint, debug }
@@ -439,7 +455,7 @@ mod eat_spaces {
 		],
 		|mut parser, _case| {
 			assert_eq!( parser.eat_spaces(), true );
-			assert_err!( parser.current() );
+			assert_matches!( parser.current(), Ok('\n') );
 		});
 	}
 }
