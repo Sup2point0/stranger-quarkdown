@@ -131,7 +131,7 @@ use path_macro::path;
 	assert_contains!( ts,  "Don't overwrite me" );
 }
 
-#[test] fn source_snapshot_in_errors()
+#[test] fn source_snapshot_in_render_errors()
 {
 	let (status, out) = capture_squarkup_from("errors/source-snapshot");
 	assert_not!( status.success() );

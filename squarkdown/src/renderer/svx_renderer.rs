@@ -83,6 +83,8 @@ pub(super) struct Renderer<'d>
 	/// Each number is an index into `self.source`. The character accessed at that index is the _first_ character in a new line.
 	/// 
 	/// For instance, `[0, 4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
+	/// 
+	/// This is always guaranteed to be non-empty because `0` is the first element.
 	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.
@@ -960,8 +962,9 @@ impl Renderer<'_>
 
 		let range_before = info.line_range.start..range.start;
 		let range_after  = range.end..info.line_range.end;
-		let before = if range_before.is_empty() { "" } else { &self.source[range_before] };
-		let after  = if range_after.is_empty()  { "" } else { &self.source[range_after] };
+
+		let before = if range_before.is_empty() {""} else { &self.source[range_before] };
+		let after  = if range_after.is_empty()  {""} else { &self.source[range_after] };
 
 		out.push(fmt!(
 			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
@@ -989,9 +992,7 @@ impl Renderer<'_>
 				continue;
 			}
 
-			let lower_this = 
-				if i == 0 { 0 }
-				else { *self.line_boundaries.get(i - 1).unwrap_or(&0) };
+			let lower_this = *self.line_boundaries.get(zero!(i - 1)).unwrap_or(&0);
 
 			return Some(LineInfo {
 				line_number: i,
@@ -1002,7 +1003,7 @@ impl Renderer<'_>
 					},
 				next_line_range:
 					self.line_boundaries.get(i + 1).map(|&upper_next| upper_this..(upper_next - 1)),
-			});
+			})
 		}
 
 		None
@@ -1011,12 +1012,8 @@ impl Renderer<'_>
 
 struct LineInfo
 {
-	/// May be `None` if:
-	/// 
-	/// - `renderer.line-boundaries` hasn't been initialised properly.
-	/// - `line_info(range)` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
+	/// 1-indexed.
 	line_number: usize,
-
 	line_range: Range<usize>,
 	prev_line_range: Option<Range<usize>>,
 	next_line_range: Option<Range<usize>>,

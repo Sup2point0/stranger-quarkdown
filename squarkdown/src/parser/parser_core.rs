@@ -273,10 +273,11 @@ impl CharmParser<'_>
 	{
 		let msg = str!("unexpected end of file");
 		let hint = str!();
-		let debug = [
-			self.source_printed((zero!(self.l - 1), 0), (zero!(self.l - 1), 999)),  // TODO
-			self.ctx.printed(),
-		].concat();
+		let debug =
+			[
+				self.source_printed(zero!(self.l - 1), 0, usize::MAX),
+				self.ctx.printed(),
+			].concat();
 
 		if self.is_live {
 			SquarkError::Unrecoverable { msg, hint, debug }
@@ -289,53 +290,60 @@ impl CharmParser<'_>
 /// Debug
 impl CharmParser<'_>
 {
-	/// Produce the lines displaying a snapshot of the source text, highlighting the range `(from-line, from-char)` to `(to-line, to-char)` inclusive.
+	/// Produce the lines of a snapshot of the source text, focused around `from..=to` in `line`.
+	/// 
+	/// If `from` or `to` are out-of-bounds, they are clamped.
 	/// 
 	/// # Panics
 	/// 
-	/// - If `from-line` or `to-line` are out-of-bounds line indices.
-	/// - If `from-char` or `to-char` are out-of-bounds char indices in their lines.
+	/// - If `line` is out-of-bounds.
 	fn source_printed(&self,
-		(from_line, from_char): (usize, usize),
-		(to_line, to_char): (usize, usize),
+		line_idx: usize,
+		mut from: usize,
+		mut to: usize,
 	) -> Vec<String>
 	{
-		// +2 for prev and next extra lines
-		// +1 cuz counting fenceposts, not gaps
-		let mut out = Vec::with_capacity(2 + (to_line - from_line + 1));
+		let mut out = Vec::with_capacity(3);
 		out.push(str!(" "));
 
+		/* NOTE: When displaying line numbers, add 1 because `line-idx` is zero-indexed! */
+
 		// previous line
-		if from_line > 0 {
+		if line_idx > 0 {
 			out.push(fmt!(
 				"{GREY1}{:6} {GREY}│  {W}{}",
-				from_line - 1,
-				self.source_lines[from_line - 1].iter().collect::<String>(),
+				(line_idx - 1) + 1,
+				self.source_lines[line_idx - 1].iter().collect::<String>(),
 			));
 		}
 
 		// focus lines
-		// TODO focus range
+		let line = &self.source_lines[line_idx];
+		from = from.min(line.len());
+		to   = to.min(line.len());
+
+		let r_before = 0..from;
+		let r_after  = to..line.len();
+
+		let before =
+			if r_before.is_empty() {str!("")} else {line[r_before].iter().collect()};
+		let after  =
+			if r_after.is_empty()  {str!("")} else {line[r_after].iter().collect()};
+
+		let focus: String = line[from..to].iter().collect();
+
 		out.push(fmt!(
-			"{GREY1}{from_line:6} {GREY}│  {R}{BOLD}{}{UNBOLD}",
-			self.source_lines[from_line].iter().collect::<String>()
+			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
+			line_idx + 1,
 		));
 
-		for line_num in (from_line + 1)..=(zero!(to_line - 1)) {
-			out.push(fmt!(
-				"{GREY1}{line_num:6} {GREY}│  {R}{BOLD}{}{UNBOLD}",
-				self.source_lines[line_num].iter().collect::<String>()
-			));
-		}
-
-		if to_line != from_line {
-			// TODO focus range
-			todo!()
-		}
-
 		// next line
-		if let Some(line) = self.source_lines.get(to_line + 1) {
-			todo!()
+		if let Some(next_line) = self.source_lines.get(line_idx + 1) {
+			out.push(fmt!(
+				"{GREY}{:6} │  {W}{}",
+				(line_idx + 1) + 1,
+				next_line.iter().collect::<String>(),
+			));
 		} else {
 			out.push(fmt!("{GREY}{:6} │  {GREY}<{BOLD}END OF FILE{UNBOLD}>", ""));
 		}
