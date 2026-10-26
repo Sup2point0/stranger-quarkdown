@@ -171,8 +171,12 @@ impl CharmParser<'_>
 					Ok(..) => SquarkError::ABANDON,
 					Err(..) => SquarkError::Unrecoverable {
 						msg: fmt!("expected either {W}live!{R} or {W}dead!{R} to start charm squark"),
-						hint: fmt!("use {W}<!-- #SQUARK live!{G} for an active file, or {W}<!-- #SQUARK dead!{G} for an inactive file"),
-						debug: vec![],
+						hint: fmt!(
+							"use {W}<!-- #SQUARK {BOLD}live!{UNBOLD}{G} for an active file, \
+							\n{:8} or {W}<!-- #SQUARK {BOLD}dead!{UNBOLD}{G} for an inactive file",
+							""
+						),
+						debug: self.source_printed(self.l, self.i, self.i),
 					},
 				}
 			)?;

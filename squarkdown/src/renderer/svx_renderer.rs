@@ -942,17 +942,19 @@ impl Renderer<'_>
 	/// Print a snapshot of the source text, focused around `range`.
 	fn source_printed(&self, range: ParserRange) -> Vec<String>
 	{
-		let Some(info) = self.line_info(range.clone())
+		let Some(LineInfo{
+			line_number, line_range, prev_line_range, next_line_range,
+		}) = self.line_info(range.clone())
 			else { return vec![] };
 
 		let mut out = Vec::with_capacity(3);
 		out.push(str!(" "));
 
 		// previous line
-		if let Some(r) = info.prev_line_range {
+		if let Some(r) = prev_line_range {
 			out.push(fmt!(
 				"{GREY1}{:6} {GREY}│  {W}{}",
-				info.line_number - 1,
+				line_number - 1,
 				&self.source[r],
 			));
 		}
@@ -960,20 +962,21 @@ impl Renderer<'_>
 		// this line
 		let focus = &self.source[range.clone()].trim_end_matches('\n');
 
-		let range_before = info.line_range.start..range.start;
-		let range_after  = range.end..info.line_range.end;
+		let r_before = line_range.start..range.start;
+		let r_after  = range.end..line_range.end;
 
-		let before = if range_before.is_empty() {""} else { &self.source[range_before] };
-		let after  = if range_after.is_empty()  {""} else { &self.source[range_after] };
+		let before = if r_before.is_empty() {""} else {&self.source[r_before]};
+		let after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
 
-		out.push(fmt!(
-			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
-			info.line_number
-		));
+		out.push(fmt!("{GREY1}{line_number:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}"));
 
 		// next line
-		if let Some(r) = info.next_line_range {
-			out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{}", info.line_number + 1, &self.source[r]));
+		if let Some(r) = next_line_range {
+			out.push(fmt!(
+				"{GREY1}{:6} {GREY}│  {W}{}",
+				line_number + 1,
+				&self.source[r],
+			));
 		}
 
 		out.push(str!(" "));

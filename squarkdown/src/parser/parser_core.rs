@@ -297,7 +297,7 @@ impl CharmParser<'_>
 	/// # Panics
 	/// 
 	/// - If `line` is out-of-bounds.
-	fn source_printed(&self,
+	pub(super) fn source_printed(&self,
 		line_idx: usize,
 		mut from: usize,
 		mut to: usize,
@@ -319,23 +319,36 @@ impl CharmParser<'_>
 
 		// focus lines
 		let line = &self.source_lines[line_idx];
-		from = from.min(line.len());
-		to   = to.min(line.len());
 
-		let r_before = 0..from;
-		let r_after  = to..line.len();
+		if from != to
+		{
+			from = from.min(line.len());
+			to   = to.min(line.len());
+			let focus: String = line[from..to].iter().collect();
 
-		let before =
-			if r_before.is_empty() {str!("")} else {line[r_before].iter().collect()};
-		let after  =
-			if r_after.is_empty()  {str!("")} else {line[r_after].iter().collect()};
+			let r_before = 0..from;
+			let r_after  = to..line.len();
+			let before = if r_before.is_empty() {str!("")} else {line[r_before].iter().collect()};
+			let after  = if r_after.is_empty()  {str!("")} else {line[r_after].iter().collect()};
 
-		let focus: String = line[from..to].iter().collect();
-
-		out.push(fmt!(
-			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
-			line_idx + 1,
-		));
+			out.push(fmt!(
+				"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
+				line_idx + 1,
+			));
+		}
+		else {
+			out.push(fmt!(
+				"{GREY1}{:6} {GREY}│  {W}{}",
+				line_idx + 1,
+				line.iter().collect::<String>(),
+			));
+			out.push(fmt!(
+				"{:6} {GREY}│  {:width$}{R}{BOLD}^^^{UNBOLD}",
+				"",
+				"",
+				width = from,
+			));
+		}
 
 		// next line
 		if let Some(next_line) = self.source_lines.get(line_idx + 1) {
@@ -345,7 +358,7 @@ impl CharmParser<'_>
 				next_line.iter().collect::<String>(),
 			));
 		} else {
-			out.push(fmt!("{GREY}{:6} │  {GREY}<{BOLD}END OF FILE{UNBOLD}>", ""));
+			out.push(fmt!("{:6} {GREY}│  {GREY}<{BOLD}END OF FILE{UNBOLD}>", ""));
 		}
 
 		out.push(str!(" "));
