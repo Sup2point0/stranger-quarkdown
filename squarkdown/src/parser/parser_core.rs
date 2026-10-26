@@ -31,13 +31,24 @@ impl CharmParser<'_>
 
 	/// Peek the next character in the source immediately after the current character.
 	/// 
+	/// If the current character is at the end of a line, this returns `\n` instead of the first character of the next line
+	/// 
 	/// Errors if the parser is out of bounds.
-	pub(super) fn peek(&self) -> SquarkResult<char>
+	pub(super) fn peek(&self) -> Option<char>
 	{
-		self.line()?
+		self.line().ok()?
 			.get(self.i + 1)
 			.copied()
-			.ok_or_else(|| self.err_eof())
+			.or(
+				self.peek_line()?.first().copied()
+			)
+	}
+
+	pub(super) fn peek_line(&self) -> Option<&[char]>
+	{
+		Some(
+			&self.source_lines.get(self.l + 1)?
+		)
 	}
 
 	/// Get a preview of the upcoming text.
@@ -128,7 +139,7 @@ impl CharmParser<'_>
 	{
 		for expected in target.chars()
 		{
-			if self.current()?.eq_ignore_ascii_case(&expected) {
+			if !self.current()?.eq_ignore_ascii_case(&expected) {
 				return Err(SquarkError::Recoverable {
 					msg: fmt!("unexpected input"),
 					hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
@@ -317,13 +328,13 @@ mod advance
 	#[test] fn and_peek()
 	{
 		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
-		assert_matches!( parser.peek(), Ok('1') );
-		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('2') );
-		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('3') );
-		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('4') );
-		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('5') );
-		assert_ok!( parser.advance() ); assert_err!( parser.peek() );
-		assert_ok!( parser.advance() );
+		assert_matches!( parser.peek(), Some('1') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('2') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('4') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('5') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Some('\n') );
+		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), None );
 		assert_err!( parser.advance() );
 	}
 }

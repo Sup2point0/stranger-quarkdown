@@ -25,6 +25,8 @@ pub(super) struct CharmParser<'d>
 
 	/* NOTE: Yeah, a raw `String` or `&str` would be more compact, but for how small the charm squark is anyway, it's not worth all the extra hassle */
 	/// The lines of the source text to parse, containing the charm squark.
+	/// 
+	/// Each line is `\n`-terminated.
 	pub(super) source_lines: Vec<Vec<char>>,
 
 	// == MUTABLE == //
@@ -58,7 +60,7 @@ impl<'d> CharmParser<'d>
 		Self {
 			config,
 			filepath,
-			source_lines: source.lines().map(|line| line.chars().collect()).collect(),
+			source_lines: source.lines().map(|line| line.chars().chain(Some('\n')).collect()).collect(),
 			l: 0,
 			i: 0,
 			is_live: false,
@@ -356,7 +358,7 @@ impl CharmParser<'_>
 				match c
 				{
 					// ` / ` flushes current value
-					'/' if can_terminate && self.peek().is_ok_and(char::is_whitespace) =>
+					'/' if can_terminate && self.peek().is_some_and(char::is_whitespace) =>
 					{
 						let _ = self.advance();  // safe from if check
 						self.eat_whitespace();
