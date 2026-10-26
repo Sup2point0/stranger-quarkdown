@@ -811,11 +811,28 @@ mod crash {
 
 	#[test] fn incomplete() {
 		test_exact(&[
-				"# ",
-				"# Sup",
-				"# Suppety Sup",
+				"# Nothing",
+				"# Nothing\n",
+				"\n# Nothing",
+				"\n# Nothing\n",
+				"# Nothing\n\n",
+				"\n# Nothing\n\n",
+				"\n\n# Nothing\n\n",
+				indoc! {"
+					# Heading
+					<!--
+				"},
+				indoc! {"
+					# Heading
+					<!-- #SQUARK
+				"},
+				indoc! {"
+					# Heading
+					<!-- #SQUARK
+
+				"},
 			],
-			|mut parser, _| {
+			|parser, _| {
 				let r = parser.parse();
 				assert_err!( &r );
 				log::error(r.unwrap_err());

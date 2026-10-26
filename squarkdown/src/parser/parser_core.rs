@@ -274,7 +274,7 @@ impl CharmParser<'_>
 		let msg = str!("unexpected end of file");
 		let hint = str!();
 		let debug = [
-			self.source_printed((self.l - 1, 0), (self.l - 1, 999)),  // TODO
+			self.source_printed((zero!(self.l - 1), 0), (zero!(self.l - 1), 999)),  // TODO
 			self.ctx.printed(),
 		].concat();
 
@@ -289,6 +289,12 @@ impl CharmParser<'_>
 /// Debug
 impl CharmParser<'_>
 {
+	/// Produce the lines displaying a snapshot of the source text, highlighting the range `(from-line, from-char)` to `(to-line, to-char)` inclusive.
+	/// 
+	/// # Panics
+	/// 
+	/// - If `from-line` or `to-line` are out-of-bounds line indices.
+	/// - If `from-char` or `to-char` are out-of-bounds char indices in their lines.
 	fn source_printed(&self,
 		(from_line, from_char): (usize, usize),
 		(to_line, to_char): (usize, usize),
@@ -300,17 +306,24 @@ impl CharmParser<'_>
 		out.push(str!(" "));
 
 		// previous line
+		if from_line > 0 {
+			out.push(fmt!(
+				"{GREY1}{:6} {GREY}│  {W}{}",
+				from_line - 1,
+				self.source_lines[from_line - 1].iter().collect::<String>(),
+			));
+		}
 
 		// focus lines
 		// TODO focus range
-		// out.push(fmt!(
-		// 	"{GREY1}{line_num:6} {GREY}│  {R}{BOLD}{}{UNBOLD}{W}",
-		// 	self.source_lines[line_num].iter().collect::<String>()
-		// ));
+		out.push(fmt!(
+			"{GREY1}{from_line:6} {GREY}│  {R}{BOLD}{}{UNBOLD}",
+			self.source_lines[from_line].iter().collect::<String>()
+		));
 
-		for line_num in (from_line + 0)..=(to_line + 0) {
+		for line_num in (from_line + 1)..=(zero!(to_line - 1)) {
 			out.push(fmt!(
-				"{GREY1}{line_num:6} {GREY}│  {R}{BOLD}{}{UNBOLD}{W}",
+				"{GREY1}{line_num:6} {GREY}│  {R}{BOLD}{}{UNBOLD}",
 				self.source_lines[line_num].iter().collect::<String>()
 			));
 		}
@@ -321,11 +334,11 @@ impl CharmParser<'_>
 		}
 
 		// next line
-		// if let Some(line) = self.source_lines.get(to_line + 1) {
-		// 	todo!()
-		// } else {
-		// 	out.push(fmt!("{GREY} │  {R}{BOLD}END OF FILE{UNBOLD}{W}", to_line + 1));
-		// }
+		if let Some(line) = self.source_lines.get(to_line + 1) {
+			todo!()
+		} else {
+			out.push(fmt!("{GREY}{:6} │  {GREY}<{BOLD}END OF FILE{UNBOLD}>", ""));
+		}
 
 		out.push(str!(" "));
 		out

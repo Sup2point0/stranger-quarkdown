@@ -73,7 +73,7 @@ pub(super) struct Renderer<'d>
 	/// The target folder to render to.
 	pub(super) dest_folder: PathBuf,
 
-	/// The source text to parse.
+	/// The Markdown source text to parse and render.
 	pub(super) source: String,
 
 	// == MUTABLE == //
@@ -948,7 +948,11 @@ impl Renderer<'_>
 
 		// previous line
 		if let Some(r) = info.prev_line_range {
-			out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{}", info.line_number - 1, &self.source[r]));
+			out.push(fmt!(
+				"{GREY1}{:6} {GREY}│  {W}{}",
+				info.line_number - 1,
+				&self.source[r],
+			));
 		}
 
 		// this line
@@ -959,7 +963,10 @@ impl Renderer<'_>
 		let before = if range_before.is_empty() { "" } else { &self.source[range_before] };
 		let after  = if range_after.is_empty()  { "" } else { &self.source[range_after] };
 
-		out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}", info.line_number));
+		out.push(fmt!(
+			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
+			info.line_number
+		));
 
 		// next line
 		if let Some(r) = info.next_line_range {
