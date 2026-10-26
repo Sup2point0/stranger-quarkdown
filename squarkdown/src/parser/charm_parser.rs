@@ -24,12 +24,15 @@ pub(super) struct CharmParser<'d>
 	pub(super) filepath: PathBuf,
 
 	/* NOTE: Yeah, a raw `String` or `&str` would be more compact, but for how small the charm squark is anyway, it's not worth all the extra hassle */
-	/// The source text to parse, containing the charm squark.
-	pub(super) source: Vec<char>,
+	/// The lines of the source text to parse, containing the charm squark.
+	pub(super) source_lines: Vec<Vec<char>>,
 
 	// == MUTABLE == //
 
-	/// The current index in [`Self::source`]'s characters.
+	/// The current line index. Which line in [`Self::source_lines`] are we on?
+	pub(super) l: usize,
+
+	/// The current character index. Which character in the current line ([`Self::source_lines`][[`l`](Self::l)]) are we on?
 	pub(super) i: usize,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
@@ -55,7 +58,8 @@ impl<'d> CharmParser<'d>
 		Self {
 			config,
 			filepath,
-			source: source.chars().collect(),
+			source_lines: source.lines().map(|line| line.chars().collect()).collect(),
+			l: 0,
 			i: 0,
 			is_live: false,
 			errors,
@@ -113,7 +117,7 @@ impl CharmParser<'_>
 				self.advance()?;
 			}
 			let stop = self.i;
-			let heading = self.source[start..stop].iter().collect();
+			let heading = self.source_lines[start..stop].iter().collect();
 			
 			Ok(utils::trim_end(heading))
 		})
@@ -304,7 +308,7 @@ impl CharmParser<'_>
 		ctx!(self, ParseCtx::FIELD =>
 		{
 			self.eat("|", to!("to start field in charm squark"))?;
-			self.eat_whitespace();
+			self.eat_spaces();
 
 			let key = self.parse_ident()?;
 			let key = key.replace('-', "_");

@@ -7,39 +7,53 @@ use crate::utils::macros::*;
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
 impl CharmParser<'_>
 {
-	/// Is the parser currently pointing outside the bounds of the current chunk?
+	/// Has the parser reached the end of its source, and thus is out of bounds?
 	pub(super) fn is_out_of_bounds(&self) -> bool
 	{
-		self.i >= self.source.len()
+			self.l >= self.source_lines.len()
+		&& self.i >= self.source_lines.last().map(|l| l.len()).unwrap_or(0)
 	}
 
-	/// The character in the source the parser is currently pointing to.
+	/// The current line of source text to process.
 	/// 
-	/// This returns `None` iff the parser has reached the end of its source and is out of bounds.
-	pub(super) fn current(&self) -> Option<char>
+	/// Errors if [`Self::is_out_of_bounds`].
+	pub(super) fn line(&self) -> SquarkResult<&[char]>
 	{
-		self.source.get(self.i).copied()
+		Ok(
+			&self.source_lines.get(self.l)
+				.ok_or_else(|| self.err_eof())?
+		)
+	}
+
+	/// The current character in the current line to process.
+	/// 
+	/// Errors if [`Self::is_out_of_bounds`].
+	pub(super) fn current(&self) -> SquarkResult<char>
+	{
+		self.line()?
+			.get(self.i)
+			.copied()
+			.ok_or_else(|| self.err_eof())
 	}
 
 	/// Peek the next character in the source immediately after the current character.
 	/// 
 	/// Returns `None` if the parser is at the end of its source.
-	pub(super) fn peek(&self) -> Option<char>
+	pub(super) fn peek(&self) -> SquarkResult<char>
 	{
-		self.source.get(self.i + 1).copied()
+		self.line()?
+			.get(self.i + 1)
+			.copied()
+			.ok_or_else(|| self.err_eof())
 	}
 
 	/// Get a preview of the upcoming text.
 	pub(super) fn preview(&self) -> String
 	{
-		const PREVIEW_CHARS: usize = 20;
-
-		let end = (self.i + PREVIEW_CHARS).min(self.source.len());
-		let chars = self.source.get(self.i..end);
-		
-		match chars {
-			Some(c) => c.iter().take_while(|&&c| c != '\n').collect(),
-			None => str!("END OF FILE"),
+		match self.line()
+		{
+			Ok(line) => line[self.i..].into_iter().collect(),
+			Err(..) => str!("END OF FILE"),
 		}
 	}
 
@@ -50,13 +64,14 @@ impl CharmParser<'_>
 	/// Skips `\r` characters.
 	pub(super) fn advance(&mut self) -> SquarkResult
 	{
-		if self.is_out_of_bounds() {
-			return self.err_eof()
+		let line = self.line()?;
+
+		if self.i >= line.len() {
+			// advance to next line
+			self.l += 1;
+			self.i = 0;
 		}
-
-		self.i += 1;
-
-		while let Some('\r') = self.current() {
+		else {
 			self.i += 1;
 		}
 
@@ -65,10 +80,15 @@ impl CharmParser<'_>
 
 	/// Check that `needle` is upcoming without consuming.
 	/// 
+	/// This does not check across line breaks, and returns `false` instead of erroring if lookahead goes out-of-bounds.
+	/// 
 	/// `needle` must be ASCII-only since this directly uses byte indices.
 	pub(super) fn lookahead(&self, needle: &str) -> bool
 	{
-		needle.char_indices().all(|(i, c)| self.source[self.i + i] == c)
+		let Ok(line) = self.line()
+			else { return false };
+		
+		needle.char_indices().all(|(i, c)| line.get(self.i + i) == Some(&c))
 	}
 	
 	/// Consume exactly `target`, erroring on failure.
@@ -232,19 +252,17 @@ impl CharmParser<'_>
 	/// If `live!` has been found already, this is critical since the user intended for Squarkdown to squarkup the file.
 	/// 
 	/// If not, then Squarkdown can just ignore the file.
-	pub(super) fn err_eof(&self) -> SquarkResult
+	pub(super) fn err_eof(&self) -> SquarkError
 	{
 		let msg = str!("unexpected end of file");
 		let hint = str!();
 		let debug = self.ctx.printed();
 
-		let err = if self.is_live {
+		if self.is_live {
 			SquarkError::Unrecoverable { msg, hint, debug }
 		} else {
 			SquarkError::Recoverable { msg, hint, debug }
-		};
-
-		Err(err)
+		}
 	}
 }
 
