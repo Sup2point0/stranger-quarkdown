@@ -160,6 +160,7 @@ impl<'d> Renderer<'d>
 		self.inject_timestamp(&mut f)?;
 		self.inject_head(&mut f)?;
 		f.write_all(content)?;
+		f.flush()?;
 		Ok(())
 	}
 

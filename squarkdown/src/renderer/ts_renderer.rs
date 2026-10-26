@@ -117,6 +117,7 @@ impl Renderer<'_>
 
 		f.write_all(b"\t};\n")?;
 		f.write_all(b"}\n")?;
+		f.flush()?;
 
 		Ok(())
 	}
