@@ -17,7 +17,7 @@ use assertables::*;
 	assert_not_contains!( main, "[main](./main)" );
 }
 
-/// Squarkdown rewrites links to folders outside a file's parent folder.
+/// Squarkdown rewrites links to files in folders outside a file's parent folder.
 #[test] fn nested()
 {
 	clear_files("links/nested").unwrap();
@@ -35,6 +35,23 @@ use assertables::*;
 	assert_contains!( side, "[more](../more)" );
 	assert_contains!( more, "[side](nested/side)" );
 	assert_contains!( more, "[main](main)" );
+}
+
+/// Squarkdown rewrites links to folders without a specific file.
+#[test] fn folders()
+{
+	clear_files("links/folders").unwrap();
+	assert!( squarkup_from("links/folders").success() );
+	
+	let main = read_file("links/folders/main/+page.svx");
+	let side = read_file("links/folders/nested/+page.svx");
+	let root = read_file("links/folders/root/+page.svx");
+	assert_contains!( main, "[nested](nested)" );
+	assert_contains!( main, "[nested/](nested)" );
+	assert_contains!( main, "[nested/more](root)" );
+	assert_contains!( main, "[nested/more/](root)" );
+	assert_contains!( side, "[main](main)" );
+	assert_contains!( root, "[main](main)" );
 }
 
 /// Squarkdown does not resolve external links, and rewrites links with `<sup>↗</sup>` to `<a target="_blank">`.
