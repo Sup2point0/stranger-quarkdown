@@ -666,9 +666,12 @@ impl Renderer<'_>
 
 		let mut their_source_path = path!(own_source_folder / their_file_name).clean();
 
-		/* NOTE: Folder links resolve to the README of that folder */
-		if their_source_path.extension().is_none() {
-			their_source_path.push("readme.md");
+		match their_source_path.extension() {
+			// only rewrite `.md` files
+			Some(ext) if ext != "md" => return None,
+			// folder links resolve to the README of that folder
+			None => their_source_path.push("readme.md"),
+			_ => {}
 		}
 
 		// 2. find where the target file will be exported to
@@ -740,7 +743,7 @@ impl Renderer<'_>
 					href += a;
 				}
 
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
+				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
 
@@ -752,12 +755,13 @@ impl Renderer<'_>
 					utils::display_rel(&self.page.filepath, &self.config.paths.root),
 				);
 
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
+				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
 
 			LinkRewriteAction::ERROR =>
 			{
+				dbg!(&self.site.pages_map());
 				self.errors.push(SquarkError::Recoverable {
 					msg: fmt!("found a link to an inactive page"),
 					hint: str!(),
