@@ -57,15 +57,13 @@ impl CharmParser<'_>
 	/// Skips `\r` characters.
 	pub(super) fn advance(&mut self) -> SquarkResult
 	{
+		self.i += 1;
 		let line = self.line()?;
 
+		// advance to next line
 		if self.i >= line.len() {
-			// advance to next line
 			self.l += 1;
 			self.i = 0;
-		}
-		else {
-			self.i += 1;
 		}
 
 		Ok(())
@@ -255,12 +253,16 @@ impl CharmParser<'_>
 #[cfg(test)] use super::test_utils::*;
 #[cfg(test)] use crate::utils::testing::*;
 
-#[cfg(test)] use assertables::*;
+#[cfg(test)] use assertables::{ assert_ok, assert_err, assert_starts_with };
+#[cfg(test)] use pretty_assertions::{ assert_eq };
+
+#[cfg(test)] use std::assert_matches;
 
 
 #[cfg(test)]
 mod preview {
 	use super::*;
+	use super::assert_eq;
 
 	#[test] fn basic()
 	{
@@ -305,7 +307,6 @@ mod advance
 		assert_matches!( parser.current(), Ok('0') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('1') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('2') );
-		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('\n') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('3') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('4') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.current(), Ok('5') );
@@ -318,7 +319,6 @@ mod advance
 		let mut parser = CharmParser::new("012\n345", TEST_FILE.clone(), &TEST_CONFIG);
 		assert_matches!( parser.peek(), Ok('1') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('2') );
-		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('\n') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('3') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('4') );
 		assert_ok!( parser.advance() ); assert_matches!( parser.peek(), Ok('5') );
@@ -376,6 +376,7 @@ mod eat {
 #[cfg(test)]
 mod eat_spaces {
 	use super::*;
+	use super::assert_eq;
 
 	#[test] fn fails()
 	{
@@ -420,6 +421,7 @@ mod eat_spaces {
 #[cfg(test)]
 mod eat_whitespace {
 	use super::*;
+	use super::assert_eq;
 
 	#[test] fn stops()
 	{
