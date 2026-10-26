@@ -6,7 +6,7 @@
 
   "scripts": {
     "dev":    "vite",
-      "devx": "npm run prep && vite --open",
+      "devx": "cd ../squarkdown && cargo run && cd ../site && vite --open",
     
     "prep":    "npx squarkdown",
       "prepx": "npx squarkdown --fonts && nu prep.nu",
