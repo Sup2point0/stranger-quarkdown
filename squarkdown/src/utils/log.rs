@@ -5,6 +5,10 @@ use crate::utils::colours::*;
 use std::fmt::Display;
 
 
+/// Print a line to the console.
+pub fn line() { println!("{GREY}─────────────────────────────"); }
+
+/// Print Squarkdown’s version to the console.
 pub fn version()
 {
 	println!();
@@ -50,8 +54,6 @@ pub fn version()
 } pub use hint;
 
 
-pub fn line() { println!("{GREY}─────────────────────────────"); }
-
 pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{GREY}› {Y}{msg}", "", i = indent); }
 pub fn log_ok   (indent: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = indent); }
 pub fn log_bad  (indent: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = indent); }
@@ -66,7 +68,7 @@ pub fn log_info(indent: usize, msg:  impl Display) {
 
 
 /// Print `err`, with surrounding line delimiters.
-pub fn error(err: SquarkError)
+pub fn error(err: impl std::borrow::Borrow<SquarkError>)
 {
 	fn go(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
 	{
@@ -134,6 +136,6 @@ pub fn error(err: SquarkError)
 	}
 
 	line();
-	go(&err, 0, false);
+	go(err.borrow(), 0, false);
 	line();
 }
