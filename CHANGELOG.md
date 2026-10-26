@@ -31,9 +31,17 @@ I’m working on fixing these!
 <br>
 
 
-## Next Major (v4.5)
+## v4.5
 
 ### New
+- Links to folders are now resolved, not just links to `.md` files!
+
+  ```md
+  Before we’d rewrite [this file link](file.md), but now we also rewrite [this folder link](folder/).
+  ```
+
+  - Squarkdown will look for the `README.md` file in that folder and use that page’s `.destination`.
+
 - `format.externalise-links` now works.
   - It is disabled by default, so opt in with `format.externalise-links = true`.
   - This will rewrite links containing `<sup>↗</sup>` into `<a target="_blank">` links, e.g.
@@ -47,13 +55,6 @@ I’m working on fixing these!
   ```
 
 - `squarkdown --quiet` option to hide info output.
-- Links to folders are now resolved, not just links to `.md` files!
-
-  ```md
-  Before we’d rewrite [this file link](file.md), but now we also rewrite [this folder link](folder/).
-  ```
-
-  - Squarkdown will look for the `README.md` file in that folder and use that page’s `.destination`.
 
 
 <br>
