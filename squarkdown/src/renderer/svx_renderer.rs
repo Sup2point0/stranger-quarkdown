@@ -642,10 +642,9 @@ impl Renderer<'_>
 		range: ParserRange,
 	) -> Option<Event<'e>>
 	{
-		/* We only rewrite relative links to Markdown files */
-		if !dest_url.contains(".md")
+		/* We only rewrite relative links to Markdown files, or folders. We ignore external links and anchor links. */
+		if dest_url.starts_with('#')
 		|| dest_url.contains("://")
-		|| dest_url.starts_with("http")
 		|| dest_url.starts_with("mailto:") {
 			return None;
 		}
@@ -665,7 +664,12 @@ impl Renderer<'_>
 		let own_source_folder = self.page.filepath.parent()
 			.expect("active files always have a parent folder");
 
-		let their_source_path = path!(own_source_folder / their_file_name).clean();
+		let mut their_source_path = path!(own_source_folder / their_file_name).clean();
+
+		/* NOTE: Folder links resolve to the README of that folder */
+		if their_source_path.extension().is_none() {
+			their_source_path.push("readme.md");
+		}
 
 		// 2. find where the target file will be exported to
 		let shard = PageData::shard_for(&their_source_path, self.config);
@@ -1405,26 +1409,39 @@ mod code_blocks {
 }
 
 /// Here we test basic link preservation, not resolution and rewriting. Since these require proper filepaths and multiple pages, that functionality is left for the integration tests.
+/// 
+/// Links here have to be external, otherwise they trigger link rewriting. Unfortunately this makes the cases a lot more verbose, but ah well.
 #[cfg(test)]
 mod links {
 	use super::*;
 
 	#[test] fn emphasis() {
 		test_preserves(&[
-			"[*link*](link)",
-			"[**link**](link)",
-			"[***link***](link)",
-			"[~~link~~](link)",
+			"[*link*](https://github.com)",
+			"[**link**](https://github.com)",
+			"[***link***](https://github.com)",
+			"[~~link~~](https://github.com)",
 		]);
 	}
 
 	#[test] fn nested_brackets() {
 		test_expected(&[
-			("[[link]](link)", "[&lbrack;link&rbrack;](link)"),
-			("[[nested] bracketed](link)", "[&lbrack;nested&rbrack; bracketed](link)"),
-			("[a [nested]](link)", "[a &lbrack;nested&rbrack;](link)"),
-			("[a [nested] bracketed](link)", "[a &lbrack;nested&rbrack; bracketed](link)"),
-			("[[[link]]](link)", "[&lbrack;&lbrack;link&rbrack;&rbrack;](link)"),
+			(
+				"[[link]](https://github.com)",
+				"[&lbrack;link&rbrack;](https://github.com)"
+			), (
+				"[[nested] bracketed](https://github.com)",
+				"[&lbrack;nested&rbrack; bracketed](https://github.com)"
+			), (
+				"[a [nested]](https://github.com)",
+				"[a &lbrack;nested&rbrack;](https://github.com)"
+			), (
+				"[a [nested] bracketed](https://github.com)",
+				"[a &lbrack;nested&rbrack; bracketed](https://github.com)"
+			), (
+				"[[[link]]](https://github.com)",
+				"[&lbrack;&lbrack;link&rbrack;&rbrack;](https://github.com)"
+			),
 		]);
 	}
 }
@@ -1483,9 +1500,9 @@ mod footnotes {
 
 	#[test] fn with_link() {
 		test_preserves(&[
-			"[^footnote]\n\n[^footnote]: With a [link](link) inside",
-			"[^footnote]\n\n[^footnote]: [this](this) is a link",
-			"[^footnote]\n\n[^footnote]: this has a [link](link)",
+			"[^footnote]\n\n[^footnote]: With a [link](https://github.com) inside",
+			"[^footnote]\n\n[^footnote]: [this](https://github.com) is a link",
+			"[^footnote]\n\n[^footnote]: this has a [link](https://github.com)",
 		]);
 	}
 
