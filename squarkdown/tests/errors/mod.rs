@@ -1,4 +1,5 @@
 use crate::*;
+use squarkdown::utils::macros::*;
 
 use assertables::*;
 use path_macro::path;
@@ -62,6 +63,19 @@ use path_macro::path;
 	assert_not!( status.success() );
 	assert_contains!( out, "possibly unclosed charm squark" );
 	assert_contains!( out, "end of file" );
+}
+
+/// Squarkdown errors if a page has a charm squark with 
+#[test] fn charm_syntax_errors()
+{
+	let (status, out) = capture_squarkup_from("errors/charm-syntax");
+	assert!( status.success() );
+	assert_contains!( out, "" );
+
+	for i in 1..=11 {
+		let ts = read_file(&fmt!("errors/charm-syntax/{i}/+page.ts"));
+		assert_contains!( ts, "description: \"success\"");
+	}
 }
 
 /// Squarkdown errors when a page has unbalanced squark usages.
