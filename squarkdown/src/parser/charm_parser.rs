@@ -806,6 +806,24 @@ mod recovery {
 }
 
 #[cfg(test)]
+mod crash {
+	use super::*;
+
+	#[test] fn incomplete() {
+		test_exact(&[
+				"# ",
+				"# Sup",
+				"# Suppety Sup",
+			],
+			|mut parser, _| {
+				let r = parser.parse();
+				assert_err!( &r );
+				log::error(r.unwrap_err());
+			});
+	}
+}
+
+#[cfg(test)]
 mod partial {
 	use super::*;
 

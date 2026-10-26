@@ -97,7 +97,7 @@ impl CharmParser<'_>
 
 		self.l += 1;
 		self.i = 0;
-		
+
 		Ok(())
 	}
 
@@ -113,7 +113,11 @@ impl CharmParser<'_>
 		
 		needle.char_indices().all(|(i, c)| line.get(self.i + i) == Some(&c))
 	}
-	
+}
+
+/// Consumption
+impl CharmParser<'_>
+{
 	/// Consume exactly `target`, erroring on failure.
 	pub(super) fn eat(&mut self,
 		target: &str,
@@ -270,10 +274,7 @@ impl CharmParser<'_>
 		let msg = str!("unexpected end of file");
 		let hint = str!();
 		let debug = [
-			vec![
-				fmt!("l = {}", self.l),
-				fmt!("i = {}", self.i),
-			],
+			self.source_printed((self.l - 1, 0), (self.l - 1, 999)),  // TODO
 			self.ctx.printed(),
 		].concat();
 
@@ -282,6 +283,52 @@ impl CharmParser<'_>
 		} else {
 			SquarkError::Recoverable { msg, hint, debug }
 		}
+	}
+}
+
+/// Debug
+impl CharmParser<'_>
+{
+	fn source_printed(&self,
+		(from_line, from_char): (usize, usize),
+		(to_line, to_char): (usize, usize),
+	) -> Vec<String>
+	{
+		// +2 for prev and next extra lines
+		// +1 cuz counting fenceposts, not gaps
+		let mut out = Vec::with_capacity(2 + (to_line - from_line + 1));
+		out.push(str!(" "));
+
+		// previous line
+
+		// focus lines
+		// TODO focus range
+		// out.push(fmt!(
+		// 	"{GREY1}{line_num:6} {GREY}│  {R}{BOLD}{}{UNBOLD}{W}",
+		// 	self.source_lines[line_num].iter().collect::<String>()
+		// ));
+
+		for line_num in (from_line + 0)..=(to_line + 0) {
+			out.push(fmt!(
+				"{GREY1}{line_num:6} {GREY}│  {R}{BOLD}{}{UNBOLD}{W}",
+				self.source_lines[line_num].iter().collect::<String>()
+			));
+		}
+
+		if to_line != from_line {
+			// TODO focus range
+			todo!()
+		}
+
+		// next line
+		// if let Some(line) = self.source_lines.get(to_line + 1) {
+		// 	todo!()
+		// } else {
+		// 	out.push(fmt!("{GREY} │  {R}{BOLD}END OF FILE{UNBOLD}{W}", to_line + 1));
+		// }
+
+		out.push(str!(" "));
+		out
 	}
 }
 

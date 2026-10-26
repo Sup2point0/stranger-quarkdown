@@ -122,7 +122,10 @@ pub fn error(err: SquarkError)
 				println!("\n{backtrace}");
 			}
 
-			SquarkError::ABANDON => {}
+			SquarkError::ABANDON => {
+				#[cfg(test)]
+				bad!("abandoned!");
+			}
 		}
 	}
 
