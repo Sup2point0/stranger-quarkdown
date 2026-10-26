@@ -74,7 +74,7 @@ impl<'d> CharmParser<'d>
 		
 		let mut heading = None;
 		
-		if self.current() == Some('#') {
+		if self.current()? == '#' {
 			catch!(self.errors => {
 				heading = Some(self.parse_heading()?);
 			});
@@ -107,19 +107,18 @@ impl CharmParser<'_>
 		{
 			self.eat("#", to!("to start heading"))?;
 
-			while let Some('#') = self.current() {
+			while self.current()? == '#' {
 				self.advance()?;
 			}
 			self.eat_spaces();
 
-			let start = self.i;
-			while let Some(c) = self.current() && c != '\n' {
-				self.advance()?;
-			}
-			let stop = self.i;
-			let heading = self.source_lines[start..stop].iter().collect();
-			
-			Ok(utils::trim_end(heading))
+			let heading = utils::trim_end(
+				self.line()?
+					.get(self.i..)
+					.unwrap_or(&[])
+					.into_iter().collect()
+			);
+			Ok(heading)
 		})
 	}
 	
@@ -192,7 +191,7 @@ impl CharmParser<'_>
 		{
 			let mut flags = strings!();
 
-			while let Some(c) = self.current() && c != '\n'
+			while self.current()? != '\n'
 			{
 				if self.lookahead("-->") { break; }
 
@@ -201,7 +200,7 @@ impl CharmParser<'_>
 					Err(e) => {
 						self.errors.push(e);
 
-						while let Some(c) = self.current()
+						while let c = self.current()?
 							&& !Self::is_ident_char(c)
 							&& c != '\n'
 						{
@@ -212,7 +211,7 @@ impl CharmParser<'_>
 					},
 				};
 
-				if self.current() == Some('!') {
+				if self.current()? == '!' {
 					flags.push(ident);
 					self.advance()?;
 				}
@@ -264,7 +263,7 @@ impl CharmParser<'_>
 
 			self.eat_whitespace();
 
-			while self.current() != Some('-')
+			while self.current()? != '-'
 			{
 				let (key, value) = match self.parse_field() {
 					Ok(r) => r,
@@ -276,9 +275,9 @@ impl CharmParser<'_>
 						loop {
 							match self.current()
 							{
-								Some('|' | '-') if can_recover => break,
-								Some('\n') => can_recover = true,
-								_          => can_recover = false,
+								Ok('|' | '-') if can_recover => break,
+								Ok('\n') => can_recover = true,
+								_        => can_recover = false,
 							}
 							self.advance()?;
 						}
@@ -351,11 +350,13 @@ impl CharmParser<'_>
 
 			self.eat_whitespace();
 
-			while let Some(c) = self.current()
-			{
-				match c {
+			loop {
+				let c = self.current()?;
+
+				match c
+				{
 					// ` / ` flushes current value
-					'/' if can_terminate && self.peek().is_some_and(char::is_whitespace) =>
+					'/' if can_terminate && self.peek().is_ok_and(char::is_whitespace) =>
 					{
 						let _ = self.advance();  // safe from if check
 						self.eat_whitespace();

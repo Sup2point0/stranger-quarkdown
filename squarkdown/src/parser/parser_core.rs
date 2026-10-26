@@ -7,16 +7,9 @@ use crate::utils::macros::*;
 /// Core parser internals, not specific to Squarkdown-Flavoured Markdown.
 impl CharmParser<'_>
 {
-	/// Has the parser reached the end of its source, and thus is out of bounds?
-	pub(super) fn is_out_of_bounds(&self) -> bool
-	{
-			self.l >= self.source_lines.len()
-		&& self.i >= self.source_lines.last().map(|l| l.len()).unwrap_or(0)
-	}
-
 	/// The current line of source text to process.
 	/// 
-	/// Errors if [`Self::is_out_of_bounds`].
+	/// Errors if the parser is out of bounds.
 	pub(super) fn line(&self) -> SquarkResult<&[char]>
 	{
 		Ok(
@@ -27,7 +20,7 @@ impl CharmParser<'_>
 
 	/// The current character in the current line to process.
 	/// 
-	/// Errors if [`Self::is_out_of_bounds`].
+	/// Errors if the parser is out of bounds.
 	pub(super) fn current(&self) -> SquarkResult<char>
 	{
 		self.line()?
@@ -38,7 +31,7 @@ impl CharmParser<'_>
 
 	/// Peek the next character in the source immediately after the current character.
 	/// 
-	/// Returns `None` if the parser is at the end of its source.
+	/// Errors if the parser is out of bounds.
 	pub(super) fn peek(&self) -> SquarkResult<char>
 	{
 		self.line()?
