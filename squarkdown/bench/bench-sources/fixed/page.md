@@ -4,14 +4,136 @@
 | description = How does Squarkdown hold up for thousands of files?
 | tags = tests / benches
 | date = 2026 October
+---
+| field1 = 1
+| field2 = 2
+| field3 = 3
+| field4 = 4
+| field5 = 5
+| field6 = 6
+| field7 = 7
+| field8 = 8
+| field9 = 9
+| field10 = 1 / 10
+| field11 = 2 / 11
+| field12 = 3 / 12
+| field13 = 4 / 13
+| field14 = 5 / 14
+| field15 = 6 / 15
+| field16 = 7 / 16
+| field17 = 8 / 17
+| field18 = 9 / 18
+| field19 = 10 / 19
+| field20 = 11 / 20
+| field21 = 12 / 21
+| field22 = 13 / 22
+| field23 = 14 / 23
+| field24 = 15 / 24
 -->
 
 The aim here is to test how Squarkdown’s performance holds up for colossal input sizes.
 
-> [!Important]
-> This page aims to use *as much **nested** [Markdown ~~syntax~~](page) as possible*, to push the limits of context tracking.
+<!-- #SQUARK slash? -->
 
-We also want each file to be pretty long to test real large input, so here goes:
+This scale is unrealistic, but scale is how you track the effects of micro-optimisations!
+
+<!-- #SQUARK slash. -->
+
+##
+
+> [!Important]
+> This page aims to use *as much **nested** [`Markdown` ~~syntax~~](page) as possible*, to push the limits of context tracking.
+
+To do that, we’ll need to have a healthy mix of <!-- interjections --> varied syntax and
+
+<!-- #SQUARK leave? -->
+
+wacky syntax that’ll require $\text{potentially a lot}$ parsing and processing, especially things like
+
+<!-- #SQUARK leave. -->
+
+lines with <!-- interleaved --> comments
+
+or terminating <!-- comments -->
+
+Comments that
+
+<!--
+
+span
+multiple
+lines
+
+with
+
+<!--
+
+weird syntax
+
+-->
+
+And then we also want stuff like:
+
+### Large Code Blocks
+
+```rs
+// == PARSE == //
+log::is!("finding files to squarkup...");
+
+for filepath in resolver::resolve_files(&config) {
+  site_data.stats.checked_files += 1;
+
+  catch! {
+    let filepath = filepath?;
+    let r = parser::parse(&filepath, &config)?;
+    
+    if let Some(page) = r {
+      site_data.add_page(page);
+
+      let (folder, file) = utils::split_path_from(filepath, &config.paths.root);
+      log::info!("found active file: {folder}/{GREY1}{file}");
+    }
+  }.or_else(|e| e.depends(&config))?;
+}
+```
+
+### Large LaTeX Blocks
+
+```math
+```math
+\int
+  \left[
+    \frac
+      { \cos{x} + x \sin{x} }
+      { \cos{x} }
+  \right]
+  \left[
+    \frac
+      { x^5 \sec(x)^6 }
+      { 2 \pi }
+    \exp\left(
+      \frac{4}{3} \pi x^3 \int_{0}^{\infin}
+        \frac
+          { \ln{y} }
+          { 1 + y^2 }
+      \ dy
+    \right)
+    +
+    \frac
+      { x^3 \sec(x)^4 }
+      { \pi }
+    \exp\left(
+      4 \pi x^2 \int_{\infin}^{0}
+        \frac
+          { \ln{y} }
+          { 1 + y^2 }
+      \ dy
+    \right)
+  \right]
+\ dx
+```
+
+And we also want each file to be pretty long to test real large input, so here goes:
 
 1. The quick brown fox jumps over the lazy dog
 1. The quick brown fox jumps over the lazy dog
@@ -382,216 +504,224 @@ __A common misconception is that between attack speed and attack delay, which ar
 1. still more
 1. still more
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
 
-We could more machine gun psystyle
+We could get more machine gun psystyle
+
+
+damn I wonder how compression on this will be
+
+
+Let’s add some entropy
+
+U3F1YXJrZG93biBpcyBhd2Vzb21lIEkgbG92ZSBTcXVhcmtkb3duIFNxdWFya2Rvd24gaXMgYXdlc29tZQ==

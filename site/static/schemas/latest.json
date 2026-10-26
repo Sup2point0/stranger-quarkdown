@@ -27,6 +27,51 @@
       }
     },
 
+    "errors": {
+      "title": "Error Handling",
+      "additionalProperties": false,
+      "properties":
+      {
+        "strict": {
+          "title":       "Enable Safety Checks",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring `destination` to be explicitly provided\n- Checking directories remain under your project root\n- Checking multiple files don't export to the same directory"
+        },
+        
+        "debug": {
+          "title":       "Improve Debug Output",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Enable more helpful debug output?\n\nThis requires Squarkdown to do more work, for instance to keep track of line numbers, so has a tiny impact on performance."
+        },
+
+        "on-error": {
+          "title":       "Error Handling",
+          "type":        "string",
+          "enum":        ["warn", "kill"],
+          "default":     "warn",
+          "description": "What to do when a non-fatal error is encountered (e.g. parsing a file failed)."
+        },
+
+        "file-already-exists": {
+          "title":       "File Conflict Handling",
+          "type":        "string",
+          "enum":        ["overwrite", "error", "skip"],
+          "default":     "overwrite",
+          "description": "What to do when a target file to write to already exists."
+        },
+
+        "link-inactive": {
+          "title":       "Inactive Link Handling",
+          "type":        "string",
+          "enum":        ["mark-broken", "strip-extension", "link-to-github", "error"],
+          "default":     "error",
+          "description": "When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?"
+        }
+      }
+    },
+
     "paths": {
       "title": "Paths",
       "additionalProperties": false,
@@ -94,7 +139,8 @@
         "render-page-ts": {
           "title":       "Enable `+page.ts` Rendering",
           "type":        "boolean",
-          "default":     true
+          "default":     true,
+          "description": "Should Squarkdown output `+page.ts` files exposing the charm squark metadata for a page to SvelteKit?"
         },
 
         "shorter-fields": {
@@ -114,25 +160,29 @@
         "inject-head": {
           "title":       "Inject `<head>`",
           "type":        "boolean",
-          "default":     true
+          "default":     true,
+          "description": "Inject a `<head>` element containing `<title>` and `<meta name=\"description\">`?"
         },
 
         "preserve-heading": {
           "title":       "Preserve Page Heading",
           "type":        "boolean",
-          "default":     false
+          "default":     false,
+          "description": "Keep the first `# Heading` in the rendered output?"
         },
 
         "preserve-comments": {
           "title":       "Preserve Comments",
           "type":        "boolean",
-          "default":     false
+          "default":     false,
+          "description": "Keep `<!-- comments -->` in the rendered output?"
         },
 
         "externalise-links": {
           "title":       "Externalise Links",
           "type":        "boolean",
-          "default":     false
+          "default":     false,
+          "description": "Convert links containing `<sup>↗</sup>` to `<a target=\"_blank\">` elements?"
         }
       }
     },
@@ -160,7 +210,8 @@
           "title":       "Asset File Extensions",
           "type":        "array",
           "items":       {"type": "string"},
-          "default":     "['png', 'jpg', 'jpeg', 'webp', 'svg']"
+          "default":     "['png', 'jpg', 'jpeg', 'webp', 'svg']",
+          "description": "Only asset files with these allowed extensions will be copied."
         }
       }
     },
@@ -174,52 +225,8 @@
           "title":       "Google Fonts Query Parameters",
           "type":        "array",
           "items":       {"type": "string"},
-          "default":     []
-        }
-      }
-    },
-
-    "errors": {
-      "title": "Error Handling",
-      "additionalProperties": false,
-      "properties":
-      {
-        "strict": {
-          "title":       "Enable Safety Checks",
-          "type":        "boolean",
-          "default":     true,
-          "description": "Enable stricter checks for safety?\n\nThis includes:\n\n- Requiring `destination` to be explicitly provided\n- Checking directories remain under your project root\n- Checking multiple files don't export to the same directory"
-        },
-        
-        "debug": {
-          "title":       "Improve Debug Output",
-          "type":        "boolean",
-          "default":     true,
-          "description": "Enable more helpful debug output?\n\nThis requires Squarkdown to do more work, for instance to keep track of line numbers, so has a tiny impact on performance."
-        },
-
-        "on-error": {
-          "title":       "Error Handling",
-          "type":        "string",
-          "enum":        ["warn", "kill"],
-          "default":     "warn",
-          "description": "What to do when a non-fatal error is encountered (e.g. parsing a file failed)."
-        },
-
-        "file-already-exists": {
-          "title":       "File Conflict Handling",
-          "type":        "string",
-          "enum":        ["overwrite", "error", "skip"],
-          "default":     "overwrite",
-          "description": "What to do when a target file to write to already exists."
-        },
-
-        "link-inactive": {
-          "title":       "Inactive Link Handling",
-          "type":        "string",
-          "enum":        ["mark-broken", "strip-extension", "link-to-github", "error"],
-          "default":     "error",
-          "description": "When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?"
+          "default":     [],
+          "description": "Query parameters to inject into the Google Fonts query, e.g. `Montserrat` or `Sora:wght@100..800`."
         }
       }
     }

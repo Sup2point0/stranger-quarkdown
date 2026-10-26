@@ -2,7 +2,7 @@
 <!-- #SQUARK live!
 | destination = docs/walkthrough/quickstart
 | capt = A guided walkthrough on how to setup and use Squarkdown
-| update = 2026 October 6
+| update = 2026 October 26
 -->
 
 Welcome to Squarkdown!
@@ -147,7 +147,7 @@ We need to provide this metadata through a [***field***](../glossary.md#field). 
 Here, we provide `destination`:
 
 ```diff
-# Showerthoughts
+  # Showerthoughts
   <!-- #SQUARK live!
 + | destination = showerthoughts
   -->
@@ -260,7 +260,7 @@ Now in our `.gitignore` we can add:
 We can provide a short `description` for the page:
 
 ```diff
-# Showerthoughts
+  # Showerthoughts
   <!-- #SQUARK live!
   | destination = showerthoughts
 + | description = Just some of our showerthoughts
@@ -270,7 +270,7 @@ We can provide a short `description` for the page:
 We can provide a list of `tags`, separated by `/`:
 
 ```diff
-# Showerthoughts
+  # Showerthoughts
   <!-- #SQUARK live!
   | destination = showerthoughts
   | description = Just some of our showerthoughts
@@ -281,7 +281,7 @@ We can provide a list of `tags`, separated by `/`:
 We can set the `release-date` and `last-update` in the format `<year> <month> <date>`:
 
 ```diff
-# Showerthoughts
+  # Showerthoughts
   <!-- #SQUARK live!
   | destination = showerthoughts
   | description = Just some of our showerthoughts
@@ -294,7 +294,7 @@ We can set the `release-date` and `last-update` in the format `<year> <month> <d
 Or if we want a less precise date, we can omit the date, or even month:
 
 ```diff
-# Showerthoughts
+  # Showerthoughts
   <!-- #SQUARK live!
   | destination = showerthoughts
   | description = Just some of our showerthoughts
@@ -309,7 +309,7 @@ Or if we want a less precise date, we can omit the date, or even month:
 Squarkdown also supports seasons:
 
 ```diff
-# Showerthoughts
+  # Showerthoughts
   <!-- #SQUARK live!
   | destination = showerthoughts
   | description = Just some of our showerthoughts

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::cli::QUIET;
 use crate::utils::colours::*;
 
 use std::fmt::Display;
@@ -12,19 +13,19 @@ pub fn version()
 }
 
 
-/// Log an action that Squarkdown is about to perform, to set up expectations.
-#[macro_export] macro_rules! is {
-	($msg:literal) => { $crate::utils::log::log_is(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_is(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_is(format_args!($($args)*)) };
-} pub use is;
-
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! info {
 	($msg:literal) => { $crate::utils::log::log_info(format_args!($msg)) };
 	($var:expr)    => { $crate::utils::log::log_info(format_args!("{}", $var)) };
 	($($args:tt)*) => { $crate::utils::log::log_info(format_args!($($args)*)) };
 } pub use info;
+
+/// Log an action that Squarkdown is about to perform, to set up expectations.
+#[macro_export] macro_rules! is {
+	($msg:literal) => { $crate::utils::log::log_is(format_args!($msg)) };
+	($var:expr)    => { $crate::utils::log::log_is(format_args!("{}", $var)) };
+	($($args:tt)*) => { $crate::utils::log::log_is(format_args!($($args)*)) };
+} pub use is;
 
 /// Log a checkpoint that has successfully been reached.
 #[macro_export] macro_rules! ok {
@@ -57,8 +58,8 @@ pub fn version()
 
 pub fn line() { println!("{GREY}─────────────────────────────"); }
 
+pub fn log_info(msg:  impl Display) { if !QUIET.get().is_some() { println!(" {}› {msg}",       GREY   ); } }
 pub fn log_is(msg:    impl Display) { println!(" {}› {}{msg}",     GREY, Y); }
-pub fn log_info(msg:  impl Display) { println!(" {}› {msg}",       GREY   ); }
 pub fn log_ok(msg:    impl Display) { println!(" {}✓ {msg}",       C      ); }
 pub fn log_bad(msg:   impl Display) { println!(" {}× {msg}",       R      ); }
 pub fn log_debug(msg: impl Display) { println!(" {}│ {msg}",       GREY   ); }

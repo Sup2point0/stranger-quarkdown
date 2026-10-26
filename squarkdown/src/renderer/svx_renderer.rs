@@ -10,13 +10,20 @@ use aho_corasick::AhoCorasick;
 use map_or_original::MapOrOriginal;
 use path_clean::PathClean;
 use path_macro::path;
-use pulldown_cmark as pd;
+use pulldown_cmark::{
+	self as pd,
+	Event,
+	Event::{ Start, End },
+	Tag, TagEnd,
+};
 use pulldown_cmark_to_cmark as cmark;
 use regex::regex;
 use time::UtcDateTime;
 
+use std::collections::{ VecDeque };
+use std::fmt::{ Write as _ };
 use std::fs::{ self, File };
-use std::io::{ self, Write };
+use std::io;
 use std::iter::{ Peekable };
 use std::ops::{ Range };
 use std::path::{ Path, PathBuf };
@@ -148,7 +155,7 @@ impl<'d> Renderer<'d>
 		self.errors.or(())
 	}
 
-	fn write_page_svx(&self, mut f: impl Write, content: &[u8]) -> SquarkResult
+	fn write_page_svx(&self, mut f: impl io::Write, content: &[u8]) -> SquarkResult
 	{
 		self.inject_timestamp(&mut f)?;
 		self.inject_head(&mut f)?;
@@ -172,10 +179,17 @@ impl<'d> Renderer<'d>
 		self.skip_heading(&mut parser);
 		self.skip_charm_squark(&mut parser);
 
+		let externalise_links = self.config.format.externalise_links;
+
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{GREY} {e:?}"); })
 			.flat_map(Self::split_comments)
+		;
+
+		let parser = Self::externalise_links(parser, externalise_links);
+
+		let parser = parser
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{W} {e:?}"); })
 			.filter_map(|(e, range)| self.process_event(e, range))
 		;
@@ -195,12 +209,12 @@ impl Renderer<'_>
 	fn skip_heading(&self, parser: &mut Peekable<pd::OffsetIter>)
 	{
 		if !self.config.format.preserve_heading
-		&& let Some((pd::Event::Start(pd::Tag::Heading{ level, .. }), _)) = parser.peek()
+		&& let Some((Start(Tag::Heading{ level, .. }), _)) = parser.peek()
 		{
 			let level = *level;
 
 			for (event, _range) in parser.by_ref() {
-				if let pd::Event::End(pd::TagEnd::Heading(lv)) = event
+				if let End(TagEnd::Heading(lv)) = event
 				&& lv == level {
 					break;
 				}
@@ -220,13 +234,13 @@ impl Renderer<'_>
 
 		if !matches!(
 			parser.peek(),
-			Some((pd::Event::Start(pd::Tag::HtmlBlock), _))
+			Some((Start(Tag::HtmlBlock), _))
 		) {
 			return;
 		}
 
 		for (event, _range) in parser.by_ref() {
-			if matches!(event, pd::Event::End(pd::TagEnd::HtmlBlock)) {
+			if matches!(event, End(TagEnd::HtmlBlock)) {
 				break;
 			}
 		}
@@ -248,20 +262,20 @@ impl Renderer<'_>
 	/// ```
 	/// 
 	/// Gets parsed to `[Text("a <!-- perhaps"), Text("strange --> comment")]` instead of the more structurally correct `[Text("A"), InlineHtml("<!-- perhaps\n\nstrange -->"), Text("comment")]`.
-	fn split_comments((event, range): (pd::Event, ParserRange))
-		-> impl Iterator<Item = (pd::Event, ParserRange)>
+	fn split_comments((event, range): (Event, ParserRange))
+		-> impl Iterator<Item = (Event, ParserRange)>
 	{
-		if let pd::Event::Text(text)
-				| pd::Event::Html(text)
-				| pd::Event::InlineHtml(text)
+		if let Event::Text(text)
+				| Event::Html(text)
+				| Event::InlineHtml(text)
 				= &event
 			&& text.trim() != "<!--"
 			&& text.trim() != "-->"
 		{
 			let mut idx = 0;
 			/* NOTE: `Rule` is a temporary placeholder, we never read it */
-			let mut text_left = pd::Event::Rule;
-			let mut text_right = pd::Event::Rule;
+			let mut text_left = Event::Rule;
+			let mut text_right = Event::Rule;
 
 			// For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML
 			/* NOTE: `<!--` at the start of a line shouldn't be split */
@@ -270,8 +284,8 @@ impl Renderer<'_>
 			{
 				idx = i;
 				let (l, r) = text.split_at(idx);
-				text_left = pd::Event::Text(l.to_owned().into());
-				text_right = pd::Event::InlineHtml(r.to_owned().into());
+				text_left = Event::Text(l.to_owned().into());
+				text_right = Event::InlineHtml(r.to_owned().into());
 			}
 			// Do the opposite for a closing comment
 			/* NOTE: `-->` at the end of a line shouldn't be split */
@@ -280,8 +294,8 @@ impl Renderer<'_>
 			{
 				idx = i + "-->".len();
 				let (l, r) = text.split_at(idx);
-				text_left = pd::Event::InlineHtml(l.to_owned().into());
-				text_right = pd::Event::Text(r.to_owned().into());
+				text_left = Event::InlineHtml(l.to_owned().into());
+				text_right = Event::Text(r.to_owned().into());
 			}
 
 			if idx != 0 {
@@ -292,6 +306,102 @@ impl Renderer<'_>
 		}
 		Some((event, range)).into_iter().chain(None)
 	}
+
+	/// Transform the sequence of events for a `[link<sup>↗</sup>](linK)` into events that would render to `<a target="_blank" href="link">link</a>`.
+	/// 
+	/// This is an iterator adapter that wraps `parser` and returns a new iterator.
+	/// 
+	/// If `enabled` is not `true`, this is a no-op – the returned iterator is equivalent to `.map(id)`.
+	fn externalise_links<'e>(
+		mut parser: impl Iterator<Item = (Event<'e>, ParserRange)>,
+		enabled: bool,
+	) -> impl Iterator<Item = (Event<'e>, ParserRange)>
+	{
+		/*
+			Links arrive as multiple events, e.g. [Start(Link), Text, Html, ..., End(Link)] so we won't know whether a link is external until many events down the line. That either requires mutating past iterator events or arbitrary-length lookahead, which ~~both suck~~ aren't feasible.
+		
+			This adapter is necessary so that we can store a buffer of pending events, and if we find that a link _is_ external, we can then transform that buffer appropriately before actually yielding those events.
+
+			So in a way, I guess this is arbitrary-length lookahead ;P
+		*/
+		let mut buffer = VecDeque::new();
+
+		std::iter::from_fn(move ||
+		{
+			if !enabled {
+				return parser.next()
+			}
+
+			if buffer.is_empty() && let Some((event, range)) = parser.next()
+			{
+				let is_in_link = matches!(event, Start(Tag::Link{..}));
+
+				/// The next fragment of `<sup>↗</sup>` we need to consume. `None` once we've found all of them.
+				let mut next_frag = Some("<sup>");
+
+				buffer.push_back((event, range));
+
+				// when we encounter a `Start(Link)`, read ahead until we see `End(Link)`
+				while is_in_link
+				{
+					let Some((event, range)) = parser.next() else { break };
+
+					match event
+					{
+						End(TagEnd::Link) =>
+						{
+							// if this was not an external link, preserve the normal `End(Link)`
+							if let Some(..) = next_frag {
+								buffer.push_back((event, range));
+								break;
+							}
+
+							/* When we reach the end of a link which contained <sup>↗</sup>, the only thing we need to touch is the opening `Start(Link)` event, turning into the raw `<a target="_blank" ...` HTML. */
+							let Some((Start(Tag::Link{ dest_url, title, id, .. }), ..)) = buffer.get_mut(0)
+								else {
+									unreachable!("element 0 of `buffer` is always `Start(Link)` if `is_in_link`")
+								};
+
+							let mut html = str!("<a target=\"_blank\" ");
+							if !id.is_empty()       { let _ = write!(html, "id={:?}", id.to_string()); }
+							if !dest_url.is_empty() { let _ = write!(html, "href={:?}", dest_url.to_string()); }
+							if !title.is_empty()    { let _ = write!(html, "title={:?}", title.to_string()); }
+							let _ = write!(html, ">");
+
+							buffer.front_mut().expect("literally just accessed").0
+								= Event::InlineHtml(html.into());
+							
+							buffer.push_back(
+								(Event::InlineHtml("</a>".into()), range)
+							);
+
+							break;
+						}
+						Event::InlineHtml(pd::CowStr::Borrowed("<sup>")) if next_frag == Some("<sup>") => {
+							next_frag = Some("↗");
+						}
+						Event::Text(pd::CowStr::Borrowed("↗")) if next_frag == Some("↗") => {
+							next_frag = Some("</sup>");
+						}
+						Event::InlineHtml(pd::CowStr::Borrowed("</sup>")) if next_frag == Some("</sup>") => {
+							next_frag = None;  // done!
+						}
+						_ => {
+							// events before `End(Link)` get queued into the `buffer``
+							buffer.push_back((event, range));
+
+							// if we did not find the next required fragment, and we're _still looking_, then reset
+							if let Some(..) = next_frag {
+								next_frag = Some("<sup>");
+							}
+						}
+					}
+				}
+			}
+
+			buffer.pop_front()
+		})
+	}
 }
 
 /// Markdown transforms
@@ -299,16 +409,16 @@ impl Renderer<'_>
 {
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
-		event: pd::Event<'e>,
+		event: Event<'e>,
 		range: ParserRange,
-	) -> Option<pd::Event<'e>>
+	) -> Option<Event<'e>>
 	{
 		match &event
 		{
-			pd::Event::Start(pd::Tag::CodeBlock(..)) => {
+			Start(Tag::CodeBlock(..)) => {
 				self.ctx.push(Ctx::CODE);
 			}
-			pd::Event::End(pd::TagEnd::CodeBlock) => {
+			End(TagEnd::CodeBlock) => {
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::CODE)?;
 				});
@@ -318,8 +428,8 @@ impl Renderer<'_>
 
 		let out = match event {
 			/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
-			| pd::Event::Html(ref html)
-			| pd::Event::InlineHtml(ref html)
+			| Event::Html(ref html)
+			| Event::InlineHtml(ref html)
 			if !self.ctx.is_code()
 			=>
 				match self.process_html(html, range.clone()) {
@@ -344,9 +454,9 @@ impl Renderer<'_>
 
 	/// Transform content depending on the current context.
 	fn process_ctx<'e>(&mut self,
-		mut event: pd::Event<'e>,
+		mut event: Event<'e>,
 		range: ParserRange,
-	) -> Option<pd::Event<'e>>
+	) -> Option<Event<'e>>
 	{
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
 		if self.ctx.has_leave() {
@@ -365,20 +475,20 @@ impl Renderer<'_>
 		match event
 		{
 			// rewrite link
-			pd::Event::Start(pd::Tag::Link{ ref mut dest_url, .. }) =>
+			Start(Tag::Link{ ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::LINK);
 				return self.process_link(dest_url, range).or(Some(event))
 			}
 
 			// pop link context
-			pd::Event::End(pd::TagEnd::Link)
+			End(TagEnd::Link)
 				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
 			{
-				return Some(pd::Event::InlineHtml("</a>".into()))
+				return Some(Event::InlineHtml("</a>".into()))
 			}
 
-			pd::Event::End(pd::TagEnd::Link) =>
+			End(TagEnd::Link) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::LINK)?;
@@ -387,7 +497,7 @@ impl Renderer<'_>
 			}
 
 			// rewrite asset link
-			pd::Event::Start(pd::Tag::Image { ref mut dest_url, .. }) =>
+			Start(Tag::Image { ref mut dest_url, .. }) =>
 			{
 				self.ctx.push(Ctx::IMAGE_LINK);
 				self.process_image(dest_url, range);
@@ -395,7 +505,7 @@ impl Renderer<'_>
 			}
 			
 			// pop asset context
-			pd::Event::End(pd::TagEnd::Image) =>
+			End(TagEnd::Image) =>
 			{
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::IMAGE_LINK)?;
@@ -404,7 +514,7 @@ impl Renderer<'_>
 			}
 
 			// sanitise text
-			pd::Event::Text(text) => Some(self.process_text(text)),
+			Event::Text(text) => Some(self.process_text(text)),
 
 			_ => Some(event),
 		}
@@ -530,12 +640,11 @@ impl Renderer<'_>
 	fn process_link<'e>(&mut self,
 		dest_url: &mut pd::CowStr,
 		range: ParserRange,
-	) -> Option<pd::Event<'e>>
+	) -> Option<Event<'e>>
 	{
-		/* We only rewrite relative links to Markdown files */
-		if !dest_url.contains(".md")
+		/* We only rewrite relative links to Markdown files, or folders. We ignore external links and anchor links. */
+		if dest_url.starts_with('#')
 		|| dest_url.contains("://")
-		|| dest_url.starts_with("http")
 		|| dest_url.starts_with("mailto:") {
 			return None
 		}
@@ -557,10 +666,24 @@ impl Renderer<'_>
 
 		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
-		// 2. find where the target file will be exported to
-		let shard = PageData::shard_for(&their_source_path, self.config);
+		// only rewrite file links to `.md` files
+		if let Some(ext) = their_source_path.extension() && ext != "md" {
+			return None
+		}
 
-		if let Some(dest_page) = self.site.get_page(&shard)
+		// 2. find where the target file will be exported to
+		let mut shard = PageData::shard_for(&their_source_path, self.config);
+		let mut lookup = self.site.get_page(&shard);
+
+		// folder links resolve to the README of that folder
+		for readme in ["readme.md", "README.md"] {
+			if lookup.is_none() && their_source_path.extension().is_none() {
+				shard = PageData::shard_for(&path!(their_source_path / readme), self.config);
+				lookup = self.site.get_page(&shard);
+			}
+		}
+
+		if let Some(dest_page) = lookup
 		{
 			let own_dest_folder = self.page.destination.parent()
 				.expect("destination always has a parent folder");
@@ -610,7 +733,7 @@ impl Renderer<'_>
 
 				let href = "<a class=\"broken-link\" href=\"\">";
 				
-				return Some(pd::Event::InlineHtml(href.into()))
+				return Some(Event::InlineHtml(href.into()));
 			}
 
 			LinkRewriteAction::STRIP_EXTENSION =>
@@ -626,7 +749,7 @@ impl Renderer<'_>
 					href += a;
 				}
 
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
+				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
 
@@ -638,7 +761,7 @@ impl Renderer<'_>
 					utils::display_rel(&self.page.filepath, &self.config.paths.root),
 				);
 
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} -> {GREY1}{href}");
+				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
 
@@ -712,7 +835,7 @@ impl Renderer<'_>
 	/// This includes:
 	/// 
 	/// - HTML entity processing
-	fn process_text<'e>(&self, text: pd::CowStr) -> pd::Event<'e>
+	fn process_text<'e>(&self, text: pd::CowStr) -> Event<'e>
 	{
 		let mut text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
 
@@ -720,7 +843,7 @@ impl Renderer<'_>
 			text = BRACKET_PATTERNS.replace_all(&text, &BRACKET_REPLACEMENTS);
 		}
 
-		pd::Event::Text(text.into())
+		Event::Text(text.into())
 	}
 }
 
@@ -745,7 +868,7 @@ pub static BRACKET_REPLACEMENTS: [&str; 2]
 impl Renderer<'_>
 {
 	/// Write a timestamp to `file`.
-	fn inject_timestamp(&self, file: &mut impl Write) -> SquarkResult
+	fn inject_timestamp(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		let now = UtcDateTime::now();
 
@@ -759,7 +882,7 @@ impl Renderer<'_>
 		Ok(())
 	}
 
-	fn inject_head(&self, file: &mut impl Write) -> SquarkResult
+	fn inject_head(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		if self.page.title.is_empty() {
 			return Ok(())
@@ -955,14 +1078,18 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		a <!-- test -->
+// 		[link<sup>↗</sup>](test)
 // 	"};
+// 	// let source = indoc! {"
+// 	// 	<a target=\"_blank\" href=\"test\">link<sup>↗</sup></a>
+// 	// "};
 
 // 	let mut config = TEST_CONFIG.clone();
 // 	config.errors.strict = true;
 // 	config.errors.strict = false;
 // 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
-// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE, &config);
+// 	config.format.externalise_links = true;
+// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 // 	let out = renderer.render_from(source.trim()).unwrap();
 // 	log::error(renderer.errors);
 // 	println!("{C}{out}{W}");
@@ -1291,26 +1418,39 @@ mod code_blocks {
 }
 
 /// Here we test basic link preservation, not resolution and rewriting. Since these require proper filepaths and multiple pages, that functionality is left for the integration tests.
+/// 
+/// Links here have to be external, otherwise they trigger link rewriting. Unfortunately this makes the cases a lot more verbose, but ah well.
 #[cfg(test)]
 mod links {
 	use super::*;
 
 	#[test] fn emphasis() {
 		test_preserves(&[
-			"[*link*](link)",
-			"[**link**](link)",
-			"[***link***](link)",
-			"[~~link~~](link)",
+			"[*link*](https://github.com)",
+			"[**link**](https://github.com)",
+			"[***link***](https://github.com)",
+			"[~~link~~](https://github.com)",
 		]);
 	}
 
 	#[test] fn nested_brackets() {
 		test_expected(&[
-			("[[link]](link)", "[&lbrack;link&rbrack;](link)"),
-			("[[nested] bracketed](link)", "[&lbrack;nested&rbrack; bracketed](link)"),
-			("[a [nested]](link)", "[a &lbrack;nested&rbrack;](link)"),
-			("[a [nested] bracketed](link)", "[a &lbrack;nested&rbrack; bracketed](link)"),
-			("[[[link]]](link)", "[&lbrack;&lbrack;link&rbrack;&rbrack;](link)"),
+			(
+				"[[link]](https://github.com)",
+				"[&lbrack;link&rbrack;](https://github.com)"
+			), (
+				"[[nested] bracketed](https://github.com)",
+				"[&lbrack;nested&rbrack; bracketed](https://github.com)"
+			), (
+				"[a [nested]](https://github.com)",
+				"[a &lbrack;nested&rbrack;](https://github.com)"
+			), (
+				"[a [nested] bracketed](https://github.com)",
+				"[a &lbrack;nested&rbrack; bracketed](https://github.com)"
+			), (
+				"[[[link]]](https://github.com)",
+				"[&lbrack;&lbrack;link&rbrack;&rbrack;](https://github.com)"
+			),
 		]);
 	}
 }
@@ -1369,9 +1509,9 @@ mod footnotes {
 
 	#[test] fn with_link() {
 		test_preserves(&[
-			"[^footnote]\n\n[^footnote]: With a [link](link) inside",
-			"[^footnote]\n\n[^footnote]: [this](this) is a link",
-			"[^footnote]\n\n[^footnote]: this has a [link](link)",
+			"[^footnote]\n\n[^footnote]: With a [link](https://github.com) inside",
+			"[^footnote]\n\n[^footnote]: [this](https://github.com) is a link",
+			"[^footnote]\n\n[^footnote]: this has a [link](https://github.com)",
 		]);
 	}
 

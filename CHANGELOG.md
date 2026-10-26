@@ -21,6 +21,44 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 <br>
 
 
+## Known Issues
+
+I’m working on fixing these!
+
+- `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and rendered correctly
+
+
+<br>
+
+
+## Next Major (v4.5)
+
+### New
+- `format.externalise-links` now works.
+  - It is disabled by default, so opt in with `format.externalise-links = true`.
+  - This will rewrite links containing `<sup>↗</sup>` into `<a target="_blank">` links, e.g.
+
+  ```md
+  <!-- before -->
+  [GitHub<sup>↗</sup>](https://github.com/Sup2point0)
+
+  <!-- after -->
+  <a target="_blank" href="https://github.com/Sup2point0">GitHub<sup>↗</sup></a>
+  ```
+
+- `squarkdown --quiet` option to hide info output.
+- Links to folders are now resolved, not just links to `.md` files!
+
+  ```md
+  Before we’d rewrite [this file link](file.md), but now we also rewrite [this folder link](folder/).
+  ```
+
+  - Squarkdown will look for the `README.md` file in that folder and use that page’s `.destination`.
+
+
+<br>
+
+
 ## v4.4.1
 
 ### Fixes

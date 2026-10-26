@@ -21,7 +21,8 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 	let mut unknown_args = vec![];
 
 	for arg in args {
-		if      arg.eq_ignore_ascii_case("--dry-run") { dry_run = true; }
+		if      arg.eq_ignore_ascii_case("--quiet")   { let _ = QUIET.set(()); }
+		else if arg.eq_ignore_ascii_case("--dry-run") { dry_run = true; }
 		else if arg.eq_ignore_ascii_case("--assets")  { assets = true; }
 		else if arg.eq_ignore_ascii_case("--fonts")   { fonts = true; }
 		else {

@@ -6,8 +6,17 @@
   text-decoration: none;
   transition: all 0.16s ease-out;
 
-  &:hover, &:focus {
+  &:hover, &:focus-visible {
     color: $col-hover;
+  }
+
+  strong em {
+    color: $col-up;
+    font-style: normal;
+
+    &:hover, &:focus-visible {
+      color: $col-hover;
+    }
   }
 }
 
@@ -29,6 +38,10 @@
     bottom: $bottom;
     border-bottom: 1px solid $col-squark;
     transition: all 0.2s ease-out;
+  }
+
+  &:has(strong em)::after {
+    border-color: $col-up;
   }
 
   &:hover, &:focus {
