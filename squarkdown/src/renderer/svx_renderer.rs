@@ -703,30 +703,66 @@ impl Renderer<'_>
 			*dest_url = href.into();
 			return None
 		}
+		// 3. handle broken or inactive link
+		else {
+			let mut link_rewritten =
+				their_file_name[..]
+				.map_or_orig(|f| f.strip_suffix(".md"))
+				.to_owned()
+			;
+			if let Some(a) = anchor {
+				link_rewritten += "#";
+				link_rewritten += a;
+			}
 
-		// 3. handle a broken link
-		if !their_source_path.exists() {
-			match self.config.errors.link_broken
+			if !their_source_path.exists() {
+				self.process_broken_link(
+					self.config.errors.link_broken,
+					dest_url, range, link_rewritten,
+					fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
+					str!(),
+					slash!("resolved to: {GREY1}{}", their_source_path)
+				)
+			} else {
+				self.process_broken_link(
+					self.config.errors.link_inactive,
+					dest_url, range, link_rewritten,
+					str!("link to an inactive page"),
+					fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
+					fmt!("resolved to: {GREY1}{shard}")
+				)
+			}
+		}
+	}
+
+	fn process_broken_link<'e>(&mut self,
+		action: LinkRewriteAction,
+		dest_url: &mut pd::CowStr,
+		range: ParserRange,
+		link_rewritten: String,
+		msg: String,
+		hint: String,
+		resolved_to: String,
+	) -> Option<Event<'e>>
+	{
+		match action
 		{
 			LinkRewriteAction::MARK_BROKEN =>
-			{
+			{	
+				log::error(SquarkError::Recoverable {
+					msg: fmt!("found a {msg}, marking it as broken"),
+					hint,
+					debug: [
+						self.source_printed(range),
+						vec![resolved_to],
+					].concat()
+				});
+
 				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
 					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
 				};
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
-				log::error(SquarkError::Recoverable {
-					msg: fmt!(
-						"marking link to a nonexistent {} as broken",
-						if is_folder_link {"folder"} else {"file"}
-					),
-					hint: str!(),
-					debug: [
-						self.source_printed(range),
-						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
-					].concat()
-				});
-
 				let href = "<a class=\"broken-link\" href=\"\">";
 				
 				return Some(Event::InlineHtml(href.into()))
@@ -734,17 +770,9 @@ impl Renderer<'_>
 
 			LinkRewriteAction::STRIP_EXTENSION =>
 			{
-				let mut href =
-					their_file_name[..]
-					.map_or_orig(|f| f.strip_suffix(".md"))
-					.to_owned()
-				;
-				if let Some(a) = anchor {
-					href += "#";
-					href += a;
-				}
-				log::info!("rewriting broken link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
-				*dest_url = href.into();
+				log::info!("found a {msg}, rewriting it: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{link_rewritten}");
+
+				*dest_url = link_rewritten.into();
 			}
 
 			LinkRewriteAction::LINK_TO_GITHUB =>
@@ -754,91 +782,23 @@ impl Renderer<'_>
 					self.config.project.github,
 					utils::display_rel(&self.page.filepath, &self.config.paths.root),
 				);
-				log::info!("rewriting broken link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
+				log::info!("found a {msg}, rewriting it: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
+
 				*dest_url = href.into();
 			}
 
 			LinkRewriteAction::ERROR =>
 			{
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!(
-						"found a broken link to a nonexistent {}",
-						if is_folder_link {"folder"} else {"file"}
-					),
-					hint: str!(""),
+					msg: fmt!("found a {msg}"),
+					hint,
 					debug: [
 						self.source_printed(range),
-						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+						vec![resolved_to],
 					].concat()
 				});
 			}
 		}
-			return None
-		}
-
-		// 4. handle a non-broken but inactive link
-		match self.config.errors.link_inactive
-		{
-			LinkRewriteAction::MARK_BROKEN =>
-			{
-				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
-					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
-				};
-				self.ctx.push(Ctx::LINK_REWRITE);
-				
-				log::error(SquarkError::Recoverable {
-					msg: fmt!("marking link to an inactive page as broken"),
-					hint: str!(),
-					debug: [
-						self.source_printed(range),
-						vec![fmt!("resolved to: {GREY1}{shard}")],
-					].concat()
-				});
-
-				let href = "<a class=\"broken-link\" href=\"\">";
-				
-				return Some(Event::InlineHtml(href.into()))
-			}
-
-			LinkRewriteAction::STRIP_EXTENSION =>
-			{
-				let mut href =
-					their_file_name[..]
-					.map_or_orig(|f| f.strip_suffix(".md"))
-					.to_owned()
-				;
-				if let Some(a) = anchor {
-					href += "#";
-					href += a;
-				}
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
-				*dest_url = href.into();
-			}
-
-			LinkRewriteAction::LINK_TO_GITHUB =>
-			{
-				let href = fmt!(
-					"https://github.com/{}/blob/main/{}",
-					self.config.project.github,
-					utils::display_rel(&self.page.filepath, &self.config.paths.root),
-				);
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
-				*dest_url = href.into();
-			}
-
-			LinkRewriteAction::ERROR =>
-			{
-				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found a link to an inactive page"),
-					hint: str!(),
-					debug: [
-						self.source_printed(range),
-						vec![fmt!("resolved to: {GREY1}{shard}")],
-					].concat()
-				});
-			}
-		}
-
 		None
 	}
 
