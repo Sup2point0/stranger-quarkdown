@@ -234,6 +234,10 @@ impl CharmParser<'_>
 							self.ctx.printed(),
 						].concat(),
 					});
+
+					if !c.is_alphanumeric() && !c.is_whitespace() {
+						self.advance()?;
+					}
 				}
 				
 				self.eat_spaces();
