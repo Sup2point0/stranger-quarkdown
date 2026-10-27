@@ -118,6 +118,22 @@ use assertables::*;
 	assert_contains!( out, "(./nested/side.md)" );
 }
 
+/// With `link-broken = mark-broken`, Squarkdown rewrites links to inactive pages into HTML links with a `broken-link` class.
+#[test] fn broken_mark()
+{
+	clear_files("links/broken-mark").unwrap();
+	assert!( squarkup_from("links/broken-mark").success() );
+
+	let md = read_file("links/broken-mark/+page.svx");
+	assert_contains!( md, "<a" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">./side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">nested</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">nested/</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">nested/side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"\">./nested/side</a>" );
+}
+
 /// With `link-inactive = error`, Squarkdown crashes when encountering links to inactive pages.
 #[test] fn inactive_crashes()
 {

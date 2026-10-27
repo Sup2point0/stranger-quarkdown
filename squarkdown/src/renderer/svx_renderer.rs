@@ -669,10 +669,12 @@ impl Renderer<'_>
 
 		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
-		// only rewrite file links to `.md` files
+		// if it's a file link, only accept `.md` files
 		if let Some(ext) = their_source_path.extension() && ext != "md" {
 			return None
 		}
+
+		let is_folder_link = their_source_path.extension().is_none();
 
 		// 2. find where the target file will be exported to
 		let mut shard = PageData::shard_for(&their_source_path, self.config);
@@ -680,7 +682,7 @@ impl Renderer<'_>
 
 		// folder links resolve to the README of that folder
 		for readme in ["readme.md", "README.md"] {
-			if lookup.is_none() && their_source_path.extension().is_none() {
+			if lookup.is_none() && is_folder_link {
 				shard = PageData::shard_for(&path!(their_source_path / readme), self.config);
 				lookup = self.site.get_page(&shard);
 			}
@@ -704,14 +706,73 @@ impl Renderer<'_>
 
 		// 3. handle a broken link
 		if !their_source_path.exists() {
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found a broken link"),
-				hint: str!(),
-				debug: [
-					self.source_printed(range),
-					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
-				].concat()
-			});
+			match self.config.errors.link_broken
+		{
+			LinkRewriteAction::MARK_BROKEN =>
+			{
+				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
+					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
+				};
+				self.ctx.push(Ctx::LINK_REWRITE);
+				
+				log::error(SquarkError::Recoverable {
+					msg: fmt!(
+						"marking link to a nonexistent {} as broken",
+						if is_folder_link {"folder"} else {"file"}
+					),
+					hint: str!(),
+					debug: [
+						self.source_printed(range),
+						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+					].concat()
+				});
+
+				let href = "<a class=\"broken-link\" href=\"\">";
+				
+				return Some(Event::InlineHtml(href.into()))
+			}
+
+			LinkRewriteAction::STRIP_EXTENSION =>
+			{
+				let mut href =
+					their_file_name[..]
+					.map_or_orig(|f| f.strip_suffix(".md"))
+					.to_owned()
+				;
+				if let Some(a) = anchor {
+					href += "#";
+					href += a;
+				}
+				log::info!("rewriting broken link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
+				*dest_url = href.into();
+			}
+
+			LinkRewriteAction::LINK_TO_GITHUB =>
+			{
+				let href = fmt!(
+					"https://github.com/{}/blob/main/{}",
+					self.config.project.github,
+					utils::display_rel(&self.page.filepath, &self.config.paths.root),
+				);
+				log::info!("rewriting broken link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
+				*dest_url = href.into();
+			}
+
+			LinkRewriteAction::ERROR =>
+			{
+				self.errors.push(SquarkError::Recoverable {
+					msg: fmt!(
+						"found a broken link to a nonexistent {}",
+						if is_folder_link {"folder"} else {"file"}
+					),
+					hint: str!(""),
+					debug: [
+						self.source_printed(range),
+						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+					].concat()
+				});
+			}
+		}
 			return None
 		}
 
@@ -736,7 +797,7 @@ impl Renderer<'_>
 
 				let href = "<a class=\"broken-link\" href=\"\">";
 				
-				return Some(Event::InlineHtml(href.into()));
+				return Some(Event::InlineHtml(href.into()))
 			}
 
 			LinkRewriteAction::STRIP_EXTENSION =>
@@ -746,12 +807,10 @@ impl Renderer<'_>
 					.map_or_orig(|f| f.strip_suffix(".md"))
 					.to_owned()
 				;
-
 				if let Some(a) = anchor {
 					href += "#";
 					href += a;
 				}
-
 				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
@@ -763,7 +822,6 @@ impl Renderer<'_>
 					self.config.project.github,
 					utils::display_rel(&self.page.filepath, &self.config.paths.root),
 				);
-
 				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
