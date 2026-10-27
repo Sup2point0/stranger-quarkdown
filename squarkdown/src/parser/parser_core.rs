@@ -37,7 +37,7 @@ impl CharmParser<'_>
 	/// 
 	/// If the current character is at the end of a line, this returns `\n` instead of the first character of the next line.
 	/// 
-	/// Errors if the parser is out of bounds.
+	/// Returns `None` if the parser is out of bounds.
 	pub(super) fn peek(&self) -> Option<char>
 	{
 		let line = self.line().ok()?;
@@ -54,6 +54,9 @@ impl CharmParser<'_>
 		}
 	}
 
+	/// Peek the next line in the source.
+	/// 
+	/// Returns `None` if the parser is out of bounds.
 	pub(super) fn peek_line(&self) -> Option<&[char]>
 	{
 		Some(
@@ -62,12 +65,25 @@ impl CharmParser<'_>
 	}
 
 	/// Get a preview of the upcoming text.
+	#[cfg(test)]
 	pub(super) fn preview(&self) -> String
 	{
 		match self.line()
 		{
 			Ok(line) => line[self.i..].into_iter().collect(),
 			Err(..) => str!("END OF FILE"),
+		}
+	}
+
+	/// Calculate the `(line-idx, char-idx)` of the previous character in the source.
+	pub(super) fn prev_indices(&self) -> (usize, usize)
+	{
+		if self.i == 0 {
+			let l = zero!(self.l - 1);
+			let i = self.source_lines[l].len();
+			(l, i)
+		} else {
+			(self.l, self.i - 1)
 		}
 	}
 
@@ -100,7 +116,11 @@ impl CharmParser<'_>
 
 		Ok(())
 	}
+}
 
+/// Consumption
+impl CharmParser<'_>
+{
 	/// Check that `needle` is upcoming without consuming.
 	/// 
 	/// This does not check across line breaks, and returns `false` instead of erroring if lookahead goes out-of-bounds.
@@ -113,15 +133,12 @@ impl CharmParser<'_>
 		
 		needle.char_indices().all(|(i, c)| line.get(self.i + i) == Some(&c))
 	}
-}
 
-/// Consumption
-impl CharmParser<'_>
-{
 	/// Consume exactly `target`, erroring on failure.
 	pub(super) fn eat(&mut self,
 		target: &str,
 		to: impl Fn() -> String,
+		hint: impl Fn() -> String,
 	) -> SquarkResult
 	{
 		let init = self.i;
@@ -129,11 +146,13 @@ impl CharmParser<'_>
 		for expected in target.chars()
 		{
 			if self.current()? != expected {
+				let (l, i) = self.prev_indices();
+				
 				return Err(SquarkError::Recoverable {
 					msg: fmt!("expected {W}{BOLD}{target}{UNBOLD} {R}{}", to()),
-					hint: str!(),
+					hint: hint(),
 					debug: [
-						self.source_printed(self.l, init, self.i),
+						self.source_printed(l, init, i),
 						self.ctx.printed(),
 					].concat(),
 				});
@@ -172,11 +191,13 @@ impl CharmParser<'_>
 		for expected in target.chars()
 		{
 			if !self.current()?.eq_ignore_ascii_case(&expected) {
+				let (l, i) = self.prev_indices();
+
 				return Err(SquarkError::Recoverable {
 					msg: fmt!("expected {target} to {}", to()),
 					hint: str!(),
 					debug: [
-						self.source_printed(self.l, init, self.i),
+						self.source_printed(l, init, i),
 						self.ctx.printed(),
 					].concat(),
 				});
@@ -480,7 +501,7 @@ mod eat {
 			"testing 123",
 		],
 		|mut parser, _case| {
-			let r = parser.eat("FAIL", to!());
+			let r = parser.eat("FAIL", to!(), to!());
 			assert_err!(r);
 		});
 	}
@@ -494,7 +515,7 @@ mod eat {
 			"testing 123",
 		],
 		|mut parser, case| {
-			assert_ok!( parser.eat(case, to!()) );
+			assert_ok!( parser.eat(case, to!(), to!()) );
 		});
 	}
 }

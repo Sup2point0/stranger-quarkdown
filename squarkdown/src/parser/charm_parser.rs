@@ -105,7 +105,7 @@ impl CharmParser<'_>
 	{
 		ctx!(self, ParseCtx::HEADING =>
 		{
-			self.eat("#", to!("to start heading"))?;
+			self.eat("#", to!("to start heading"), to!())?;
 
 			while self.current()? == '#' {
 				self.advance()?;
@@ -150,7 +150,7 @@ impl CharmParser<'_>
 			fields.extend(other);
 		}
 
-		self.eat("-->", to!("to terminate charm squark"))?;
+		self.eat("-->", to!("to terminate charm squark"), to!())?;
 
 		Ok((flags, fields))
 	}
@@ -323,14 +323,20 @@ impl CharmParser<'_>
 	{
 		ctx!(self, ParseCtx::FIELD =>
 		{
-			self.eat("|", to!("to start field in charm squark"))?;
+			self.eat("|",
+				to!("to start field in charm squark"),
+				to!("charm squark fields look like this: {Y}| field = value")
+			)?;
 			self.eat_spaces();
 
 			let key = self.parse_ident()?;
 			let key = key.replace('-', "_");
 
 			self.eat_whitespace();
-			self.eat("=", to!("after field identifier"))?;
+			self.eat("=",
+				to!("after field identifier"),
+				to!("charm squark fields look like this: {Y}| field = value")
+			)?;
 			self.eat_whitespace();
 
 			let values = self.parse_values()?;
