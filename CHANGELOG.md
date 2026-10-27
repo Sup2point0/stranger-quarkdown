@@ -35,6 +35,10 @@ I’m working on fixing these!
 ## Next Major (v4.6)
 
 ### New
+- `errors.link-broken` option (returns)
+  - This is distinct to the existing `errors.link-inactive`.
+  - `link-broken` determines how links to *nonexistent* files should be handled.
+  - The values for `link-broken` are the same as `link-inactive` (`error`, `mark-broken`, `strip-extension`, `link-to-github`).
 - Parser error messages now include source snapshots too!
 
   ```hs
