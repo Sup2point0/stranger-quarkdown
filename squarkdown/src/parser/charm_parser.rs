@@ -29,10 +29,10 @@ pub(super) struct CharmParser<'d>
 
 	// == MUTABLE == //
 
-	/// The current line index. Which line in [`Self::source_lines`] are we on?
+	/// The current line index: which line in [`Self::source_lines`] are we on?
 	pub(super) l: usize,
 
-	/// The current character index. Which character in the current line ([`Self::source_lines`][[`l`](Self::l)]) are we on?
+	/// The current character index: which character in the current line ([`Self::source_lines`][[`l`](Self::l)]) are we on?
 	pub(super) i: usize,
 	
 	/// Have we encountered a `<!-- #SQUARK live!` yet?
@@ -173,7 +173,7 @@ impl CharmParser<'_>
 						msg: fmt!("expected either {W}live!{R} or {W}dead!{R} to start charm squark"),
 						hint: fmt!(
 							"use {W}<!-- #SQUARK {BOLD}live!{UNBOLD}{G} for an active file, \
-							\n{:8} or {W}<!-- #SQUARK {BOLD}dead!{UNBOLD}{G} for an inactive file",
+							\n{:8} or {W}<!-- #SQUARK {BOLD}dead!{UNBOLD}{G} if you want to mark the file as inactive",
 							""
 						),
 						debug: self.source_printed(self.l, self.i, self.i),
@@ -201,6 +201,8 @@ impl CharmParser<'_>
 			{
 				if self.lookahead("-->") { break; }
 
+				let from = self.i;
+
 				let ident = match self.parse_ident() {
 					Ok(id) => id,
 					Err(e) => {
@@ -217,16 +219,21 @@ impl CharmParser<'_>
 					},
 				};
 
-				if self.current()? == '!' {
+				let c = self.current()?;
+
+				if c == '!' {
 					flags.push(ident);
 					self.advance()?;
 				}
 				else {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("invalid flag: {W}{ident}{GREY}...",),
-						hint: fmt!("flags must end in {W}!{G}, like: {W}{ident}!"),
-						debug: self.ctx.printed(),
-					});	
+						msg: fmt!("invalid flag in charm squark",),
+						hint: fmt!("flags must end in {Y}{BOLD}!{UNBOLD}{G}, like: {W}{ident}!"),
+						debug: [
+							self.source_printed(self.l, from, self.i),
+							self.ctx.printed(),
+						].concat(),
+					});
 				}
 				
 				self.eat_spaces();
@@ -625,9 +632,8 @@ mod full {
 			"};
 			let mut config = TEST_CONFIG.clone();
 			config.errors.strict = true;
-			let r = CharmParser::new(source, TEST_FILE.clone(), &config).parse();
-			assert_err!( &r );
-			assert_contains!( r.unwrap_err(), "before" );
+			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
+			assert_contains!( e, "before" );
 		}
 	}
 
@@ -810,37 +816,62 @@ mod recovery {
 }
 
 #[cfg(test)]
-mod crash {
+mod errors {
 	use super::*;
 
-	#[test] fn incomplete() {
+	#[test] fn unexpected_end() {
 		test_exact(&[
-				"# Nothing",
-				"# Nothing\n",
-				"\n# Nothing",
-				"\n# Nothing\n",
-				"# Nothing\n\n",
-				"\n# Nothing\n\n",
-				"\n\n# Nothing\n\n",
-				indoc! {"
-					# Heading
-					<!--
-				"},
+			"# Nothing",
+			"# Nothing\n",
+			"\n# Nothing",
+			"\n# Nothing\n",
+			"# Nothing\n\n",
+			"\n# Nothing\n\n",
+			"\n\n# Nothing\n\n",
+			indoc! {"
+				# Heading
+				<!--
+			"},
+			indoc! {"
+				# Heading
+				<!-- #SQUARK live!
+			"},
+			indoc! {"
+				# Heading
+				<!-- #SQUARK live!
+				| dest = .
+			"},
+		],
+		|parser, _| {
+			let e = parser.parse().unwrap_err();
+			log::error(&e);
+			assert_contains!( &e, "unexpected end of file" );
+		});
+	}
+
+	#[test] fn missing_live_or_dead() {
+		test_expected(&[
+			(
 				indoc! {"
 					# Heading
 					<!-- #SQUARK
 				"},
+				"to start charm squark"
+			),
+			(
 				indoc! {"
 					# Heading
 					<!-- #SQUARK
 
 				"},
-			],
-			|parser, _| {
-				let r = parser.parse();
-				assert_err!( &r );
-				log::error(r.unwrap_err());
-			});
+				"to start charm squark"
+			),
+		],
+		|parser, msg| {
+			let e = parser.parse().unwrap_err();
+			log::error(&e);
+			assert_contains!( &e, msg );
+		});
 	}
 }
 
@@ -884,9 +915,8 @@ mod partial {
 				"Don't Do It",
 			],
 			|mut parser, _case| {
-				let r = parser.parse_heading();
-				assert_err!( &r );
-				assert_contains!( r.unwrap_err(), "start heading" );
+				let e = parser.parse_heading().unwrap_err();
+				assert_contains!( e, "start heading" );
 			});
 		}
 	}

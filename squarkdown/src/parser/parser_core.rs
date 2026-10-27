@@ -124,13 +124,18 @@ impl CharmParser<'_>
 		to: impl Fn() -> String,
 	) -> SquarkResult
 	{
+		let init = self.i;
+
 		for expected in target.chars()
 		{
 			if self.current()? != expected {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("unexpected input"),
-					hint: fmt!("expected {W}{BOLD}{target}{UNBOLD} {G}{}, but found: {W}{}", to(), self.preview()),
-					debug: self.ctx.printed(),
+					msg: fmt!("expected {W}{BOLD}{target}{UNBOLD} {R}{}", to()),
+					hint: str!(),
+					debug: [
+						self.source_printed(self.l, init, self.i),
+						self.ctx.printed(),
+					].concat(),
 				});
 			}
 			self.advance()?;
@@ -162,13 +167,18 @@ impl CharmParser<'_>
 		to: impl Fn() -> String,
 	) -> SquarkResult
 	{
+		let init = self.i;
+
 		for expected in target.chars()
 		{
 			if !self.current()?.eq_ignore_ascii_case(&expected) {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("unexpected input"),
-					hint: fmt!("expected {target} to {}, but found: {}", to(), self.preview()),
-					debug: self.ctx.printed(),
+					msg: fmt!("expected {target} to {}", to()),
+					hint: str!(),
+					debug: [
+						self.source_printed(self.l, init, self.i),
+						self.ctx.printed(),
+					].concat(),
 				});
 			}
 			self.advance()?;
@@ -231,17 +241,23 @@ impl CharmParser<'_>
 
 			if let Ok('-') = self.current() {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("illegal identifier: {}", self.preview()),
-					hint: fmt!("identifiers cannot start with {W}-"),
-					debug: self.ctx.printed(),
+					msg: fmt!("illegal identifier"),
+					hint: fmt!("identifiers cannot start with {Y}{BOLD}-{UNBOLD} (hyphen)"),
+					debug: [
+						self.source_printed(self.l, self.i, self.i),
+						self.ctx.printed(),
+					].concat(),
 				});
 			}
 
 			if let Ok(c) = self.current() && !Self::is_ident_char(c) {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("expected identifier, but found: {W}{}", self.preview()),
-					hint: fmt!("identifiers cannot start with {W}{c}"),
-					debug: self.ctx.printed(),
+					msg: fmt!("expected an identifier, but found {W}{BOLD}{c}{UNBOLD}"),
+					hint: fmt!("identifiers must start with an alphanumeric character or {Y}{BOLD}_.~{UNBOLD}"),
+					debug: [
+						self.source_printed(self.l, self.i, self.i),
+						self.ctx.printed(),
+					].concat(),
 				});
 			}
 
@@ -320,40 +336,40 @@ impl CharmParser<'_>
 		// focus lines
 		let line = &self.source_lines[line_idx];
 
-		if from != to
-		{
-			from = from.min(line.len());
-			to   = to.min(line.len());
-			let focus: String = line[from..to].iter().collect();
+		let mut show_pointer = false;
 
-			let r_before = 0..from;
-			let r_after  = to..line.len();
-			let before = if r_before.is_empty() {str!("")} else {line[r_before].iter().collect()};
-			let after  = if r_after.is_empty()  {str!("")} else {line[r_after].iter().collect()};
-
-			out.push(fmt!(
-				"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
-				line_idx + 1,
-			));
+		if from == to {
+			show_pointer = true;
+			to += 1;
 		}
-		else {
+
+		from = from.min(line.len());
+		to   = to.min(line.len());
+		let focus: String = line[from..to].iter().collect();
+
+		let r_before = 0..from;
+		let r_after  = to..line.len();
+		let before = if r_before.is_empty() {str!("")} else {line[r_before].iter().collect()};
+		let after  = if r_after.is_empty()  {str!("")} else {line[r_after].iter().collect()};
+
+		out.push(fmt!(
+			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
+			line_idx + 1,
+		));
+		
+		if show_pointer {
 			out.push(fmt!(
-				"{GREY1}{:6} {GREY}│  {W}{}",
-				line_idx + 1,
-				line.iter().collect::<String>(),
-			));
-			out.push(fmt!(
-				"{:6} {GREY}│  {:width$}{R}{BOLD}^^^{UNBOLD}",
+				"{:6} {GREY}│  {:width$}{R}{BOLD}^^{UNBOLD}",
 				"",
 				"",
-				width = from,
+				width = zero!(from - 1),
 			));
 		}
 
 		// next line
 		if let Some(next_line) = self.source_lines.get(line_idx + 1) {
 			out.push(fmt!(
-				"{GREY}{:6} │  {W}{}",
+				"{GREY1}{:6} {GREY}│  {W}{}",
 				(line_idx + 1) + 1,
 				next_line.iter().collect::<String>(),
 			));
