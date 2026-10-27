@@ -84,7 +84,7 @@ pub(super) struct Renderer<'d>
 	/// 
 	/// For instance, `[0, 4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
 	/// 
-	/// This is always guaranteed to be non-empty because `0` is the first element.
+	/// If `errors.debug = false`, this is empty. Otherwise, this is always guaranteed to be non-empty, because `0` is the first element.
 	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.

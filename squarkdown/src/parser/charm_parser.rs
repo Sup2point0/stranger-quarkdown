@@ -70,30 +70,39 @@ impl<'d> CharmParser<'d>
 	/// Run the parser to completion, extracting the heading and charm squark of the source.
 	pub fn parse(mut self) -> SquarkResult<PageData>
 	{
-		self.eat_whitespace();
-		
-		let mut heading = None;
-		
-		if self.current()? == '#' {
-			catch!(self.errors => {
-				heading = Some(self.parse_heading()?);
-			});
-		}
+		let mut page = None;
 
-		self.eat_whitespace();
-
-		let (flags, mut fields) = self.parse_charm_squark()?;
-
-		if !fields.contains_key("head")
-		&& !fields.contains_key("heading")
+		catch!(self.errors =>
 		{
-			fields.insert(str!("head"), heading.into_iter().collect());
-		}
+			self.eat_whitespace();
+			
+			let mut heading = None;
+			
+			if self.current()? == '#' {
+				heading = Some(self.parse_heading()?);
+			}
 
-		let page = PageData::init(self.filepath, flags, fields, self.config)?;
-		
+			self.eat_whitespace();
+
+			let (flags, mut fields) = self.parse_charm_squark()?;
+
+			if !fields.contains_key("head")
+			&& !fields.contains_key("heading")
+			{
+				fields.insert(str!("head"), heading.into_iter().collect());
+			}
+
+			page = Some(
+				PageData::init(self.filepath.clone(), flags, fields, self.config)?
+			);
+		});
+
 		self.errors.depends(self.config)?;
-		Ok(page)
+
+		match page {
+			Some(p) => Ok(p),
+			None    => Err(SquarkError::ABANDON),
+		}
 	}
 }
 
