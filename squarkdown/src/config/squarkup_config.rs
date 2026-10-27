@@ -148,7 +148,10 @@ pub struct ErrorConfig {
 	/// What to do when a target file to write to already exists.
 	pub file_already_exists: FileAction,
 
-	/// When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?
+	/// When rendering Markdown, how should Squarkdown handle a link that points to a nonexistent file or folder?
+	pub link_broken: LinkRewriteAction,
+
+	/// When rendering Markdown, how should Squarkdown handle a link that points to an inactive file or folder?
 	pub link_inactive: LinkRewriteAction,
 }
 

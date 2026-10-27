@@ -125,8 +125,22 @@ impl SquarkupConfig
 				}
 			}) }
 			
+			if let Some(value) = errors.remove("link-broken") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "errors.link-broken", "(a broken link handling strategy)")?;
+
+				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
+					c.errors.link_broken = opt;
+				} else {
+					unrecoverable! {
+						msg: fmt!("unknown setting for {Y}errors.link-broken"),
+						hint: fmt!("valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
+						debug: vec![fmt!("you provided {value}")],
+					}
+				}
+			}) }
+			
 			if let Some(value) = errors.remove("link-inactive") { catch!(errs => {
-				let raw = Self::try_get_str(&value, "errors.link-inactive", "(a missing file handling strategy)")?;
+				let raw = Self::try_get_str(&value, "errors.link-inactive", "(a broken link handling strategy)")?;
 
 				if let Ok(opt) = LinkRewriteAction::try_from(raw) {
 					c.errors.link_inactive = opt;

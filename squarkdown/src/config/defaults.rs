@@ -23,6 +23,7 @@ impl SquarkupConfig
 				debug: true,
 				on_error: ErrorAction::WARN,
 				file_already_exists: FileAction::OVERWRITE,
+				link_broken: LinkRewriteAction::ERROR,
 				link_inactive: LinkRewriteAction::ERROR,
 			},
 			project: ProjectConfig {
