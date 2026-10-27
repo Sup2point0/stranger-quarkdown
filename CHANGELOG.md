@@ -32,6 +32,37 @@ I’m working on fixing these!
 <br>
 
 
+## Next Major (v4.6)
+
+### New
+- Parser error messages now include source snapshots too!
+
+  ```hs
+  ─────────────────────────────
+  × 1 error while parsing example.md
+  ─────────────────────────────
+  × expected an identifier, but found !
+  │  
+  │      1 │  # Hmm, this charm squark looks suspicious
+  │      2 │  <!-- #SQUARK live! very!! weird flags!
+  │        │                         ^^
+  │      3 │  | dest = .
+  │  
+  │ while parsing identifier
+  │ while parsing flags
+  = hint: identifiers must start with an alphanumeric character or _.~
+  ─────────────────────────────
+  ```
+
+  - Unlike renderer errors, these are much cheaper to compute, so you don’t need `errors.debug = true` to have them.
+
+### Fixes
+- Improve parser reliability to reduce panics
+
+
+<br>
+
+
 ## Next (v4.5.1)
 
 ### New

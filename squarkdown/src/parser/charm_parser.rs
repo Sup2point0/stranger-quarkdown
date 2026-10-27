@@ -1,5 +1,4 @@
 use super::*;
-use crate::prelude::*;
 use crate::types::*;
 use crate::utils;
 use crate::utils::colours::*;
@@ -301,7 +300,8 @@ impl CharmParser<'_>
 						loop {
 							match self.current()
 							{
-								Ok('|' | '-') if can_recover => break,
+								Ok('|') if can_recover => break,
+								Ok(..) if can_recover && self.lookahead("-->") => break,
 								Ok('\n') => can_recover = true,
 								_        => can_recover = false,
 							}
@@ -433,6 +433,7 @@ impl CharmParser<'_>
 // == TESTS == //
 
 #[cfg(test)] use super::test_utils::*;
+#[cfg(test)] use crate::config::*;
 #[cfg(test)] use crate::utils::testing::*;
 #[cfg(test)] use crate::utils::log;
 
@@ -651,6 +652,7 @@ mod full {
 			"};
 			let mut config = TEST_CONFIG.clone();
 			config.errors.strict = true;
+			config.errors.on_error = ErrorAction::KILL;
 			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
 			assert_contains!( e, "before" );
 		}
@@ -839,7 +841,7 @@ mod errors {
 	use super::*;
 
 	#[test] fn unexpected_end() {
-		test_exact(&[
+		test_exact_for(|c| c.errors.on_error = ErrorAction::KILL, &[
 			"# Nothing",
 			"# Nothing\n",
 			"\n# Nothing",
@@ -1082,7 +1084,7 @@ mod partial {
 
 		#[test] fn recovers() {
 			test_expected(&[
-				("live!ignore:ignored", "cannot start with"),
+				("live!ignore:ignored", "must end in"),
 			],
 			|mut parser, expected_err| {
 				parser.parse_flags().unwrap();

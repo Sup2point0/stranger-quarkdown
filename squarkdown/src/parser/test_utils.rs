@@ -7,8 +7,20 @@ pub(super) fn test_exact(
 	test: impl Fn(CharmParser, &str),
 )
 {
+	test_exact_for(|_| {}, cases, test)
+}
+
+pub(super) fn test_exact_for(
+	change_config: impl FnOnce(&mut SquarkupConfig),
+	cases: &[&'static str],
+	test: impl Fn(CharmParser, &str),
+)
+{
+	let mut config = TEST_CONFIG.clone();
+	change_config(&mut config);
+
 	for case in cases {
-		let parser = CharmParser::new(case, TEST_FILE.clone(), &TEST_CONFIG);
+		let parser = CharmParser::new(case, TEST_FILE.clone(), &config);
 
 		test(parser, case)
 	}
