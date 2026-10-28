@@ -50,12 +50,16 @@ This content only shows up in the output.
 
 Squarkdown lets you:
 
-- Write Markdown anywhere in your repo, independently of your SvelteKit site
-- Use [Squarkdown-Flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md) to control how Squarkdown renders the content – all hidden inside `<!-- #SQUARK -->` comments, meaning no disruption to the original Markdown preview!
-- Attach metadata to pages that is passed to SvelteKit via `+page.ts` and/or `site.json`
-- Link between Markdown files and to asset files without worry; Squarkdown fixes the links for the site for you
+- Write Markdown anywhere in your repo, independently of your SvelteKit site.
+- Use [Squarkdown-Flavoured Markdown](docs/walkthrough/squarkdown-flavoured-markdown.md) to control how Squarkdown renders the content, all hidden inside `<!-- #SQUARK -->` comments – meaning no disruption to the original Markdown preview!
+- Add metadata to pages, passed to SvelteKit via `+page.ts`.
+- Link between Markdown files and assets without worry.
 
-> In my experience, it’s quite difficult to explain to people what Squarkdown is exactly. But it’s a tool I absolutely need – and use in so many projects! – so trust me, it *is* useful ;)
+Squarkdown can also:
+
+- Resolve and rewrite links so that they work in production (e.g. stripping the `.md` extension).
+- Check for broken links and mark them as broken *at compile time*.
+- Aggregate metadata of all pages and export it to `site.json`.
 
 
 <br>
@@ -100,7 +104,9 @@ NPM (Windows/Linux):
 > [!Tip]
 > Use `squarkdown --help` to remind yourself of the above.
 
-For more on how Squarkdown works, how to configure and customise Squarkdown, and the features available, read [the docs](docs/) in this repo, or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs)!
+For a more detailed introduction, see [Quickstart](docs/walkthrough/quickstart.md).
+
+For full details on how Squarkdown works, how to configure and customise Squarkdown, and all the features available, read [the docs](docs/) in this repo or view them on [the website](https://sup2point0.github.io/stranger-quarkdown/docs)!
 
 
 <br>
