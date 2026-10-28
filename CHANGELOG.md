@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.5.2
+
+### Fixes
+- `format.inject-head` was not being read from `squarkup.toml`.
+
+
 ## v4.5.1
 
 ### New
