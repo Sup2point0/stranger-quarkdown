@@ -162,6 +162,12 @@ impl SquarkError
 		}
 	}
 
+	/// Is this an empty [`SquarkError::Multiple`]?
+	pub fn is_empty(&self) -> bool
+	{
+		self.len() == 0
+	}
+
 	/// Propagate a [`SquarkError::Multiple`] if it is non-empty, otherwise return `t`.
 	/// 
 	/// ```ignore

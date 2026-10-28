@@ -70,7 +70,7 @@ impl PageData
 		config: &SquarkupConfig,
 	) -> SquarkResult<Self>
 	{
-		let mut errs = SquarkError::multiple(slash!("initialising {}", filepath));
+		let mut errs = SquarkError::multiple(slash!("parsing charm squark of {B}{}", filepath));
 
 		let destination = {
 			if let Some(raw) = fields.take_flat("destination", "dest") {

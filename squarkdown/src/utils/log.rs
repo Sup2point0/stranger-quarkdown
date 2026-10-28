@@ -68,45 +68,56 @@ pub fn log_info(indent: usize, msg:  impl Display) {
 /// Print `err`, with surrounding line delimiters.
 pub fn error(err: SquarkError)
 {
-	fn go(err: &SquarkError, mut already_shown_when: bool)
+	fn go(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
 	{
 		match err
 		{
 			SquarkError::Recoverable{ msg, hint, debug }
 			| SquarkError::Unrecoverable{ msg, hint, debug }
 			=> {
-				bad!(msg);
+				bad!(indent => msg);
 				
 				for each in debug {
 					if !each.is_empty() {
-						debug!(each);
+						debug!(indent => each);
 					}
 				}
 
 				if !hint.is_empty() {
-					hint!(hint);
+					hint!(indent => hint);
 				}
 			}
 
-			SquarkError::Multiple{ when, errs } => {
+			SquarkError::Multiple{ when, errs } =>
+			{
 				if !already_shown_when && !when.is_empty() {
 					already_shown_when = true;
 					let count = err.len();
 					let plural = if count == 1 {""} else {"s"};
-					bad!("{count} error{plural} while {when}");
+					bad!(indent => "{count} error{plural} while {when}");
 					line();
+					indent += 3;
 				}
 
 				for (i, err) in errs.iter().enumerate() {
-					if i != 0 {
-						line();
+					if err.is_empty() {
+						continue;
 					}
-					go(err, already_shown_when);
+					// 1st error already has preceeding line
+					if i != 0 {
+						if let SquarkError::Multiple{..} = &err {
+							line();
+						} else {
+							// Don't print lines between lowest-level aggregated errors
+							println!();
+						}
+					}
+					go(err, indent, already_shown_when);
 				}
 			}
 
 			SquarkError::External{ err, msg, backtrace } => {
-				bad!(msg);
+				bad!(indent => msg);
 				println!("\n   {R}{err:?}");
 				println!("\n{backtrace}");
 			}
@@ -115,7 +126,11 @@ pub fn error(err: SquarkError)
 		}
 	}
 
+	if err.is_empty() {
+		return;
+	}
+
 	line();
-	go(&err, false);
+	go(&err, 0, false);
 	line();
 }

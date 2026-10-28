@@ -32,6 +32,15 @@ I’m working on fixing these!
 <br>
 
 
+## Next (v4.5.1)
+
+### New
+- Indent error messages to make scanning them easier ;)
+
+### Fixes
+- Fix inconsistent error message highlighting.
+
+
 ## v4.5
 
 ### New
