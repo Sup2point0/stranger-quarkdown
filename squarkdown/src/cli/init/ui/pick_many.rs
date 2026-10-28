@@ -320,20 +320,20 @@ pub(crate) fn _pick_many_or_skip_<T>(
 		{
 			let is_selected = (i == idx);
 
-			print!(" {GREY}│  ");
+			print!(" {F}│  ");
 
 			if *enabled {
-				print!("{}● ", if is_skipping {GREY} else {C});
+				print!("{}● ", if is_skipping {F} else {C});
 			} else {
-				print!("{}○ ", if is_selected {C} else {GREY});
+				print!("{}○ ", if is_selected {C} else {F});
 			}
 
 			if is_selected {
-				print!("{W}{label} {GREY}{ITAL}{hint}{UNITAL}");
+				print!("{W}{label} {F}{ITAL}{hint}{UNITAL}");
 			} else if *enabled {
-				print!("{GREY1}{label}");
+				print!("{FF}{label}");
 			} else {
-				print!("{GREY}{label}");
+				print!("{F}{label}");
 			}
 
 			execute!(stdout, Clear(ClearType::UntilNewLine))?;
@@ -342,15 +342,15 @@ pub(crate) fn _pick_many_or_skip_<T>(
 
 		if skippable {
 			println!(
-				" {GREY}│  {col1}{dot} {col2}Skip this question",
+				" {F}│  {col1}{dot} {col2}Skip this question",
 				col1 = if is_skipping {C} else {""},
 				dot = if is_skipping {"●"} else {"○"},
-				col2 = if is_skipping {W} else {GREY},
+				col2 = if is_skipping {W} else {F},
 			);
 		}
 
 		out!();
-		out!("└" => "{GREY}SPACE to select · ENTER to submit · ESC to exit");
+		out!("└" => "{F}SPACE to select · ENTER to submit · ESC to exit");
 
 		if let Event::Key(KeyEvent{
 			code,
@@ -362,7 +362,7 @@ pub(crate) fn _pick_many_or_skip_<T>(
 			{
 				KeyCode::Esc => {
 					reset_cursor!(finish: true)?;
-					out!("{GREY}×" => "{after}");
+					out!("{F}×" => "{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
 					
 					return Err(io::Error::from(io::ErrorKind::Interrupted))
@@ -402,7 +402,7 @@ pub(crate) fn _pick_many_or_skip_<T>(
 	reset_cursor!(finish: true)?;
 
 	if is_skipping {
-		out!("{GREY}×" => "{after}");
+		out!("{F}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
 		execute!(stdout, cursor::Show)?;
 		return Ok(None)
@@ -424,7 +424,7 @@ pub(crate) fn _pick_many_or_skip_<T>(
 	if labels.is_empty() {
 		labels = str!("none");
 	}
-	out!("{GREY}{labels}");
+	out!("{F}{labels}");
 
 	execute!(stdout, cursor::Show)?;
 

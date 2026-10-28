@@ -91,7 +91,7 @@ impl PageData
 					msg: fmt!("missing field: {W}dest{R}({W}ination{R})"),
 					hint: fmt!("active pages must specify where they should be rendered to when {Y}errors.strict{G} is enabled"),
 					debug: vec![
-						fmt!("parsed fields: {GREY1}{fields:?}")
+						fmt!("parsed fields: {FF}{fields:?}")
 					],
 				});
 				PathBuf::new()

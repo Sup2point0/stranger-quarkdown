@@ -46,12 +46,12 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 	{
 		Ok(..) => {
 			log::line();
-			println!("{P}squarkup finished! {GREY}{perf:.1?} ms{W}");
+			println!("{P}squarkup finished! {F}{perf:.1?} ms{W}");
 			return ExitCode::SUCCESS
 		},
 		Err(e) => {
 			log::error(e);
-			println!("{R}squarkup failed! {GREY}{perf:.1?} ms\n{W}");
+			println!("{R}squarkup failed! {F}{perf:.1?} ms\n{W}");
 			return ExitCode::FAILURE
 		},
 	}
@@ -71,7 +71,7 @@ fn squarkup(
 		if dry_run { enabled.push("dry-run"); }
 		if assets  { enabled.push("assets"); }
 		if fonts   { enabled.push("fonts"); }
-		log::info!("enabled options: {G}{}", enabled.join(&fmt!("{GREY} · {G}")));
+		log::info!("enabled options: {G}{}", enabled.join(&fmt!("{F} · {G}")));
 	}
 
 	// == SETUP == //
@@ -115,7 +115,7 @@ fn squarkup(
 				site_data.add_page(page);
 
 				let (folder, file) = utils::split_path_from(filepath, &config.paths.root);
-				log::info!("found active file: {folder}/{GREY1}{file}");
+				log::info!("found active file: {folder}/{FF}{file}");
 			}
 		}.or_else(|e| e.depends(&config))?;
 	}

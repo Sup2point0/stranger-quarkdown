@@ -192,7 +192,7 @@ impl SquarkupConfig
 						msg: fmt!("warning: your {Y}project.github{R} does not contain a {W}/"),
 						hint: fmt!("use the format {W}user/project"),
 						debug: vec![
-							fmt!("you provided {GREY1}{raw}"),
+							fmt!("you provided {FF}{raw}"),
 						],
 					});
 				}
@@ -289,7 +289,7 @@ impl SquarkupConfig
 			}) }
 
 			if let Some(value) = out.remove("file-name") { catch!(errs => {
-				let raw = Self::try_get_str(&value, "out.file-name", &fmt!("(filename including {GREY1}.svx{GREY} extension)"))?;
+				let raw = Self::try_get_str(&value, "out.file-name", &fmt!("(filename including {FF}.svx{F} extension)"))?;
 
 				if raw.contains('/') {
 					unrecoverable! {
@@ -314,7 +314,7 @@ impl SquarkupConfig
 						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),
 						hint: fmt!("{W}out.site-data-path{G} is a filepath relative to your site directory"),
 						debug: vec![
-							slash!("{GREY1}{}{GREY} is not a valid directory", path)
+							slash!("{FF}{}{F} is not a valid directory", path)
 						],
 					}
 				}
@@ -444,7 +444,7 @@ impl SquarkupConfig
 			msg: fmt!("{Y}{setting_group}{R} must be a table, not a field"),
 			hint: hint(),
 			debug: vec![
-				fmt!("you provided {GREY1}{data}{GREY}, which has type {GREY1}{}", value.type_str()),
+				fmt!("you provided {FF}{data}{F}, which has type {FF}{}", value.type_str()),
 			],
 		}
 	}
@@ -459,9 +459,9 @@ impl SquarkupConfig
 		value.as_str()
 			.ok_or_else(|| SquarkError::Unrecoverable {
 				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-				hint: fmt!("{Y}{setting}{G} must be a string {GREY}{hint}"),
+				hint: fmt!("{Y}{setting}{G} must be a string {F}{hint}"),
 				debug: vec![
-					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+					fmt!("you provided a value of type {FF}{}", value.type_str()),
 				],
 			})
 	}
@@ -474,7 +474,7 @@ impl SquarkupConfig
 				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
 				hint: fmt!("{Y}{setting}{G} must be a boolean"),
 				debug: vec![
-					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+					fmt!("you provided a value of type {FF}{}", value.type_str()),
 				],
 			})
 	}
@@ -489,9 +489,9 @@ impl SquarkupConfig
 		value.as_array()
 			.ok_or_else(|| SquarkError::Unrecoverable {
 				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
-				hint: fmt!("{Y}{setting}{G} must be an array {GREY}{hint}"),
+				hint: fmt!("{Y}{setting}{G} must be an array {F}{hint}"),
 				debug: vec![
-					fmt!("you provided a value of type {GREY1}{}", value.type_str()),
+					fmt!("you provided a value of type {FF}{}", value.type_str()),
 				],
 			})
 	}
@@ -511,7 +511,7 @@ impl SquarkupConfig
 				msg: fmt!("the folder you specified {location} doesn't exist!"),
 				hint: hint(),
 				debug: vec![
-					slash!("{GREY1}{}{GREY} is not a valid directory", path),
+					slash!("{FF}{}{F} is not a valid directory", path),
 				],
 			})
 		}
@@ -520,7 +520,7 @@ impl SquarkupConfig
 				msg: fmt!("the folder you specified {location} is not a folder"),
 				hint: str!(),
 				debug: vec![
-					slash!("{GREY1}{}{GREY} is not a folder", path),
+					slash!("{FF}{}{F} is not a folder", path),
 				],
 			})
 		}
@@ -540,7 +540,7 @@ impl SquarkupConfig
 				),
 				hint: str!(),
 				debug: vec![
-					fmt!("received: {GREY1}{key} = {value:?}")
+					fmt!("received: {FF}{key} = {value:?}")
 				],
 			});
 		}

@@ -348,7 +348,7 @@ impl CharmParser<'_>
 		// previous line
 		if line_idx > 0 {
 			out.push(fmt!(
-				"{GREY1}{:6} {GREY}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{}",
 				(line_idx - 1) + 1,
 				self.source_lines[line_idx - 1].iter().collect::<String>(),
 			));
@@ -374,13 +374,13 @@ impl CharmParser<'_>
 		let after  = if r_after.is_empty()  {str!("")} else {line[r_after].iter().collect()};
 
 		out.push(fmt!(
-			"{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
+			"{FF}{:6} {F}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}",
 			line_idx + 1,
 		));
 		
 		if show_pointer {
 			out.push(fmt!(
-				"{:6} {GREY}│  {:width$}{R}{BOLD}^^{UNBOLD}",
+				"{:6} {F}│  {:width$}{R}{BOLD}^^{UNBOLD}",
 				"",
 				"",
 				width = zero!(from - 1),
@@ -390,12 +390,12 @@ impl CharmParser<'_>
 		// next line
 		if let Some(next_line) = self.source_lines.get(line_idx + 1) {
 			out.push(fmt!(
-				"{GREY1}{:6} {GREY}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{}",
 				(line_idx + 1) + 1,
 				next_line.iter().collect::<String>(),
 			));
 		} else {
-			out.push(fmt!("{:6} {GREY}│  {GREY}<{BOLD}END OF FILE{UNBOLD}>", ""));
+			out.push(fmt!("{:6} {F}│  {F}<{BOLD}END OF FILE{UNBOLD}>", ""));
 		}
 
 		out.push(str!(" "));

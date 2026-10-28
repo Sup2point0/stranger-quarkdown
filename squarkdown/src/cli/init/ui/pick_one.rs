@@ -303,14 +303,14 @@ pub(crate) fn _pick_one_or_skip_<T>(
 
 		for (i, PickOneChoice{ label, hint, .. }) in choices.iter().enumerate() {
 			if i == idx {
-				out!("{C}● {W}{label} {GREY}{ITAL}{hint}{UNITAL}");
+				out!("{C}● {W}{label} {F}{ITAL}{hint}{UNITAL}");
 			} else {
-				out!("{GREY}○ {label}");
+				out!("{F}○ {label}");
 			}
 		}
 
 		if skippable {
-			print!(" {GREY}│  ");
+			print!(" {F}│  ");
 
 			if is_skipping {
 				print!("{C}● ");
@@ -318,11 +318,11 @@ pub(crate) fn _pick_one_or_skip_<T>(
 				print!("○ ");
 			}
 
-			println!("{}Skip this question", if is_skipping {W} else {GREY});
+			println!("{}Skip this question", if is_skipping {W} else {F});
 		}
 
 		out!();
-		out!("└" => "{GREY}ENTER to submit · ESC to exit");
+		out!("└" => "{F}ENTER to submit · ESC to exit");
 
 		if let Event::Key(KeyEvent{
 			code,
@@ -334,7 +334,7 @@ pub(crate) fn _pick_one_or_skip_<T>(
 			{
 				KeyCode::Esc => {
 					refresh(true)?;
-					out!("{GREY}×" => "{after}");
+					out!("{F}×" => "{after}");
 					out!("{R}{ITAL}cancelled{UNITAL}");
 					
 					return Err(io::Error::from(io::ErrorKind::Interrupted))
@@ -369,7 +369,7 @@ pub(crate) fn _pick_one_or_skip_<T>(
 	refresh(true)?;
 
 	if is_skipping {
-		out!("{GREY}×" => "{after}");
+		out!("{F}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
 		execute!(stdout, cursor::Show)?;
 		return Ok(None)
@@ -378,7 +378,7 @@ pub(crate) fn _pick_one_or_skip_<T>(
 	out!("{C}✓" => "{after}");
 
 	let PickOneChoice{ value, label, .. } = choices.swap_remove(idx);
-	out!("{GREY}{label}");
+	out!("{F}{label}");
 
 	execute!(stdout, cursor::Show)?;
 

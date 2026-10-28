@@ -1,9 +1,11 @@
 /// Turn text white! (by resetting all styles)
-pub const W:     &str = "\x1b[0m";
+pub const W:  &str = "\x1b[0m";
 /// Turn text grey!
-pub const GREY:  &str = "\x1b[90m";
+/// 
+/// (`F` is for "fade".)
+pub const F:  &str = "\x1b[90m";
 /// Turn text light grey!
-pub const GREY1: &str = "\x1b[37m";
+pub const FF: &str = "\x1b[37m";
 
 /// Turn text red!
 pub const R: &str = "\x1b[31m";

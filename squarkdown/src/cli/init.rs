@@ -114,7 +114,7 @@ fn preamble() -> io::Result<()>
 {
 	println!();
 	println!(
-		"{GREY} ┌  {P}Welcome to Stranger Quarkdown! {GREY}v{}  ─────────────────────────",
+		"{F} ┌  {P}Welcome to Stranger Quarkdown! {F}v{}  ─────────────────────────",
 		env!("CARGO_PKG_VERSION")
 	);
 	out!();
@@ -139,7 +139,7 @@ fn check_existing_config(cwd: &Path) -> io::Result<()>
 
 		out!();
 		out!("{R}×" => "Woah, looks like you already have an existing squarkup config!");
-		out!(&slash!("{GREY}found at: {B}{}", filepath));
+		out!(&slash!("{F}found at: {B}{}", filepath));
 		
 		let should_quit = pick_one!(
 			ask: "Exit?";
@@ -214,7 +214,7 @@ fn write_squarkup_toml(cwd: &Path, config: &[String]) -> io::Result<()>
 				s = if c == 1 {""} else {"s"}
 			);
 			for err in errs {
-				out!("{GREY}▸ {err}");
+				out!("{F}▸ {err}");
 			}
 		}
 	}
@@ -232,7 +232,7 @@ fn wrapup() -> io::Result<()>
 	}?;
 
 	out!();
-	out!("{GREY}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
+	out!("{F}└" => "{P}Thanks for using Stranger Quarkdown, enjoy! 🥕");
 	println!();
 
 	Ok(())

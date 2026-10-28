@@ -25,7 +25,7 @@ pub fn prep_fonts(config: &SquarkupConfig, dry_run: bool) -> SquarkResult
 			msg: fmt!("could not find your {W}app.html"),
 			hint: fmt!("Squarkdown injects Google Fonts queries into the {W}<head>{G} of your {W}app.html"),
 			debug: vec![
-				slash!("{GREY1}{}{GREY} is not a file", path),
+				slash!("{FF}{}{F} is not a file", path),
 			],
 		});
 	}

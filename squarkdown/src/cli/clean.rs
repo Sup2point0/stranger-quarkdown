@@ -48,12 +48,12 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	{
 		Ok(()) => {
 			log::line();
-			println!("{P}cleanup finished! {GREY}{perf:.1?} ms{W}");
+			println!("{P}cleanup finished! {F}{perf:.1?} ms{W}");
 			ExitCode::SUCCESS
 		},
 		Err(e) => {
 			log::error(e);
-			println!("{R}cleanup failed! {GREY}{perf:.1?} ms\n{W}");
+			println!("{R}cleanup failed! {F}{perf:.1?} ms\n{W}");
 			ExitCode::FAILURE
 		},
 	}
@@ -115,7 +115,7 @@ fn cleanup(force: bool) -> SquarkResult
 					msg: fmt!("critical error: received a path outside your project root"),
 					hint: str!(),
 					debug: vec![
-						slash!("would have tried deleting: {GREY1}{}", path)
+						slash!("would have tried deleting: {FF}{}", path)
 					],
 				});
 			}
@@ -126,7 +126,7 @@ fn cleanup(force: bool) -> SquarkResult
 			if path.is_dir() && utils::is_empty_dir(&path)?
 			{
 				let (parent, folder) = utils::split_path(&path_rel);
-				log::info!("deleting: {GREY1}{parent}/{folder}");
+				log::info!("deleting: {FF}{parent}/{folder}");
 
 				fs::remove_dir(path)?;
 				deleted_paths += 1;
@@ -142,7 +142,7 @@ fn cleanup(force: bool) -> SquarkResult
 			}
 
 			let (folder, filename) = utils::split_path(&path_rel);
-			let path_display = fmt!("{GREY1}{folder}{GREY}/{filename}");
+			let path_display = fmt!("{FF}{folder}{F}/{filename}");
 			
 			// check Git safety
 			if let Some((repo, repo_folder)) = &repo_info

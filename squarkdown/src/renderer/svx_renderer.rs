@@ -129,7 +129,7 @@ impl<'d> Renderer<'d>
 		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 		
 		log::info!(
-			"{} to: {base}/{GREY1}{folder}{GREY}/{}",
+			"{} to: {base}/{FF}{folder}{F}/{}",
 			if dry_run {"would render"} else {"rendering"},
 			self.config.out.file_name,
 		);
@@ -186,7 +186,7 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			.inspect(|(e, _)| if DEBUG { println!("{G}›{GREY} {e:?}"); })
+			.inspect(|(e, _)| if DEBUG { println!("{G}›{F} {e:?}"); })
 			.flat_map(Self::split_comments)
 		;
 
@@ -721,7 +721,7 @@ impl Renderer<'_>
 					dest_url, range, link_rewritten,
 					fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
 					str!(),
-					slash!("resolved to: {GREY1}{}", their_source_path)
+					slash!("resolved to: {FF}{}", their_source_path)
 				)
 			} else {
 				self.process_broken_link(
@@ -729,7 +729,7 @@ impl Renderer<'_>
 					dest_url, range, link_rewritten,
 					str!("link to an inactive page"),
 					fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
-					fmt!("resolved to: {GREY1}{shard}")
+					fmt!("resolved to: {FF}{shard}")
 				)
 			}
 		}
@@ -770,7 +770,7 @@ impl Renderer<'_>
 
 			LinkRewriteAction::STRIP_EXTENSION =>
 			{
-				log::info!("found a {msg}, rewriting it: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{link_rewritten}");
+				log::info!("found a {msg}, rewriting it: {FF}{dest_url}{F} ⟶ {FF}{link_rewritten}");
 
 				*dest_url = link_rewritten.into();
 			}
@@ -782,7 +782,7 @@ impl Renderer<'_>
 					self.config.project.github,
 					utils::display_rel(&self.page.filepath, &self.config.paths.root),
 				);
-				log::info!("found a {msg}, rewriting it: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
+				log::info!("found a {msg}, rewriting it: {FF}{dest_url}{F} ⟶ {FF}{href}");
 
 				*dest_url = href.into();
 			}
@@ -822,7 +822,7 @@ impl Renderer<'_>
 				hint: str!(),
 				debug: [
 					self.source_printed(range),
-					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+					vec![slash!("resolved to: {FF}{}", their_source_path)],
 				].concat()
 			});
 			return;
@@ -840,7 +840,7 @@ impl Renderer<'_>
 					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
 					debug: [
 						self.source_printed(range),
-						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+						vec![slash!("resolved to: {FF}{}", their_source_path)],
 					].concat()
 				});
 				return;
@@ -971,7 +971,7 @@ impl Renderer<'_>
 		// previous line
 		if let Some(r) = prev_line_range {
 			out.push(fmt!(
-				"{GREY1}{:6} {GREY}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{}",
 				line_number - 1,
 				&self.source[r],
 			));
@@ -998,13 +998,13 @@ impl Renderer<'_>
 		}
 
 		out.push(fmt!(
-			"{GREY1}{line_number:6} {GREY}│  {ddd_before}{W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}{GREY}{ddd_after}",
+			"{FF}{line_number:6} {F}│  {ddd_before}{W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}{F}{ddd_after}",
 		));
 
 		// next line
 		if let Some(r) = next_line_range {
 			out.push(fmt!(
-				"{GREY1}{:6} {GREY}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{}",
 				line_number + 1,
 				&self.source[r],
 			));
