@@ -6,9 +6,12 @@ macro_rules! str {
 	($t:expr) => { String::from($t) };
 } pub use str;
 
+/// An alias for `format!()` that doesn’t require a string literal.
 #[macro_export]
 macro_rules! fmt {
-	($($args:tt)*) => { format!($($args)*) };
+	($msg:literal)  => { format!($msg) };
+	($display:expr) => { format!("{}", $display) };
+	($($args:tt)*)  => { format!($($args)*) };
 } pub use fmt;
 
 /// Format a string with a single path argument, normalising `\` in the path to `/`.
@@ -30,7 +33,7 @@ macro_rules! slash {
 #[macro_export]
 macro_rules! to {
 	()             => { || String::from("INTERNAL INVARIANT HAS BEEN BROKEN") };
-	($($args:tt)*) => { || format!($($args)*) };
+	($($args:tt)*) => { || fmt!($($args)*) };
 } pub use to;
 
 
@@ -62,11 +65,17 @@ macro_rules! strings {
 macro_rules! catch
 {
 	($errs:expr => $body:block) => {
-		if let Err(e) = (|| -> SquarkResult<_> { $body; Ok(()) })() {
+		if let Err(e) = (|| -> SquarkResult<_> {
+			$body;
+			Ok(())
+		})() {
 			$errs.push(e);
 		}
 	};
 	($($body:tt)*) => {
-		(|| -> SquarkResult<_> { $($body)*; Ok(()) })()
+		(|| -> SquarkResult<_> {
+			$($body)*;
+			Ok(())
+		})()
 	};
 } pub use catch;

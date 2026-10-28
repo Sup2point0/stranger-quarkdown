@@ -15,55 +15,54 @@ pub fn version()
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! info {
-	($msg:literal) => { $crate::utils::log::log_info(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_info(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_info(format_args!($($args)*)) };
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_info($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::info!(0 => $($args)*) };
 } pub use info;
 
 /// Log an action that Squarkdown is about to perform, to set up expectations.
 #[macro_export] macro_rules! is {
-	($msg:literal) => { $crate::utils::log::log_is(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_is(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_is(format_args!($($args)*)) };
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_is($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::is!(0 => $($args)*) };
 } pub use is;
 
 /// Log a checkpoint that has successfully been reached.
 #[macro_export] macro_rules! ok {
-	($msg:literal) => { $crate::utils::log::log_ok(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_ok(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_ok(format_args!($($args)*)) };
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_ok($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::ok!(0 => $($args)*) };
 } pub use ok;
 
 /// Log an error, failure or issue the user should be aware of.
 #[macro_export] macro_rules! bad {
-	($msg:literal) => { $crate::utils::log::log_bad(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_bad(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_bad(format_args!($($args)*)) };
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_bad($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::bad!(0 => $($args)*) };
 } pub use bad;
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! debug {
-	($msg:literal) => { $crate::utils::log::log_debug(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_debug(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_debug(format_args!($($args)*)) };
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_debug($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::debug!(0 => $($args)*) };
 } pub use debug;
 
 /// Log a hint to the user that may help them fix an error.
 #[macro_export] macro_rules! hint {
-	($msg:literal) => { $crate::utils::log::log_hint(format_args!($msg)) };
-	($var:expr)    => { $crate::utils::log::log_hint(format_args!("{}", $var)) };
-	($($args:tt)*) => { $crate::utils::log::log_hint(format_args!($($args)*)) };
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_hint($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::hint!(0 => $($args)*) };
 } pub use hint;
 
 
 pub fn line() { println!("{GREY}─────────────────────────────"); }
 
-pub fn log_info(msg:  impl Display) { if !QUIET.get().is_some() { println!(" {}› {msg}",       GREY   ); } }
-pub fn log_is(msg:    impl Display) { println!(" {}› {}{msg}",     GREY, Y); }
-pub fn log_ok(msg:    impl Display) { println!(" {}✓ {msg}",       C      ); }
-pub fn log_bad(msg:   impl Display) { println!(" {}× {msg}",       R      ); }
-pub fn log_debug(msg: impl Display) { println!(" {}│ {msg}",       GREY   ); }
-pub fn log_hint(msg:  impl Display) { println!(" {}= hint: {msg}", G      ); }
+pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{GREY}› {Y}{msg}", "", i = indent); }
+pub fn log_ok   (indent: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = indent); }
+pub fn log_bad  (indent: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = indent); }
+pub fn log_debug(indent: usize, msg: impl Display) { println!(" {:i$}{GREY}│ {msg}",    "", i = indent); }
+pub fn log_hint (indent: usize, msg: impl Display) { println!(" {:i$}{G}= hint: {msg}", "", i = indent); }
+
+pub fn log_info(indent: usize, msg:  impl Display) {
+	if !QUIET.get().is_some() {
+		println!("{:i$} {GREY}› {msg}", "", i = indent);
+	}
+}
 
 
 /// Print `err`, with surrounding line delimiters.
