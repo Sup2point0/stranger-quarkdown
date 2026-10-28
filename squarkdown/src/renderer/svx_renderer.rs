@@ -961,7 +961,7 @@ impl Renderer<'_>
 	fn source_printed(&self, range: ParserRange) -> Vec<String>
 	{
 		let Some(LineInfo{
-			line_number, mut line_range, prev_line_range, next_line_range,
+			line_number, line_range, prev_line_range, next_line_range,
 		}) = self.line_info(range.clone())
 			else { return vec![] };
 
@@ -980,25 +980,25 @@ impl Renderer<'_>
 		// this line
 		let focus = &self.source[range.clone()].trim_end_matches('\n');
 
-		const MAX_PREVIEW_WIDTH: usize = 32;
-		let mut before_clipped = "";
-		let mut after_clipped = "";
-		if line_range.start < zero!(range.start - MAX_PREVIEW_WIDTH) {
-			line_range.start = zero!(range.start - MAX_PREVIEW_WIDTH);
-			before_clipped = "...";
-		}
-		if line_range.end > range.end + MAX_PREVIEW_WIDTH {
-			line_range.end = range.end + MAX_PREVIEW_WIDTH;
-			after_clipped = "...";
-		}
 		let r_before = line_range.start..range.start;
 		let r_after  = range.end..line_range.end;
-
-		let before = if r_before.is_empty() {""} else {&self.source[r_before]};
-		let after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
+		let mut before = if r_before.is_empty() {""} else {&self.source[r_before]};
+		let mut after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
+		
+		const MAX_PREVIEW_CHARS: usize = 32;
+		let mut ddd_before = "";
+		let mut ddd_after = "";
+		if let Some(before_clipped) = utils::truncated_start(before, MAX_PREVIEW_CHARS) {
+			before = before_clipped;
+			ddd_before = "...";
+		}
+		if let Some(after_clipped) = utils::truncated_end(after, MAX_PREVIEW_CHARS) {
+			after = after_clipped;
+			ddd_after = "...";
+		}
 
 		out.push(fmt!(
-			"{GREY1}{line_number:6} {GREY}│  {before_clipped}{W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}{GREY}{after_clipped}",
+			"{GREY1}{line_number:6} {GREY}│  {ddd_before}{W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}{GREY}{ddd_after}",
 		));
 
 		// next line
