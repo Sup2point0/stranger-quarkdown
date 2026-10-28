@@ -25,7 +25,8 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 
 I’m working on fixing these!
 
-- `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and rendered correctly
+- `clean`(`se`) in charm squark has not yet been implemented.
+- `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and rendered correctly.
 
 
 <br>
