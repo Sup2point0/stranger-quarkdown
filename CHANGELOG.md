@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## Next (v4.6.1)
+
+### Fixes
+- Do not try resolving empty links
+
+
 ## v4.6
 
 ### New

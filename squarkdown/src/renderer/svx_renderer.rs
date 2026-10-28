@@ -646,7 +646,8 @@ impl Renderer<'_>
 	) -> Option<Event<'e>>
 	{
 		/* We only rewrite relative links to Markdown files, or folders. We ignore external links and anchor links. */
-		if dest_url.starts_with('#')
+		if dest_url.is_empty()
+		|| dest_url.starts_with('#')
 		|| dest_url.contains("://")
 		|| dest_url.starts_with("mailto:") {
 			return None

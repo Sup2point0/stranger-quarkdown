@@ -13,6 +13,7 @@ use assertables::*;
 	let side = read_file("links/basic/side/+page.svx");
 	assert_contains!( main, "[side](side)" );
 	assert_contains!( side, "[main](main)" );
+	assert_contains!( main, "[empty link]()" );
 	assert_not_contains!( main, "[side](./side)" );
 	assert_not_contains!( main, "[main](./main)" );
 }
