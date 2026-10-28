@@ -131,7 +131,7 @@ pub fn error(err: impl std::borrow::Borrow<SquarkError>)
 		}
 	}
 
-	if err.is_empty() {
+	if err.borrow().is_empty() {
 		return;
 	}
 
