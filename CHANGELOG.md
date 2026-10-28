@@ -32,12 +32,13 @@ I’m working on fixing these!
 <br>
 
 
-## Next (v4.5.1)
+## v4.5.1
 
 ### New
 - Indent error messages to make scanning them easier ;)
 
 ### Fixes
+- Fix issues with excessive lines in error output.
 - Fix inconsistent error message highlighting.
 
 
