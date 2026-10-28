@@ -21,7 +21,7 @@ pub fn prep_assets(
 			let (folder, filename) = utils::split_path(&source_path);
 
 			log::info!(
-				"found asset: {folder}{FF}{filename}",
+				"found asset: {folder}/{FF}{filename}",
 			);
 
 			if !dry_run {
