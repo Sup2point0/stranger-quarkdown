@@ -11,12 +11,12 @@ use std::path::PathBuf;
 
 lazy_static!
 {
-	pub static ref TESTS: PathBuf = path!(std::env::current_dir().unwrap() / "tests/test-project");
-
-	pub static ref TEST_FILE: PathBuf = path!(*TESTS / "unit.md");
+	pub static ref TESTS:        PathBuf = path!(std::env::current_dir().unwrap() / "tests");
+	pub static ref TEST_PROJECT: PathBuf = path!(*TESTS / "test-project");
+	pub static ref TEST_FILE:    PathBuf = path!(*TEST_PROJECT / "unit.md");
 	
 	/// A barebones testing squarkup config for unit tests.
-	pub static ref TEST_CONFIG: SquarkupConfig = SquarkupConfig::init_defaults(&TESTS, &TESTS);
+	pub static ref TEST_CONFIG: SquarkupConfig = SquarkupConfig::init_defaults(&TEST_PROJECT, &TEST_PROJECT);
 
 	/// Dummy page data for unit tests (with invalid paths).
 	pub static ref TEST_PAGE: PageData = PageData::default();

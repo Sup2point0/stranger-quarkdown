@@ -326,6 +326,9 @@ impl SquarkupConfig
 		{
 			let s = &mut c.format;
 
+			if let Some(value) = format.remove("inject-head") { catch!(errs => {
+				s.inject_head = Self::try_get_bool(&value, "format.inject-head")?;
+			}) }
 			if let Some(value) = format.remove("preserve-heading") { catch!(errs => {
 				s.preserve_heading = Self::try_get_bool(&value, "format.preserve-heading")?;
 			}) }
@@ -551,6 +554,68 @@ fn load_config(source: &str) -> SquarkResult<SquarkupConfig>
 
 
 #[cfg(test)]
+mod full {
+	use super::*;
+
+	#[test] fn all() {
+		let c = load_config(indoc! {r#"
+			#:schema https://sup2point0.github.io/stranger-quarkdown/schemas/latest
+
+			[errors]
+			strict = true
+			debug = true
+			on-error = "kill"
+			file-already-exists = "overwrite"
+			link-inactive = "link-to-github"
+
+			[paths]
+			site = "test-project"
+			sources = ["/"]
+
+			[out]
+			folder = "src/routes/"
+			file-name = "file-name"
+			site-data-path = "site-data-path"
+			render-page-ts = true
+			shorter-fields = true
+
+			[format]
+			inject-head = true
+			preserve-comments = true
+			preserve-heading = true
+			externalise-links = true
+
+			[assets]
+			folder = "/"
+			site-assets-folder = "/"
+
+			[fonts]
+			queries = ["queries"]
+		"#}).unwrap();
+
+		assert_eq!( c.errors.strict, true );
+		assert_eq!( c.errors.debug, true );
+		assert_eq!( c.errors.on_error, ErrorAction::KILL );
+		assert_eq!( c.errors.file_already_exists, FileAction::OVERWRITE );
+		assert_eq!( c.errors.link_inactive, LinkRewriteAction::LINK_TO_GITHUB );
+		assert_eq!( c.paths.site, *TEST_PROJECT);
+		assert_eq!( c.paths.sources, vec![TESTS.clone()] );
+		assert_eq!( c.out.folder, path!(*TEST_PROJECT / "src" / "routes") );
+		assert_eq!( c.out.file_name, str!("file-name") );
+		assert_eq!( c.out.site_data_path, Some(path!(*TEST_PROJECT / "site-data-path")) );
+		assert_eq!( c.out.render_page_ts, true );
+		assert_eq!( c.out.shorter_fields, true );
+		assert_eq!( c.format.inject_head, true );
+		assert_eq!( c.format.preserve_comments, true );
+		assert_eq!( c.format.preserve_heading, true );
+		assert_eq!( c.format.externalise_links, true );
+		assert_eq!( c.assets.folder, *TESTS );
+		assert_eq!( c.assets.site_assets_folder, Some(TESTS.clone()) );
+		assert_eq!( c.fonts.queries, vec![str!("queries")] );
+	}
+}
+
+#[cfg(test)]
 mod error_handling {
 	use super::*;
 
@@ -653,9 +718,9 @@ mod assets {
 	#[test] fn accept() {
 		let c = load_config(indoc! {"
 			[assets]
-			folder = 'static'
+			folder = 'test-project/static'
 		"}).unwrap().assets;
-		assert_eq!( c.folder, path!(*TESTS / "static") );
+		assert_eq!( c.folder, path!(*TEST_PROJECT / "static") );
 	}
 
 	#[test] fn reject() {

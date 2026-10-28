@@ -447,7 +447,7 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.heading, str!("Test") );
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
 		}
 
 		#[test] fn all_fields() {
@@ -464,7 +464,7 @@ mod full {
 				| update = 2021 May 31
 				-->
 			"});
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
 			assert_eq!( page_data.title, str!("One") );
 			assert_eq!( page_data.description, str!("Two") );
 			assert_eq!( page_data.heading, str!("Three") );
@@ -492,7 +492,7 @@ mod full {
 				| last-update = 2021 May 31
 				-->
 			"});
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
 			assert_eq!( page_data.title, str!("One") );
 			assert_eq!( page_data.description, str!("Two") );
 			assert_eq!( page_data.heading, str!("Three") );
@@ -516,7 +516,7 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.heading, str!("One") );
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
 			assert_eq!( page_data.other["testing"], strings!("true") );
 		}
 
@@ -531,7 +531,7 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.heading, str!("Many") );
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
 			assert_eq!( page_data.other["one"], strings!("1") );
 			assert_eq!( page_data.other["two"], strings!("2") );
 		}
@@ -630,7 +630,7 @@ mod full {
 				| dest = a dangerous path
 				-->
 			"});
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/a-dangerous-path") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/a-dangerous-path") );
 		}
 
 		#[test] fn slash_in_single() {
@@ -698,7 +698,7 @@ mod full {
 				-->
 			"});
 			assert_eq!( page_data.heading, str!("Test") );
-			assert_eq!( page_data.destination, path!(*TESTS / "src/routes/test") );
+			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
 		}
 
 		#[test] fn chinese() {
