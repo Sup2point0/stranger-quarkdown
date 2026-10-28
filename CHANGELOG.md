@@ -32,7 +32,7 @@ I’m working on fixing these!
 <br>
 
 
-## Next Major (v4.6)
+## v4.6
 
 ### New
 - `errors.link-broken` option (returns)
