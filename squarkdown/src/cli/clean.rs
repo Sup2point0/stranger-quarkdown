@@ -18,14 +18,14 @@ use std::time::{ Instant };
 /// This reads the user's squarkup config to find the appropriate folders and files to check, and reconciles it with Git to avoid deleting tracked files that probably shouldn't be deleted.
 pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 {
-	let mut force = false;
+	let mut dry_run = false;
+	let mut force   = false;
 	let mut unknown_args = vec![];
 
 	for arg in args {
-		if arg.eq_ignore_ascii_case("--force")
-		|| arg.eq_ignore_ascii_case("-f") {
-			force = true;
-		}
+		if arg.eq_ignore_ascii_case("--dry-run")
+		|| arg.eq_ignore_ascii_case("--dryrun")     { dry_run = true; }
+		else if arg.eq_ignore_ascii_case("--force") { force = true; }
 		else {
 			unknown_args.push(arg);
 		}
@@ -40,7 +40,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	log::is!("cleaning Squarkdown output...");
 
 	let t_init = Instant::now();
-	let r = cleanup(force);
+	let r = cleanup(dry_run, force);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -59,7 +59,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	}
 }
 
-fn cleanup(force: bool) -> SquarkResult
+fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 {
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
@@ -88,7 +88,11 @@ fn cleanup(force: bool) -> SquarkResult
 		}
 	}
 
-	log::info!(slash!("deleting files under: {}", &config.out.folder));
+	log::info!(slash!(
+		"{simulating}deleting files under: {}",
+		&config.out.folder,
+		simulating = if dry_run {"simulating "} else {""}
+	));
 
 	let mut errs = SquarkError::multiple("cleaning files");
 
@@ -126,9 +130,14 @@ fn cleanup(force: bool) -> SquarkResult
 			if path.is_dir() && utils::is_empty_dir(&path)?
 			{
 				let (parent, folder) = utils::split_path(&path_rel);
-				log::info!("deleting: {FF}{parent}/{folder}");
 
-				fs::remove_dir(path)?;
+				log::info!(
+					"{}: {FF}{parent}/{folder}",
+					if dry_run {"would delete"} else {"deleting"}
+				);
+				if !dry_run {
+					fs::remove_dir(path)?;
+				}
 				deleted_paths += 1;
 				return Ok(())
 			}
@@ -152,8 +161,13 @@ fn cleanup(force: bool) -> SquarkResult
 				return Ok(())
 			}
 
-			log::info!("deleting: {path_display}");
-			fs::remove_file(path)?;
+			log::info!(
+				"{}: {path_display}",
+				if dry_run {"would delete"} else {"deleting"}
+			);
+			if !dry_run {
+				fs::remove_file(path)?;
+			}
 			deleted_paths += 1;
 		});
 	}
@@ -161,7 +175,10 @@ fn cleanup(force: bool) -> SquarkResult
 	if checked_paths == 0 {
 		log::bad!("nothing found to cleanup!");
 	} else {
-		log::ok!("deleted {}/{} children", deleted_paths, checked_paths);
+		log::ok!(
+			"{} {deleted_paths}/{checked_paths} children",
+			if dry_run {"would delete"} else {"deleted"}
+		);
 	}
 
 	if !skipped_paths.is_empty() {

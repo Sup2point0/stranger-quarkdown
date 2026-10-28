@@ -51,7 +51,7 @@ macro_rules! squarkup {
 			let bin = env!("CARGO_BIN_EXE_squarkdown");
 			let r = std::process::Command::new(bin)
 				.current_dir(TESTS.join($path))
-				$( .arg($arg) )*
+				$(.arg($arg))*
 				.status();
 
 			assertables::assert_ok!( &r );
@@ -88,7 +88,7 @@ macro_rules! capture_squarkup {
 			let bin = env!("CARGO_BIN_EXE_squarkdown");
 			let r = std::process::Command::new(bin)
 				.current_dir(TESTS.join($path))
-				$( .arg($arg) )*
+				$(.arg($arg))*
 				.output();
 
 			assertables::assert_ok!( &r );

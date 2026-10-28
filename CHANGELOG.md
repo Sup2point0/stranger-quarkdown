@@ -59,9 +59,12 @@ I’m working on fixing these!
   ```
 
   - Unlike renderer errors, these are much cheaper to compute, so you don’t need `errors.debug = true` to have them.
+- `squarkdown clean --dry-run`, so that you can also check which files Squarkdown would delete.
 
 ### Fixes
-- Improve parser reliability to reduce panics
+- Improve charm squark parsing:
+  - Better recovery from errors
+  - Better reliability with fewer opportunities for panics
 
 
 <br>
