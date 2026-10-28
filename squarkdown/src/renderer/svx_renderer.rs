@@ -721,7 +721,7 @@ impl Renderer<'_>
 					dest_url, range, link_rewritten,
 					fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
 					str!(),
-					slash!("resolved to: {FF}{}", their_source_path)
+					slash!("resolved to: {}", their_source_path)
 				)
 			} else {
 				self.process_broken_link(
@@ -729,7 +729,7 @@ impl Renderer<'_>
 					dest_url, range, link_rewritten,
 					str!("link to an inactive page"),
 					fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
-					fmt!("resolved to: {FF}{shard}")
+					fmt!("resolved to: {shard}")
 				)
 			}
 		}
@@ -822,7 +822,7 @@ impl Renderer<'_>
 				hint: str!(),
 				debug: [
 					self.source_printed(range),
-					vec![slash!("resolved to: {FF}{}", their_source_path)],
+					vec![slash!("resolved to: {}", their_source_path)],
 				].concat()
 			});
 			return;
@@ -840,7 +840,7 @@ impl Renderer<'_>
 					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
 					debug: [
 						self.source_printed(range),
-						vec![slash!("resolved to: {FF}{}", their_source_path)],
+						vec![slash!("resolved to: {}", their_source_path)],
 					].concat()
 				});
 				return;
