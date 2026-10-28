@@ -247,7 +247,7 @@ impl PageData
 			.or_else(|_| Date::parse(&fmt!("{date} January 1"), long))
 			.map_err(|_| SquarkError::Recoverable {
 				msg: fmt!("invalid date for {W}{field}{R}: {date}"),
-				hint: str!("dates use the format {W}<year> <month?> <date?>"),
+				hint: fmt!("dates use the format {W}<year> <month?> <date?>"),
 				debug: vec![]
 			})
 	}
