@@ -1,0 +1,12 @@
+#:schema ../../../src/config/schema.json
+
+[errors]
+strict = false
+on-error = "kill"
+link-broken = "mark-broken"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/links/broken-mark/"

@@ -20,7 +20,7 @@ macro_rules! out
 		$msg:expr
 	) => {
 		_out_(
-			&format!("{GREY}│"),
+			&format!("{F}│"),
 			$msg
 		)
 	};
@@ -63,7 +63,7 @@ macro_rules! head
 	($msg:literal) => {
 		{
 			out!();
-			out!("├" => "{Y}{}  {GREY}─────────────────", $msg);
+			out!("├" => "{Y}{}  {F}─────────────────", $msg);
 			wait!()
 		}
 	}

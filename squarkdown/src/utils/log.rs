@@ -5,6 +5,10 @@ use crate::utils::colours::*;
 use std::fmt::Display;
 
 
+/// Print a line to the console.
+pub fn line() { println!("{F}─────────────────────────────"); }
+
+/// Print Squarkdown’s version to the console.
 pub fn version()
 {
 	println!();
@@ -50,23 +54,21 @@ pub fn version()
 } pub use hint;
 
 
-pub fn line() { println!("{GREY}─────────────────────────────"); }
-
-pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{GREY}› {Y}{msg}", "", i = indent); }
+pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{F}› {Y}{msg}", "", i = indent); }
 pub fn log_ok   (indent: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = indent); }
 pub fn log_bad  (indent: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = indent); }
-pub fn log_debug(indent: usize, msg: impl Display) { println!(" {:i$}{GREY}│ {msg}",    "", i = indent); }
+pub fn log_debug(indent: usize, msg: impl Display) { println!(" {:i$}{F}│ {msg}",    "", i = indent); }
 pub fn log_hint (indent: usize, msg: impl Display) { println!(" {:i$}{G}= hint: {msg}", "", i = indent); }
 
 pub fn log_info(indent: usize, msg:  impl Display) {
 	if !QUIET.get().is_some() {
-		println!("{:i$} {GREY}› {msg}", "", i = indent);
+		println!("{:i$} {F}› {msg}", "", i = indent);
 	}
 }
 
 
 /// Print `err`, with surrounding line delimiters.
-pub fn error(err: SquarkError)
+pub fn error(err: impl std::borrow::Borrow<SquarkError>)
 {
 	fn go(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
 	{
@@ -122,15 +124,18 @@ pub fn error(err: SquarkError)
 				println!("\n{backtrace}");
 			}
 
-			SquarkError::ABANDON => {}
+			SquarkError::ABANDON => {
+				#[cfg(test)]
+				bad!("abandoned!");
+			}
 		}
 	}
 
-	if err.is_empty() {
+	if err.borrow().is_empty() {
 		return;
 	}
 
 	line();
-	go(&err, 0, false);
+	go(err.borrow(), 0, false);
 	line();
 }

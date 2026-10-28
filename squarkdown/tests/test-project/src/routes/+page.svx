@@ -51,6 +51,8 @@
 - [links/spaces/the main file](links/spaces/the-main-file)
 - [links/spaces/other file](links/spaces/other-file)
 
+- [links/broken-mark](links/broken-mark)
+- [links/inactive-mark](links/inactive-mark)
 - [links/strip-extension](links/strip-extension)
 - [links/link-github](links/link-github)
 - 

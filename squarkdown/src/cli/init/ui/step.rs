@@ -53,7 +53,7 @@ pub(crate) fn _step_(
 		Clear(ClearType::FromCursorDown),
 		cursor::MoveToColumn(0),
 	)?;
-	out!("{GREY}{after}");
+	out!("{F}{after}");
 
 	Ok(())
 }

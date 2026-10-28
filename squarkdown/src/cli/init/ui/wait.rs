@@ -30,14 +30,14 @@ pub(crate) fn _wait_(mut hint: &str) -> io::Result<()>
 {
 	let mut stdout = io::stdout();
 	
-	print!(" {GREY}└  ");
+	print!(" {F}└  ");
 	execute!(stdout, cursor::SavePosition)?;
 
 	if hint.is_empty() {
 		hint = "any key to continue · ESC to exit";
 	}
 
-	print!("{GREY}{hint}");
+	print!("{F}{hint}");
 
 	stdout.flush()?;
 	execute!(stdout, cursor::RestorePosition)?;

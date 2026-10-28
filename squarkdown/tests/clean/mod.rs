@@ -11,6 +11,10 @@ use path_macro::path;
 	assert!( path!(*TEST_ROUTES / "clean/basic/main/+page.svx").exists() );
 	assert!( path!(*TEST_ROUTES / "clean/basic/main/+page.ts").exists() );
 
+	assert!( squarkup!("clean/basic", "clean", "--dry-run").success() );
+	assert!( path!(*TEST_ROUTES / "clean/basic/main/+page.svx").exists() );
+	assert!( path!(*TEST_ROUTES / "clean/basic/main/+page.ts").exists() );
+
 	assert!( squarkup!("clean/basic", "clean").success() );
 	assert_not!( path!(*TEST_ROUTES / "clean/basic/main/+page.svx").exists() );
 	assert_not!( path!(*TEST_ROUTES / "clean/basic/main/+page.ts").exists() );
@@ -24,7 +28,12 @@ use path_macro::path;
 	assert!( squarkup_from("clean/committed").success() );
 	assert!( path!(*TEST_ROUTES / "clean/committed/main/+page.svx").exists() );
 	assert!( path!(*TEST_ROUTES / "clean/committed/main/+page.ts").exists() );
+	let md = read_file("clean/committed/main/+page.svx");
+	assert_contains!( md, "handwritten" );
 
+	assert_not!( squarkup!("clean/committed", "clean", "--dry-run").success() );
+	assert!( path!(*TEST_ROUTES / "clean/committed/main/+page.svx").exists() );
+	assert!( path!(*TEST_ROUTES / "clean/committed/main/+page.ts").exists() );
 	let md = read_file("clean/committed/main/+page.svx");
 	assert_contains!( md, "handwritten" );
 
@@ -38,6 +47,10 @@ use path_macro::path;
 #[test] fn keep_folder()
 {
 	assert!( squarkup_from("clean/keep-folder").success() );
+	assert!( path!(*TEST_ROUTES / "clean/keep-folder/+page.svx").exists() );
+	assert!( path!(*TEST_ROUTES / "clean/keep-folder/+page.ts").exists() );
+
+	assert!( squarkup!("clean/keep-folder", "clean", "--dry-run").success() );
 	assert!( path!(*TEST_ROUTES / "clean/keep-folder/+page.svx").exists() );
 	assert!( path!(*TEST_ROUTES / "clean/keep-folder/+page.ts").exists() );
 

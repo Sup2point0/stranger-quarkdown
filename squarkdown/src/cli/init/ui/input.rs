@@ -46,7 +46,7 @@ pub(crate) fn _input_(
 	let mut stdout = io::stdout();
 	
 	ask!("{before}");
-	print!(" {GREY}└  {G}");
+	print!(" {F}└  {G}");
 	stdout.flush()?; 
 	
 	let mut out = str!();
@@ -60,12 +60,12 @@ pub(crate) fn _input_(
 	)?;
 
 	if out.is_empty() {
-		out!("{GREY}×" => "{after}");
+		out!("{F}×" => "{after}");
 		out!("{R}{ITAL}skipped{UNITAL}");
 		Ok(None)
 	} else {
 		out!("{C}✓" => "{after}");
-		out!("{GREY}{out}");
+		out!("{F}{out}");
 		Ok(Some(out))
 	}
 }

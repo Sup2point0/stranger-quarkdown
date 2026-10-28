@@ -30,7 +30,7 @@ pub fn configure_site_data(config: &mut String, site: &str) -> io::Result<()>
 
 	if filepath == "Enter manually" {
 		let Some(answer) = input!(
-			before: "Enter the file path for exported site data: {GREY}(relative to your SvelteKit folder)";
+			before: "Enter the file path for exported site data: {F}(relative to your SvelteKit folder)";
 			after: "Enter the file path for exported site data:";
 		)?
 			else { return Ok(()) };

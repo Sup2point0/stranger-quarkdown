@@ -79,3 +79,23 @@ macro_rules! catch
 		})()
 	};
 } pub use catch;
+
+
+// == ARITHMETIC == //
+
+macro_rules! zero
+{
+	($left:ident - $right:literal) => {
+		$left.saturating_sub($right)
+	};
+	($left:ident - $right:ident) => {
+		$left.saturating_sub($right)
+	};
+	($var:ident . $attr:ident - $right:literal) => {
+		$var.$attr.saturating_sub($right)
+	};
+	($var:ident . $attr:ident - $right:ident) => {
+		$var.$attr.saturating_sub($right)
+	};
+}
+pub(crate) use zero;

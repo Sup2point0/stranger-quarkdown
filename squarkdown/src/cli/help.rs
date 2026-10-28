@@ -11,23 +11,23 @@ pub fn help() -> ExitCode
 	println!(
 "{W} Setup your project’s {Y}squarkup.toml{W}:
 
-{GREY}   › {C}squarkdown {G}init
+{F}   › {C}squarkdown {G}init
 
 {W} Run Squarkdown on your project:
 
-{GREY}   › {C}squarkdown
+{F}   › {C}squarkdown
 
 {W} Run Squarkdown on your project, with extras enabled too:
 
-{GREY}   › {C}squarkdown {Y}--assets --fonts
+{F}   › {C}squarkdown {Y}--assets --fonts
 
 {W} Simulate a run of Squarkdown without actual output:
 
-{GREY}   › {C}squarkdown {Y}--dry-run
+{F}   › {C}squarkdown {Y}--dry-run
 
 {W} Delete Squarkdown’s output for a fresh run:
 
-{GREY}   › {C}squarkdown {G}clean
+{F}   › {C}squarkdown {G}clean
 "
 	);
 

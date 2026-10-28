@@ -73,7 +73,7 @@ pub(super) struct Renderer<'d>
 	/// The target folder to render to.
 	pub(super) dest_folder: PathBuf,
 
-	/// The source text to parse.
+	/// The Markdown source text to parse and render.
 	pub(super) source: String,
 
 	// == MUTABLE == //
@@ -83,6 +83,8 @@ pub(super) struct Renderer<'d>
 	/// Each number is an index into `self.source`. The character accessed at that index is the _first_ character in a new line.
 	/// 
 	/// For instance, `[0, 4, 9, 25]` means bytes 0–3 are line 1 in the source text, 4–8 are line 2, and 9–24 are line 3.
+	/// 
+	/// If `errors.debug = false`, this is empty. Otherwise, this is always guaranteed to be non-empty, because `0` is the first element.
 	pub(super) line_boundaries: Vec<usize>,
 	
 	/// The parsing context stack.
@@ -127,7 +129,7 @@ impl<'d> Renderer<'d>
 		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 		
 		log::info!(
-			"{} to: {base}/{GREY1}{folder}{GREY}/{}",
+			"{} to: {base}/{FF}{folder}{F}/{}",
 			if dry_run {"would render"} else {"rendering"},
 			self.config.out.file_name,
 		);
@@ -184,7 +186,7 @@ impl<'d> Renderer<'d>
 
 		let parser =
 			pd::TextMergeWithOffset::new(parser)
-			.inspect(|(e, _)| if DEBUG { println!("{G}›{GREY} {e:?}"); })
+			.inspect(|(e, _)| if DEBUG { println!("{G}›{F} {e:?}"); })
 			.flat_map(Self::split_comments)
 		;
 
@@ -667,10 +669,12 @@ impl Renderer<'_>
 
 		let their_source_path = path!(own_source_folder / their_file_name).clean();
 
-		// only rewrite file links to `.md` files
+		// if it's a file link, only accept `.md` files
 		if let Some(ext) = their_source_path.extension() && ext != "md" {
 			return None
 		}
+
+		let is_folder_link = their_source_path.extension().is_none();
 
 		// 2. find where the target file will be exported to
 		let mut shard = PageData::shard_for(&their_source_path, self.config);
@@ -678,7 +682,7 @@ impl Renderer<'_>
 
 		// folder links resolve to the README of that folder
 		for readme in ["readme.md", "README.md"] {
-			if lookup.is_none() && their_source_path.extension().is_none() {
+			if lookup.is_none() && is_folder_link {
 				shard = PageData::shard_for(&path!(their_source_path / readme), self.config);
 				lookup = self.site.get_page(&shard);
 			}
@@ -699,59 +703,76 @@ impl Renderer<'_>
 			*dest_url = href.into();
 			return None
 		}
+		// 3. handle broken or inactive link
+		else {
+			let mut link_rewritten =
+				their_file_name[..]
+				.map_or_orig(|f| f.strip_suffix(".md"))
+				.to_owned()
+			;
+			if let Some(a) = anchor {
+				link_rewritten += "#";
+				link_rewritten += a;
+			}
 
-		// 3. handle a broken link
-		if !their_source_path.exists() {
-			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found a broken link"),
-				hint: str!(),
-				debug: [
-					self.source_printed(range),
-					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
-				].concat()
-			});
-			return None
+			if !their_source_path.exists() {
+				self.process_broken_link(
+					self.config.errors.link_broken,
+					dest_url, range, link_rewritten,
+					fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
+					str!(),
+					slash!("resolved to: {}", their_source_path)
+				)
+			} else {
+				self.process_broken_link(
+					self.config.errors.link_inactive,
+					dest_url, range, link_rewritten,
+					str!("link to an inactive page"),
+					fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
+					fmt!("resolved to: {shard}")
+				)
+			}
 		}
+	}
 
-		// 4. handle a non-broken but inactive link
-		match self.config.errors.link_inactive
+	fn process_broken_link<'e>(&mut self,
+		action: LinkRewriteAction,
+		dest_url: &mut pd::CowStr,
+		range: ParserRange,
+		link_rewritten: String,
+		msg: String,
+		hint: String,
+		resolved_to: String,
+	) -> Option<Event<'e>>
+	{
+		match action
 		{
 			LinkRewriteAction::MARK_BROKEN =>
-			{
+			{	
+				log::error(SquarkError::Recoverable {
+					msg: fmt!("found a {msg}, marking it as broken"),
+					hint,
+					debug: [
+						self.source_printed(range),
+						vec![resolved_to],
+					].concat()
+				});
+
 				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
 					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
 				};
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
-				log::error(SquarkError::Recoverable {
-					msg: fmt!("marking link to an inactive page as broken"),
-					hint: str!(),
-					debug: [
-						self.source_printed(range),
-						vec![fmt!("resolved to: {GREY1}{shard}")],
-					].concat()
-				});
-
 				let href = "<a class=\"broken-link\" href=\"\">";
 				
-				return Some(Event::InlineHtml(href.into()));
+				return Some(Event::InlineHtml(href.into()))
 			}
 
 			LinkRewriteAction::STRIP_EXTENSION =>
 			{
-				let mut href =
-					their_file_name[..]
-					.map_or_orig(|f| f.strip_suffix(".md"))
-					.to_owned()
-				;
+				log::info!("found a {msg}, rewriting it: {FF}{dest_url}{F} ⟶ {FF}{link_rewritten}");
 
-				if let Some(a) = anchor {
-					href += "#";
-					href += a;
-				}
-
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
-				*dest_url = href.into();
+				*dest_url = link_rewritten.into();
 			}
 
 			LinkRewriteAction::LINK_TO_GITHUB =>
@@ -761,24 +782,23 @@ impl Renderer<'_>
 					self.config.project.github,
 					utils::display_rel(&self.page.filepath, &self.config.paths.root),
 				);
+				log::info!("found a {msg}, rewriting it: {FF}{dest_url}{F} ⟶ {FF}{href}");
 
-				log::info!("rewriting inactive link: {GREY1}{dest_url}{GREY} ⟶ {GREY1}{href}");
 				*dest_url = href.into();
 			}
 
 			LinkRewriteAction::ERROR =>
 			{
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found a link to an inactive page"),
-					hint: str!(),
+					msg: fmt!("found a {msg}"),
+					hint,
 					debug: [
 						self.source_printed(range),
-						vec![fmt!("resolved to: {GREY1}{shard}")],
+						vec![resolved_to],
 					].concat()
 				});
 			}
 		}
-
 		None
 	}
 
@@ -802,7 +822,7 @@ impl Renderer<'_>
 				hint: str!(),
 				debug: [
 					self.source_printed(range),
-					vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+					vec![slash!("resolved to: {}", their_source_path)],
 				].concat()
 			});
 			return;
@@ -820,7 +840,7 @@ impl Renderer<'_>
 					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
 					debug: [
 						self.source_printed(range),
-						vec![slash!("resolved to: {GREY1}{}", their_source_path)],
+						vec![slash!("resolved to: {}", their_source_path)],
 					].concat()
 				});
 				return;
@@ -940,30 +960,54 @@ impl Renderer<'_>
 	/// Print a snapshot of the source text, focused around `range`.
 	fn source_printed(&self, range: ParserRange) -> Vec<String>
 	{
-		let Some(info) = self.line_info(range.clone())
+		let Some(LineInfo{
+			line_number, line_range, prev_line_range, next_line_range,
+		}) = self.line_info(range.clone())
 			else { return vec![] };
 
 		let mut out = Vec::with_capacity(3);
 		out.push(str!(" "));
 
 		// previous line
-		if let Some(r) = info.prev_line_range {
-			out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{}", info.line_number - 1, &self.source[r]));
+		if let Some(r) = prev_line_range {
+			out.push(fmt!(
+				"{FF}{:6} {F}│  {W}{}",
+				line_number - 1,
+				&self.source[r],
+			));
 		}
 
 		// this line
 		let focus = &self.source[range.clone()].trim_end_matches('\n');
 
-		let range_before = info.line_range.start..range.start;
-		let range_after  = range.end..info.line_range.end;
-		let before = if range_before.is_empty() { "" } else { &self.source[range_before] };
-		let after  = if range_after.is_empty()  { "" } else { &self.source[range_after] };
+		let r_before = line_range.start..range.start;
+		let r_after  = range.end..line_range.end;
+		let mut before = if r_before.is_empty() {""} else {&self.source[r_before]};
+		let mut after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
+		
+		const MAX_PREVIEW_CHARS: usize = 32;
+		let mut ddd_before = "";
+		let mut ddd_after = "";
+		if let Some(before_clipped) = utils::truncated_start(before, MAX_PREVIEW_CHARS) {
+			before = before_clipped;
+			ddd_before = "...";
+		}
+		if let Some(after_clipped) = utils::truncated_end(after, MAX_PREVIEW_CHARS) {
+			after = after_clipped;
+			ddd_after = "...";
+		}
 
-		out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}", info.line_number));
+		out.push(fmt!(
+			"{FF}{line_number:6} {F}│  {ddd_before}{W}{before}{R}{BOLD}{focus}{UNBOLD}{W}{after}{F}{ddd_after}",
+		));
 
 		// next line
-		if let Some(r) = info.next_line_range {
-			out.push(fmt!("{GREY1}{:6} {GREY}│  {W}{}", info.line_number + 1, &self.source[r]));
+		if let Some(r) = next_line_range {
+			out.push(fmt!(
+				"{FF}{:6} {F}│  {W}{}",
+				line_number + 1,
+				&self.source[r],
+			));
 		}
 
 		out.push(str!(" "));
@@ -982,9 +1026,7 @@ impl Renderer<'_>
 				continue;
 			}
 
-			let lower_this = 
-				if i == 0 { 0 }
-				else { *self.line_boundaries.get(i - 1).unwrap_or(&0) };
+			let lower_this = *self.line_boundaries.get(zero!(i - 1)).unwrap_or(&0);
 
 			return Some(LineInfo {
 				line_number: i,
@@ -995,7 +1037,7 @@ impl Renderer<'_>
 					},
 				next_line_range:
 					self.line_boundaries.get(i + 1).map(|&upper_next| upper_this..(upper_next - 1)),
-			});
+			})
 		}
 
 		None
@@ -1004,12 +1046,8 @@ impl Renderer<'_>
 
 struct LineInfo
 {
-	/// May be `None` if:
-	/// 
-	/// - `renderer.line-boundaries` hasn't been initialised properly.
-	/// - `line_info(range)` is out-of-bounds (which shouldn't be the case, since it comes from pulldown-cmark parsing the source).
+	/// 1-indexed.
 	line_number: usize,
-
 	line_range: Range<usize>,
 	prev_line_range: Option<Range<usize>>,
 	next_line_range: Option<Range<usize>>,

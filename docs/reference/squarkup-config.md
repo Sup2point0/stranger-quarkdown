@@ -1,7 +1,7 @@
 # Squarkup Configuration
 <!-- #SQUARK live!
 | dest = docs/reference/squarkup-config
-| update = 2026 October 24
+| update = 2026 October 27
 -->
 
 Squarkdown comes with sensible defaults out-of-the-box, but you’ll almost certainly want to configure it to suit your needs.
@@ -54,7 +54,8 @@ Configuration options are neatly organised into categories. Throughout the docs 
 | [`debug`](#debug)                             | boolean | | `true` |
 | [`on-error`](#on-error)                       | string | `warn` <br> `kill` | `warn` |
 | [`file-already-exists`](#file-already-exists) | string | `overwrite` <br> `error` <br> `skip` | `overwrite` |
-| [`link-inactive`](#link-inactive)                 | string | `mark-broken` <br> `strip-extension` <br> `link-to-github` <br> `error` | `strip-extension` |
+| [`link-broken`](#link-broken)                 | string | `mark-broken` <br> `strip-extension` <br> `link-to-github` <br> `error` | `error` |
+| [`link-inactive`](#link-inactive)             | string | `mark-broken` <br> `strip-extension` <br> `link-to-github` <br> `error` | `error` |
 
 ### `strict`
 Enable stricter safety checks?
@@ -92,14 +93,23 @@ Defaults to `overwrite`, meaning Squarkdown will overwrite the existing file.
 
 In production, you may want `error` to avoid Squarkdown overwriting a handwritten `+page.svx` without you knowing.
 
+### `link-broken`
+> [!Important]
+> Not to be confused with [`link-inactive`](#link-inactive)!
+
+How should Squarkdown handle a link that does not resolve to an existent file or folder?
+
+Defaults to `error`, meaning Squarkdown will raise an error handled according to [`errors.on-error`](#on-error).
+
+*New in v4.6*.
+
 ### `link-inactive`
+> [!Important]
+> Not to be confused with [`link-broken`](#link-broken)!
 
-How should Squarkdown handle a `.md` link that does not resolve to an [active](../glossary.md#active) file?
+How should Squarkdown handle a link that does not resolve to an [active](../glossary.md#active) file or folder?
 
-This can happen because either:
-
-- The link is *totally* broken: the linked `.md` file doesn’t exist at all!
-- The link *would* be broken: the linked file doesn’t have `#SQUARK live!`, so wouldn’t have a page in the site.
+This refers to when a link *would* be broken in production, because the linked file doesn’t have `#SQUARK live!`, and so wouldn’t have a page in the site.
 
 Defaults to `error`, meaning Squarkdown will raise an error handled according to [`errors.on-error`](#on-error).
 
