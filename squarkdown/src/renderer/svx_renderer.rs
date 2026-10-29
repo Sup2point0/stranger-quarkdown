@@ -749,7 +749,7 @@ impl Renderer<'_>
 	{
 		match action
 		{
-			LinkRewriteAction::MARK_BROKEN =>
+			LinkRewriteAction::MARK_DEAD =>
 			{	
 				self.errors.push(SquarkError::Warning {
 					msg: fmt!("found a {msg}, marking it as broken"),
@@ -765,7 +765,7 @@ impl Renderer<'_>
 				};
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
-				let href = "<a class=\"broken-link\" href=\".\">";
+				let href = "<a class=\"dead-link\" href=\".\">";
 				
 				return Some(Event::InlineHtml(href.into()))
 			}
