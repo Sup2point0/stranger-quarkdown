@@ -34,10 +34,16 @@ I’m working on fixing these!
 
 ## Next (v4.6.1)
 
+### New
+- Warnings are now printed with yellow text, rather than red text!
+
 ### Fixes
 - Do not try resolving empty links
 - Use `href="."` instead of `href=""` for dead links when `link-broken = "mark-broken"` or `link-inactive = "mark-broken"`.
   - `href=""` was causing invalid attribute errors in SvelteKit.
+
+### Changes
+- Capitalise error messages and hints for better readability.
 
 
 ## v4.6

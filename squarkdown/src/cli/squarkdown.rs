@@ -122,15 +122,15 @@ fn squarkup(
 	
 	if site_data.stats.checked_files == 0 {
 		SquarkError::Recoverable {
-			msg: str!("no files found to squarkup"),
-			hint: fmt!("check your {Y}paths.sources{G} · {Y}.include{G} · {Y}.exclude{G} are configured correctly?"),
+			msg: str!("No files found to squarkup"),
+			hint: fmt!("Check your {Y}paths.sources{G} · {Y}.include{G} · {Y}.exclude{G} are configured correctly?"),
 			debug: vec![],
 		}.depends(&config)?;
 	}
 	else if site_data.stats.active_pages == 0 {
 		SquarkError::Recoverable {
-			msg: str!("no active files found"),
-			hint: fmt!("check your files have {Y}<!-- #SQUARK live!{G} under their heading"),
+			msg: str!("No active files found"),
+			hint: fmt!("Check your files have {Y}<!-- #SQUARK live!{G} under their heading"),
 			debug: vec![
 				fmt!("parsed {} files", site_data.stats.checked_files),
 			],

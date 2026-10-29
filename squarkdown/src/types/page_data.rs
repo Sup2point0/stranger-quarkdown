@@ -79,7 +79,7 @@ impl PageData
 				if config.errors.strict && !dest.starts_with(&config.paths.root) {
 					errs.push(SquarkError::Unrecoverable {
 						msg: slash!("cannot export a file to: {}", dest),
-						hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
+						hint: fmt!("Output files must remain under your project root when {Y}errors.strict{G} is enabled"),
 						debug: vec![],
 					});
 				}
@@ -88,8 +88,8 @@ impl PageData
 			}
 			else if config.errors.strict {
 				errs.push(SquarkError::Unrecoverable {
-					msg: fmt!("missing field: {W}dest{R}({W}ination{R})"),
-					hint: fmt!("active pages must specify where they should be rendered to when {Y}errors.strict{G} is enabled"),
+					msg: fmt!("Missing field: {W}dest{R}({W}ination{R})"),
+					hint: fmt!("Active pages must specify where they should be rendered to when {Y}errors.strict{G} is enabled"),
 					debug: vec![
 						fmt!("parsed fields: {FF}{fields:?}")
 					],
@@ -148,8 +148,8 @@ impl PageData
 		&& update < date
 		{
 			errs.push(SquarkError::Recoverable {
-				msg: fmt!("you provided a {W}last updated{R} date earlier than the {W}release date"),
-				hint: str!("you can’t update a page before you release it!"),
+				msg: fmt!("You provided a {W}last updated{R} date earlier than the {W}release date"),
+				hint: str!("You can’t update a page before you release it!"),
 				debug: vec![
 					fmt!("last updated = {}", &last_update_raw),
 					fmt!("release date = {}", &release_date_raw),
@@ -165,8 +165,8 @@ impl PageData
 				Ok(value) => cleanse.push(value),
 				Err(_) => {
 					errs.push(SquarkError::Recoverable {
-						msg: fmt!("invalid value for {W}cleanse{R}: {W}{raw}"),
-						hint: fmt!("valid values are {W}'angles'{G} · {W}'braces'{G} · {W}'line-breaks'"),
+						msg: fmt!("Invalid value for {W}cleanse{R}: {W}{raw}"),
+						hint: fmt!("Valid values are {W}'angles'{G} · {W}'braces'{G} · {W}'line-breaks'"),
 						debug: vec![
 							slash!("in file: {}", filepath),
 						],
@@ -213,8 +213,8 @@ impl PageData
 			}
 
 			errs.push(SquarkError::Recoverable {
-				msg: fmt!("warning: unknown field {W}{field}"),
-				hint: fmt!("only Squarkdown-native fields like {W}desc{G} or {W}update{G} are allowed before {W}---"),
+				msg: fmt!("Warning: unknown field {W}{field}"),
+				hint: fmt!("Only Squarkdown-native fields like {W}desc{G} or {W}update{G} are allowed before {W}---"),
 				debug: vec![],
 			});
 		}
@@ -246,8 +246,8 @@ impl PageData
 			.or_else(|_| Date::parse(&fmt!("{date} 1"), short))
 			.or_else(|_| Date::parse(&fmt!("{date} January 1"), long))
 			.map_err(|_| SquarkError::Recoverable {
-				msg: fmt!("invalid date for {W}{field}{R}: {date}"),
-				hint: fmt!("dates use the format {W}<year> <month?> <date?>"),
+				msg: fmt!("Invalid date for {W}{field}{R}: {date}"),
+				hint: fmt!("Dates use the format {W}<year> <month?> <date?>"),
 				debug: vec![]
 			})
 	}

@@ -149,7 +149,7 @@ impl CharmParser<'_>
 				let (l, i) = self.prev_indices();
 				
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("expected {W}{BOLD}{target}{UNBOLD} {R}{}", to()),
+					msg: fmt!("Expected {W}{BOLD}{target}{UNBOLD} {R}{}", to()),
 					hint: hint(),
 					debug: [
 						self.source_printed(l, init, i),
@@ -194,7 +194,7 @@ impl CharmParser<'_>
 				let (l, i) = self.prev_indices();
 
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("expected {target} to {}", to()),
+					msg: fmt!("Expected {target} to {}", to()),
 					hint: str!(),
 					debug: [
 						self.source_printed(l, init, i),
@@ -262,8 +262,8 @@ impl CharmParser<'_>
 
 			if let Ok('-') = self.current() {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("illegal identifier"),
-					hint: fmt!("identifiers cannot start with {Y}{BOLD}-{UNBOLD} (hyphen)"),
+					msg: fmt!("Illegal identifier"),
+					hint: fmt!("Identifiers cannot start with {Y}{BOLD}-{UNBOLD} (hyphen)"),
 					debug: [
 						self.source_printed(self.l, self.i, self.i),
 						self.ctx.printed(),
@@ -273,8 +273,8 @@ impl CharmParser<'_>
 
 			if let Ok(c) = self.current() && !Self::is_ident_char(c) {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("expected an identifier, but found {W}{BOLD}{c}{UNBOLD}"),
-					hint: fmt!("identifiers must start with an alphanumeric character or {Y}{BOLD}_.~{UNBOLD}"),
+					msg: fmt!("Expected an identifier, but found {W}{BOLD}{c}{UNBOLD}"),
+					hint: fmt!("Identifiers must start with an alphanumeric character or {Y}{BOLD}_.~{UNBOLD}"),
 					debug: [
 						self.source_printed(self.l, self.i, self.i),
 						self.ctx.printed(),
@@ -308,7 +308,7 @@ impl CharmParser<'_>
 	/// If not, then Squarkdown can just ignore the file.
 	pub(super) fn err_eof(&self) -> SquarkError
 	{
-		let msg = str!("unexpected end of file");
+		let msg = str!("Unexpected end of file");
 		let hint = str!();
 		let debug =
 			[

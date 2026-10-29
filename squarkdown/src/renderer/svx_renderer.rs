@@ -139,8 +139,8 @@ impl<'d> Renderer<'d>
 
 		if !self.ctx.is_empty() {
 			self.errors.push(SquarkError::Recoverable {
-				msg: str!("unclosed context"),
-				hint: fmt!("did you forget to close a {W}{}{G} context?", self.ctx.current()),
+				msg: str!("Unclosed context"),
+				hint: fmt!("Did you forget to close a {W}{}{G} context?", self.ctx.current()),
 				debug: self.ctx.printed(),
 			});
 		}
@@ -576,10 +576,10 @@ impl Renderer<'_>
 			if html.contains("#squark") || html.contains("#SQUARK") {
 				self.errors.push(SquarkError::Recoverable {
 					msg: fmt!(
-						"unknown squark pattern: {W}{BOLD}{}{UNBOLD}",
+						"Unknown squark pattern: {W}{BOLD}{}{UNBOLD}",
 						html.trim_start_matches("<!--").trim_end_matches("-->").trim()
 					),
-					hint: fmt!("use squarks like this: {Y}<!-- #SQUARK leave? -->"),
+					hint: fmt!("Use squarks like this: {Y}<!-- #SQUARK leave? -->"),
 					debug: [self.source_printed(range), self.ctx.printed()].concat(),
 				});
 			}
@@ -597,8 +597,8 @@ impl Renderer<'_>
 			s => {
 				if !self.ctx.has_leave() {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("unknown twin squark: {W}{BOLD}{s}{UNBOLD}"),
-						hint: fmt!("valid twin squarks are {Y}leave{G} · {Y}slash{G} · {Y}only"),
+						msg: fmt!("Unknown twin squark: {W}{BOLD}{s}{UNBOLD}"),
+						hint: fmt!("Valid twin squarks are {Y}leave{G} · {Y}slash{G} · {Y}only"),
 						debug: [self.source_printed(range), self.ctx.printed()].concat(),
 					});
 				}
@@ -615,12 +615,12 @@ impl Renderer<'_>
 			"." => {
 				if self.ctx.try_pop_exact(&squark).is_err() {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("unpaired closing squark"),
+						msg: fmt!("Unpaired closing squark"),
 						hint: {
 							if self.ctx.contains(&squark) {
-								fmt!("did you forget to close a {} context?", self.ctx.current())
+								fmt!("Did you forget to close a {} context?", self.ctx.current())
 							} else {
-								fmt!("did you forget to open a {W}{squark}?{G} context?")
+								fmt!("Did you forget to open a {W}{squark}?{G} context?")
 							}
 						},
 						debug: [self.source_printed(range), self.ctx.printed()].concat(),
@@ -752,7 +752,7 @@ impl Renderer<'_>
 			LinkRewriteAction::MARK_BROKEN =>
 			{	
 				self.errors.push(SquarkError::Warning {
-					msg: fmt!("found a {msg}, marking it as broken"),
+					msg: fmt!("Found a {msg}, marking it as broken"),
 					hint,
 					debug: [
 						self.source_printed(range),
@@ -792,7 +792,7 @@ impl Renderer<'_>
 			LinkRewriteAction::ERROR =>
 			{
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found a {msg}"),
+					msg: fmt!("Found a {msg}"),
 					hint,
 					debug: [
 						self.source_printed(range),
@@ -820,7 +820,7 @@ impl Renderer<'_>
 		// 2. check it's an asset file
 		if !their_source_path.exists() {
 			self.errors.push(SquarkError::Recoverable {
-				msg: fmt!("found a broken asset link"),
+				msg: fmt!("Found a broken asset link"),
 				hint: str!(),
 				debug: [
 					self.source_printed(range),
@@ -838,8 +838,8 @@ impl Renderer<'_>
 		let Some(their_path_rel) = self.config.assets.rel_path(&their_source_path)
 			else {
 				self.errors.push(SquarkError::Recoverable {
-					msg: fmt!("found a link to an asset not processed by Squarkdown"),
-					hint: fmt!("this asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
+					msg: fmt!("Found a link to an asset not processed by Squarkdown"),
+					hint: fmt!("This asset isn't under {Y}assets.folder{G} or {Y}assets.site-assets.folder{G}, so Squarkdown doesn't know how to link to it"),
 					debug: [
 						self.source_printed(range),
 						vec![slash!("resolved to: {}", their_source_path)],

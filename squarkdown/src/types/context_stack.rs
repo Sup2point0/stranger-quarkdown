@@ -61,8 +61,8 @@ impl<Ctx> ContextStack<Ctx>
 		let Some(mut out) = self.stack.pop_if(|c| eq_discriminant::eq_discriminant(c, ctx))
 			else {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("failed to pop context: {ctx:?}"),
-					hint: str!("contexts must always be balanced"),
+					msg: fmt!("Failed to pop context: {ctx:?}"),
+					hint: str!("Contexts must always be balanced"),
 					debug: vec![],
 				});
 			};
@@ -86,8 +86,8 @@ impl<Ctx> ContextStack<Ctx>
 		let Some(mut out) = self.stack.pop_if(|c| c == ctx)
 			else {
 				return Err(SquarkError::Recoverable {
-					msg: fmt!("failed to pop context: {ctx:?}"),
-					hint: str!("contexts must always be balanced"),
+					msg: fmt!("Failed to pop context: {ctx:?}"),
+					hint: str!("Contexts must always be balanced"),
 					debug: vec![],
 				});
 			};

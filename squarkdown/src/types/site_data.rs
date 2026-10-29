@@ -96,12 +96,12 @@ impl SiteData
 			{
 				return Err(SquarkError::Recoverable {
 					msg: fmt!(
-						"found conflicting pages: {W}{}{R} and {W}{}{R} both want to export to {W}{}",
+						"Found conflicting pages: {W}{}{R} and {W}{}{R} both want to export to {W}{}",
 						utils::display_rel(&existing.filepath, &config.paths.root),
 						utils::display_rel(&page.filepath, &config.paths.root),
 						utils::display_rel(dest, &config.paths.site),
 					),
-					hint: str!("pages must have unique export destinations, otherwise one will overwrite the other"),
+					hint: str!("Pages must have unique export destinations, otherwise one will overwrite the other"),
 					debug: vec![],
 				});
 			}

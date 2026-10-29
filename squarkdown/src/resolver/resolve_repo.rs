@@ -28,7 +28,7 @@ pub fn resolve_project_repo(
 	}
 
 	Err(SquarkError::Recoverable {
-		msg: fmt!("could not find your project Git repository"),
+		msg: fmt!("Could not find your project Git repository"),
 		hint: str!(),
 		debug: checked.into_iter().map(|d| slash!("checked: {}", d)).collect(),
 	})

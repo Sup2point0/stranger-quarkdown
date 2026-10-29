@@ -104,8 +104,8 @@ impl SquarkupConfig
 					c.errors.on_error = opt;
 				} else {
 					unrecoverable! {
-						msg: fmt!("unknown setting for {Y}errors.on-error"),
-						hint: fmt!("valid values are {W}'warn'{G} (default) or {W}'kill'"),
+						msg: fmt!("Unknown setting for {Y}errors.on-error"),
+						hint: fmt!("Valid values are {W}'warn'{G} (default) or {W}'kill'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
@@ -118,8 +118,8 @@ impl SquarkupConfig
 					c.errors.file_already_exists = opt;
 				} else {
 					unrecoverable! {
-						msg: fmt!("unknown setting for {Y}errors.file-already-exists"),
-						hint: fmt!("valid values are {W}'overwrite'{G} (default) · {W}'error'{G} · {W}'skip'"),
+						msg: fmt!("Unknown setting for {Y}errors.file-already-exists"),
+						hint: fmt!("Valid values are {W}'overwrite'{G} (default) · {W}'error'{G} · {W}'skip'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
@@ -132,8 +132,8 @@ impl SquarkupConfig
 					c.errors.link_broken = opt;
 				} else {
 					unrecoverable! {
-						msg: fmt!("unknown setting for {Y}errors.link-broken"),
-						hint: fmt!("valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
+						msg: fmt!("Unknown setting for {Y}errors.link-broken"),
+						hint: fmt!("Valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
@@ -146,8 +146,8 @@ impl SquarkupConfig
 					c.errors.link_inactive = opt;
 				} else {
 					unrecoverable! {
-						msg: fmt!("unknown setting for {Y}errors.link-inactive"),
-						hint: fmt!("valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
+						msg: fmt!("Unknown setting for {Y}errors.link-inactive"),
+						hint: fmt!("Valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
@@ -166,8 +166,8 @@ impl SquarkupConfig
 
 				if raw.is_empty() {
 					recoverable! {
-						msg: fmt!("warning: you provided a blank {Y}project.name"),
-						hint: str!("project name is ignored if blank"),
+						msg: fmt!("Warning: you provided a blank {Y}project.name"),
+						hint: str!("Project name is ignored if blank"),
 						debug: vec![],
 					}
 				}
@@ -182,15 +182,15 @@ impl SquarkupConfig
 
 				if raw.is_empty() {
 					recoverable! {
-						msg: fmt!("warning: you provided a blank {Y}project.github"),
-						hint: str!("project GitHub link is ignored if blank"),
+						msg: fmt!("Warning: you provided a blank {Y}project.github"),
+						hint: str!("Project GitHub link is ignored if blank"),
 						debug: vec![],
 					}
 				}
 				else if !raw.contains('/') {
 					errs.push(SquarkError::Recoverable {
-						msg: fmt!("warning: your {Y}project.github{R} does not contain a {W}/"),
-						hint: fmt!("use the format {W}user/project"),
+						msg: fmt!("Warning: your {Y}project.github{R} does not contain a {W}/"),
+						hint: fmt!("Use the format {W}user/project"),
 						debug: vec![
 							fmt!("you provided {FF}{raw}"),
 						],
@@ -221,7 +221,7 @@ impl SquarkupConfig
 					|| raw.contains("/..")
 					{
 						errs.push(SquarkError::Recoverable {
-							msg: fmt!("illegal source directory: {W}{BOLD}{raw}{UNBOLD}"),
+							msg: fmt!("Illegal source directory: {W}{BOLD}{raw}{UNBOLD}"),
 							hint: fmt!("{Y}paths.sources{G} entries cannot contain {W}..{G} traversal"),
 							debug: vec![],
 						});
@@ -250,7 +250,7 @@ impl SquarkupConfig
 						Ok(compiled) => c.paths.include.push(compiled),
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
-							msg: fmt!("invalid RegEx pattern in {Y}paths.include"),
+							msg: fmt!("Invalid RegEx pattern in {Y}paths.include"),
 							backtrace: std::backtrace::Backtrace::capture(),
 						})
 					}
@@ -267,7 +267,7 @@ impl SquarkupConfig
 						Ok(compiled) => c.paths.exclude.push(compiled),
 						Err(e) => return Err(SquarkError::External {
 							err: Box::new(e),
-							msg: fmt!("invalid RegEx pattern in {Y}paths.exclude"),
+							msg: fmt!("Invalid RegEx pattern in {Y}paths.exclude"),
 							backtrace: std::backtrace::Backtrace::capture(),
 						})
 					}
@@ -293,8 +293,8 @@ impl SquarkupConfig
 
 				if raw.contains('/') {
 					unrecoverable! {
-						msg: fmt!("illegal value for {Y}out.file-name{R}: {W}{raw}"),
-						hint: fmt!("the file name cannot contain {W}/{G}, because that turns into a file path!"),
+						msg: fmt!("Illegal value for {Y}out.file-name{R}: {W}{raw}"),
+						hint: fmt!("The file name cannot contain {W}/{G}, because that turns into a file path!"),
 						debug: vec![],
 					}
 				}
@@ -311,7 +311,7 @@ impl SquarkupConfig
 
 				if !folder.exists() {
 					unrecoverable! {
-						msg: fmt!("the folder you specified for site data to be saved doesn't exist!"),
+						msg: fmt!("The folder you specified for site data to be saved doesn't exist!"),
 						hint: fmt!("{W}out.site-data-path{G} is a filepath relative to your site directory"),
 						debug: vec![
 							slash!("{FF}{}{F} is not a valid directory", path)
@@ -461,7 +461,7 @@ impl SquarkupConfig
 	{
 		value.as_str()
 			.ok_or_else(|| SquarkError::Unrecoverable {
-				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				msg: fmt!("Invalid value {W}{value}{R} for {Y}{setting}"),
 				hint: fmt!("{Y}{setting}{G} must be a string {F}{hint}"),
 				debug: vec![
 					fmt!("you provided a value of type {FF}{}", value.type_str()),
@@ -474,7 +474,7 @@ impl SquarkupConfig
 	{
 		value.as_bool()
 			.ok_or_else(|| SquarkError::Unrecoverable {
-				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				msg: fmt!("Invalid value {W}{value}{R} for {Y}{setting}"),
 				hint: fmt!("{Y}{setting}{G} must be a boolean"),
 				debug: vec![
 					fmt!("you provided a value of type {FF}{}", value.type_str()),
@@ -491,7 +491,7 @@ impl SquarkupConfig
 	{
 		value.as_array()
 			.ok_or_else(|| SquarkError::Unrecoverable {
-				msg: fmt!("invalid value {W}{value}{R} for {Y}{setting}"),
+				msg: fmt!("Invalid value {W}{value}{R} for {Y}{setting}"),
 				hint: fmt!("{Y}{setting}{G} must be an array {F}{hint}"),
 				debug: vec![
 					fmt!("you provided a value of type {FF}{}", value.type_str()),
@@ -511,7 +511,7 @@ impl SquarkupConfig
 
 		if !path.exists() {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("the folder you specified {location} doesn't exist!"),
+				msg: fmt!("The folder you specified {location} doesn't exist!"),
 				hint: hint(),
 				debug: vec![
 					slash!("{FF}{}{F} is not a valid directory", path),
@@ -520,7 +520,7 @@ impl SquarkupConfig
 		}
 		else if !path.is_dir() {
 			Err(SquarkError::Unrecoverable {
-				msg: fmt!("the folder you specified {location} is not a folder"),
+				msg: fmt!("The folder you specified {location} is not a folder"),
 				hint: str!(),
 				debug: vec![
 					slash!("{FF}{}{F} is not a folder", path),
@@ -538,7 +538,7 @@ impl SquarkupConfig
 		for (key, value) in data {
 			errs.push(SquarkError::Recoverable {
 				msg: fmt!(
-					"unknown {}: {W}{BOLD}{key}{UNBOLD}",
+					"Unknown {}: {W}{BOLD}{key}{UNBOLD}",
 					if is_final_check && value.is_table() {"group"} else {"option"},
 				),
 				hint: str!(),
@@ -790,7 +790,7 @@ mod rejects {
 		] {
 			let r = load_config(source);
 			assert_err!( &r );
-			assert_contains!( r.unwrap_err(), "unknown option" );
+			assert_contains!( r.unwrap_err(), "Unknown option" );
 		}
 	}
 
@@ -803,7 +803,7 @@ mod rejects {
 		] {
 			let r = load_config(source);
 			assert_err!( &r );
-			assert_contains!( r.unwrap_err(), "unknown group" );
+			assert_contains!( r.unwrap_err(), "Unknown group" );
 		}
 	}
 }

@@ -43,8 +43,8 @@ pub fn parse(filepath: &Path, config: &SquarkupConfig) -> SquarkResult<Option<Pa
 		if reader.read_line(&mut source)? == 0 {
 			if may_have_charm_squark && config.errors.strict {
 				return Err(SquarkError::Recoverable {
-					msg: str!("warning: possibly unclosed charm squark"),
-					hint: fmt!("if you aren’t trying to write a charm squark, you can ignore this"),
+					msg: str!("Warning: possibly unclosed charm squark"),
+					hint: fmt!("If you aren’t trying to write a charm squark, you can ignore this"),
 					debug: [
 						vec![
 							slash!("in: {}", filepath),

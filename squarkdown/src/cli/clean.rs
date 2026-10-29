@@ -83,7 +83,7 @@ fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 	   Err(mut e) => if force {
 			log::bad!("no repository found, proceeding with {W}{BOLD}--force{UNBOLD}");
 		} else {
-			e.set_hint(fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"));
+			e.set_hint(fmt!("To cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"));
 			return Err(e)
 		}
 	}
@@ -116,7 +116,7 @@ fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 
 			if let Some((_, root)) = &repo_info && path.strip_prefix(root).is_err() {
 				return Err(SquarkError::Unrecoverable {
-					msg: fmt!("critical error: received a path outside your project root"),
+					msg: fmt!("Critical error: received a path outside your project root"),
 					hint: str!(),
 					debug: vec![
 						slash!("would have tried deleting: {FF}{}", path)
@@ -183,8 +183,8 @@ fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 
 	if !skipped_paths.is_empty() {
 		errs.push(SquarkError::Recoverable {
-			msg: fmt!("skipped {} files that are not Git-ignored", skipped_paths.len()),
-			hint: fmt!("to cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
+			msg: fmt!("Skipped {} files that are not Git-ignored", skipped_paths.len()),
+			hint: fmt!("To cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
 			debug: skipped_paths,
 		});
 	}

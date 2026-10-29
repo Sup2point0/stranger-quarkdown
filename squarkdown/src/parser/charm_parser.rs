@@ -178,9 +178,9 @@ impl CharmParser<'_>
 				match self.try_eat_caseless("dead!") {
 					Ok(..) => SquarkError::ABANDON,
 					Err(..) => SquarkError::Unrecoverable {
-						msg: fmt!("expected either {W}live!{R} or {W}dead!{R} to start charm squark"),
+						msg: fmt!("Expected either {W}live!{R} or {W}dead!{R} to start charm squark"),
 						hint: fmt!(
-							"use {W}<!-- #SQUARK {BOLD}live!{UNBOLD}{G} for an active file, \
+							"Use {W}<!-- #SQUARK {BOLD}live!{UNBOLD}{G} for an active file, \
 							\n{:8} or {W}<!-- #SQUARK {BOLD}dead!{UNBOLD}{G} if you want to mark the file as inactive",
 							""
 						),
@@ -235,8 +235,8 @@ impl CharmParser<'_>
 				}
 				else {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("invalid flag in charm squark",),
-						hint: fmt!("flags must end in {Y}{BOLD}!{UNBOLD}{G}, like: {W}{ident}!"),
+						msg: fmt!("Invalid flag in charm squark",),
+						hint: fmt!("Flags must end in {Y}{BOLD}!{UNBOLD}{G}, like: {W}{ident}!"),
 						debug: [
 							self.source_printed(self.l, from, self.i),
 							self.ctx.printed(),
@@ -866,7 +866,7 @@ mod errors {
 		|parser, _| {
 			let e = parser.parse().unwrap_err();
 			log::error(&e);
-			assert_contains!( &e, "unexpected end of file" );
+			assert_contains!( &e, "Unexpected end of file" );
 		});
 	}
 

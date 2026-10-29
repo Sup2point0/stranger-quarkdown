@@ -21,7 +21,7 @@ pub fn save_site_data(
 	if config.errors.strict && !dest.starts_with(&config.paths.root) {
 		SquarkError::Recoverable {
 			msg: slash!("cannot export site data to: {}", dest),
-			hint: fmt!("output files must remain under your project root when {Y}errors.strict{G} is enabled"),
+			hint: fmt!("Output files must remain under your project root when {Y}errors.strict{G} is enabled"),
 			debug: vec![],
 		}.depends(config)?;
 	}

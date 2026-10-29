@@ -154,8 +154,8 @@ use assertables::*;
 
 	let md = read_file("links/inactive-mark/+page.svx");
 	assert_contains!( md, "<a" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\"\">inactive</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\"\">very inactive</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\".\">inactive</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\".\">very inactive</a>" );
 }
 
 /// With `link-inactive = strip-extension`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.

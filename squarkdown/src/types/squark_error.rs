@@ -83,7 +83,7 @@ impl SquarkError
 	pub fn external(error: impl std::error::Error + Send + 'static) -> Self
 	{
 		Self::External {
-			msg: str!("unexpected external error"),
+			msg: str!("Unexpected external error"),
 			err: Box::new(error),
 			backtrace: std::backtrace::Backtrace::capture(),
 		}

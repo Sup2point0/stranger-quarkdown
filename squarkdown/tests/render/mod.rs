@@ -9,7 +9,7 @@ use path_macro::path;
 {
 	let (status, out) = capture_squarkup_from("render/dead");
 	assert_not!( status.success() );
-	assert_contains!( out, "no active files found" );
+	assert_contains!( out, "No active files found" );
 
 	assert_not!( path!(*TEST_ROUTES / "render/dead/only-dead" ).exists() );
 	assert_not!( path!(*TEST_ROUTES / "render/dead/live-and-dead" ).exists() );

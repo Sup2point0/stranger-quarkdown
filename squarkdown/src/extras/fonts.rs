@@ -12,7 +12,7 @@ pub fn prep_fonts(config: &SquarkupConfig, dry_run: bool) -> SquarkResult
 {
 	if config.fonts.queries.is_empty() {
 		return Err(SquarkError::Recoverable {
-			msg: fmt!("no queries provided in {W}fonts.queries"),
+			msg: fmt!("No queries provided in {W}fonts.queries"),
 			hint: str!(),
 			debug: vec![],
 		});
@@ -22,7 +22,7 @@ pub fn prep_fonts(config: &SquarkupConfig, dry_run: bool) -> SquarkResult
 
 	if !path.is_file() {
 		return Err(SquarkError::Recoverable {
-			msg: fmt!("could not find your {W}app.html"),
+			msg: fmt!("Could not find your {W}app.html"),
 			hint: fmt!("Squarkdown injects Google Fonts queries into the {W}<head>{G} of your {W}app.html"),
 			debug: vec![
 				slash!("{FF}{}{F} is not a file", path),

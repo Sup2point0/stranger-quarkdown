@@ -53,7 +53,7 @@ use path_macro::path;
 {
 	let (status, out) = capture_squarkup_from("errors/none");
 	assert_not!( status.success() );
-	assert_contains!( out, "no files found to squarkup" );
+	assert_contains!( out, "No files found to squarkup" );
 }
 
 /// Squarkdown errors if a page has an incomplete charm squark (instead of silently deeming it inactive).
@@ -86,13 +86,13 @@ use path_macro::path;
 
 	assert_contains!( out, "2 errors" );
 
-	assert_contains!( out, "unpaired closing squark" );
+	assert_contains!( out, "Unpaired closing squark" );
 	assert_contains!( out, "<!-- #SQUARK slash. -->" );
-	assert_contains!( out, "did you forget to open" );
+	assert_contains!( out, "Did you forget to open" );
 	assert_contains!( out, "#SQUARK slash?" );
 
-	assert_contains!( out, "unclosed context" );
-	assert_contains!( out, "did you forget to close" );
+	assert_contains!( out, "Unclosed context" );
+	assert_contains!( out, "Did you forget to close" );
 	assert_contains!( out, "#SQUARK only" );
 }
 
@@ -137,9 +137,9 @@ use path_macro::path;
 	assert_not!( status.success() );
 	// error messages
 	assert_contains!( out, "3 errors while" );
-	assert_contains!( out, "unknown twin squark" );
-	assert_contains!( out, "unknown squark pattern" );
-	assert_contains!( out, "unpaired closing squark" );
+	assert_contains!( out, "Unknown twin squark" );
+	assert_contains!( out, "Unknown squark pattern" );
+	assert_contains!( out, "Unpaired closing squark" );
 	// basic mention
 	assert_contains!( out, "<!-- #SQUARK unknown? -->" );
 	assert_contains!( out, "<!-- #SQUARK unknown!? -->" );
