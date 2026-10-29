@@ -22,23 +22,22 @@ Run:
 
 ```bash
 > squarkdown
-```
-
-With extras:
-
-```bash
 > squarkdown --assets --fonts
+> squarkdown --quiet
+> squarkdown --dry-run
 ```
 
 Cleanup:
 
 ```bash
 > squarkdown clean
+> squarkdown clean --dry-run
 ```
 
-Remind yourself:
+Info:
 
 ```bash
+> squarkdown --version
 > squarkdown --help
 ```
 
