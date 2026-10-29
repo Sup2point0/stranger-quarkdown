@@ -61,7 +61,7 @@ pub fn version()
 } pub use hint;
 
 
-pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{F}› {Y}{msg}", "", i = indent); }
+pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{F}› {W}{msg}", "", i = indent); }
 pub fn log_ok   (indent: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = indent); }
 pub fn log_bad  (indent: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = indent); }
 pub fn log_warn (indent: usize, msg: impl Display) { println!(" {:i$}{Y}▲ {msg}",       "", i = indent); }
