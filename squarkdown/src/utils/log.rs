@@ -35,11 +35,18 @@ pub fn version()
 	($($args:tt)*) => { $crate::ok!(0 => $($args)*) };
 } pub use ok;
 
-/// Log an error, failure or issue the user should be aware of.
+/// Log an error or failure.
 #[macro_export] macro_rules! bad {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_bad($indent, $crate::fmt!($($args)*)) };
 	($($args:tt)*) => { $crate::bad!(0 => $($args)*) };
 } pub use bad;
+
+/* NOTE: Would like to use `warn!` but this clashes with prelude */
+/// Log a non-critical issue the user should be aware of.
+#[macro_export] macro_rules! warns {
+	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_warn($indent, $crate::fmt!($($args)*)) };
+	($($args:tt)*) => { $crate::warns!(0 => $($args)*) };
+} pub use warns;
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! debug {
@@ -57,6 +64,7 @@ pub fn version()
 pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{F}› {Y}{msg}", "", i = indent); }
 pub fn log_ok   (indent: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = indent); }
 pub fn log_bad  (indent: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = indent); }
+pub fn log_warn (indent: usize, msg: impl Display) { println!(" {:i$}{Y}▲ {msg}",       "", i = indent); }
 pub fn log_debug(indent: usize, msg: impl Display) { println!(" {:i$}{F}│ {msg}",    "", i = indent); }
 pub fn log_hint (indent: usize, msg: impl Display) { println!(" {:i$}{G}= hint: {msg}", "", i = indent); }
 
@@ -74,10 +82,15 @@ pub fn error(err: impl std::borrow::Borrow<SquarkError>)
 	{
 		match err
 		{
-			SquarkError::Recoverable{ msg, hint, debug }
+			  SquarkError::Warning{ msg, hint, debug }
+			| SquarkError::Recoverable{ msg, hint, debug }
 			| SquarkError::Unrecoverable{ msg, hint, debug }
 			=> {
-				bad!(indent => msg);
+				if let SquarkError::Warning{..} = err {
+					warns!(indent => msg);
+				} else {
+					bad!(indent => msg);
+				}
 				
 				for each in debug {
 					if !each.is_empty() {

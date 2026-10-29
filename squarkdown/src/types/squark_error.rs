@@ -29,9 +29,14 @@ pub enum SquarkError
 	/// This is used in the parser for speculative parsing, and elsewhere for skipping files.
 	ABANDON,
 
-	/// A non-fatal error which Squarkdown can recover from, sorta like a warning.
-	/// 
-	/// Handling depends on `config.errors.on_error`.
+	/// An issue that Squarkdown is flagging to the user.
+	Warning {
+		msg: String,
+		hint: String,
+		debug: Vec<String>,
+	},
+
+	/// A non-fatal error which Squarkdown can recover from. Handling depends on `config.errors.on_error`.
 	Recoverable {
 		msg: String,
 		hint: String,
@@ -97,7 +102,7 @@ impl SquarkError
 	{
 		match self
 		{
-			Self::ABANDON | Self::Recoverable{..}
+			Self::ABANDON | Self::Warning{..} | Self::Recoverable{..}
 				=> false,
 
 			Self::Unrecoverable{..} | Self::External{..}
@@ -264,7 +269,9 @@ impl SquarkError
 		{
 			Self::ABANDON | Self::External{..} => false,
 
-			Self::Recoverable{ msg, hint, .. } | Self::Unrecoverable{ msg, hint, .. }
+			  Self::Warning{ msg, hint, .. }
+			| Self::Recoverable{ msg, hint, .. }
+			| Self::Unrecoverable{ msg, hint, .. }
 				=> msg.contains(pat) || hint.contains(pat),
 
 			Self::Multiple { when, errs }
@@ -305,7 +312,8 @@ impl std::fmt::Display for SquarkError
 		{
 			Self::ABANDON => write!(f, "ABANDONED"),
 
-			  Self::Recoverable{ msg, .. }
+			  Self::Warning{ msg, .. }
+			| Self::Recoverable{ msg, .. }
 			| Self::Unrecoverable{ msg, .. }
 			| Self::External{ msg, .. }
 				=> write!(f, "{msg}"),
