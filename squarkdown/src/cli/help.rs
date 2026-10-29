@@ -16,13 +16,8 @@ pub fn help() -> ExitCode
 {W} Run Squarkdown on your project:
 
 {F}   › {C}squarkdown
-
-{W} Run Squarkdown on your project, with extras enabled too:
-
 {F}   › {C}squarkdown {Y}--assets --fonts
-
-{W} Simulate a run of Squarkdown without actual output:
-
+{F}   › {C}squarkdown {Y}--quiet
 {F}   › {C}squarkdown {Y}--dry-run
 
 {W} Delete Squarkdown’s output for a fresh run:
