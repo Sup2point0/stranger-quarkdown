@@ -70,7 +70,11 @@ pub fn render(
 	/* NOTE:
 		Why not return a `SquarkResult<bool>`, or better yet, just check `.is_ok()` for a successful write?
 	
-		Well, we return `Err()` if _any_ errors occurred at all – even if they were recoverable errors that did not crash the write because `errors.on-error = "warn"`. In that case, we still need to know whether a file was written, so that we can accurately count the number of pages rendered for the output message. Hence we always need to return a `bool`, regardless of `Ok()` or `Err()`. Quite messy, but what can you do.
+		Well, we return `Err()` if _any_ errors occurred at all – even if they were recoverable errors that did not crash the write (e.g. cuz `errors.on-error = "warn"`).
+		
+		In that case, we still need to know whether a file was written, so that we can accurately count the number of pages rendered for the output message. Hence we always need to return a `bool`, regardless of `Ok()` or `Err()`.
+		
+		Quite messy, but what can you do.
 	*/
 	(
 		errs.or(()),

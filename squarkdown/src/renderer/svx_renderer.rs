@@ -736,6 +736,7 @@ impl Renderer<'_>
 		}
 	}
 
+	/// Handle a broken or inactive link according to `action`.
 	fn process_broken_link<'e>(&mut self,
 		action: LinkRewriteAction,
 		dest_url: &mut pd::CowStr,
@@ -750,7 +751,7 @@ impl Renderer<'_>
 		{
 			LinkRewriteAction::MARK_BROKEN =>
 			{	
-				log::error(SquarkError::Recoverable {
+				self.errors.push(SquarkError::Warning {
 					msg: fmt!("found a {msg}, marking it as broken"),
 					hint,
 					debug: [
@@ -760,7 +761,7 @@ impl Renderer<'_>
 				});
 
 				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
-					log::bad!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
+					log::warns!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
 				};
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
@@ -1064,14 +1065,15 @@ impl Renderer<'_>
 		{
 			FileAction::OVERWRITE => Ok(()),
 			FileAction::ERROR => Err(SquarkError::Recoverable {
-				msg: slash!("cannot overwrite existing file: {W}{}", filepath),
+				msg: slash!("cannot overwrite existing file: {B}{}", filepath),
 				hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'error'"),
 				debug: vec![],
 			}),
 			FileAction::SKIP => {
-				log::error(SquarkError::Recoverable {
-					msg: slash!("warning: not overwriting existing file: {W}{}", filepath),
-					hint: fmt!("Squarkdown will not overwrite since you set {Y}errors.file-already-exists{G} to {W}'skip'"),
+				// TODO aggregate instead of raw (non-thread safe) log
+				log::error(SquarkError::Warning {
+					msg: slash!("warning: not overwriting existing file: {B}{}", filepath),
+					hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'skip'"),
 					debug: vec![],
 				});
 				Err(SquarkError::ABANDON)
