@@ -157,8 +157,8 @@ fn squarkup(
 			)
 			.fold(
 				|| (SquarkError::multiple(""), 0),
-				|(mut errs, mut count), (r, wrote)| {
-					if let Err(e) = r {
+				|(mut errs, mut count), (e, wrote)| {
+					if !e.is_empty() {
 						let did_push = errs.push(e);
 						debug_assert!(did_push);
 					}

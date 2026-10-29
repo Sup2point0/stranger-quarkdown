@@ -3,7 +3,7 @@
 | dest = info/dev
 | desc = Technicalities, challenges and decisions behind developing Stranger Quarkdown
 | date = 2026 October 10
-| update = 2026 October 11
+| update = 2026 October 29
 -->
 
 sup!
@@ -43,6 +43,36 @@ It’s very sequential, very pure, very testable and very parallelisable.
 <br>
 
 
+## Error Severities
+
+<!-- #SQUARK slash? -->
+> Relevant files: [types/squark_error.rs](../squarkdown/src/types/squark_error.rs)
+<!-- #SQUARK slash. -->
+
+
+<br>
+
+
+## Printing Errors
+
+<!-- #SQUARK slash? -->
+> Relevant files: [types/squark_error.rs](../squarkdown/src/types/squark_error.rs), [renderer/mod.rs](../squarkdown/src/renderer/mod.rs)
+<!-- #SQUARK slash. -->
+
+Rendering is parallelised, and unfortunately with the naive approach of each `render()` call printing its own errors directly, what we get is a garbled console output where the lines of output from each thread are interleaved. The easiest remedy for this is to collect the errors, and then print them all at once.
+
+The annoying issue with this is it means errors *always* have to be propagated – *regardless* of severity. This makes interfaces quite a bit messier when a function returns a `SquarkResult<T>` instead of just a `SquarkResult<()>`. It’s not “success XOR failure”, it’s “success OR failures”:
+
+- Successful, no errors
+- Successful, some warnings / recoverable errors
+- Unsuccessful, errors
+
+So we can’t just use `Ok(T)`/`Err(SquarkError)`, instead we have to return something like `Ok((T, SquarkError))`... so we end up with `Result<(T, SquarkError), SquarkError>`. Bleugh.
+
+
+<br>
+
+
 ## Parse then render... but that means duplicate work?
 
 <!-- #SQUARK slash? -->
@@ -53,7 +83,7 @@ In the Ruby version, parsing the charm squarkdown and rendering Markdown happene
 
 With the Rust rewrite, I changed this to first parsing every file, then rendering every file. Theoretically this is worse because we repeat work reading from each file twice, not once.
 
-However, this was a necessary evil if we wanted link rewriting to be possible. Squarkdown necessarily *needs* a complete picture of every page in the site in order to resolve links properly.
+However, this was a necessary evil if we wanted link rewriting to be possible, because Squarkdown *necessarily needs* a complete picture of every page in the site to resolve links properly.
 
 It’s basically like the Assembler dilemma: 2-pass to scan for labels first, or 1-pass and fill in labels as you find them? The latter is technically more performant but a nightmare to implement.
 

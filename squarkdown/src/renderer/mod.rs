@@ -24,13 +24,15 @@ use std::fs;
 
 /// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
 /// 
-/// Returns `(errs, wrote)` where `wrote` indicates if all required files were successfully written.
+/// Returns `(errs, wrote)` where `errs` contains all aggregated errors (if any), and `wrote` indicates if all required files were successfully written.
+/// 
+/// If `dry-run`, do not write to any actual files.
 pub fn render(
 	page: &PageData,
 	site: &SiteData,
 	config: &SquarkupConfig,
 	dry_run: bool,
-) -> (SquarkResult, bool)
+) -> (SquarkError, bool)
 {
 	let mut errs = SquarkError::multiple(fmt!(
 		"rendering {B}{}",
@@ -43,7 +45,7 @@ pub fn render(
 		let r = fs::create_dir_all(&renderer.dest_folder);
 
 		if let Err(e) = r {
-			return (Err(e.into()), false)
+			return (e.into(), false)
 		}
 	}
 
@@ -77,7 +79,7 @@ pub fn render(
 		Quite messy, but what can you do.
 	*/
 	(
-		errs.or(()),
+		errs,
 		wrote_ts && wrote_svx
 	)
 }
