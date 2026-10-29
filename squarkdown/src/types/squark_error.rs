@@ -123,10 +123,8 @@ impl SquarkError
 	pub fn is_fine(&self) -> bool
 	{
 		matches!(self, Self::ABANDON)
-		||
-		matches!(self, Self::Multiple{ errs, .. }
-			if errs.iter().all(Self::is_fine)
-		)
+		|| matches!(self, Self::Warning{..})
+		|| matches!(self, Self::Multiple{ errs, .. } if errs.iter().all(Self::is_fine))
 	}
 
 	/// Set the `hint` text of a [`SquarkError::Recoverable`] or [`SquarkError::Unrecoverable`].
@@ -251,6 +249,9 @@ impl SquarkError
 	pub fn or_depends<T>(self, t: T, config: &SquarkupConfig) -> SquarkResult<T>
 	{
 		if self.is_fine() {
+			if let Self::Warning{..} = self {
+				log::error(self);
+			}
 			Ok(t)
 		}
 		else if self.is_fatal() || config.errors.on_error == ErrorAction::KILL {
