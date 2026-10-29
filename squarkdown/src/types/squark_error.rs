@@ -92,11 +92,13 @@ impl SquarkError
 
 impl SquarkError
 {
-	/// Is this a non-recoverable error?
+	/// Is this a non-recoverable error that *must* crash Squarkdown?
 	/// 
 	/// Some errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
 	/// 
 	/// Other errors are 'unrecoverable' because they invalidate how everything works down the line. For instance, a missing required field.
+	/// 
+	/// Contrast with [`is_fine`](Self::is_fine).
 	#[must_use]
 	pub fn is_fatal(&self) -> bool
 	{
@@ -119,11 +121,12 @@ impl SquarkError
 	/// 
 	/// - [`SquarkError::Multiple`] error with no aggregated errors
 	/// - [`SquarkError::ABANDON`] to skip an operation
+	/// 
+	/// Contrast with [`is_fatal`](Self::is_fatal).
 	#[must_use]
 	pub fn is_fine(&self) -> bool
 	{
 		matches!(self, Self::ABANDON)
-		|| matches!(self, Self::Warning{..})
 		|| matches!(self, Self::Multiple{ errs, .. } if errs.iter().all(Self::is_fine))
 	}
 
@@ -249,9 +252,6 @@ impl SquarkError
 	pub fn or_depends<T>(self, t: T, config: &SquarkupConfig) -> SquarkResult<T>
 	{
 		if self.is_fine() {
-			if let Self::Warning{..} = self {
-				log::error(self);
-			}
 			Ok(t)
 		}
 		else if self.is_fatal() || config.errors.on_error == ErrorAction::KILL {
