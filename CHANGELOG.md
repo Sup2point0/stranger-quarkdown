@@ -36,6 +36,8 @@ I’m working on fixing these!
 
 ### Fixes
 - Do not try resolving empty links
+- Use `href="."` instead of `href=""` for dead links when `link-broken = "mark-broken"` or `link-inactive = "mark-broken"`.
+  - `href=""` was causing invalid attribute errors in SvelteKit.
 
 
 ## v4.6
