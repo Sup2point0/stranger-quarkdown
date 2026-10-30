@@ -133,7 +133,7 @@ impl SquarkupConfig
 				} else {
 					unrecoverable! {
 						msg: fmt!("Unknown setting for {Y}errors.link-broken"),
-						hint: fmt!("Valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
+						hint: fmt!("Valid values are {W}'mark-dead'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
@@ -147,7 +147,7 @@ impl SquarkupConfig
 				} else {
 					unrecoverable! {
 						msg: fmt!("Unknown setting for {Y}errors.link-inactive"),
-						hint: fmt!("Valid values are {W}'mark-broken'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
+						hint: fmt!("Valid values are {W}'mark-dead'{G} {W}'strip-extension'{G} (default) · {W}'link-to-github'{G} · {W}'error'"),
 						debug: vec![fmt!("you provided {value}")],
 					}
 				}
