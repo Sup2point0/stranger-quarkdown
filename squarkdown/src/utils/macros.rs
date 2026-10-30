@@ -1,3 +1,19 @@
+// == ASSERTS == //
+
+/// An alternative `debug_assert!` that does not strip the entire statement (which may contain wanted side effects) in release builds.
+macro_rules! debug_check {
+	($($args:tt)+) => {
+		{
+			let r = $($args)*;
+			if cfg!(debug_assertions) {
+				assert!(r)
+			}
+			r
+		}
+	};
+} pub(crate) use debug_check;
+
+
 // == STRINGS == //
 
 #[macro_export]
