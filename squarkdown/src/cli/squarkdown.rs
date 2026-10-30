@@ -3,6 +3,7 @@ use crate::*;
 use crate::prelude::*;
 use crate::utils::log;
 use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use rayon::prelude::*;
 
@@ -154,28 +155,16 @@ fn squarkup(
 		site_data.pages_map()
 			.par_iter()
 			.map(|(_shard, page)|
-				renderer::render(
-					page, &site_data, &config, dry_run, &successful_writes,
-				)
+				renderer::render(page, &site_data, &config, dry_run, &successful_writes)
 			)
-			.fold(
-				|| SquarkError::multiple(""),
-				|mut errs, r| {
-					if let Err(e) = r {
-						let did_push = errs.push(e);
-						debug_assert!(did_push);
-					}
-					errs
-				}
-			)
-			.reduce(
-				|| SquarkError::multiple(""),
-				|mut e1, e2| {
-					let did_push = e1.push(e2);
-					debug_assert!(did_push);
-					e1
-				}
-			)
+			.fold(|| SquarkError::multiple(""), |mut errs, r| {
+				debug_check!(errs.extend(r));
+				errs
+			})
+			.reduce(|| SquarkError::multiple(""), |mut e1, e2| {
+				debug_check!(e1.push(e2));
+				e1
+			})
 			.depends(&config)?;
 
 		let successes = successful_writes.into_inner();

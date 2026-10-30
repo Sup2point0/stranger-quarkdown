@@ -3,6 +3,7 @@ use crate::utils::log;
 use crate::utils::macros::*;
 
 use std::borrow::Cow;
+use std::debug_assert_matches;
 
 
 /// A large fallible operation in the Squarkdown pipeline which errors with [`SquarkError`].
@@ -173,20 +174,9 @@ impl SquarkError
 /// Implementations specific to [`SquarkError::Multiple`]
 impl SquarkError
 {
-	/// Add an error to a [`Self::Multiple`] instance.
-	pub fn push(&mut self, error: SquarkError) -> bool
-	{
-		if let Self::Multiple{ errs, .. } = self {
-			errs.push(error);
-			true
-		} else {
-			false
-		}
-	}
-
 	/// Count the number of atomic errors contained in this [`SquarkError`].
 	/// 
-	/// For [`SquarkError::Multiple`], this recursively counts its aggregated errors. For all other error variants, this returns `1`.
+	/// For [`SquarkError::Multiple`], this recursively counts its aggregated errors. For all other error variants, this just returns `1`.
 	pub fn len(&self) -> usize
 	{
 		if let Self::Multiple{ errs, ..} = self {
@@ -244,7 +234,7 @@ impl SquarkError
 		}
 	}
 
-	/// Propagate a non-empty [`SquarkError`] depending on `config`.
+	/// Propagate a non-empty [`SquarkError`] depending on `config.errors.on-error`.
 	/// 
 	/// ```ignore
 	/// fn may_fail(config: &SquarkupConfig) -> SquarkResult
@@ -258,36 +248,46 @@ impl SquarkError
 	///    Ok(2)
 	/// }
 	/// ```
+	/// 
+	/// [`SquarkError::Warning`]s are always printed rather than propagated, regardless of `errors.on-error`.
 	pub fn depends(self, config: &SquarkupConfig) -> SquarkResult
 	{
-		self.or_depends((), config)
-	}
-
-	/// Propagate a non-empty [`SquarkError`] depending on `config`, otherwise return `t`.
-	/// 
-	/// ```ignore
-	/// fn may_fail(config: &SquarkupConfig) -> SquarkResult<usize>
-	/// {
-	///    let err = SquarkError::Recoverable {..};
-	/// 
-	///    // For a recoverable error:
-	///    // - If `config.errors.on-error` is `KILL`, this returns `Err(err)`.
-	///    // - If `config.errors.on-error` is `WARN`, this prints the error and returns `Ok(2)`.
-	///    err.or_depends(2, config)?;
-	///    Ok(2)
-	/// }
-	/// ```
-	pub fn or_depends<T>(self, t: T, config: &SquarkupConfig) -> SquarkResult<T>
-	{
 		if self.is_fine() {
-			Ok(t)
+			Ok(())
 		}
-		else if self.is_fatal() || config.errors.on_error == ErrorAction::KILL {
+		else if self.is_fatal() || (
+			config.errors.on_error == ErrorAction::KILL
+			&& !matches!(self, Self::Warning{..})
+		) {
 			Err(self)
 		}
 		else {
 			log::error(self);
-			Ok(t)
+			Ok(())
+		}
+	}
+
+	/// Add an error to a [`SquarkError::Multiple`] instance.
+	pub fn push(&mut self, error: SquarkError) -> bool
+	{
+		if let Self::Multiple{ errs, .. } = self {
+			errs.push(error);
+			true
+		} else {
+			false
+		}
+	}
+
+	/// Add `errs` to a [`SquarkError::Multiple`] instance.
+	pub fn extend(&mut self, action: SquarkAction) -> bool
+	{
+		if let Self::Multiple{ errs, .. } = self
+		&& let Ok(((), e)) | Err(e) = action
+		{
+			errs.extend(e);
+			true
+		} else {
+			false
 		}
 	}
 
@@ -353,6 +353,19 @@ impl std::fmt::Display for SquarkError
 				}
 				Ok(())
 			}
+		}
+	}
+}
+
+impl Extend<SquarkError> for SquarkError
+{
+	fn extend<I>(&mut self, errs: I)
+		where I: IntoIterator<Item = SquarkError>
+	{
+		debug_assert_matches!(self, Self::Multiple{..}, "`.extend()` can only be called on a `SquarkError::Multiple`");
+
+		for err in errs {
+			debug_check!(self.push(err));
 		}
 	}
 }
