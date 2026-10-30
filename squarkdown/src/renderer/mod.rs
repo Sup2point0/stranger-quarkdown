@@ -43,11 +43,7 @@ pub fn render(
 	let renderer = Renderer::new(page, site, config);
 
 	if !dry_run {
-		let r = fs::create_dir_all(&renderer.dest_folder);
-
-		if let Err(e) = r {
-			return (e.into(), false)
-		}
+		fs::create_dir_all(&renderer.dest_folder)?;
 	}
 
 	/* NOTE:

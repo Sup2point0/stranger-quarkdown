@@ -36,5 +36,5 @@ pub mod utils;
 pub mod prelude
 {
 	pub use super::config::{ SquarkupConfig };
-	pub use super::types::{ SquarkResult, SquarkError, PageData, SiteData };
+	pub use super::types::{ SquarkAction, SquarkResult, SquarkError, PageData, SiteData };
 }

@@ -159,29 +159,26 @@ fn squarkup(
 				)
 			)
 			.fold(
-				|| (SquarkError::multiple(""), 0),
-				|(mut errs, mut count), (e, wrote)| {
-					if !e.is_empty() {
+				|| SquarkError::multiple(""),
+				|mut errs, r| {
+					if let Err(e) = r {
 						let did_push = errs.push(e);
 						debug_assert!(did_push);
 					}
-					if wrote {
-						count += 1;
-					}
-					return (errs, count)
+					errs
 				}
 			)
 			.reduce(
-				|| (SquarkError::multiple(""), 0),
-				|(mut e1, c1), (e2, c2)| {
+				|| SquarkError::multiple(""),
+				|mut e1, e2| {
 					let did_push = e1.push(e2);
 					debug_assert!(did_push);
-					return (e1, c1 + c2)
+					e1
 				}
 			)
-		;
+			.depends(&config)?;
 
-		errs.depends(&config)?;
+		let successes = successful_writes.into_inner();
 
 		log::ok!(
 			"{} {successes}/{total} pages",

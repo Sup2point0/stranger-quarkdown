@@ -120,7 +120,7 @@ impl<'d> Renderer<'d>
 	pub(super) fn render_page_svx(mut self,
 		wrote: &mut bool,
 		dry_run: bool,
-	) -> SquarkResult
+	) -> SquarkAction
 	{
 		if self.dest_file.exists() {
 			self.err_exists(&self.dest_file)?;
@@ -154,10 +154,10 @@ impl<'d> Renderer<'d>
 			*wrote = true;
 		}
 
-		self.errors.or(())
+		Ok(((), self.errors))
 	}
 
-	fn write_page_svx(&self, mut f: impl io::Write, content: &[u8]) -> SquarkResult
+	fn write_page_svx(&self, mut f: impl io::Write, content: &[u8]) -> Result<(), SquarkError>
 	{
 		self.inject_timestamp(&mut f)?;
 		self.inject_head(&mut f)?;
@@ -167,7 +167,7 @@ impl<'d> Renderer<'d>
 	}
 
 	/// (out-of-place) Render the given Markdown `source`, without surrounding injection.
-	pub(super) fn render_from(&mut self, source: &str) -> SquarkResult<String>
+	pub(super) fn render_from(&mut self, source: &str) -> Result<String, SquarkError>
 	{
 		if self.config.errors.debug {
 			self.update_source(source);

@@ -65,7 +65,7 @@ macro_rules! strings {
 macro_rules! catch
 {
 	($errs:expr => $body:block) => {
-		if let Err(e) = (|| -> SquarkResult<_> {
+		if let Err(e) = (|| -> $crate::types::SquarkResult {
 			$body;
 			Ok(())
 		})() {
@@ -73,7 +73,7 @@ macro_rules! catch
 		}
 	};
 	($($body:tt)*) => {
-		(|| -> SquarkResult<_> {
+		(|| -> $crate::types::SquarkResult {
 			$($body)*;
 			Ok(())
 		})()

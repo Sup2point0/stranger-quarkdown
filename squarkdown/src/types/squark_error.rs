@@ -5,7 +5,28 @@ use crate::utils::macros::*;
 use std::borrow::Cow;
 
 
-/// An operation which may error with a [`SquarkError`].
+/// A large fallible operation in the Squarkdown pipeline which errors with [`SquarkError`].
+/// 
+/// Why the duplicated [`SquarkError`]? Well, Squarkdown doesn’t just have simple `Ok`/`Err`; it also needs to propagate [`SquarkError::Warning`]s and [`SquarkError::Recoverable`]s. So there are really 3 outcomes:
+/// 
+/// - `Ok(t, ..)` — success + no errors
+/// - `Ok(t, e)` — success + errors (to be printed)
+/// - `Err(e)` — failure + errors
+/// 
+/// Alternatively, you can think of `Err` as being reserved for conventional ‘exceptions’ in other languages, while `Ok(t, e)` aggregates errors to print.
+/// 
+/// Contrast with the lighter [`SquarkResult`].
+pub type SquarkAction<T = ()> = Result<(T, SquarkError), SquarkError>;
+
+impl From<SquarkError> for SquarkAction {
+	fn from(errs: SquarkError) -> Self {
+		Ok(((), errs))
+	}
+}
+
+/// A small fallible operation which errors with [`SquarkError`].
+/// 
+/// Contrast with the heavier [`SquarkAction`].
 pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 
 
@@ -13,8 +34,9 @@ pub type SquarkResult<T = ()> = Result<T, SquarkError>;
 /// 
 /// Squarkdown needs to handle errors in many different ways:
 /// 
-/// - [`Self::Unrecoverable`]: Mission-critical errors. Squarkdown can't continue properly.
-/// - [`Self::Recoverable`]: Undesirable, but localised, so Squarkdown can still recover from them.
+/// - [`Self::Unrecoverable`]: Critical errors that mean Squarkdown can’t continue properly inside a context, e.g. failing to find the project root.
+/// - [`Self::Recoverable`]: Non-critical errors that Squarkdown can gracefully recover from.
+/// - [`Self::Warning`]: Potentially unwanted behaviour that should still be flagged to the user.
 /// - [`Self::Multiple`]: If Squarkdown encounters multiple errors, it aggregates them and presses on to do a best-effort job.
 /// - [`Self::External`]: Squarkdown interfaces with many external APIs, which all return their own errors.
 /// 
@@ -52,7 +74,7 @@ pub enum SquarkError
 
 	/// Multiple errors, aggregated from an atomic operation.
 	/// 
-	/// Handling depends on `config::errors::on_error`.
+	/// Handling depends on `config.errors.on-error`.
 	Multiple {
 		when: Cow<'static, str>,
 		errs: Vec<SquarkError>,
@@ -92,11 +114,17 @@ impl SquarkError
 
 impl SquarkError
 {
-	/// Is this a non-recoverable error that *must* crash Squarkdown?
+	/// Is this a non-recoverable error that immediately crashes its parent context?
 	/// 
-	/// Some errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
+	/// “Parent context” is either the entire Squarkdown pipeline (if this error occurs during initialisation) or processing for a singular page.
 	/// 
-	/// Other errors are 'unrecoverable' because they invalidate how everything works down the line. For instance, a missing required field.
+	/// This includes:
+	/// 
+	/// - [`SquarkError::Unrecoverable`]
+	/// 
+	/// These errors are 'unrecoverable' because they invalidate how everything works down the line. For instance, a missing required field.
+	/// 
+	/// Other errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
 	/// 
 	/// Contrast with [`is_fine`](Self::is_fine).
 	#[must_use]
@@ -104,11 +132,11 @@ impl SquarkError
 	{
 		match self
 		{
-			Self::ABANDON | Self::Warning{..} | Self::Recoverable{..}
-				=> false,
-
 			Self::Unrecoverable{..} | Self::External{..}
 				=> true,
+
+			Self::ABANDON | Self::Warning{..} | Self::Recoverable{..}
+				=> false,
 
 			Self::Multiple{ errs, .. }
 				=> errs.iter().any(SquarkError::is_fatal),
