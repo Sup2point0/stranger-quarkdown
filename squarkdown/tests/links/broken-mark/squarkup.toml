@@ -3,7 +3,7 @@
 [errors]
 strict = false
 on-error = "kill"
-link-broken = "mark-broken"
+link-broken = "mark-dead"
 
 [paths]
 site = "../../test-project/"
