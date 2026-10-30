@@ -32,10 +32,10 @@ I’m working on fixing these!
 <br>
 
 
-## Next (v4.6.1)
+## v4.6.1
 
 ### Fixes
-- Rewrite dead links to `href="."` instead of `href=""` when `errors.link-broken = "mark-broken"` or `errors.link-inactive = "mark-broken"`.
+- Rewrite dead links to `href="?"` instead of `href=""` when `errors.link-broken = "mark-broken"` or `errors.link-inactive = "mark-broken"`.
 - Do not try resolving empty links.
 
 

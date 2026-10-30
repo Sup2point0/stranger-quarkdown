@@ -127,12 +127,12 @@ use assertables::*;
 
 	let md = read_file("links/broken-mark/+page.svx");
 	assert_contains!( md, "<a" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">side</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">./side</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">nested</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">nested/</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">nested/side</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">./nested/side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">./side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">nested</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">nested/</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">nested/side</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">./nested/side</a>" );
 }
 
 /// With `link-inactive = error`, Squarkdown crashes when encountering links to inactive pages.
@@ -154,8 +154,8 @@ use assertables::*;
 
 	let md = read_file("links/inactive-mark/+page.svx");
 	assert_contains!( md, "<a" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">inactive</a>" );
-	assert_contains!( md, "<a class=\"broken-link\" href=\".\">very inactive</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">inactive</a>" );
+	assert_contains!( md, "<a class=\"broken-link\" href=\"?\">very inactive</a>" );
 }
 
 /// With `link-inactive = strip-extension`, Squarkdown rewrites links to inactive pages into links to the original file on GitHub.

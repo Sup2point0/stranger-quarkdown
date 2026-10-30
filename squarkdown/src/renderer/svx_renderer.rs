@@ -764,7 +764,7 @@ impl Renderer<'_>
 				};
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
-				let href = "<a class=\"broken-link\" href=\".\">";
+				let href = "<a class=\"broken-link\" href=\"?\">";
 				
 				return Some(Event::InlineHtml(href.into()))
 			}
