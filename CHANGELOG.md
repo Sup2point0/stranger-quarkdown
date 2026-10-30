@@ -27,6 +27,7 @@ I’m working on fixing these!
 
 - `clean`(`se`) in charm squark has not yet been implemented.
 - `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and rendered correctly.
+- Warnings are not properly differentiated from regular errors, so can fail the build.
 
 
 <br>
