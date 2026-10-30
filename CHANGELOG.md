@@ -35,7 +35,8 @@ I’m working on fixing these!
 ## Next (v4.6.1)
 
 ### Fixes
-- Do not try resolving empty links
+- Rewrite dead links to `href="."` instead of `href=""` when `errors.link-broken = "mark-broken"` or `errors.link-inactive = "mark-broken"`.
+- Do not try resolving empty links.
 
 
 ## v4.6
