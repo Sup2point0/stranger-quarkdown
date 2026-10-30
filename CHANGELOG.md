@@ -33,6 +33,15 @@ I’m working on fixing these!
 <br>
 
 
+## Next Major (v4.7)
+
+### New
+- Truncate source snapshots so that they don’t overflow the terminal.
+
+
+<br>
+
+
 ## v4.6.1
 
 ### Fixes

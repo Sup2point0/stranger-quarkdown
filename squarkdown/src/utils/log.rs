@@ -111,7 +111,7 @@ pub fn error(err: impl std::borrow::Borrow<SquarkError>)
 					let plural = if count == 1 {""} else {"s"};
 					bad!(indent => "{count} error{plural} while {when}");
 					line();
-					indent += 3;
+					indent += 2;
 				}
 
 				for (i, err) in errs.iter().enumerate() {

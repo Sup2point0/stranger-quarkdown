@@ -987,14 +987,20 @@ impl Renderer<'_>
 		let mut before = if r_before.is_empty() {""} else {&self.source[r_before]};
 		let mut after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
 		
-		const MAX_PREVIEW_CHARS: usize = 32;
+		// clip to prevent lines from blowing up terminal output
+		const MAX_PREVIEW: usize = 32;
+		const MIN_PREVIEW: usize = 7;
+		let shrink_chars = zero!(focus.len() - MAX_PREVIEW);
+		let max_chars = clamp_above!(MIN_PREVIEW => MAX_PREVIEW - shrink_chars);
+
 		let mut ddd_before = "";
 		let mut ddd_after = "";
-		if let Some(before_clipped) = utils::truncated_start(before, MAX_PREVIEW_CHARS) {
+
+		if let Some(before_clipped) = utils::truncated_start(before, max_chars) {
 			before = before_clipped;
 			ddd_before = "...";
 		}
-		if let Some(after_clipped) = utils::truncated_end(after, MAX_PREVIEW_CHARS) {
+		if let Some(after_clipped) = utils::truncated_end(after, max_chars) {
 			after = after_clipped;
 			ddd_after = "...";
 		}
