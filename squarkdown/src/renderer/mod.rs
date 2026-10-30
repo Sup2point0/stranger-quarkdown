@@ -24,7 +24,9 @@ use std::fs;
 
 /// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
 /// 
-/// Returns `(errs, wrote)` where `errs` contains all aggregated errors (if any), and `wrote` indicates if all required files were successfully written.
+/// This always returns `Err(SquarkError)` for more uniform error propagation.
+/// 
+/// If both `+page.svx` and `+page.ts` (if wanted) were successfully written, `successful_writes` is incremented.
 /// 
 /// If `dry-run`, do not write to any actual files.
 pub fn render(
@@ -33,7 +35,7 @@ pub fn render(
 	config: &SquarkupConfig,
 	dry_run: bool,
 	successful_writes: &AtomicUsize,
-) -> SquarkAction
+) -> SquarkResult
 {
 	let mut errs = SquarkError::multiple(fmt!(
 		"rendering {B}{}",
@@ -70,14 +72,5 @@ pub fn render(
 		successful_writes.fetch_add(1, Ordering::Relaxed);
 	}
 
-	/* NOTE:
-		Why not return a `SquarkResult<bool>`, or better yet, just check `.is_ok()` for a successful write?
-	
-		Well, we return `Err()` if _any_ errors occurred at all – even if they were recoverable errors that did not crash the write (e.g. cuz `errors.on-error = "warn"`).
-		
-		In that case, we still need to know whether a file was written, so that we can accurately count the number of pages rendered for the output message. Hence we always need to return a `bool`, regardless of `Ok()` or `Err()`.
-		
-		Quite messy, but what can you do.
-	*/
-	errs.into()
+	Err(errs)
 }

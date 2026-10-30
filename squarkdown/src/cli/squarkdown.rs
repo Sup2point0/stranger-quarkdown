@@ -158,7 +158,9 @@ fn squarkup(
 				renderer::render(page, &site_data, &config, dry_run, &successful_writes)
 			)
 			.fold(|| SquarkError::multiple(""), |mut errs, r| {
-				debug_check!(errs.extend(r));
+				if let Err(e) = r {
+					debug_check!(errs.push(e));
+				}
 				errs
 			})
 			.reduce(|| SquarkError::multiple(""), |mut e1, e2| {

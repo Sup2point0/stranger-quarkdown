@@ -278,19 +278,6 @@ impl SquarkError
 		}
 	}
 
-	/// Add `errs` to a [`SquarkError::Multiple`] instance.
-	pub fn extend(&mut self, action: SquarkAction) -> bool
-	{
-		if let Self::Multiple{ errs, .. } = self
-		&& let Ok(((), e)) | Err(e) = action
-		{
-			errs.extend(e);
-			true
-		} else {
-			false
-		}
-	}
-
 	#[cfg(test)]
 	pub fn contains(&self, pat: &str) -> bool
 	{
