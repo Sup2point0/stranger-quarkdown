@@ -107,6 +107,9 @@ macro_rules! zero
 	(  @calc [$left:literal] => [$($right:tt)+]  ) => {
 		($left as usize).saturating_sub($($right)+)
 	};
+	(  @calc [$left:literal] => [$right:literal]  ) => {
+		($left as usize).saturating_sub($right as usize)
+	};
 	(  @calc [$($left:tt)+] => [$($right:tt)+]  ) => {
 		($($left)+).saturating_sub($($right)+)
 	};
@@ -123,3 +126,36 @@ macro_rules! zero
 	};
 }
 pub(crate) use zero;
+
+macro_rules! clamp_above
+{
+	(  $limit:expr => $($calc:tt)+  ) => {
+		zero!($($calc)*).max($limit)
+	};
+}
+pub(crate) use clamp_above;
+
+
+// == TESTS == //
+
+#[test] fn zero_() {
+	assert_eq!( zero!(0 - 0), 0 );
+	assert_eq!( zero!(0 - 1), 0 );
+	assert_eq!( zero!(1 - 0), 1 );
+	assert_eq!( zero!(1 - 1), 0 );
+	assert_eq!( zero!(1 - 2), 0 );
+
+	let x: usize = 10;
+	let y: usize = 100;
+	assert_eq!( zero!(x - x), 0 );
+	assert_eq!( zero!(x - y), 0 );
+	assert_eq!( zero!(y - y), 0 );
+	assert_eq!( zero!(y - x), 90 );
+}
+
+#[test] fn clamp_above_() {
+	assert_eq!( clamp_above!(7 => 0 - 0), 7 );
+	assert_eq!( clamp_above!(7 => 0 - 9), 7 );
+	assert_eq!( clamp_above!(7 => 9 - 9), 7 );
+	assert_eq!( clamp_above!(7 => 9 - 0), 9 );
+}
