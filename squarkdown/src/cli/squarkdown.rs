@@ -6,8 +6,9 @@ use crate::utils::colours::*;
 
 use rayon::prelude::*;
 
-use std::process::ExitCode;
-use std::time::Instant;
+use std::sync::atomic::{ AtomicUsize };
+use std::process::{ ExitCode };
+use std::time::{ Instant };
 
 
 /// Run Squarkdown on the user's project.
@@ -148,12 +149,14 @@ fn squarkup(
 		// == RENDER == //
 		log::is!(if dry_run {"simulating rendering..."} else {"rendering..."});
 
-		let (errs, num_oks) =
-			site_data
-			.pages_map()
+		let successful_writes = AtomicUsize::new(0);
+
+		site_data.pages_map()
 			.par_iter()
 			.map(|(_shard, page)|
-				renderer::render(page, &site_data, &config, dry_run)
+				renderer::render(
+					page, &site_data, &config, dry_run, &successful_writes,
+				)
 			)
 			.fold(
 				|| (SquarkError::multiple(""), 0),
@@ -181,7 +184,7 @@ fn squarkup(
 		errs.depends(&config)?;
 
 		log::ok!(
-			"{} {num_oks}/{total} pages",
+			"{} {successes}/{total} pages",
 			if dry_run {"would render"} else {"rendered"},
 			total = site_data.stats.active_pages
 		);

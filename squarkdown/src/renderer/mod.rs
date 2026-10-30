@@ -1,9 +1,8 @@
 //! This module implements the renderer, which outputs `+page.svx` and `+page.ts` files.
 
 mod svx_renderer;
-use svx_renderer::{ Renderer };
-
 mod ts_renderer;
+use svx_renderer::{ Renderer };
 
 mod ctx;
 pub(crate) use ctx::{ RenderCtx };
@@ -19,6 +18,7 @@ use crate::utils;
 use crate::utils::colours::*;
 use crate::utils::macros::*;
 
+use std::sync::atomic::{ AtomicUsize, Ordering };
 use std::fs;
 
 
@@ -32,7 +32,8 @@ pub fn render(
 	site: &SiteData,
 	config: &SquarkupConfig,
 	dry_run: bool,
-) -> (SquarkError, bool)
+	successful_writes: &AtomicUsize,
+) -> SquarkAction
 {
 	let mut errs = SquarkError::multiple(fmt!(
 		"rendering {B}{}",
@@ -69,6 +70,10 @@ pub fn render(
 		renderer.render_page_svx(&mut wrote_svx, dry_run)?;
 	});
 
+	if (wrote_ts && wrote_svx) {
+		successful_writes.fetch_add(1, Ordering::Relaxed);
+	}
+
 	/* NOTE:
 		Why not return a `SquarkResult<bool>`, or better yet, just check `.is_ok()` for a successful write?
 	
@@ -78,8 +83,5 @@ pub fn render(
 		
 		Quite messy, but what can you do.
 	*/
-	(
-		errs,
-		wrote_ts && wrote_svx
-	)
+	errs.into()
 }
