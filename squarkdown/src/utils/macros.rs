@@ -99,19 +99,27 @@ macro_rules! catch
 
 // == ARITHMETIC == //
 
+/// # `zero!(left - right)`
+/// 
+/// Syntax sugar for `left.saturating_sub(right)`.
 macro_rules! zero
 {
-	($left:ident - $right:literal) => {
-		$left.saturating_sub($right)
+	(  @calc [$left:literal] => [$($right:tt)+]  ) => {
+		($left as usize).saturating_sub($($right)+)
 	};
-	($left:ident - $right:ident) => {
-		$left.saturating_sub($right)
+	(  @calc [$($left:tt)+] => [$($right:tt)+]  ) => {
+		($($left)+).saturating_sub($($right)+)
 	};
-	($var:ident . $attr:ident - $right:literal) => {
-		$var.$attr.saturating_sub($right)
+
+	(  @parse [$($left:tt)*] - $($right:tt)*  ) => {
+		zero!(@calc [$($left)*] => [$($right)*])
 	};
-	($var:ident . $attr:ident - $right:ident) => {
-		$var.$attr.saturating_sub($right)
+	(  @parse [$($left:tt)*] $head:tt $($tail:tt)*  ) => {
+		zero!(@parse [$($left)* $head] $($tail)*)
+	};
+
+	(  $($args:tt)+  ) => {
+		zero!(@parse [] $($args)+)
 	};
 }
 pub(crate) use zero;
