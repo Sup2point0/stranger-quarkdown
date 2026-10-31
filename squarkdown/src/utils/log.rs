@@ -61,16 +61,16 @@ pub fn version()
 } pub use hint;
 
 
-pub fn log_is   (indent: usize, msg: impl Display) { println!(" {:i$}{F}› {W}{msg}", "", i = indent); }
-pub fn log_ok   (indent: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = indent); }
-pub fn log_bad  (indent: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = indent); }
-pub fn log_warn (indent: usize, msg: impl Display) { println!(" {:i$}{Y}▲ {msg}",       "", i = indent); }
-pub fn log_debug(indent: usize, msg: impl Display) { println!(" {:i$}{F}│ {msg}",    "", i = indent); }
-pub fn log_hint (indent: usize, msg: impl Display) { println!(" {:i$}{G}= hint: {msg}", "", i = indent); }
+pub fn log_is   (i: usize, msg: impl Display) { println!(" {:i$}{F}› {W}{msg}",    "", i = i); }
+pub fn log_ok   (i: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = i); }
+pub fn log_bad  (i: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = i); }
+pub fn log_warn (i: usize, msg: impl Display) { println!(" {:i$}{Y}▲ {msg}",       "", i = i); }
+pub fn log_debug(i: usize, msg: impl Display) { println!(" {:i$}{F}│ {msg}",       "", i = i); }
+pub fn log_hint (i: usize, msg: impl Display) { println!(" {:i$}{G}= hint: {msg}", "", i = i); }
 
-pub fn log_info(indent: usize, msg:  impl Display) {
+pub fn log_info(i: usize, msg:  impl Display) {
 	if !QUIET.get().is_some() {
-		println!("{:i$} {F}› {msg}", "", i = indent);
+		println!("{:i$} {F}› {msg}", "", i = i);
 	}
 }
 
