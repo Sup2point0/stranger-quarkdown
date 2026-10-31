@@ -128,7 +128,6 @@ impl SquarkError
 	/// Other errors, like an invalid field, are 'recoverable' in that they don't break *everything*. For instance, they might only change how the output renders.
 	/// 
 	/// Contrast with [`is_fine`](Self::is_fine).
-	#[must_use]
 	pub fn is_fatal(&self) -> bool
 	{
 		match self
@@ -152,11 +151,33 @@ impl SquarkError
 	/// - [`SquarkError::ABANDON`] to skip an operation
 	/// 
 	/// Contrast with [`is_fatal`](Self::is_fatal).
-	#[must_use]
 	pub fn is_fine(&self) -> bool
 	{
 		matches!(self, Self::ABANDON)
 		|| matches!(self, Self::Multiple{ errs, .. } if errs.iter().all(Self::is_fine))
+	}
+
+	pub fn how_to_handle(&self, config: &SquarkupConfig) -> Option<ErrorAction>
+	{
+		match self
+		{
+			Self::External{..}      => Some(ErrorAction::KILL),
+			Self::Unrecoverable{..} => Some(ErrorAction::KILL),
+			Self::Recoverable{..}   => Some(config.errors.on_error),
+			Self::Warning{..}       => Some(ErrorAction::WARN),
+			Self::ABANDON           => None,
+			Self::Multiple{ errs, .. } => {
+				let mut out = None;
+				for err in errs {
+					match err.how_to_handle(config) {
+						Some(ErrorAction::KILL) => return Some(ErrorAction::KILL),
+						Some(ErrorAction::WARN) => out = Some(ErrorAction::WARN),
+						_ => {}
+					}
+				}
+				return out
+			}
+		}
 	}
 
 	/// Set the `hint` text of a [`SquarkError::Recoverable`] or [`SquarkError::Unrecoverable`].
@@ -252,18 +273,11 @@ impl SquarkError
 	/// [`SquarkError::Warning`]s are always printed rather than propagated, regardless of `errors.on-error`.
 	pub fn depends(self, config: &SquarkupConfig) -> SquarkResult
 	{
-		if self.is_fine() {
-			Ok(())
-		}
-		else if self.is_fatal() || (
-			config.errors.on_error == ErrorAction::KILL
-			&& !matches!(self, Self::Warning{..})
-		) {
-			Err(self)
-		}
-		else {
-			log::error(self);
-			Ok(())
+		match self.how_to_handle(config)
+		{
+			Some(ErrorAction::KILL) => Err(self),
+			Some(ErrorAction::WARN) => { log::error(self); Ok(()) }
+			None => Ok(())
 		}
 	}
 
