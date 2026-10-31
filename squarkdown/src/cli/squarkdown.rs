@@ -69,9 +69,11 @@ fn squarkup(
 
 	if dry_run || assets || fonts {
 		let mut enabled = vec![];
+
 		if dry_run { enabled.push("dry-run"); }
 		if assets  { enabled.push("assets"); }
 		if fonts   { enabled.push("fonts"); }
+		
 		log::info!("enabled options: {G}{}", enabled.join(&fmt!("{F} · {G}")));
 	}
 
@@ -93,6 +95,8 @@ fn squarkup(
 
 		log::ok!("injected fonts queries");
 	}
+
+	/* NOTE: It’d be nice to put extras _after_ core squarkup, but funnily enough, asset link rewriting _depends_ on assets preprocessing, so assets has to come before squarkup. */
 
 	// == ASSETS == //
 	if assets {
@@ -177,7 +181,7 @@ fn squarkup(
 
 		if pages_with_errors > 0 {
 			log::bad!(
-				"{pages_with_errors}/{total_pages} pages had warnings or errors",
+				"but {pages_with_errors}/{total_pages} pages had warnings or errors",
 			);
 		}
 	}

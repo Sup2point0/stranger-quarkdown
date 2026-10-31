@@ -1,3 +1,13 @@
+//! This module implements Squarkdown’s logging functionality.
+//! 
+//! This consists primarily of macros along with some functions:
+//! 
+//! - The single-line `log::*!`, such as [`log::is!`](is) or [`log::ok!`](ok) for printing small messages.
+//! - The multi-line [`log::error()`](error) for printing large error messages.
+//! - [`log::line()`](line) for printing nice line separators.
+//! 
+//! To prevent interleaved console output, logging errors is made atomic via [`LOG_LOCK`].
+
 use crate::prelude::*;
 use crate::cli::QUIET;
 use crate::utils::colours::*;

@@ -120,8 +120,6 @@ impl<'d> Renderer<'d>
 	}
 
 	/// Run the renderer to completion, writing the whole `+page.svx` file with all injections.
-	/// 
-	/// This always returns `Err(SquarkError)` for propagating aggregated errors (even if empty).
 	pub(super) fn render_page_svx(mut self,
 		wrote: &mut bool,
 		dry_run: bool,
