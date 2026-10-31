@@ -1,5 +1,6 @@
 use super::*;
 use crate::config::*;
+use crate::utils::colours::*;
 use crate::utils::macros::*;
 use crate::utils::testing::*;
 
