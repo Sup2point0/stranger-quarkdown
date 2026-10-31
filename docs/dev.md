@@ -3,7 +3,7 @@
 | dest = info/dev
 | desc = Technicalities, challenges and decisions behind developing Stranger Quarkdown
 | date = 2026 October 10
-| update = 2026 October 29
+| update = 2026 October 31
 -->
 
 sup!
@@ -38,6 +38,11 @@ It’s very sequential, very pure, very testable and very parallelisable.
 <!-- #SQUARK slash? -->
 > Relevant files: [types/squark_error.rs](../squarkdown/src/types/squark_error.rs), [cli/squarkdown.rs](../squarkdown/src/cli/squarkdown.rs)
 <!-- #SQUARK slash. -->
+<!-- #SQUARK only?
+
+> Relevant files: [types/squark_error.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/types/squark_error.rs), [cli/squarkdown.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/cli/squarkdown.rs)
+
+	  #SQUARK only. -->
 
 
 <br>
@@ -48,6 +53,11 @@ It’s very sequential, very pure, very testable and very parallelisable.
 <!-- #SQUARK slash? -->
 > Relevant files: [types/squark_error.rs](../squarkdown/src/types/squark_error.rs)
 <!-- #SQUARK slash. -->
+<!-- #SQUARK only?
+
+> Relevant files: [types/squark_error.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/types/squark_error.rs)
+
+	  #SQUARK only. -->
 
 
 <br>
@@ -58,6 +68,11 @@ It’s very sequential, very pure, very testable and very parallelisable.
 <!-- #SQUARK slash? -->
 > Relevant files: [types/squark_error.rs](../squarkdown/src/types/squark_error.rs), [renderer/mod.rs](../squarkdown/src/renderer/mod.rs)
 <!-- #SQUARK slash. -->
+<!-- #SQUARK only?
+
+> Relevant files: [types/squark_error.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/types/squark_error.rs), [renderer/mod.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/renderer/mod.rs)
+
+	  #SQUARK only. -->
 
 Rendering is parallelised, and unfortunately with the naive approach of each `render()` call printing its own errors directly, what we get is a garbled console output where the lines of output from each thread are interleaved. The easiest remedy for this is to collect the errors, and then print them all at once.
 
@@ -78,6 +93,11 @@ So we can’t just use `Ok(T)`/`Err(SquarkError)`, instead we have to return som
 <!-- #SQUARK slash? -->
 > Relevant files: [cli/squarkdown.rs](../squarkdown/src/cli/squarkdown.rs)
 <!-- #SQUARK slash. -->
+<!-- #SQUARK only?
+
+> Relevant files: [cli/squarkdown.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/cli/squarkdown.rs)
+
+	  #SQUARK only. -->
 
 In the Ruby version, parsing the charm squarkdown and rendering Markdown happened at the same time.
 
@@ -94,8 +114,13 @@ It’s basically like the Assembler dilemma: 2-pass to scan for labels first, or
 ## Why is loading a config such a nightmare?
 
 <!-- #SQUARK slash? -->
-> Relevant files: [config/from_toml.rs](../squarkdown/src/config/from_toml.rs)
+> Relevant files: [config/from-toml.rs](../squarkdown/src/config/from_toml.rs)
 <!-- #SQUARK slash. -->
+<!-- #SQUARK only?
+
+> Relevant files: [config/from-toml.rs <sup>↗</sup>](https://github.com/Sup2point0/stranger-quarkdown/blob/main/squarkdown/src/config/from_toml.rs)
+
+	  #SQUARK only. -->
 
 In the Ruby version, Squarkdown loaded the user’s `squarkup.json` with a simple JSON parse and JSON Schema validate. It was dead easy.
 

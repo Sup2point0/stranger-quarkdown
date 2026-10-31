@@ -4,11 +4,11 @@
 | title = decoded: Stranger Quarkdown
 | desc = Lessons learnt from development
 | head = <em>decoded</em>: Stranger Quarkdown
-| update = 2026 Oct 17
+| update = 2026 October 31
 -->
 
 > [!Note]
-> This is part of my [*decoded*](https://github.com/Sup2point0/Assort/blob/origin/~dev/decoded.md) series, a collection of lessons learnt from each major project I’ve undertaken.
+> This is part of my [*decoded*<sup>↗</sup>](https://github.com/Sup2point0/Assort/blob/origin/~dev/decoded.md) series, a collection of lessons learnt from each major project I’ve undertaken.
 
 
 <br>
@@ -19,6 +19,9 @@
 - As much I think they might, projects are never really finished.
   - I inevitably come up with new features and needs.
 - Error aggregation is pretty messy.
+  - Error aggregation is REALLY messy, gawddamn.
+- I do really like working in Rust.
+  - Genuinely – there can be some friction, but if you play your cards right it’s effortless and euphoric.
 
 
 <br>
