@@ -154,26 +154,27 @@ fn squarkup(
 
 		site_data.pages_map()
 			.par_iter()
-			.map(|(_shard, page)|
-				renderer::render(page, &site_data, &config, dry_run, &successful_writes)
-			)
-			.fold(|| SquarkError::multiple(""), |mut errs, Err(e)| {
-				debug_check!(errs.push(e));
-				errs
-			})
-			.reduce(|| SquarkError::multiple(""), |mut e1, e2| {
-				debug_check!(e1.push(e2));
-				e1
-			})
-			.depends(&config)?;
-
-		let successes = successful_writes.into_inner();
+			.try_for_each(|(_shard, page)|
+			{
+				let Err(errs) = renderer::render(
+					page, &site_data, &config, dry_run, &successful_writes,
+				);
+				if errs.how_to_handle(&config) != None {
+					pages_with_errors.fetch_add(1, Ordering::Relaxed);
+				}
+				errs.depends(&config)
+			})?
+		;
+		
+		let total_pages = site_data.stats.active_pages;
+		let pages_with_errors = pages_with_errors.into_inner();
 
 		log::ok!(
-			"{} {successes}/{total} pages",
+			"{} {oks}/{total_pages} pages",
 			if dry_run {"would render"} else {"rendered"},
-			total = site_data.stats.active_pages
+			oks = successful_writes.into_inner(),
 		);
+
 	}
 
 	// == SITE DATA == //
