@@ -10,6 +10,7 @@ use std::path::{ PathBuf };
 use std::process;
 
 
+/// Syntax sugar for `assert!( !... )`.
 #[macro_export]
 macro_rules! assert_not {
 	($($tokens:tt)*) => {

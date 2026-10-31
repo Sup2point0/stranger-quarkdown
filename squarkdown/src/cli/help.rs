@@ -23,6 +23,8 @@ pub fn help() -> ExitCode
 {W} Delete Squarkdown’s output for a fresh run:
 
 {F}   › {C}squarkdown {G}clean
+{F}   › {C}squarkdown {G}clean {Y}--force
+{F}   › {C}squarkdown {G}clean {Y}--dry-run
 "
 	);
 
@@ -31,8 +33,8 @@ pub fn help() -> ExitCode
 	println!(
 "{W}For detailed guidance, please visit the docs!
 
-{W}  GitHub: {B}https://github.com/Sup2point0/stranger-quarkdown/tree/main/docs
-{W}  site: {B}https://sup2point0.github.io/stranger-quarkdown/docs
+{W}  GitHub: {B}https://github.com/Sup2point0/stranger-quarkdown/blob/main/docs/reference/cli
+{W}  site: {B}https://sup2point0.github.io/stranger-quarkdown/docs/reference/cli
 {W}"
 	);
 
