@@ -23,7 +23,7 @@ squarkdown -h
 
 This shows the core Squarkdown commands available.[^variants]
 
-[^variants]: Why so many variants for the same command? Well, when you want help there’s nothing more frustrating than *not being able to run the help command* ;)
+[^variants]: Why so many variants for the same command? Well, when you want help there’s nothing more frustrating than *not being able to find the help command* ;)
 
 
 <br>
@@ -103,7 +103,7 @@ This requires a Git repository to run, since it only deletes uncommitted and `.g
 
 This command always checks before every delete that the file it’s about to delete is below your project root, so that it can never touch files outside your project.[^delete-folder]
 
-[^delete-folder]: Why not just delete the whole folder for Squarkdown output? Well, what if you wanted to put committed files in that folder too? Then Squarkdown would be deleting your committed files, we don’t want.
+[^delete-folder]: Why not just delete the whole folder for Squarkdown output? Well, what if you wanted to put committed files in that folder too? Then Squarkdown would be deleting your committed files, we don’t want that.
 
 
 <br>
