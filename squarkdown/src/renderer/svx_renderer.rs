@@ -133,11 +133,13 @@ impl<'d> Renderer<'d>
 
 		let (base, folder) = utils::split_path_from(&self.dest_folder, &self.config.paths.root);
 		
-		log::info!(
-			"{} to: {base}/{FF}{folder}{F}/{}",
-			if dry_run {"would render"} else {"rendering"},
-			self.config.out.file_name,
-		);
+		log::lock! {
+			log::info!(
+				"{} to: {base}/{FF}{folder}{F}/{}",
+				if dry_run {"would render"} else {"rendering"},
+				self.config.out.file_name,
+			);
+		}
 
 		let source = fs::read_to_string(&self.page.filepath)?;
 		let output = self.render_from(&source)?;
