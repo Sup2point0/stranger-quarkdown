@@ -27,7 +27,6 @@ I’m working on fixing these!
 
 - `clean`(`se`) in charm squark has not yet been implemented.
 - `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and rendered correctly.
-- Warnings are not properly differentiated from regular errors, so can fail the build.
 
 
 <br>
@@ -36,7 +35,20 @@ I’m working on fixing these!
 ## Next Major (v4.7)
 
 ### New
+- The JSON Schema for your squarkup config has been stabilised.
+  - You can use this for error-checking, autocomplete and hover tooltips in your IDE!
+  - See [the site](https://sup2point0.github.io/stranger-quarkdown/schemas) for more.
 - Truncate source snapshots so that they don’t overflow the terminal.
+
+### Fixes
+- Warnings no longer fail squarkup when `errors.on-error = "kill"`.
+
+### Changes
+- Improve console output.
+- Error messages during rendering are now printed eagerly instead of aggregated and grouped at the end.
+  - This means messier output, but reduced memory usage :P
+  - Tip: you can remedy the issue by passing `--quiet` to hide all the debug info.
+- Restructure internal pipeline for better error propagation with lower memory usage.
 
 
 <br>

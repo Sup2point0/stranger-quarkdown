@@ -6,9 +6,9 @@
 
   "scripts": {
     "dev":    "vite",
-      "devx": "nu dev.nu && vite --open",
+      "devx": "npm run prep && vite --open docs",
     
-    "prep":    "squarkdown",
+    "prep":    "nu dev.nu",
       "prepx": "squarkdown --fonts",
     
     "build":    "vite build",

@@ -1,5 +1,5 @@
 {
-  "squarkdown-version": "4.4",
+  "squarkdown-version": "4.7",
 
   "title":       "Squarkup Configuration Schema",
   "description": "Shared schema for your squarkup.toml or squarkup.json",
@@ -62,12 +62,20 @@
           "description": "What to do when a target file to write to already exists."
         },
 
+        "link-broken": {
+          "title":       "Broken Link Handling",
+          "type":        "string",
+          "enum":        ["mark-dead", "strip-extension", "link-to-github", "error"],
+          "default":     "error",
+          "description": "When rendering Markdown, how should Squarkdown handle a link that resolves to a nonexistent file or folder?"
+        },
+
         "link-inactive": {
           "title":       "Inactive Link Handling",
           "type":        "string",
           "enum":        ["mark-broken", "strip-extension", "link-to-github", "error"],
           "default":     "error",
-          "description": "When rendering Markdown, how should Squarkdown handle a link that points to an inactive file?"
+          "description": "When rendering Markdown, how should Squarkdown handle a link that resolves to an inactive file or folder?"
         }
       }
     },

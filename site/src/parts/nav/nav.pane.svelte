@@ -5,7 +5,7 @@ The left navigation sidebar.
 
 <script lang="ts">
 
-import Schema from "#static/squarkup-schema/latest.json" with { type: "json" };
+import Schema from "#static/schemas/latest.json" with { type: "json" };
 
 import NavSection from "#src/parts/nav/section.nav.svelte";
 import NavLink from "#src/parts/nav/link.nav.svelte";
@@ -90,9 +90,9 @@ const delay = 240;
     <NavLink text="Fonts" intern="features/fonts" />
   </NavSection> -->
 
-  <NavSection title="Schemas" intern="squarkup-schemas" open={false}>
-    <NavLink text="latest (v{Schema.version})" intern="squarkup-schema/latest.json" />
-    <NavLink text="v5.0.7" intern="squarkup-schema/v5.0.7.json" />
+  <NavSection title="Schemas" intern="schemas" open={false}>
+    <NavLink text="v{Schema['squarkdown-version']} (latest)" intern="schemas/latest.json" />
+    <NavLink text="v4.4" intern="schemas/v4.4.json" />
   </NavSection>
 
   <NavSection title="Info" intern="info/synopsis">
