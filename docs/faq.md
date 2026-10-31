@@ -1,7 +1,7 @@
 # Frequently Asked Questions
 <!-- #SQUARK live!
 | dest = info/faq
-| update = 2026 October 11
+| update = 2026 October 31
 -->
 
 ### What is Squarkdown?
@@ -18,17 +18,27 @@ Yeah so, Squarkdown was made for a very particular purpose in a very particular 
 
 It’s happened to be perfect for many of my projects, including [pyco:bytes](https://sup2point0.github.io/pycobytes), [Integrity](https://sup2point0.github.io/integrity), [Skyscraping](https://sup2point0.github.io/skyscraping), and ofc [*Assort*](https://sup2point0.github.io/Assort). It really does make development so much easier when I don’t have to worry about where I put everything. After having all the infrastructure set up, being able to just add comments to a `.md` file and have it automatically render to a webpage is pretty awesome. The best part is being able to hide all the processing away from the Markdown preview!
 
+### Why does Squarkdown on NPM only support Windows and Linux?
+For [crates.io<sup>↗</sup>](https://crates.io/crates/squarkdown) users will run `cargo install squarkdown` which will build Squarkdown *from source* on their machine, so a crates.io works on any platform.
+
+However, NPM ofc doesn’t do that, so it needs prebuilt binaries. I have a Windows machine, and I can build a Linux binary via WSL.
+
+Why not publish via GitHub Actions so I can matrix all the platforms? Short answer: I’m lazy. Long answer: I much prefer manually publishing locally, it feels more controlled and intentional.
+
 ### How fast is Squarkdown?
 With the Rust rewrite, fast enough! On my Windows machine the Squarkdown docs take under 50 ms to squarkup, but on GitHub Action’s Linux machine the whole thing finishes in under 10 ms. Execution time varies a lot depending on system speed and delays. Run it yourself and see, right?
 
 ### What is Squarkdown spending its time doing?
-Squarkdown spends most of its time doing 3 things:
+Squarkdown spends most of its time doing 3 (or 4) things:
 
 - Finding `.md` files to squarkup
-- Parsing their [charm](glossary.md#charm-squark) for metadata
+- Parsing their [charm squark](glossary.md#charm-squark) for metadata
 - Rendering each page to `+page.svx` and `+page.ts`
+- Saving [site data](reference/site-data.md) (if enabled)
 
-The last part takes the longest because Squarkdown is reading, parsing, processing and rendering your entire file. So the longer the file, the more work it has to do.
+Rendering takes the longest because Squarkdown is reading, parsing, processing and rendering your entire file. So the longer the file, the more work it has to do.
+
+Saving site data can also take a hot sec if you have a *lot* of metadata, since Squarkdown needs to write a huge JSON file to disk.
 
 The first two parts are pretty fast, and Squarkdown avoids unnecessary work by skipping ignored directories and only reading files up to the end of their charm squark.
 
