@@ -23,6 +23,11 @@ use std::sync::{ Mutex };
 /// Note that this only protects [`log::error()`](error) calls from each other, not other calls like [`log::info!()`](info), unless they are wrapped in [`log_lock!`].
 pub static LOG_LOCK: Mutex<()> = Mutex::new(());
 
+/// Did the last printed message have a trailing [`log::line()`](line) printed?
+/// 
+/// This is used to avoid printing 2 lines one after the other in the console, which looks funky...
+static LAST_LOG_HAD_TRAILING_LINE: Mutex<bool> = Mutex::new(false);
+
 
 /// # `log-lock! { ... }`
 /// 
@@ -37,7 +42,7 @@ pub static LOG_LOCK: Mutex<()> = Mutex::new(());
 macro_rules! lock {
 	($($body:tt)+) => {
 		{
-			let _lock = $crate::utils::log::LOG_LOCK.lock().expect("global log lock was poisoned!");
+			let _lock = $crate::utils::log::LOG_LOCK.lock().expect("global log lock was poisoned!!");
 			$($body)+
 		}
 	}
@@ -101,16 +106,29 @@ pub fn version()
 } pub use hint;
 
 
-pub fn log_is   (i: usize, msg: impl Display) { println!(" {:i$}{F}› {W}{msg}",    "", i = i); }
-pub fn log_ok   (i: usize, msg: impl Display) { println!(" {:i$}{C}✓ {msg}",       "", i = i); }
-pub fn log_bad  (i: usize, msg: impl Display) { println!(" {:i$}{R}× {msg}",       "", i = i); }
-pub fn log_warn (i: usize, msg: impl Display) { println!(" {:i$}{Y}▲ {msg}",       "", i = i); }
-pub fn log_debug(i: usize, msg: impl Display) { println!(" {:i$}{F}│ {msg}",       "", i = i); }
-pub fn log_hint (i: usize, msg: impl Display) { println!(" {:i$}{G}= hint: {msg}", "", i = i); }
+macro_rules! impl_log {
+	(
+		$ident:ident => $($prints:tt)+
+	) => {
+		pub fn $ident(indent: usize, msg: impl Display)
+		{
+			let mut l = LAST_LOG_HAD_TRAILING_LINE.lock().expect("log trailing line lock was poisoned!!");
+			println!($($prints)+, "", msg, indent = indent);
+			*l = true;
+		}
+	}
+}
 
-pub fn log_info(i: usize, msg:  impl Display) {
+impl_log! { log_is    => " {:indent$}{F}› {W}{}" }
+impl_log! { log_ok    => " {:indent$}{C}✓ {}" }
+impl_log! { log_bad   => " {:indent$}{R}× {}" }
+impl_log! { log_warn  => " {:indent$}{Y}▲ {}" }
+impl_log! { log_debug => " {:indent$}{F}│ {}" }
+impl_log! { log_hint  => " {:indent$}{G}= hint: {}" }
+
+pub fn log_info(indent: usize, msg: impl Display) {
 	if !QUIET.get().is_some() {
-		println!("{:i$} {F}› {msg}", "", i = i);
+		println!("{:indent$} {F}› {msg}", "", indent = indent);
 	}
 }
 
@@ -120,81 +138,91 @@ pub fn log_info(i: usize, msg:  impl Display) {
 /// This is atomic to prevent interleaving from multiple threads calling [`error()`] at once.
 pub fn error(err: impl Borrow<SquarkError>)
 {
-	fn go(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
-	{
-		match err
-		{
-			  SquarkError::Warning{ msg, hint, debug }
-			| SquarkError::Recoverable{ msg, hint, debug }
-			| SquarkError::Unrecoverable{ msg, hint, debug }
-			=> {
-				if let SquarkError::Warning{..} = err {
-					warns!(indent => msg);
-				} else {
-					bad!(indent => msg);
-				}
-				
-				for each in debug {
-					if !each.is_empty() {
-						debug!(indent => each);
-					}
-				}
-
-				if !hint.is_empty() {
-					hint!(indent => hint);
-				}
-			}
-
-			SquarkError::Multiple{ when, errs } =>
-			{
-				if !already_shown_when && !when.is_empty() {
-					already_shown_when = true;
-					let count = err.len();
-					let plural = if count == 1 {""} else {"s"};
-					bad!(indent => "{count} error{plural} while {when}");
-					line();
-					indent += 2;
-				}
-
-				for (i, err) in errs.iter().enumerate() {
-					if err.is_empty() {
-						continue;
-					}
-					// 1st error already has preceeding line
-					if i != 0 {
-						if let SquarkError::Multiple{..} = &err {
-							line();
-						} else {
-							// Don't print lines between lowest-level aggregated errors
-							println!();
-						}
-					}
-					go(err, indent, already_shown_when);
-				}
-			}
-
-			SquarkError::External{ err, msg, backtrace } => {
-				bad!(indent => msg);
-				println!("\n   {R}{err:?}");
-				println!("\n{backtrace}");
-			}
-
-			SquarkError::ABANDON => {
-				#[cfg(test)]
-				bad!("abandoned!");
-			}
-		}
-	}
-
 	if err.borrow().is_empty() {
 		return;
 	}
 
-	let _lock = LOG_LOCK.lock().expect("global log lock was poisoned");
+	let _lock = LOG_LOCK.lock()
+		.expect("global log lock was poisoned!!");
+
+	/* NOTE: Duplicate line avoidance is best-effort: we don’t want to slow down the entire pipeline by waiting on locks _just_ for nicer formatting... */
+	match LAST_LOG_HAD_TRAILING_LINE.try_lock() {
+		Ok(v) => if !*v { line() },
+		Err(..) => line(),
+	}
+
+	print_error(err.borrow(), 0, false);
 
 	line();
-	go(err.borrow(), 0, false);
-	line();
+
+	*LAST_LOG_HAD_TRAILING_LINE.lock().expect("log trailing line lock was poisoned!!")
+		= true;
 
 	let _ = io::stdout().flush();
+}
+
+fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
+{
+	match err
+	{
+		  SquarkError::Warning{ msg, hint, debug }
+		| SquarkError::Recoverable{ msg, hint, debug }
+		| SquarkError::Unrecoverable{ msg, hint, debug }
+		=> {
+			if let SquarkError::Warning{..} = err {
+				warns!(indent => msg);
+			} else {
+				bad!(indent => msg);
+			}
+			
+			for each in debug {
+				if !each.is_empty() {
+					debug!(indent => each);
+				}
+			}
+
+			if !hint.is_empty() {
+				hint!(indent => hint);
+			}
+		}
+
+		SquarkError::Multiple{ when, errs } =>
+		{
+			if !already_shown_when && !when.is_empty() {
+				already_shown_when = true;
+				let count = err.len();
+				let plural = if count == 1 {""} else {"s"};
+				bad!(indent => "{count} error{plural} while {when}");
+				line();
+				indent += 2;
+			}
+
+			for (i, err) in errs.iter().enumerate() {
+				if err.is_empty() {
+					continue;
+				}
+				// 1st error already has preceeding line
+				if i != 0 {
+					if let SquarkError::Multiple{..} = &err {
+						line();
+					} else {
+						// Don't print lines between lowest-level aggregated errors
+						println!();
+					}
+				}
+				print_error(err, indent, already_shown_when);
+			}
+		}
+
+		SquarkError::External{ err, msg, backtrace } => {
+			bad!(indent => msg);
+			println!("\n   {R}{err:?}");
+			println!("\n{backtrace}");
+		}
+
+		SquarkError::ABANDON => {
+			#[cfg(test)]
+			bad!("abandoned!");
+		}
+	}
 }
