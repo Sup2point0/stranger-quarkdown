@@ -6,7 +6,7 @@ use std::fmt::Display;
 
 
 /// Print a line to the console.
-pub fn line() { println!("{F}─────────────────────────────"); }
+pub fn line() { println!("{F}{}", "─".repeat(69)); }
 
 /// Print Squarkdown’s version to the console.
 pub fn version()
