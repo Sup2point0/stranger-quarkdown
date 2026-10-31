@@ -90,8 +90,19 @@ Inactive files are not processed by Squarkdown.
 <br>
 
 
+## Site Data
+> Main article: [Site Data](reference/site-data.md)
+
+A JSON file (`site.json` by default) containing the [charm squark](#charm-squark) metadata of every [active](#active) page Squarkdown processed, plus other useful metadata.
+
+This file is only generated if you have [`out.site-data-path`](reference/squarkup-config.md#site-data-path) configured.
+
+
+<br>
+
+
 ## Squark
-> Main article: [squarks](reference/squarks.md)
+> Main article: [Squarks](reference/squarks.md)
 
 A special `<!-- #SQUARK -->` comment that tells Squarkdown to do something.
 
@@ -135,9 +146,9 @@ The special Markdown syntax Squarkdown accepts, using [squarks](#squark) hidden 
 The entire processing pipeline of Squarkdown:
 
 - Finding your Markdown files
-- Parsing metadata
+- Parsing metadata in [charm squarks](#charm-squark)
 - Rendering `+page.svx` and `+page.ts`
-- Saving `site.json`
+- (optionally) Saving [site data](#site-data)
 - (optionally) Copying assets
 - (optionally) Injecting Google Fonts query into `app.html`
 

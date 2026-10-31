@@ -33,7 +33,7 @@ Squarkdown expects a project structure like this:
       	   ...
 ```
 
-`squarkup.toml` contains your [squarkup configuration](../reference/squarkup-config.md). `site/` is a SvelteKit project.
+squarkup.toml contains your [squarkup configuration](../reference/squarkup-config.md). `site/` is a SvelteKit project.
 
 Alternatively, you can place your squarkup config under a `.squarkdown/` folder:
 

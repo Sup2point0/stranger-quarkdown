@@ -10,7 +10,7 @@
 
 </div>
 
-Stranger Quarkdown provides a [JSON Schema<sup>↗</sup>](https://json-schema.org) to validate your [`squarkup.toml`](../../docs/reference/squarkup-toml.md)[^toml] or `squarkup.json` .
+Stranger Quarkdown provides a [JSON Schema<sup>↗</sup>](https://json-schema.org) to validate your [squarkup.toml](../../docs/reference/squarkup-toml.md)[^toml] or squarkup.json.
 
 [^toml]: JSON Schema can validate TOML too!
 
