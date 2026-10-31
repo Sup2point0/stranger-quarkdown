@@ -44,7 +44,7 @@
     border-color: $col-up;
   }
 
-  &:hover, &:focus {
+  &:hover, &:focus-visible {
     &::after {
       bottom: $bottom-hover;
       border-color: $col-hover;
@@ -64,7 +64,7 @@
     display: none;
   }
 
-  &:hover, &:focus {
+  &:hover, &:focus-visible {
     cursor: pointer;
     background: color-mix(in oklch, $col-charm, transparent 90%);
   }
