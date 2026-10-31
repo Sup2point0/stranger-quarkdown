@@ -14,7 +14,6 @@ use crate::utils::colours::*;
 
 use std::borrow::{ Borrow };
 use std::fmt::{ Display };
-use std::io::{ self, Write };
 use std::sync::{ Mutex };
 
 
@@ -143,8 +142,6 @@ pub fn error(err: impl Borrow<SquarkError>)
 	line();
 	print_error(err.borrow(), 0, false);
 	line();
-
-	let _ = io::stdout().flush();
 }
 
 fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
