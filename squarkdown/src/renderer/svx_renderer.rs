@@ -109,7 +109,10 @@ impl<'d> Renderer<'d>
 			config,
 			source: str!(),
 			line_boundaries: vec![],
-			errors: SquarkError::multiple(str!()),
+			errors: SquarkError::multiple(fmt!(
+				"rendering {B}{}",
+				utils::display_rel(&page.filepath, &config.paths.root)
+			)),
 			dest_file: path!(page.destination / config.out.file_name),
 			dest_folder: page.destination.clone(),
 			ctx: ContextStack::new(),
@@ -122,7 +125,7 @@ impl<'d> Renderer<'d>
 	pub(super) fn render_page_svx(mut self,
 		wrote: &mut bool,
 		dry_run: bool,
-	) -> SquarkResult
+	) -> SquarkAction
 	{
 		if self.dest_file.exists() {
 			self.err_exists(&self.dest_file)?;
@@ -147,16 +150,18 @@ impl<'d> Renderer<'d>
 			});
 		}
 
-		if self.errors.is_fine() || self.config.errors.on_error == ErrorAction::WARN {
-			if dry_run {
-				self.write_page_svx(io::sink(), &[])?;
-			} else {
-				self.write_page_svx(File::create(&self.dest_file)?, output.as_bytes())?;
-			}
-			*wrote = true;
+		if let Some(ErrorAction::KILL) = self.errors.how_to_handle(self.config) {
+			return Err(self.errors)
 		}
 
-		Err(self.errors)
+		if dry_run {
+			self.write_page_svx(io::sink(), &[])?;
+		} else {
+			self.write_page_svx(File::create(&self.dest_file)?, output.as_bytes())?;
+		}
+		*wrote = true;
+
+		self.errors.into()
 	}
 
 	fn write_page_svx(&self, mut f: impl io::Write, content: &[u8]) -> Result<(), SquarkError>

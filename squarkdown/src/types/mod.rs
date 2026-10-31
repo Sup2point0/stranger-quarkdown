@@ -16,6 +16,9 @@ mod context_stack;
 pub use context_stack::{ ContextStack };
 
 
+pub enum Never {}
+
+
 use tinyvec::TinyVec;
 
 /// A single string on the stack, or many strings on the heap.

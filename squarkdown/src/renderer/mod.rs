@@ -14,9 +14,7 @@ mod test_utils;
 // == PUBLIC == //
 
 use crate::prelude::*;
-use crate::utils;
-use crate::utils::colours::*;
-use crate::utils::macros::*;
+use crate::types::Never;
 
 use std::sync::atomic::{ AtomicUsize, Ordering };
 use std::fs;
@@ -35,13 +33,8 @@ pub fn render(
 	config: &SquarkupConfig,
 	dry_run: bool,
 	successful_writes: &AtomicUsize,
-) -> SquarkResult
+) -> SquarkResult<Never>
 {
-	let mut errs = SquarkError::multiple(fmt!(
-		"rendering {B}{}",
-		utils::display_rel(&page.filepath, &config.paths.root)
-	));
-
 	let renderer = Renderer::new(page, site, config);
 
 	if !dry_run {
@@ -58,15 +51,11 @@ pub fn render(
 
 	if config.out.render_page_ts {
 		wrote_ts = false;
-		catch!(errs => {
-			renderer.render_page_ts(&mut wrote_ts, dry_run)?;
-		});
+		renderer.render_page_ts(&mut wrote_ts, dry_run)?;
 	}
 	
 	let mut wrote_svx = false;
-	catch!(errs => {
-		renderer.render_page_svx(&mut wrote_svx, dry_run)?;
-	});
+	let ((), errs) = renderer.render_page_svx(&mut wrote_svx, dry_run)?;
 
 	if (wrote_ts && wrote_svx) {
 		successful_writes.fetch_add(1, Ordering::Relaxed);
