@@ -2,7 +2,37 @@ use crate::prelude::*;
 use crate::cli::QUIET;
 use crate::utils::colours::*;
 
-use std::fmt::Display;
+use std::borrow::{ Borrow };
+use std::fmt::{ Display };
+use std::io::{ self, Write };
+use std::sync::{ Mutex };
+
+
+/// Global lock for logging to allow multi-line messages to be printed atomically without interleaving from multithreading.
+/// 
+/// Note that this only protects [`log::error()`](error) calls from each other, not other calls like [`log::info!()`](info), unless they are wrapped in [`log_lock!`].
+pub static LOG_LOCK: Mutex<()> = Mutex::new(());
+
+
+/// # `log-lock! { ... }`
+/// 
+/// Wrap the given block in a lock on [`LOG_LOCK`] so that it prints atomically.
+/// 
+/// ```ignore
+/// log_lock! {
+///   log::info!("This log will be atomic.");
+/// }
+/// ```
+#[macro_export]
+macro_rules! lock {
+	($($body:tt)+) => {
+		{
+			let _lock = $crate::utils::log::LOG_LOCK.lock().expect("global log lock was poisoned!");
+			$($body)+
+		}
+	}
+}
+pub use lock;
 
 
 /// Print a line to the console.
@@ -76,7 +106,9 @@ pub fn log_info(i: usize, msg:  impl Display) {
 
 
 /// Print `err`, with surrounding line delimiters.
-pub fn error(err: impl std::borrow::Borrow<SquarkError>)
+/// 
+/// This is atomic to prevent interleaving from multiple threads calling [`error()`] at once.
+pub fn error(err: impl Borrow<SquarkError>)
 {
 	fn go(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
 	{
@@ -148,7 +180,11 @@ pub fn error(err: impl std::borrow::Borrow<SquarkError>)
 		return;
 	}
 
+	let _lock = LOG_LOCK.lock().expect("global log lock was poisoned");
+
 	line();
 	go(err.borrow(), 0, false);
 	line();
+
+	let _ = io::stdout().flush();
 }
