@@ -3,11 +3,10 @@ use crate::*;
 use crate::prelude::*;
 use crate::utils::log;
 use crate::utils::colours::*;
-use crate::utils::macros::*;
 
 use rayon::prelude::*;
 
-use std::sync::atomic::{ AtomicUsize };
+use std::sync::atomic::{ AtomicUsize, Ordering };
 use std::process::{ ExitCode };
 use std::time::{ Instant };
 
@@ -151,6 +150,7 @@ fn squarkup(
 		log::is!(if dry_run {"simulating rendering..."} else {"rendering..."});
 
 		let successful_writes = AtomicUsize::new(0);
+		let pages_with_errors = AtomicUsize::new(0);
 
 		site_data.pages_map()
 			.par_iter()
@@ -175,6 +175,11 @@ fn squarkup(
 			oks = successful_writes.into_inner(),
 		);
 
+		if pages_with_errors > 0 {
+			log::bad!(
+				"{pages_with_errors}/{total_pages} pages had warnings or errors",
+			);
+		}
 	}
 
 	// == SITE DATA == //
