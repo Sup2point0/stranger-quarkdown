@@ -14,7 +14,7 @@ const FOLDER_NAMES = [
 ]
 
 
-def main [--fresh] {
+def main [--quiet --fresh] {
 	
 	if $fresh {
 		print "creating source directories..."
@@ -22,7 +22,11 @@ def main [--fresh] {
 		print $"done!"
 	}
 
-	cargo run --release -- --quiet
+	if $quiet {
+		cargo run --release -- --quiet
+	} else {
+		cargo run --release
+	}
 }
 
 def create-source-dirs [] {
