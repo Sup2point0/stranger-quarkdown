@@ -20,13 +20,8 @@ use std::sync::{ Mutex };
 
 /// Global lock for logging to allow multi-line messages to be printed atomically without interleaving from multithreading.
 /// 
-/// Note that this only protects [`log::error()`](error) calls from each other, not other calls like [`log::info!()`](info), unless they are wrapped in [`log_lock!`].
+/// Note that this only protects [`log::error()`](error) calls from each other, not other calls like [`log::info!()`](info), unless they are wrapped in [`log::lock!`](lock).
 pub static LOG_LOCK: Mutex<()> = Mutex::new(());
-
-/// Did the last printed message have a trailing [`log::line()`](line) printed?
-/// 
-/// This is used to avoid printing 2 lines one after the other in the console, which looks funky...
-static LAST_LOG_HAD_TRAILING_LINE: Mutex<bool> = Mutex::new(false);
 
 
 /// # `log-lock! { ... }`
@@ -112,9 +107,7 @@ macro_rules! impl_log {
 	) => {
 		pub fn $ident(indent: usize, msg: impl Display)
 		{
-			let mut l = LAST_LOG_HAD_TRAILING_LINE.lock().expect("log trailing line lock was poisoned!!");
 			println!($($prints)+, "", msg, indent = indent);
-			*l = true;
 		}
 	}
 }
@@ -126,8 +119,10 @@ impl_log! { log_warn  => " {:indent$}{Y}▲ {}" }
 impl_log! { log_debug => " {:indent$}{F}│ {}" }
 impl_log! { log_hint  => " {:indent$}{G}= hint: {}" }
 
-pub fn log_info(indent: usize, msg: impl Display) {
+pub fn log_info(indent: usize, msg: impl Display)
+{
 	if !QUIET.get().is_some() {
+		let _lock = LOG_LOCK.try_lock().ok();
 		println!("{:indent$} {F}› {msg}", "", indent = indent);
 	}
 }
@@ -145,18 +140,9 @@ pub fn error(err: impl Borrow<SquarkError>)
 	let _lock = LOG_LOCK.lock()
 		.expect("global log lock was poisoned!!");
 
-	/* NOTE: Duplicate line avoidance is best-effort: we don’t want to slow down the entire pipeline by waiting on locks _just_ for nicer formatting... */
-	match LAST_LOG_HAD_TRAILING_LINE.try_lock() {
-		Ok(v) => if !*v { line() },
-		Err(..) => line(),
-	}
-
-	print_error(err.borrow(), 0, false);
-
 	line();
-
-	*LAST_LOG_HAD_TRAILING_LINE.lock().expect("log trailing line lock was poisoned!!")
-		= true;
+	print_error(err.borrow(), 0, false);
+	line();
 
 	let _ = io::stdout().flush();
 }
