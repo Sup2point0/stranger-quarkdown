@@ -37,8 +37,8 @@ If you’d like to pin your schema to your particular version, you can access pa
 
 ### Supported
 <!-- #SQUARK leave? -->
-- [v4.7](schemas/4.7.json) (latest)
-- [v4.4](schemas/4.4.json)
+- [v4.7](schemas/v4.7.json) (latest)
+- [v4.4](schemas/v4.4.json)
 <!-- #SQUARK leave. -->
 
 ### Archived
