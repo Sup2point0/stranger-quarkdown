@@ -33,15 +33,21 @@ I’m working on fixing these!
 <br>
 
 
-## Next Major (v4.7)
+## v4.7
 
 ### New
-- The JSON Schema for your squarkup config has been stabilised.
+- The squarkup config schema has been stabilised.
   - You can use this for error-checking, autocomplete and hover tooltips in your IDE!
+
+  ```toml
+  #:schema https://sup2point0.github.io/stranger-quarkdown/schemas/latest.json
+  ```
+
   - See [the site](https://sup2point0.github.io/stranger-quarkdown/schemas) for more.
 - Truncate source snapshots so that they don’t overflow the terminal.
 
 ### Fixes
+- Repair error printing.
 - Warnings no longer fail squarkup when `errors.on-error = "kill"`.
 
 ### Changes

@@ -12,6 +12,6 @@ This [empty link]() should be left untouched and should not raise an error.
 <!-- FIXME -->
 <!-- #SQUARK only?
 
-This link to [only side](side.md) should be rewritten even inside an `only` squark.
+This link to `[only side](side.md)` should be rewritten even inside an `only` squark.
 
 	  #SQUARK only. -->
