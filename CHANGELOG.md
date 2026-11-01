@@ -25,8 +25,9 @@ Sometimes you may find things breaking (usually by erroring) with `minor` update
 
 I’m working on fixing these!
 
+- Markdown inside `#SQUARK only` is not properly parsed, meaning links are not rewritten.
+- `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and applied correctly.
 - `clean`(`se`) in charm squark has not yet been implemented.
-- `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and rendered correctly.
 
 
 <br>

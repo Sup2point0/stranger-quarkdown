@@ -1133,16 +1133,19 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		[link<sup>↗</sup>](test)
+// 		t
+
+// 		<!-- #SQUARK only?
+
+// 		test [link](hi) *hello*
+
+// 		-->
 // 	"};
-// 	// let source = indoc! {"
-// 	// 	<a target=\"_blank\" href=\"test\">link<sup>↗</sup></a>
-// 	// "};
 
 // 	let mut config = TEST_CONFIG.clone();
 // 	config.errors.strict = true;
 // 	config.errors.strict = false;
-// 	config.errors.link_inactive = LinkRewriteAction::MARK_BROKEN;
+// 	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
 // 	config.format.externalise_links = true;
 // 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 // 	let out = renderer.render_from(source.trim()).unwrap();
