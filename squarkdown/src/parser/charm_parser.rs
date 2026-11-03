@@ -52,7 +52,10 @@ impl<'d> CharmParser<'d>
 	/// Construct a parser for parsing the charm squark of `file`, using settings from `config`.
 	pub fn new(source: &str, filepath: PathBuf, config: &'d SquarkupConfig) -> Self
 	{
-		let errors = SquarkError::multiple(slash!("parsing {}", &filepath));
+		let errors = SquarkError::multiple(fmt!(
+			"parsing {B}{}",
+			utils::display_rel(&filepath, &config.paths.root)
+		));
 
 		Self {
 			config,

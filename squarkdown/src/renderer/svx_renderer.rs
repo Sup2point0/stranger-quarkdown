@@ -103,16 +103,18 @@ impl<'d> Renderer<'d>
 		config: &'d SquarkupConfig,
 	) -> Self
 	{
+		let errors = SquarkError::multiple(fmt!(
+			"rendering {B}{}",
+			utils::display_rel(&page.filepath, &config.paths.root)
+		));
+
 		Self {
 			page,
 			site,
 			config,
 			source: str!(),
 			line_boundaries: vec![],
-			errors: SquarkError::multiple(fmt!(
-				"rendering {B}{}",
-				utils::display_rel(&page.filepath, &config.paths.root)
-			)),
+			errors,
 			dest_file: path!(page.destination / config.out.file_name),
 			dest_folder: page.destination.clone(),
 			ctx: ContextStack::new(),
