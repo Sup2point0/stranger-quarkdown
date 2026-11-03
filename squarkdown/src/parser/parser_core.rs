@@ -364,8 +364,8 @@ impl CharmParser<'_>
 			to += 1;
 		}
 
-		from = from.min(line.len());
-		to   = to.min(line.len());
+		to   = to.min(line.len() - 1);
+		from = from.min(line.len() - 1).min(to);
 		let focus: String = line[from..to].iter().collect();
 
 		let r_before = 0..from;

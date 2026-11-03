@@ -33,6 +33,15 @@ I’m working on fixing these!
 <br>
 
 
+## Next (v4.7.1)
+
+### Fixes
+- Fix out-of-bounds index when printing parsing errors.
+
+
+<br>
+
+
 ## v4.7
 
 ### New
