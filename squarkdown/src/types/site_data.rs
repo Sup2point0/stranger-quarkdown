@@ -7,7 +7,7 @@ use crate::utils::macros::*;
 use serde::ser::SerializeMap;
 use time::{ UtcDateTime, macros::* };
 
-use std::collections::{ HashMap, BTreeMap };
+use std::collections::{ HashSet, HashMap, BTreeMap };
 use std::path::{ Path };
 
 
@@ -17,7 +17,7 @@ pub struct SiteData
 	pub stats: SiteStats,
 
 	/// Maps tags to the pages that included them.
-	tags: BTreeMap<String, Vec<String>>,
+	tags: BTreeMap<String, HashSet<String>>,
 
 	/// The active pages in the site, keyed by the location (filepath) of their source file.
 	/// 
@@ -77,7 +77,7 @@ impl SiteData
 		for tag in &page_data.tags {
 			self.tags
 				.entry(tag.to_owned()).or_default()
-				.push(key.clone());
+				.insert(key.clone());
 		}
 
 		self.pages.insert(key.clone(), page_data);

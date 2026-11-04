@@ -47,6 +47,7 @@ I’m working on fixing these!
 
 ### Fixes
 - Deduplicate tags in charm squark.
+- Deduplicate pages in `tags` arrays in `site.json`.
 
 
 <br>
