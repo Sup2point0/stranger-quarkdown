@@ -57,6 +57,7 @@ impl SquarkupConfig
 				externalise_links: false,
 			},
 			assets: AssetsConfig {
+				base_path: str!(),
 				folder: root.to_owned(),
 				site_assets_folder: None,
 				extensions: HashSet::from([
