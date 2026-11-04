@@ -664,7 +664,7 @@ impl Renderer<'_>
 
 		let mut anchor: Option<&str> = None;
 
-		let their_file_name = {
+		let their_file_path = {
 			if let Some((left, right)) = dest_url.split_once(".md#") {
 				anchor = Some(right);
 				left.replace("%20", " ") + ".md"
@@ -677,7 +677,7 @@ impl Renderer<'_>
 		let own_source_folder = self.page.filepath.parent()
 			.expect("active files always have a parent folder");
 
-		let their_source_path = path!(own_source_folder / their_file_name).clean();
+		let their_source_path = path!(own_source_folder / their_file_path).clean();
 
 		// if it's a file link, only accept `.md` files
 		if let Some(ext) = their_source_path.extension() && ext != "md" {
@@ -716,7 +716,7 @@ impl Renderer<'_>
 		// 3. handle broken or inactive link
 		else {
 			let mut link_rewritten =
-				their_file_name[..]
+				their_file_path[..]
 				.map_or_orig(|f| f.strip_suffix(".md"))
 				.to_owned()
 			;

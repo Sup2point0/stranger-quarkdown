@@ -200,6 +200,13 @@
       "additionalProperties": false,
       "properties":
       {
+        "base-path": {
+          "title":       "Assets Base Path",
+          "type":        "string",
+          "default":     "",
+          "description": "[relative to site origin]\n\nA base path to prepend to rewritten asset links."
+        },
+
         "folder": {
           "title":       "Assets Folder",
           "type":        "string",

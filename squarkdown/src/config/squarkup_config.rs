@@ -115,8 +115,16 @@ pub struct FormatConfig {
 
 #[derive(Clone, Debug)]
 pub struct AssetsConfig {
+	/// A base path to prepend to rewritten asset links.
+	pub base_path: String,
+
+	/// The folder containing asset files to copy to SvelteKit’s `static/` folder.
 	pub folder: PathBuf,
+
+	/// The folder containing asset files to copy directly to the root of `static/`, without structure preservation.
 	pub site_assets_folder: Option<PathBuf>,
+
+	/// Only files with these extensions will be treated as asset files.
 	pub extensions: HashSet<String>,
 }
 

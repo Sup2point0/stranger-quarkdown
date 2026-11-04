@@ -361,6 +361,17 @@ impl SquarkupConfig
 			hints!("write your config like this: {W}```\n\t[assets]\n\tfolder = '.github/assets'\n```")
 		)?
 		{
+			if let Some(value) = assets.remove("base-path") { catch!(errs => {
+				let raw = Self::try_get_str(&value, "assets.base-path", "URL path")?
+					.trim_end_matches('/');
+
+				if raw.starts_with('/') {
+					raw.clone_into(&mut c.assets.base_path);
+				} else {
+					c.assets.base_path = fmt!("/{raw}");
+				}
+			}) }
+
 			if let Some(value) = assets.remove("folder") { catch!(errs => {
 				let dir = Self::try_get_str(&value, "assets.folder", "(folder relative to your project root)")?;
 				let folder = Self::try_resolve_folder(root, dir, "for assets", hints!("{Y}assets.folder{G} is relative to your project root"))?;
