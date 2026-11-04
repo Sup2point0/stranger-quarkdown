@@ -90,7 +90,7 @@ impl Renderer<'_>
 		if !p.heading.is_empty()     { writeln!(f, "\t\t{}: {:?},", p.head(s),  p.heading )?; }
 		if !p.caption.is_empty()     { writeln!(f, "\t\t{}: {:?},", p.capt(s),  p.caption )?; }
 
-		writeln!(f, "\t\t{}: {:?},", p.tags(s), p.tags)?;
+		writeln!(f, "\t\t{}: {:?},", p.tags(s), p.tags.iter().collect::<Vec<_>>())?;
 
 		if let Some(v) = p.release_date {
 			writeln!(f,
