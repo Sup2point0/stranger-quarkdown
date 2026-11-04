@@ -33,10 +33,11 @@ I’m working on fixing these!
 <br>
 
 
-## Next (v4.7.1)
+## v4.7.1
 
 ### Fixes
 - Fix out-of-bounds index when printing parsing errors.
+- Fix highlighting in parser errors.
 
 
 <br>
