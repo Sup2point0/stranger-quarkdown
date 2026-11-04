@@ -23,13 +23,17 @@ Here’s what Squarkdown’s own squarkup.toml looks like:
 ```toml
 #:schema ../squarkdown/src/config/schema.json
 
+[project]
+name = "Stranger Quarkdown"
+github = "Sup2point0/stranger-quarkdown"
+
 [errors]
 strict = true
 debug = true
 on-error = "kill"
 file-already-exists = "overwrite"
-link-broken = "error"
 link-inactive = "link-to-github"
+link-broken = "error"
 
 [paths]
 site = "/site/"
