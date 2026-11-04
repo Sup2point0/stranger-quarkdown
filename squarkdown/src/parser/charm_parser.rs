@@ -441,6 +441,7 @@ impl CharmParser<'_>
 #[cfg(test)] use crate::utils::log;
 
 #[cfg(test)] use assertables::*;
+#[cfg(test)] use indexmap::indexset;
 #[cfg(test)] use indoc::indoc;
 #[cfg(test)] use path_macro::path;
 
@@ -510,7 +511,7 @@ mod full {
 			assert_eq!( page_data.description, str!("Two") );
 			assert_eq!( page_data.heading, str!("Three") );
 			assert_eq!( page_data.caption, str!("Four") );
-			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
+			assert_eq!( page_data.tags, indexset![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
 		}
@@ -538,7 +539,7 @@ mod full {
 			assert_eq!( page_data.description, str!("Two") );
 			assert_eq!( page_data.heading, str!("Three") );
 			assert_eq!( page_data.caption, str!("Four") );
-			assert_eq!( page_data.tags, vec![str!("five"), str!("six"), str!("seven")] );
+			assert_eq!( page_data.tags, indexset![str!("five"), str!("six"), str!("seven")] );
 			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
 			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
 		}
@@ -710,7 +711,7 @@ mod full {
 				| desc = Works
 				-->
 			"});
-			assert_eq!( page_data.tags, vec!["one"] );
+			assert_eq!( page_data.tags, indexset![str!("one")] );
 			assert_eq!( page_data.description, str!("Works") );
 		}
 
@@ -755,7 +756,7 @@ mod full {
 			assert_eq!( page_data.heading, str!("无名之辈") );
 			assert_eq!( page_data.title, str!("从前有座山") );
 			assert_eq!( page_data.caption, str!("你是我的小呀小苹果") );
-			assert_eq!( page_data.tags, vec![str!("一"), str!("二"), str!("三"), str!("四")] );
+			assert_eq!( page_data.tags, indexset![str!("一"), str!("二"), str!("三"), str!("四")] );
 		}
 	}
 }

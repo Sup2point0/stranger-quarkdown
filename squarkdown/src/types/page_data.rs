@@ -4,6 +4,7 @@ use crate::utils;
 use crate::utils::colours::*;
 use crate::utils::macros::*;
 
+use indexmap::IndexSet;
 use path_clean::PathClean;
 use path_macro::path;
 use serde::ser::SerializeMap;
@@ -49,7 +50,7 @@ pub struct PageData
 	/// A short caption for the page displayed below `.heading`.
 	pub caption: String,
 
-	pub tags: Vec<String>,
+	pub tags: IndexSet<String>,
 
 	pub release_date: Option<Date>,
 	pub release_date_raw: String,
@@ -120,7 +121,7 @@ impl PageData
 		let caption     = fields.take_flat("caption", "capt").unwrap_or_default();
 		let description = fields.take_flat("description", "desc").unwrap_or_else(|| caption.clone());
 
-		let tags        = fields.take("tags", "tags").unwrap_or_default();
+		let tags = IndexSet::from_iter(fields.take("tags", "tags").unwrap_or_default());
 
 		let mut release_date = None;
 		let mut release_date_raw = str!();
