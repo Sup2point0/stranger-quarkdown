@@ -227,3 +227,14 @@ use assertables::*;
 	assert_not_contains!( main, ".assets" );
 	assert_not_contains!( main, ".md" );
 }
+
+/// Squarkdown prepends `assets.base-path` to asset file links.
+#[test] fn assets_base_path()
+{
+	clear_files("links/assets-base-path").unwrap();
+	assert!( squarkup!("links/assets-base-path", "--assets").success() );
+	
+	let main = read_file("links/assets-linked/main/+page.svx");
+	assert_contains!( main, "![one](/base-path/link.jpg)" );
+	assert_contains!( main, "![two](/base-path/link.jpg)" );
+}

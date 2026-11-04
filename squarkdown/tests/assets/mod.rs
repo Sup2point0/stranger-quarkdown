@@ -46,3 +46,9 @@ use std::fs;
 	assert!( squarkup!("assets/site", "--assets").success() );
 	assert!( path.is_file() );
 }
+
+/// Squarkdown copies site assets directly to the root of `static/` without preserving file structure.
+#[test] fn site_no_nest()
+{
+	// TODO
+}
