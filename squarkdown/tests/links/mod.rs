@@ -234,7 +234,7 @@ use assertables::*;
 	clear_files("links/assets-base-path").unwrap();
 	assert!( squarkup!("links/assets-base-path", "--assets").success() );
 	
-	let main = read_file("links/assets-linked/main/+page.svx");
+	let main = read_file("links/assets-base-path/+page.svx");
 	assert_contains!( main, "![one](/base-path/link.jpg)" );
 	assert_contains!( main, "![two](/base-path/link.jpg)" );
 }

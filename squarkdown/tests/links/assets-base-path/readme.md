@@ -3,6 +3,6 @@
 
 These image links should have `/base-path` prepended to them.
 
-![one](.assets/link.svg)
+![one](.assets/link.jpg)
 
-![two](./.assets/link.svg)
+![two](./.assets/link.jpg)

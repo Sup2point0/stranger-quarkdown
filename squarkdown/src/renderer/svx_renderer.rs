@@ -815,8 +815,7 @@ impl Renderer<'_>
 
 	fn process_image(&mut self, dest_url: &mut pd::CowStr, range: ParserRange)
 	{
-		if dest_url.contains("://")
-		|| dest_url.starts_with("http") {
+		if dest_url.contains("://") {
 			return;
 		}
 
@@ -857,7 +856,7 @@ impl Renderer<'_>
 				return;
 			};
 
-		let dest = slash!("/{}", their_path_rel);
+		let dest = slash!("{base}/{}", their_path_rel, base = self.config.assets.base_path);
 
 		*dest_url = pd::CowStr::Boxed(Box::from(dest));
 	}
