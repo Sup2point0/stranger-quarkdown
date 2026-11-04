@@ -40,9 +40,6 @@ I’m working on fixing these!
 - Fix highlighting in parser errors.
 
 
-<br>
-
-
 ## v4.7
 
 ### New
