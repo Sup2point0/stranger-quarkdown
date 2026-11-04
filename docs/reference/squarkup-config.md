@@ -1,7 +1,7 @@
 # Squarkup Configuration
 <!-- #SQUARK live!
 | dest = docs/reference/squarkup-config
-| update = 2026 October 27
+| update = 2026 November 4
 -->
 
 Squarkdown comes with sensible defaults out-of-the-box, but you’ll almost certainly want to configure it to suit your needs.
@@ -125,10 +125,12 @@ Defaults to `error`, meaning Squarkdown will raise an error handled according to
 | [`github`](#github) | string |
 
 ### `name`
+The displayed name of the repo, injected into `<title>` when `format.inject-head = true`.
 
 *New in v4.2*.
 
 ### `github`
+The GitHub repository name, e.g. `Sup2point0/stranger-quarkdown`.
 
 *New in v4.2*.
 
@@ -159,14 +161,31 @@ Defaults to `error`, meaning Squarkdown will raise an error handled according to
 | Option | Type | Notes | Default |
 | ------ | ---- | ----- | ------- |
 | [`folder`](#folder)                 | string | path relative to project root | `src/routes/` in your site folder |
+| [`file-name`](#file-name)           | string | file name with `.svx` extension | `+page.svx` |
 | [`site-data-path`](#site-data-path) | string <br> none | path relative to site | none |
 | [`render-page-ts`](#render-page-ts) | boolean || `true` |
 | [`shorter-fields`](#shorter-fields) | boolean || `false` |
 
 ### `folder`
+Where to export files relative to.
+
+`destination` paths in files are relative to this folder.
+
+### `file-name`
+The file name for exported files, including the (expected) `.svx` extension.
+
 ### `site-data-path`
+Where to export site data, including the (expected) `.json` extension.
+
+If absent, site data is not exported.
+
 ### `render-page-ts`
+Should `+page.ts` files be exported?
+
 ### `shorter-fields`
+Should fields in exported `+page.ts` and `site.json` use more compact identifiers?
+
+For instance, `description` is shortened to `desc`, and `last_update` is shortened to `update`.
 
 
 <br>
@@ -182,12 +201,18 @@ Defaults to `error`, meaning Squarkdown will raise an error handled according to
 | [`externalise-links`](#externalise-links) | boolean | `true` |
 
 ### `inject-head`
+Inject a `<head>` element containing `<title>` and `<meta name="description">`?
 
 *New in v4.2*.
 
 ### `preserve-heading`
+Keep the first `# Heading` in the rendered output?
+
 ### `preserve-comments`
+Keep `<!-- comments -->` in the rendered output?
+
 ### `externalise-links`
+Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 
 
 <br>
@@ -195,15 +220,36 @@ Defaults to `error`, meaning Squarkdown will raise an error handled according to
 
 ## Assets
 
+These options are used for assets preprocessing and rewriting links to asset files.
+
+If any options are provided, then assets preprocessing will be enabled and asset links will be rewritten.
+
 | Option | Type | Notes | Default |
 | ------ | ---- | ----- | ------- |
+| [`base-path`](#base-path)                   | string | path relative to site origin | none |
 | [`folder`](#folder)                         | string | path relative to project root | your project root |
 | [`site-assets-folder`](#site-assets-folder) | string <br> none | path relative to project root | none |
-| [`extensions`](#extensions)                 | string array || `.png`, `.jpg`, `.jpeg`, `.webp`, `.svg` files |
+| [`extensions`](#extensions)                 | string array | file extensions | `.png`, `.jpg`, `.jpeg`, `.webp`, `.svg` files |
+
+### `base-path`
+Base path to prepend to rewritten asset links.
+
+When assets preprocessing is enabled, Squarkdown will rewrite Markdown links to asset files, so that they work in the site. These links are absolute links, so e.g. `![](../image.png)` becomes `![](/image.png)`.
+
+This is fine if your site is served from the origin root (e.g. `my-site.com/image.png`), but if you’re under a subpath (e.g. `me.github.io/project/image.png`), then these links will break.
+
+This option remedies that by allowing you to specify what to prepend before `/image.png`. So if you provide `my-project`, then the link is rewritten to `/my-project/image.png`.
+
+*New in v4.8*.
 
 ### `folder`
+The folder containing asset files to copy to SvelteKit’s `static/` folder.
+
 ### `site-assets-folder`
+The folder containing asset files to copy directly to the root of `static/`, without structure preservation.
+
 ### `extensions`
+Only files with these extensions will be treated as asset files.
 
 
 <br>
