@@ -277,6 +277,7 @@ impl Renderer<'_>
 	fn split_comments((event, range): (Event, ParserRange))
 		-> impl Iterator<Item = (Event, ParserRange)>
 	{
+		'no_split: {
 		if let Event::Text(text)
 				| Event::Html(text)
 				| Event::InlineHtml(text)
@@ -284,37 +285,33 @@ impl Renderer<'_>
 			&& text.trim() != "<!--"
 			&& text.trim() != "-->"
 		{
-			let mut idx = 0;
-			/* NOTE: `Rule` is a temporary placeholder, we never read it */
-			let mut text_left = Event::Rule;
-			let mut text_right = Event::Rule;
+			let text_left: Event;
+			let text_right: Event;
 
 			// For an opening comment attach the `<!--` to the right fragment and turn the right fragment into HTML
-			/* NOTE: `<!--` at the start of a line shouldn't be split */
 			if let Some(i) = text.find("<!--")
+				/* NOTE: `<!--` at the start of a line shouldn't be split */
 				&& i > 0
 			{
-				idx = i;
-				let (l, r) = text.split_at(idx);
+				let (l, r) = text.split_at(i);
 				text_left = Event::Text(l.to_owned().into());
 				text_right = Event::InlineHtml(r.to_owned().into());
 			}
 			// Do the opposite for a closing comment
-			/* NOTE: `-->` at the end of a line shouldn't be split */
 			else if let Some(i) = text.find("-->")
+				/* NOTE: `-->` at the end of a line shouldn't be split */
 				&& i < text.len()
 			{
-				idx = i + "-->".len();
-				let (l, r) = text.split_at(idx);
+				let (l, r) = text.split_at(i + "-->".len());
 				text_left = Event::InlineHtml(l.to_owned().into());
 				text_right = Event::Text(r.to_owned().into());
 			}
+			else { break 'no_split }
 
-			if idx != 0 {
-				let left = Some((text_left, range.clone())).into_iter();
-				let right = Some((text_right, range)).into_iter();
-				return left.chain(right)
-			}
+			let left = Some((text_left, range.clone())).into_iter();
+			let right = Some((text_right, range)).into_iter();
+			return left.chain(right)
+		}
 		}
 		Some((event, range)).into_iter().chain(None)
 	}
@@ -423,7 +420,8 @@ impl Renderer<'_>
 	fn transform_event<'e>(&mut self, event: Event<'e>, range: ParserRange) -> Option<Event<'e>>
 	{
 		/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
-		if !self.ctx.is_code() && let Event::Html(ref html) | Event::InlineHtml(ref html) = event
+		if let Event::Html(ref html) | Event::InlineHtml(ref html) = event
+			&& !self.ctx.is_code()
 		{
 			match self.process_html(html, range.clone()) {
 				ProcessAction::KEEP  => return Some(event),
@@ -512,7 +510,8 @@ impl Renderer<'_>
 				return Some(event)
 			}
 
-			Event::Html(ref text) if text.contains("</table>") => {
+			Event::Html(ref text) if text.contains("</table>") =>
+			{
 				if self.ctx.try_pop_any(&Ctx::TABLE_MAYBE_REPAIR).is_err() {
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("Unpaired closing tag"),
