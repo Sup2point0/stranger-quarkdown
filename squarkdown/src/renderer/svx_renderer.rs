@@ -421,7 +421,7 @@ impl Renderer<'_>
 {
 	/// Transform a single `pulldown-cmark` event.
 	fn process_event<'e>(&mut self,
-		event: Event<'e>,
+		mut event: Event<'e>,
 		range: ParserRange,
 	) -> Option<Event<'e>>
 	{
@@ -431,45 +431,25 @@ impl Renderer<'_>
 				self.ctx.push(Ctx::CODE);
 			}
 			End(TagEnd::CodeBlock) => {
-				catch!(self.errors => {
-					self.ctx.try_pop_exact(&Ctx::CODE)?;
-				});
+				if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
+					log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
+				}
 			}
 			_ => {}
 		};
 
-		let out = match event {
-			/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
-			| Event::Html(ref html)
-			| Event::InlineHtml(ref html)
-			if !self.ctx.is_code()
-			=>
-				match self.process_html(html, range.clone()) {
-					ProcessAction::KEEP  => Some(event),
-					ProcessAction::ERASE => None,
-					ProcessAction::DEFER => self.process_ctx(event, range),
-				}
-
-			/* But for everything else, handling will depend on the current context */
-			_ => self.process_ctx(event, range),
-		};
-
-		if DEBUG {
-			println!(
-				"\n{G}»{B} {B}{:?}{W}",
-				self.ctx.prints_with_prefix("").rev().collect::<Vec<_>>()
-			);
+		/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
+		if !self.ctx.is_code() && let Event::Html(ref html) | Event::InlineHtml(ref html) = event
+		{
+			match self.process_html(html, range.clone()) {
+				ProcessAction::KEEP  => return Some(event),
+				ProcessAction::ERASE => return None,
+				ProcessAction::DEFER => {}
+			}
 		}
 
-		out
-	}
-
-	/// Transform content depending on the current context.
-	fn process_ctx<'e>(&mut self,
-		mut event: Event<'e>,
-		range: ParserRange,
-	) -> Option<Event<'e>>
-	{
+		/* But for everything else, handling will depend on the current context */
+	
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
 		if self.ctx.has_leave() {
 			// TODO add `code` here too?
@@ -485,7 +465,7 @@ impl Renderer<'_>
 			return self.config.format.preserve_comments.then_some(event)
 		}
 
-		match event
+		let out = match event
 		{
 			// rewrite link
 			Start(Tag::Link{ ref mut dest_url, .. }) =>
@@ -531,7 +511,7 @@ impl Renderer<'_>
 				self.ctx.push(Ctx::TABLE_MAYBE_REPAIR);
 				return Some(event)
 			}
-			
+
 			Event::Html(ref text) if text.contains("</table>") => {
 				if self.ctx.try_pop_any(&Ctx::TABLE_MAYBE_REPAIR).is_err() {
 					self.errors.push(SquarkError::Recoverable {
@@ -553,7 +533,16 @@ impl Renderer<'_>
 			Event::Text(text) => Some(self.process_text(text)),
 
 			_ => Some(event),
+		};
+
+		if DEBUG {
+			println!(
+				"\n{G}»{B} {B}{:?}{W}",
+				self.ctx.prints_with_prefix("").rev().collect::<Vec<_>>()
+			);
 		}
+
+		out
 	}
 
 	/// Process HTML comments to check for `<!-- #SQUARK -->`s and/or strip comments from the output.
