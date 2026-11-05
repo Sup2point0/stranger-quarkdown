@@ -45,6 +45,7 @@ I’m working on fixing these!
 - `[charm]` config category for customising the charm squark:
   - `charm.flags` to set allowed flags.
   - `charm.fields` to set allowed additional fields.
+  - Squarkdown will error if a non-whitelisted flag or field is present in a page’s charm squark.
 - `assets.base-path` option.
   - This is prepended to asset links, in case your assets are not served from root (like on `github.io` sites).
 - `format.repair-tables` option.

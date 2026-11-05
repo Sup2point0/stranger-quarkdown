@@ -4,6 +4,7 @@ use crate::utils;
 use crate::utils::colours::*;
 use crate::utils::macros::*;
 
+use itertools::Itertools;
 use tinyvec::tiny_vec;
 
 use std::collections::{ HashMap };
@@ -233,6 +234,29 @@ impl CharmParser<'_>
 				let c = self.current()?;
 
 				if c == '!' {
+					if let Some(allowed_flags) = &self.config.charm.flags
+						&& !allowed_flags.contains(&ident)
+					{
+						self.errors.push(SquarkError::Recoverable {
+							msg: fmt!("Unknown flag in charm squark",),
+							hint:
+								if allowed_flags.is_empty() {
+									fmt!("Your {Y}charm.flags{G} is {W}[]{G}, so no flags except {W}live!{G} are allowed")
+								} else {
+									fmt!(
+										"The {} you allowed in {Y}charm.flags{G} {} {W}{}",
+										if allowed_flags.len() == 1 {"only flag"} else {"flags"},
+										if allowed_flags.len() == 1 {"is"} else {"are"},
+										allowed_flags.iter().join(&fmt!("{G} · {W}"))
+									)
+								},
+							debug: [
+								self.source_printed(self.l, from, self.i),
+								self.ctx.printed(),
+							].concat(),
+						});
+					}
+
 					flags.push(ident);
 					self.advance()?;
 				}
@@ -444,6 +468,8 @@ impl CharmParser<'_>
 #[cfg(test)] use indexmap::indexset;
 #[cfg(test)] use indoc::indoc;
 #[cfg(test)] use path_macro::path;
+
+#[cfg(test)] use std::collections::{ HashSet };
 
 
 #[cfg(test)]
@@ -802,6 +828,47 @@ mod recovery {
 			"});
 			assert_eq!( page_data.flags, strings!["how"] );
 			assert_eq!( page_data.title, str!("Success") );
+		}
+
+		#[test] fn unallowed() {
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK live! bad!
+				| dest = .
+				-->
+			"};
+			let mut config = TEST_CONFIG.clone();
+			config.errors.on_error = ErrorAction::KILL;
+			config.charm.flags = Some(HashSet::new());
+			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
+			assert_contains!( &e, "Unknown flag" );
+			log::error(e);
+
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK live! good! bad!
+				| dest = .
+				-->
+			"};
+			let mut config = TEST_CONFIG.clone();
+			config.errors.on_error = ErrorAction::KILL;
+			config.charm.flags = Some(HashSet::from_iter([str!("good")]));
+			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
+			assert_contains!( &e, "Unknown flag" );
+			log::error(e);
+			
+			let source = indoc! {"
+				# Test
+				<!-- #SQUARK live! good! fine! bad!
+				| dest = .
+				-->
+			"};
+			let mut config = TEST_CONFIG.clone();
+			config.errors.on_error = ErrorAction::KILL;
+			config.charm.flags = Some(HashSet::from_iter([str!("good"), str!("fine")]));
+			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
+			assert_contains!( &e, "Unknown flag" );
+			log::error(e);
 		}
 	}
 
