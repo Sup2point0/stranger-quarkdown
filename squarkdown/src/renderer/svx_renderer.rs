@@ -472,6 +472,7 @@ impl Renderer<'_>
 	{
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
 		if self.ctx.has_leave() {
+			// TODO add `code` here too?
 			return Some(event)
 		}
 
@@ -522,6 +523,29 @@ impl Renderer<'_>
 				catch!(self.errors => {
 					self.ctx.try_pop_exact(&Ctx::IMAGE_LINK)?;
 				});
+				return Some(event)
+			}
+
+			// tables
+			Event::Html(ref text) if text.contains("<table>") => {
+				self.ctx.push(Ctx::TABLE_MAYBE_REPAIR);
+				return Some(event)
+			}
+			
+			Event::Html(ref text) if text.contains("</table>") => {
+				if self.ctx.try_pop_any(&Ctx::TABLE_MAYBE_REPAIR).is_err() {
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("Unpaired closing tag"),
+						hint: {
+							if self.ctx.contains(&Ctx::TABLE_MAYBE_REPAIR) {
+								fmt!("Did you forget to close a {} context?", self.ctx.current())
+							} else {
+								fmt!("Did you forget to open a {W}<table>{G} context?")
+							}
+						},
+						debug: [self.source_printed(range), self.ctx.printed()].concat(),
+					});
+				}
 				return Some(event)
 			}
 
@@ -1139,33 +1163,33 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-// 	= true;
+	= true;
 
-// #[test] fn playground()
-// {
-// 	let source = indoc! {"
-// 		t
+#[test] fn playground()
+{
+	let source = indoc! {"
+		t
 
-// 		<!-- #SQUARK only?
+		<table>
+			<tr>
+				<th> Test </th>
+			</tr>
+		</table>
+	"};
 
-// 		test [link](hi) *hello*
+	let mut config = TEST_CONFIG.clone();
+	config.errors.strict = true;
+	config.errors.strict = false;
+	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
+	config.format.externalise_links = true;
+	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
+	let out = renderer.render_from(source.trim()).unwrap();
+	log::error(renderer.errors);
+	println!("{C}{out}{W}");
+	log::line();
+}
 
-// 		-->
-// 	"};
-
-// 	let mut config = TEST_CONFIG.clone();
-// 	config.errors.strict = true;
-// 	config.errors.strict = false;
-// 	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
-// 	config.format.externalise_links = true;
-// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
-// 	let out = renderer.render_from(source.trim()).unwrap();
-// 	log::error(renderer.errors);
-// 	println!("{C}{out}{W}");
-// 	log::line();
-// }
-
-// const _: bool
+const _: bool
 	= false;
 
 

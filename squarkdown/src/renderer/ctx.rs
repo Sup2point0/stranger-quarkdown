@@ -26,6 +26,12 @@ pub enum RenderCtx
 	#[display("image")]
 	IMAGE_LINK,
 
+	#[display("table")]
+	TABLE_MAYBE_REPAIR,
+
+	#[display("table (repaired)")]
+	TABLE_REPAIRED,
+
 	// TODO stringify with key
 
 	/* NOTE: LEAVE has higher priority than SLASH. A SLASH should always be ignored if inside a LEAVE context. */
