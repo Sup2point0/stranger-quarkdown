@@ -58,6 +58,18 @@ use assertables::*;
 	assert_contains!( root, "[main](main)" );
 }
 
+/// Squarkdown resolves absolute links relative to the detected project root.
+#[test] fn absolute()
+{
+	clear_files("links/absolute").unwrap();
+	assert!( squarkup_from("links/absolute").success() );
+	
+	let nested = read_file("links/absolute/nested/+page.svx");
+	let side   = read_file("links/absolute/nested/side/+page.svx");
+	assert_contains!( nested, "[root](root)" );
+	assert_contains!( side, "[nested/readme.md](.)" );
+}
+
 /// Squarkdown does not resolve external links, and rewrites links with `<sup>↗</sup>` to `<a target="_blank">`.
 #[test] fn external()
 {
