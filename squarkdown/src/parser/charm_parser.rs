@@ -128,7 +128,7 @@ impl CharmParser<'_>
 				self.line()?
 					.get(self.i..)
 					.unwrap_or(&[])
-					.into_iter().collect()
+					.iter().collect()
 			);
 
 			self.advance_line()?;

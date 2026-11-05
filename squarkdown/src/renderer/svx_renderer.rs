@@ -339,14 +339,15 @@ impl Renderer<'_>
 
 			if buffer.is_empty() && let Some((event, range)) = parser.next()
 			{
-				let is_in_link = matches!(event, Start(Tag::Link{..}));
-
 				/// The next fragment of `<sup>↗</sup>` we need to consume. `None` once we've found all of them.
 				let mut next_frag = Some("<sup>");
 
+				let is_in_link = matches!(event, Start(Tag::Link{..}));
+
 				buffer.push_back((event, range));
 
-				// when we encounter a `Start(Link)`, read ahead until we see `End(Link)`
+				/* When we encounter a `Start(Link)`, read ahead until we see `End(Link)` */
+				/* NOTE: `is-in-link` is necessary because we only want to run this loop (which consumes `parser`) if we _are_ inside a link! */
 				while is_in_link
 				{
 					let Some((event, range)) = parser.next() else { break };
@@ -355,7 +356,7 @@ impl Renderer<'_>
 					{
 						End(TagEnd::Link) =>
 						{
-							// if this was not an external link, preserve the normal `End(Link)`
+							/* If this was not an external link, preserve the normal `End(Link)` */
 							if let Some(..) = next_frag {
 								buffer.push_back((event, range));
 								break;
@@ -392,10 +393,10 @@ impl Renderer<'_>
 							next_frag = None;  // done!
 						}
 						_ => {
-							// events before `End(Link)` get queued into the `buffer``
+							/* Events before `End(Link)` get queued into the `buffer` */
 							buffer.push_back((event, range));
 
-							// if we did not find the next required fragment, and we're _still looking_, then reset
+							/* If we did not find the next required fragment, and we're _still looking_, then reset */
 							if let Some(..) = next_frag {
 								next_frag = Some("<sup>");
 							}

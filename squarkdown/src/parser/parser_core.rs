@@ -13,7 +13,7 @@ impl CharmParser<'_>
 	pub(super) fn line(&self) -> SquarkResult<&[char]>
 	{
 		Ok(
-			&self.source_lines.get(self.l)
+			self.source_lines.get(self.l)
 				.ok_or_else(|| self.err_eof())?
 		)
 	}
@@ -60,7 +60,7 @@ impl CharmParser<'_>
 	pub(super) fn peek_line(&self) -> Option<&[char]>
 	{
 		Some(
-			&self.source_lines.get(self.l + 1)?
+			self.source_lines.get(self.l + 1)?
 		)
 	}
 
