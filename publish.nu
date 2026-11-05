@@ -13,11 +13,12 @@ def main [] {
 
 ## Run all tests before publish
 def test-all [] {
-	cd squarkdown/tests/test-project
-	npm test
-	cd ../..
+	cd squarkdown
 	cargo run -- clean
 	cargo run
+	
+	cd tests/test-project
+	npm test
 }
 
 ## Publish to crates.io

@@ -33,7 +33,7 @@ I’m working on fixing these!
 <br>
 
 
-## Next Major (v4.8)
+## v4.8
 
 ### Breaking
 - `format.externalise-links` now defaults to `true` instead of `false`.

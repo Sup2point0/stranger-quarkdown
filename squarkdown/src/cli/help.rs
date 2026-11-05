@@ -17,7 +17,7 @@ pub fn help() -> ExitCode
 
 {F}   › {C}squarkdown
 {F}   › {C}squarkdown {Y}--assets --fonts
-{F}   › {C}squarkdown {Y}--quiet
+{F}   › {C}squarkdown {Y}--quiet --no-warn
 {F}   › {C}squarkdown {Y}--dry-run
 
 {W} Delete Squarkdown’s output for a fresh run:
