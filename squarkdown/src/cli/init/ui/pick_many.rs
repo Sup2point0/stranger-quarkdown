@@ -9,6 +9,7 @@ use crossterm::{
 	terminal::{ Clear, ClearType },
 	execute,
 };
+use itertools::Itertools;
 
 use std::fmt::Display;
 use std::io;
@@ -415,17 +416,13 @@ pub(crate) fn _pick_many_or_skip_<T>(
 		.filter(|c| c.enabled)
 		.collect();
 
-	let mut labels =
-		choices.iter()
-		.map(|c| c.label.to_string())
-		.collect::<Vec<_>>()
-		.join(" · ")
-	;
+	let mut labels = choices.iter().map(|c| &c.label).join(" · ");
+
 	if labels.is_empty() {
 		labels = str!("none");
 	}
-	out!("{F}{labels}");
 
+	out!("{F}{labels}");
 	execute!(stdout, cursor::Show)?;
 
 	Ok(Some(

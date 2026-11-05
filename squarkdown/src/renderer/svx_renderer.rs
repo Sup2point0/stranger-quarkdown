@@ -7,6 +7,7 @@ use crate::utils::colours::*;
 use crate::utils::macros::*;
 
 use aho_corasick::AhoCorasick;
+use itertools::Itertools;
 use map_or_original::MapOrOriginal;
 use path_clean::PathClean;
 use path_macro::path;
@@ -537,7 +538,7 @@ impl Renderer<'_>
 		if DEBUG {
 			println!(
 				"\n{G}»{B} {B}{:?}{W}",
-				self.ctx.prints_with_prefix("").rev().collect::<Vec<_>>()
+				self.ctx.prints_with_prefix("").rev().collect_vec()
 			);
 		}
 
