@@ -180,7 +180,7 @@ impl CharmParser<'_>
 			.map_err(|_| 
 				match self.try_eat_caseless("dead!") {
 					Ok(..) => SquarkError::ABANDON,
-					Err(..) => SquarkError::Unrecoverable {
+					Err(..) => SquarkError::Recoverable {
 						msg: fmt!("Expected either {W}live!{R} or {W}dead!{R} to start charm squark"),
 						hint: fmt!(
 							"Use {W}<!-- #SQUARK {BOLD}live!{UNBOLD}{G} for an active file, \

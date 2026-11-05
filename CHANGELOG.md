@@ -36,18 +36,21 @@ I’m working on fixing these!
 ## Next Major (v4.8)
 
 ### New
+- `[charm]` config category for customising the charm squark:
+  - `charm.flags` to set allowed flags.
+  - `charm.fields` to set allowed additional fields.
 - `assets.base-path` option.
   - This is prepended to asset links, in case your assets are not served from root (like on `github.io` sites).
 - Rewrite absolute links!
   - These are resolved against your project root.
   - Note that if your squarkup config is not in your project root, this means you may run into issues.
-- `squarkdown clean --assets` to delete copied asset files.
 - `squarkdown --suppress` to hide warnings.
 - Repair HTML `<table>` missing a `<tbody>` element when rendering.
 
 ### Fixes
-- Deduplicate tags in charm squark.
+- Deduplicate tags in charm squark. (Order is still preserved)
 - Deduplicate pages in `tags` arrays in `site.json`.
+- Fix a parser error that should be recoverable rather than irrecoverable.
 
 
 <br>
