@@ -9,7 +9,7 @@
 //! To prevent interleaved console output, logging errors is made atomic via [`LOG_LOCK`].
 
 use crate::prelude::*;
-use crate::cli::QUIET;
+use crate::cli::{ NO_INFO, NO_WARN };
 use crate::utils::colours::*;
 
 use std::borrow::{ Borrow };
@@ -59,44 +59,44 @@ pub fn version()
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! info {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_info($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::info!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::info!(1 => $($args)*) };
 } pub use info;
 
 /// Log an action that Squarkdown is about to perform, to set up expectations.
 #[macro_export] macro_rules! is {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_is($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::is!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::is!(1 => $($args)*) };
 } pub use is;
 
 /// Log a checkpoint that has successfully been reached.
 #[macro_export] macro_rules! ok {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_ok($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::ok!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::ok!(1 => $($args)*) };
 } pub use ok;
 
 /// Log an error or failure.
 #[macro_export] macro_rules! bad {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_bad($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::bad!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::bad!(1 => $($args)*) };
 } pub use bad;
 
 /* NOTE: Would like to use `warn!` but this clashes with prelude */
 /// Log a non-critical issue the user should be aware of.
 #[macro_export] macro_rules! warns {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_warn($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::warns!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::warns!(1 => $($args)*) };
 } pub use warns;
 
 /// Log a generic informative message with no special colouring, which can be quickly skimmed past.
 #[macro_export] macro_rules! debug {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_debug($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::debug!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::debug!(1 => $($args)*) };
 } pub use debug;
 
 /// Log a hint to the user that may help them fix an error.
 #[macro_export] macro_rules! hint {
 	($indent:expr => $($args:tt)*) => { $crate::utils::log::log_hint($indent, $crate::fmt!($($args)*)) };
-	($($args:tt)*) => { $crate::hint!(0 => $($args)*) };
+	($($args:tt)*) => { $crate::hint!(1 => $($args)*) };
 } pub use hint;
 
 
@@ -111,18 +111,18 @@ macro_rules! impl_log {
 	}
 }
 
-impl_log! { log_is    => " {:indent$}{F}› {W}{}" }
-impl_log! { log_ok    => " {:indent$}{C}✓ {}" }
-impl_log! { log_bad   => " {:indent$}{R}× {}" }
-impl_log! { log_warn  => " {:indent$}{Y}▲ {}" }
-impl_log! { log_debug => " {:indent$}{F}│ {}" }
-impl_log! { log_hint  => " {:indent$}{G}= hint: {}" }
+impl_log! { log_is    => "{:indent$}{F}› {W}{}" }
+impl_log! { log_ok    => "{:indent$}{C}✓ {}" }
+impl_log! { log_bad   => "{:indent$}{R}× {}" }
+impl_log! { log_warn  => "{:indent$}{Y}▲ {}" }
+impl_log! { log_debug => "{:indent$}{F}│ {}" }
+impl_log! { log_hint  => "{:indent$}{G}= hint: {}" }
 
 pub fn log_info(indent: usize, msg: impl Display)
 {
-	if !QUIET.get().is_some() {
+	if NO_INFO.get().is_none() {
 		let _lock = LOG_LOCK.try_lock().ok();
-		println!("{:indent$} {F}› {msg}", "", indent = indent);
+		println!("{:indent$}{F}› {msg}", "", indent = indent);
 	}
 }
 
@@ -140,7 +140,7 @@ pub fn error(err: impl Borrow<SquarkError>)
 		.expect("global log lock was poisoned!!");
 
 	line();
-	print_error(err.borrow(), 0, false);
+	print_error(err.borrow(), 1, false);
 	line();
 }
 
@@ -148,11 +148,14 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 {
 	match err
 	{
-		  SquarkError::Warning{ msg, hint, debug }
-		| SquarkError::Recoverable{ msg, hint, debug }
+		  SquarkError::Recoverable{ msg, hint, debug }
 		| SquarkError::Unrecoverable{ msg, hint, debug }
+		| SquarkError::Warning{ msg, hint, debug }
 		=> {
 			if let SquarkError::Warning{..} = err {
+				if NO_WARN.get().is_some() {
+					return
+				}
 				warns!(indent => msg);
 			} else {
 				bad!(indent => msg);
