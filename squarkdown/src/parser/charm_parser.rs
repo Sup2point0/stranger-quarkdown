@@ -875,27 +875,21 @@ mod errors {
 	}
 
 	#[test] fn missing_live_or_dead() {
-		test_expected(&[
-			(
-				indoc! {"
-					# Heading
-					<!-- #SQUARK
-				"},
-				"to start charm squark"
-			),
-			(
-				indoc! {"
-					# Heading
-					<!-- #SQUARK
+		test_exact_for(|c| c.errors.on_error = ErrorAction::KILL, &[
+			indoc! {"
+				# Heading
+				<!-- #SQUARK
+			"},
+			indoc! {"
+				# Heading
+				<!-- #SQUARK
 
-				"},
-				"to start charm squark"
-			),
+			"},
 		],
-		|parser, msg| {
+		|parser, _| {
 			let e = parser.parse().unwrap_err();
 			log::error(&e);
-			assert_contains!( &e, msg );
+			assert_contains!( &e, "to start charm squark" );
 		});
 	}
 }
