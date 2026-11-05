@@ -194,23 +194,18 @@ impl<'d> Renderer<'d>
 
 		let externalise_links = self.config.format.externalise_links;
 
-		let parser =
-			pd::TextMergeWithOffset::new(parser)
+		let parser = pd::TextMergeWithOffset::new(parser)
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{F} {e:?}"); })
 			.flat_map(Self::split_comments)
 		;
-
 		let parser = Self::externalise_links(parser, externalise_links);
-
 		let parser = parser
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{W} {e:?}"); })
 			.flat_map(|(e, range)| self.transform_event(e, range))
 		;
 
 		let mut out = str!();
-
 		cmark::cmark_with_options(parser, &mut out, RENDER_OPTIONS.clone())?;
-
 		Ok(out)
 	}
 }
@@ -472,14 +467,11 @@ impl Renderer<'_>
 				self.ctx.push(Ctx::LINK);
 				return self.process_link(dest_url, range).or(Some(event))
 			}
-
-			// pop link context
 			End(TagEnd::Link)
 				if self.ctx.try_pop_exact(&Ctx::LINK_REWRITE).is_ok() =>
 			{
 				return Some(Event::InlineHtml("</a>".into()))
 			}
-
 			End(TagEnd::Link) =>
 			{
 				catch!(self.errors => {
@@ -495,8 +487,6 @@ impl Renderer<'_>
 				self.process_image(dest_url, range);
 				return Some(event)
 			}
-			
-			// pop asset context
 			End(TagEnd::Image) =>
 			{
 				catch!(self.errors => {
@@ -505,19 +495,28 @@ impl Renderer<'_>
 				return Some(event)
 			}
 
-			// tables
+			// repair table
 			Event::Html(ref text) if text.contains("<table>") => {
-				self.ctx.push(Ctx::TABLE_MAYBE_REPAIR);
+				self.ctx.push(Ctx::TABLE);
 				return Some(event)
 			}
-
+			Event::Html(ref text) if text.contains("<tr>")
+				&& self.ctx.try_pop_exact(&Ctx::TABLE).is_ok() =>
+			{
+				self.ctx.push(Ctx::TABLE_REPAIR);
+				return Some(Event::Html(fmt!("<tbody> {text}").into()))
+			}
 			Event::Html(ref text) if text.contains("</table>") =>
 			{
-				if self.ctx.try_pop_any(&Ctx::TABLE_MAYBE_REPAIR).is_err() {
+				if self.ctx.try_pop_exact(&Ctx::TABLE_REPAIR).is_ok() {
+					return Some(Event::Html(pd::CowStr::Borrowed("</tbody></table>")))
+				}
+
+				if self.ctx.try_pop_exact(&Ctx::TABLE).is_err() {
 					self.errors.push(SquarkError::Recoverable {
-						msg: fmt!("Unpaired closing tag"),
+						msg: fmt!("Unpaired closing tag: {W}{BOLD}{text}{UNBOLD}"),
 						hint: {
-							if self.ctx.contains(&Ctx::TABLE_MAYBE_REPAIR) {
+							if self.ctx.contains(&Ctx::TABLE) {
 								fmt!("Did you forget to close a {} context?", self.ctx.current())
 							} else {
 								fmt!("Did you forget to open a {W}<table>{G} context?")
@@ -1149,33 +1148,33 @@ impl From<bool> for ProcessAction {
 
 
 const DEBUG: bool
-	= true;
+// 	= true;
 
-#[test] fn playground()
-{
-	let source = indoc! {"
-		t
+// #[test] fn playground()
+// {
+// 	let source = indoc! {"
+// 		t
 
-		<table>
-			<tr>
-				<th> Test </th>
-			</tr>
-		</table>
-	"};
+// 		<table>
+// 			<tr>
+// 				<th> Test </th>
+// 			</tr>
+// 		</table>
+// 	"};
 
-	let mut config = TEST_CONFIG.clone();
-	config.errors.strict = true;
-	config.errors.strict = false;
-	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
-	config.format.externalise_links = true;
-	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
-	let out = renderer.render_from(source.trim()).unwrap();
-	log::error(renderer.errors);
-	println!("{C}{out}{W}");
-	log::line();
-}
+// 	let mut config = TEST_CONFIG.clone();
+// 	config.errors.strict = true;
+// 	config.errors.strict = false;
+// 	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
+// 	config.format.externalise_links = true;
+// 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
+// 	let out = renderer.render_from(source.trim()).unwrap();
+// 	log::error(renderer.errors);
+// 	println!("{C}{out}{W}");
+// 	log::line();
+// }
 
-const _: bool
+// const _: bool
 	= false;
 
 
@@ -1677,6 +1676,37 @@ mod tables {
 				|-|-|
 				|1|2|
 			"},
+		]);
+	}
+
+	#[test] fn repair() {
+		test_expected(&[
+			(
+				indoc! {"
+					.
+
+					<table>
+						<tr>
+							<th> Test </th>
+						</tr>
+						<tr>
+							<td> Testing </td>
+						</tr>
+					</table>
+				"},
+				indoc! {"
+					.
+
+					<table>
+					<tbody> 	<tr>
+							<th> Test </th>
+						</tr>
+						<tr>
+							<td> Testing </td>
+						</tr>
+					</tbody></table>
+				"}
+			),
 		]);
 	}
 }

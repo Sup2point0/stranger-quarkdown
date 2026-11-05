@@ -27,10 +27,10 @@ pub enum RenderCtx
 	IMAGE_LINK,
 
 	#[display("table")]
-	TABLE_MAYBE_REPAIR,
+	TABLE,
 
-	#[display("table (repaired)")]
-	TABLE_REPAIRED,
+	#[display("table (repairing)")]
+	TABLE_REPAIR,
 
 	// TODO stringify with key
 
