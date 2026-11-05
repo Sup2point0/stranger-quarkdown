@@ -84,14 +84,14 @@ pub struct CharmConfig {
 	/// If empty, no additional flags are allowed.
 	/// 
 	/// `None` if not provided, in which case any flags are allowed.
-	pub flags: Option<Vec<String>>,
+	pub flags: Option<HashSet<String>>,
 
 	/// What fields should be allowed in the latter half of charm squarks?
 	/// 
 	/// If empty, no additional fields are allowed.
 	/// 
 	/// `None` if not provided, in which case any fields are allowed.
-	pub fields: Option<Vec<String>>,
+	pub fields: Option<HashSet<String>>,
 }
 
 #[derive(Clone, Debug)]

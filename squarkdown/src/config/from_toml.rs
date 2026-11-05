@@ -8,6 +8,7 @@ use path_clean::PathClean;
 use path_macro::path;
 use regex::{ Regex };
 
+use std::collections::{ HashSet };
 use std::path::{ Path, PathBuf };
 
 
@@ -188,8 +189,8 @@ impl SquarkupConfig
 					}
 				}
 				else if !raw.contains('/') {
-					errs.push(SquarkError::Recoverable {
-						msg: fmt!("Warning: your {Y}project.github{R} does not contain a {W}/"),
+					errs.push(SquarkError::Warning {
+						msg: fmt!("Your {Y}project.github{R} does not contain a {W}/"),
 						hint: fmt!("Use the format {W}user/project"),
 						debug: vec![
 							fmt!("you provided {FF}{raw}"),
@@ -213,19 +214,18 @@ impl SquarkupConfig
 					c.paths.sources.clear();
 				}
 
-				for value in values {
+				for value in values { catch!(errs => {
 					let raw = Self::try_get_str(value, "paths.sources", "(entry in an array)")?;
 
 					if raw == ".."
 					|| raw.contains("../")
 					|| raw.contains("/..")
 					{
-						errs.push(SquarkError::Recoverable {
+						recoverable! {
 							msg: fmt!("Illegal source directory: {W}{BOLD}{raw}{UNBOLD}"),
 							hint: fmt!("{Y}paths.sources{G} entries cannot contain {W}..{G} traversal"),
 							debug: vec![],
-						});
-						continue;
+						}
 					}
 
 					let dir = Self::try_resolve_folder(
@@ -233,7 +233,7 @@ impl SquarkupConfig
 						hints!("{Y}paths.sources{G} folders are relative from your project root"),
 					)?;
 					c.paths.sources.push(dir);
-				}
+				}) }
 			}) }
 
 			if let Some(value) = paths.remove("include") { catch!(errs => {
@@ -275,6 +275,49 @@ impl SquarkupConfig
 			}) }
 			
 			Self::check_leftover_unknowns(paths, &mut errs, false);
+		}
+
+		// == CharmConfig == //
+		if let Some(mut charm) = Self::try_take_table_if_present(&mut data, "charm",
+			hints!("write your config like this: {W}```\n\t[charm]\n\tflags = ['dev', 'feat']\n```")
+		)?
+		{
+			if let Some(value) = charm.remove("flags") { catch!(errs => {
+				let mut flags = HashSet::new();
+				let values = Self::try_get_array(&value, "assets.flags", "(of flag identifiers)")?;
+
+				for value in values { catch!(errs => {
+					let raw = Self::try_get_str(value, "assets.flags", "(flag identifier)")?
+						.trim_end_matches('!');
+
+					flags.insert(raw.to_owned());
+				}) }
+
+				c.charm.flags = Some(flags);
+			}) }
+			
+			if let Some(value) = charm.remove("fields") { catch!(errs => {
+				let mut fields = HashSet::new();
+				let values = Self::try_get_array(&value, "assets.fields", "(of field identifiers)")?;
+
+				for value in values { catch!(errs => {
+					let raw = Self::try_get_str(value, "assets.fields", "(field identifier)")?;
+
+					if raw.contains('=') {
+						recoverable! {
+							msg: fmt!("Illegal field identifier: {W}{BOLD}{raw}{UNBOLD}"),
+							hint: fmt!("Identifiers cannot contain {W}={G}, since this confuses the parser!"),
+							debug: vec![],
+						}
+					}
+					
+					fields.insert(raw.to_owned());
+				}) }
+
+				c.charm.fields = Some(fields);
+			}) }
+
+			Self::check_leftover_unknowns(charm, &mut errs, false);
 		}
 
 		// == OutConfig == //
@@ -597,6 +640,10 @@ mod full {
 			site = "test-project"
 			sources = ["/"]
 
+			[charm]
+			flags = ["dev", "feat"]
+			fields = ["prev", "next"]
+
 			[out]
 			folder = "src/routes/"
 			file-name = "file-name"
@@ -625,6 +672,8 @@ mod full {
 		assert_eq!( c.errors.link_inactive, LinkRewriteAction::LINK_TO_GITHUB );
 		assert_eq!( c.paths.site, *TEST_PROJECT);
 		assert_eq!( c.paths.sources, vec![TESTS.clone()] );
+		assert_eq!( c.charm.flags, Some(HashSet::from_iter([str!("dev"), str!("feat")])) );
+		assert_eq!( c.charm.fields, Some(HashSet::from_iter([str!("prev"), str!("next")])) );
 		assert_eq!( c.out.folder, path!(*TEST_PROJECT / "src" / "routes") );
 		assert_eq!( c.out.file_name, str!("file-name") );
 		assert_eq!( c.out.site_data_path, Some(path!(*TEST_PROJECT / "site-data-path")) );
@@ -733,6 +782,31 @@ mod paths {
 			assert_err!( &e );
 			assert_contains!( e.unwrap_err(), ".." );
 		}
+	}
+}
+
+#[cfg(test)]
+mod charm {
+	use super::*;
+
+	#[test] fn accept() {
+		let c = load_config(indoc! {"
+			[charm]
+			flags = ['dev', 'feat']
+			fields = ['series']
+		"}).unwrap().charm;
+		assert_eq!( c.flags, Some(HashSet::from_iter([str!("dev"), str!("feat")])) );
+		assert_eq!( c.fields, Some(HashSet::from_iter([str!("series")])) );
+	}
+
+	#[test] fn accept_empty() {
+		let c = load_config(indoc! {"
+			[charm]
+			flags = []
+			fields = []
+		"}).unwrap().charm;
+		assert_eq!( c.flags, Some(HashSet::new()) );
+		assert_eq!( c.fields, Some(HashSet::new()) );
 	}
 }
 
