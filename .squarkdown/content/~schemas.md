@@ -17,7 +17,7 @@ Stranger Quarkdown provides a [JSON Schema<sup>↗</sup>](https://json-schema.or
 To use it, link a schema to your config:
 
 ```toml
-#:schema https://sup2point0.github.io/stranger-quarkdown/schemas/latest.json
+#:schema https://sup2point0.github.io/stranger-quarkdown/schemas/latest
 
 [project]
 name = "Schemafied!"
