@@ -236,7 +236,7 @@ Keep `<!-- comments -->` in the rendered output?
 Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 
 ### `repair-tables`
-> See also: [Repairing HTML](repair.md)
+> See also: [Repairing HTML](../features/repair.md)
 
 Repair `<table>`s that are missing `<tbody>`?
 

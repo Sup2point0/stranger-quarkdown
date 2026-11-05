@@ -83,12 +83,13 @@ const delay = 240;
     <NavLink text="Site Data" intern="docs/reference/site-data" />
   </NavSection>
 
-  <!-- <NavSection title="Features" intern="features">
-    <NavLink text="Link Rewriting" intern="features/link-rewriting" />
+  <NavSection title="Features" intern="features">
+    <NavLink text="HTML Repairing" intern="features/repair" />
+    <!-- <NavLink text="Link Rewriting" intern="features/link-rewriting" />
     <NavLink text="Markdown Sanitisation" intern="features/cleanse" />
     <NavLink text="Assets" intern="features/assets" />
-    <NavLink text="Fonts" intern="features/fonts" />
-  </NavSection> -->
+    <NavLink text="Fonts" intern="features/fonts" /> -->
+  </NavSection>
 
   <NavSection title="Schemas" intern="schemas" open={false}>
     <NavLink text="v{Schema['squarkdown-version']} (latest)" intern="schemas/latest.json" />
