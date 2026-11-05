@@ -12,6 +12,7 @@ pub fn trim_end(mut string: String) -> String
 /// Try to slice `string` from the *end* so that it has at most `max_chars` Unicode characters (not graphemes).
 /// 
 /// Returns `None` if no truncation needs to happen.
+#[must_use]
 pub fn truncated_end(string: &str, max_chars: usize) -> Option<&str>
 {
 	let (end, _) = string.char_indices().nth(max_chars)?;
@@ -21,6 +22,7 @@ pub fn truncated_end(string: &str, max_chars: usize) -> Option<&str>
 /// Try to slice `string` from the *start* so that it has at most `max_chars` Unicode characters (not graphemes).
 /// 
 /// Returns `None` if no truncation needs to happen.
+#[must_use]
 pub fn truncated_start(string: &str, max_chars: usize) -> Option<&str>
 {
 	let (start, _) = string.char_indices().rev().nth(zero!(max_chars - 1))?;

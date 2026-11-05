@@ -347,7 +347,7 @@ impl Renderer<'_>
 				buffer.push_back((event, range));
 
 				/* When we encounter a `Start(Link)`, read ahead until we see `End(Link)` */
-				/* NOTE: `is-in-link` is necessary because we only want to run this loop (which consumes `parser`) if we _are_ inside a link! */
+				/* NOTE: We never overwrite `is-in-link`, but we need it because we only want to run this loop (which consumes `parser`) if we _are_ inside a link! */
 				while is_in_link
 				{
 					let Some((event, range)) = parser.next() else { break };
@@ -357,7 +357,7 @@ impl Renderer<'_>
 						End(TagEnd::Link) =>
 						{
 							/* If this was not an external link, preserve the normal `End(Link)` */
-							if let Some(..) = next_frag {
+							if next_frag.is_some() {
 								buffer.push_back((event, range));
 								break;
 							}
@@ -397,7 +397,7 @@ impl Renderer<'_>
 							buffer.push_back((event, range));
 
 							/* If we did not find the next required fragment, and we're _still looking_, then reset */
-							if let Some(..) = next_frag {
+							if next_frag.is_some() {
 								next_frag = Some("<sup>");
 							}
 						}
@@ -735,35 +735,34 @@ impl Renderer<'_>
 			*dest_url = href.into();
 			return None
 		}
-		// 3. handle broken or inactive link
-		else {
-			let mut link_rewritten =
-				their_file_path[..]
-				.map_or_orig(|f| f.strip_suffix(".md"))
-				.to_owned()
-			;
-			if let Some(a) = anchor {
-				link_rewritten += "#";
-				link_rewritten += a;
-			}
 
-			if !their_source_path.exists() {
-				self.process_broken_link(
-					self.config.errors.link_broken,
-					dest_url, range, link_rewritten,
-					fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
-					str!(),
-					slash!("resolved to: {}", their_source_path)
-				)
-			} else {
-				self.process_broken_link(
-					self.config.errors.link_inactive,
-					dest_url, range, link_rewritten,
-					str!("link to an inactive page"),
-					fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
-					fmt!("resolved to: {shard}")
-				)
-			}
+		// 3. handle broken or inactive link
+		let mut link_rewritten =
+			their_file_path[..]
+			.map_or_orig(|f| f.strip_suffix(".md"))
+			.to_owned()
+		;
+		if let Some(a) = anchor {
+			link_rewritten += "#";
+			link_rewritten += a;
+		}
+
+		if !their_source_path.exists() {
+			self.process_broken_link(
+				self.config.errors.link_broken,
+				dest_url, range, link_rewritten,
+				fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
+				str!(),
+				slash!("resolved to: {}", their_source_path)
+			)
+		} else {
+			self.process_broken_link(
+				self.config.errors.link_inactive,
+				dest_url, range, link_rewritten,
+				str!("link to an inactive page"),
+				fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
+				fmt!("resolved to: {shard}")
+			)
 		}
 	}
 
@@ -793,7 +792,7 @@ impl Renderer<'_>
 
 				if self.ctx.try_pop_any(&Ctx::LINK).is_err() {
 					log::warns!("internal bug: expected an existing link context to be pushed before popping in inactive link handler");
-				};
+				}
 				self.ctx.push(Ctx::LINK_REWRITE);
 				
 				let href = "<a class=\"dead-link\" href=\"?\">";
