@@ -8,7 +8,6 @@ use path_clean::PathClean;
 use path_macro::path;
 use regex::{ Regex };
 
-use std::collections::{ HashSet };
 use std::path::{ Path, PathBuf };
 
 
@@ -283,7 +282,7 @@ impl SquarkupConfig
 		)?
 		{
 			if let Some(value) = charm.remove("flags") { catch!(errs => {
-				let mut flags = HashSet::new();
+				let mut flags = set!{};
 				let values = Self::try_get_array(&value, "assets.flags", "(of flag identifiers)")?;
 
 				for value in values { catch!(errs => {
@@ -297,7 +296,7 @@ impl SquarkupConfig
 			}) }
 			
 			if let Some(value) = charm.remove("fields") { catch!(errs => {
-				let mut fields = HashSet::new();
+				let mut fields = set!{};
 				let values = Self::try_get_array(&value, "assets.fields", "(of field identifiers)")?;
 
 				for value in values { catch!(errs => {
@@ -675,8 +674,8 @@ mod full {
 		assert_eq!( c.errors.link_inactive, LinkRewriteAction::LINK_TO_GITHUB );
 		assert_eq!( c.paths.site, *TEST_PROJECT);
 		assert_eq!( c.paths.sources, vec![TESTS.clone()] );
-		assert_eq!( c.charm.flags, Some(HashSet::from_iter([str!("dev"), str!("feat")])) );
-		assert_eq!( c.charm.fields, Some(HashSet::from_iter([str!("prev"), str!("next")])) );
+		assert_eq!( c.charm.flags, Some(set!{str!("dev"), str!("feat")}) );
+		assert_eq!( c.charm.fields, Some(set!{str!("prev"), str!("next")}) );
 		assert_eq!( c.out.folder, path!(*TEST_PROJECT / "src" / "routes") );
 		assert_eq!( c.out.file_name, str!("file-name") );
 		assert_eq!( c.out.site_data_path, Some(path!(*TEST_PROJECT / "site-data-path")) );
@@ -798,8 +797,8 @@ mod charm {
 			flags = ['dev', 'feat']
 			fields = ['series']
 		"}).unwrap().charm;
-		assert_eq!( c.flags, Some(HashSet::from_iter([str!("dev"), str!("feat")])) );
-		assert_eq!( c.fields, Some(HashSet::from_iter([str!("series")])) );
+		assert_eq!( c.flags, Some(set!{str!("dev"), str!("feat")}) );
+		assert_eq!( c.fields, Some(set!{str!("series")}) );
 	}
 
 	#[test] fn accept_empty() {
@@ -808,8 +807,8 @@ mod charm {
 			flags = []
 			fields = []
 		"}).unwrap().charm;
-		assert_eq!( c.flags, Some(HashSet::new()) );
-		assert_eq!( c.fields, Some(HashSet::new()) );
+		assert_eq!( c.flags, Some(set!{}) );
+		assert_eq!( c.fields, Some(set!{}) );
 	}
 }
 

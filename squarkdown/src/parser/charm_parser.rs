@@ -499,8 +499,6 @@ impl CharmParser<'_>
 #[cfg(test)] use indoc::indoc;
 #[cfg(test)] use path_macro::path;
 
-#[cfg(test)] use std::collections::{ HashSet };
-
 
 #[cfg(test)]
 fn parse(source: &str) -> PageData
@@ -869,7 +867,7 @@ mod recovery {
 			
 			test_exact_for(|c| {
 				c.errors.on_error = ErrorAction::KILL;
-				c.charm.flags = Some(HashSet::new());
+				c.charm.flags = Some(set!{});
 			}, &[
 				indoc! {"
 					# Test

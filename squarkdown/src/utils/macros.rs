@@ -62,11 +62,9 @@ macro_rules! pair {
 #[cfg(test)]
 pub(crate) use pair;
 
-#[cfg(test)]
 macro_rules! set {
 	($($args:tt)*) => { std::collections::HashSet::from_iter([$($args)*]) }
 }
-#[cfg(test)]
 pub(crate) use set;
 
 macro_rules! strings {
