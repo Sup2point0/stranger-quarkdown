@@ -17,7 +17,7 @@ Currently, this includes:
 
 ## Repairing Tables
 
-*Opt in by setting [`format.repair-tables = true`](squarkup-config.md#repair-tables)*.
+*Opt in by setting [`format.repair-tables = true`](../reference/squarkup-config.md#repair-tables)*.
 
 This is a common shorthand when handwriting HTML tables:
 
