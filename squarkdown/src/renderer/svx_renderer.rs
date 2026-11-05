@@ -501,12 +501,14 @@ impl Renderer<'_>
 				return Some(event)
 			}
 			Event::Html(ref text) if text.contains("<tr>")
+				&& self.config.format.repair_tables
 				&& self.ctx.try_pop_exact(&Ctx::TABLE).is_ok() =>
 			{
 				self.ctx.push(Ctx::TABLE_REPAIR);
 				return Some(Event::Html(fmt!("<tbody> {text}").into()))
 			}
-			Event::Html(ref text) if text.contains("</table>") =>
+			Event::Html(ref text) if text.contains("</table>")
+				&& self.config.format.repair_tables =>
 			{
 				if self.ctx.try_pop_exact(&Ctx::TABLE_REPAIR).is_ok() {
 					return Some(Event::Html(pd::CowStr::Borrowed("</tbody></table>")))
