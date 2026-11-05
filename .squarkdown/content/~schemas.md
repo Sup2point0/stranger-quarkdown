@@ -6,7 +6,7 @@
 
 <div class="quicklinks" align="center">
 
-[Latest](https://sup2point0.github.io/stranger-quarkdown/schemas/latest.json)
+[Latest](https://sup2point0.github.io/stranger-quarkdown/schemas/latest)
 
 </div>
 
@@ -30,15 +30,16 @@ This will enable error-checking, autocomplete, and helpful hover tooltips in IDE
 ## Versions
 
 <!-- #SQUARK leave? -->
-The [latest](schemas/latest.json) version of the schema is always up-to-date with the latest version of Squarkdown.
+The [latest](schemas/latest) version of the schema is always up-to-date with the newest version of Squarkdown.
 <!-- #SQUARK leave. -->
 
 If you’d like to pin your schema to your particular version, you can access past versions of the schema below. The schema’s version is synced with Squarkdown, so e.g. `v4.4` of the schema is compatible with Squarkdown `v4.4`.
 
 ### Supported
 <!-- #SQUARK leave? -->
-- [v4.7](schemas/v4.7.json) (latest)
-- [v4.4](schemas/v4.4.json)
+- [v4.8](schemas/v4.8) (latest)
+- [v4.7](schemas/v4.7)
+- [v4.4](schemas/v4.4)
 <!-- #SQUARK leave. -->
 
 ### Archived

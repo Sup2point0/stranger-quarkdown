@@ -8,5 +8,7 @@ def main [] {
 	print $"received version: ($ver)"
 
 	cp schema.json $"../../../site/static/schemas/v($ver).json"
+	cp schema.json $"../../../site/static/schemas/v($ver)"
 	cp schema.json $"../../../site/static/schemas/latest.json"
+	cp schema.json $"../../../site/static/schemas/latest"
 }

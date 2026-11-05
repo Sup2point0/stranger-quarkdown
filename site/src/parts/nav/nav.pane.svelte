@@ -92,6 +92,7 @@ const delay = 240;
 
   <NavSection title="Schemas" intern="schemas" open={false}>
     <NavLink text="v{Schema['squarkdown-version']} (latest)" intern="schemas/latest.json" />
+    <NavLink text="v4.7" intern="schemas/v4.7.json" />
     <NavLink text="v4.4" intern="schemas/v4.4.json" />
   </NavSection>
 
