@@ -395,6 +395,9 @@ impl SquarkupConfig
 			if let Some(value) = format.remove("externalise-links") { catch!(errs => {
 				s.externalise_links = Self::try_get_bool(&value, "format.externalise-links")?;
 			}) }
+			if let Some(value) = format.remove("repair-tables") { catch!(errs => {
+				s.repair_tables = Self::try_get_bool(&value, "format.repair-tables")?;
+			}) }
 			
 			Self::check_leftover_unknowns(format, &mut errs, false);
 		}

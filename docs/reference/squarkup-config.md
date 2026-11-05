@@ -219,6 +219,7 @@ For instance, `description` is shortened to `desc`, and `last_update` is shorten
 | [`preserve-heading`](#preserve-heading)   | boolean | `false` |
 | [`preserve-comments`](#preserve-comments) | boolean | `false` |
 | [`externalise-links`](#externalise-links) | boolean | `true` |
+| [`repair-tables`](#repair-tables)         | boolean | `true` |
 
 ### `inject-head`
 Inject a `<head>` element containing `<title>` and `<meta name="description">`?
@@ -233,6 +234,13 @@ Keep `<!-- comments -->` in the rendered output?
 
 ### `externalise-links`
 Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
+
+### `repair-tables`
+> See also: [Repairing HTML](repair.md)
+
+Repair `<table>`s that are missing `<tbody>`?
+
+*New in v4.8*.
 
 
 <br>

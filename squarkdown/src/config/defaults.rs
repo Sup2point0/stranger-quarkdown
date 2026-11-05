@@ -58,7 +58,8 @@ impl SquarkupConfig
 				inject_head: true,
 				preserve_heading: false,
 				preserve_comments: false,
-				externalise_links: false,
+				externalise_links: true,
+				repair_tables: true,
 			},
 			assets: AssetsConfig {
 				base_path: str!(),
