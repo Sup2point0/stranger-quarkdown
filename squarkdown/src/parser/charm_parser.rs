@@ -361,7 +361,7 @@ impl CharmParser<'_>
 								)
 							},
 						debug: [
-							self.source_printed(self.l, 0, self.i),
+							self.source_printed(self.l - 1, 0, usize::MAX),
 							self.ctx.printed(),
 						].concat(),
 					});
@@ -861,44 +861,47 @@ mod recovery {
 		}
 
 		#[test] fn unallowed() {
-			let source = indoc! {"
-				# Test
-				<!-- #SQUARK live! bad!
-				| dest = .
-				-->
-			"};
-			let mut config = TEST_CONFIG.clone();
-			config.errors.on_error = ErrorAction::KILL;
-			config.charm.flags = Some(HashSet::new());
-			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
-			assert_contains!( &e, "Unknown flag" );
-			log::error(e);
-
-			let source = indoc! {"
-				# Test
-				<!-- #SQUARK live! good! bad!
-				| dest = .
-				-->
-			"};
-			let mut config = TEST_CONFIG.clone();
-			config.errors.on_error = ErrorAction::KILL;
-			config.charm.flags = Some(HashSet::from_iter([str!("good")]));
-			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
-			assert_contains!( &e, "Unknown flag" );
-			log::error(e);
+			let unknown = |parser: CharmParser, _: &str| {
+				let e = parser.parse().unwrap_err();
+				log::error(&e);
+				assert_contains!( e, "Unknown flag" );
+			};
 			
-			let source = indoc! {"
-				# Test
-				<!-- #SQUARK live! good! fine! bad!
-				| dest = .
-				-->
-			"};
-			let mut config = TEST_CONFIG.clone();
-			config.errors.on_error = ErrorAction::KILL;
-			config.charm.flags = Some(HashSet::from_iter([str!("good"), str!("fine")]));
-			let e = CharmParser::new(source, TEST_FILE.clone(), &config).parse().unwrap_err();
-			assert_contains!( &e, "Unknown flag" );
-			log::error(e);
+			test_exact_for(|c| {
+				c.errors.on_error = ErrorAction::KILL;
+				c.charm.flags = Some(HashSet::new());
+			}, &[
+				indoc! {"
+					# Test
+					<!-- #SQUARK live! bad!
+					| dest = .
+					-->
+				"},
+			], unknown);
+			
+			test_exact_for(|c| {
+				c.errors.on_error = ErrorAction::KILL;
+				c.charm.flags = Some(set!{str!("good")});
+			}, &[
+				indoc! {"
+					# Test
+					<!-- #SQUARK live! good! bad!
+					| dest = .
+					-->
+				"},
+			], unknown);
+			
+			test_exact_for(|c| {
+				c.errors.on_error = ErrorAction::KILL;
+				c.charm.flags = Some(set!{str!("good"), str!("fine")});
+			}, &[
+				indoc! {"
+					# Test
+					<!-- #SQUARK live! good! fine! bad!
+					| dest = .
+					-->
+				"},
+			], unknown);
 		}
 	}
 
@@ -987,6 +990,27 @@ mod errors {
 			let e = parser.parse().unwrap_err();
 			log::error(&e);
 			assert_contains!( &e, "to start charm squark" );
+		});
+	}
+
+	#[test] fn invalid_fields() {
+		test_exact_for(|c| {
+			c.errors.on_error = ErrorAction::KILL;
+			c.charm.fields = Some(set!{});
+		}, &[
+			indoc! {"
+				# Heading
+				<!-- #SQUARK live!
+				| dest = .
+				---
+				| hmm = ?
+				-->
+			"},
+		],
+		|parser, _| {
+			let e = parser.parse().unwrap_err();
+			log::error(&e);
+			assert_contains!( e, "no non-native fields are allowed");
 		});
 	}
 }

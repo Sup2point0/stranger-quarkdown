@@ -331,9 +331,11 @@ impl CharmParser<'_>
 	/// 
 	/// If `from` or `to` are out-of-bounds, they are clamped.
 	/// 
+	/// To focus an entire line, set `from = 0` and `to = usize::MAX`.
+	/// 
 	/// # Panics
 	/// 
-	/// - If `line` is out-of-bounds.
+	/// - If `line_idx` is out-of-bounds.
 	pub(super) fn source_printed(&self,
 		line_idx: usize,
 		mut from: usize,
