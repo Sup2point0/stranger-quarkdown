@@ -31,7 +31,8 @@ Configuration options are neatly organised into categories. Throughout the docs 
 | -------- | ----------- |
 | [`errors`](#errors)   | Error handling |
 | [`project`](#project) | Project metadata |
-| [`paths`](#paths)     | Where Squarkdown should find files |
+| [`paths`](#paths)     | Finding files to squarkup |
+| [`charm`](#charm)     | Charm squark |
 | [`out`](#out)         | Output |
 | [`format`](#format)   | Markdown rendering |
 | [`assets`](#assets)   | Assets preprocessing |
@@ -151,6 +152,25 @@ The GitHub repository name, e.g. `Sup2point0/stranger-quarkdown`.
 ### `sources`
 ### `include`
 ### `exclude`
+
+
+<br>
+
+
+## Charm
+
+| Option | Type | Default |
+| ------ | ---- | ------- |
+| [`flags`](#flags)   | string array | none |
+| [`fields`](#fields) | string array | none |
+
+### `flags`
+
+*New in v4.8*.
+
+### `fields`
+
+*New in v4.8*.
 
 
 <br>

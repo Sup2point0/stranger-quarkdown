@@ -43,6 +43,10 @@ impl SquarkupConfig
 					regex!(r"/\.svelte-kit").clone(),
 				],
 			},
+			charm: CharmConfig {
+				flags: None,
+				fields: None,
+			},
 			out: OutConfig {
 				folder: path!(site / "src/routes/"),
 				file_name: str!("+page.svx"),

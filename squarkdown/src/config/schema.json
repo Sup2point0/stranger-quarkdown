@@ -1,5 +1,5 @@
 {
-  "squarkdown-version": "4.7",
+  "squarkdown-version": "4.8",
 
   "title":       "Squarkup Configuration Schema",
   "description": "Shared schema for your squarkup.toml or squarkup.json",
@@ -114,6 +114,29 @@
           "items":       {"type": "string"},
           "default":     "['/\\.git', '/node_modules', '/\\.svelte-kit']",
           "description": "Files whose full path matches against any of these RegEx patterns will *not* be checked by Squarkdown."
+        }
+      }
+    },
+
+    "charm": {
+      "title": "Charm Squark Options",
+      "additionalProperties": false,
+      "properties":
+      {
+        "flags": {
+          "title":       "Charm Squark Flags",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     [],
+          "description": "What flags should be allowed in a charm squark, other than `live!`?\n\nIf empty, no additional flags are allowed.\n\nIf not provided, arbitrary extra flags are allowed."
+        },
+        
+        "fields": {
+          "title":       "Charm Squark Fields",
+          "type":        "array",
+          "items":       {"type": "string"},
+          "default":     [],
+          "description": "What fields should be allowed in the latter half of charm squarks?\n\nIf empty, no additional fields are allowed.\n\nIf not provided, arbitrary extra fields are allowed."
         }
       }
     },

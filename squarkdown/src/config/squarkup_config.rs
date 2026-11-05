@@ -27,6 +27,9 @@ pub struct SquarkupConfig
 
 	pub paths: PathsConfig,
 
+	/// Charm squark options.
+	pub charm: CharmConfig,
+
 	/// Options for output.
 	pub out: OutConfig,
 
@@ -72,6 +75,23 @@ pub struct PathsConfig {
 
 	/// Files whose full path matches against any of these RegEx patterns will *not* be checked by Squarkdown.
 	pub exclude: Vec<regex::Regex>,
+}
+
+#[derive(Clone, Debug)]
+pub struct CharmConfig {
+	/// What flags should be allowed in charm squarks, other than `live!`?
+	/// 
+	/// If empty, no additional flags are allowed.
+	/// 
+	/// `None` if not provided, in which case any flags are allowed.
+	pub flags: Option<Vec<String>>,
+
+	/// What fields should be allowed in the latter half of charm squarks?
+	/// 
+	/// If empty, no additional fields are allowed.
+	/// 
+	/// `None` if not provided, in which case any fields are allowed.
+	pub fields: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug)]
