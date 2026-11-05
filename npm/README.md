@@ -23,7 +23,7 @@ Run:
 ```bash
 > squarkdown
 > squarkdown --assets --fonts
-> squarkdown --quiet
+> squarkdown --quiet --no-warn
 > squarkdown --dry-run
 ```
 
@@ -31,6 +31,7 @@ Cleanup:
 
 ```bash
 > squarkdown clean
+> squarkdown clean --force
 > squarkdown clean --dry-run
 ```
 

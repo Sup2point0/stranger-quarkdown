@@ -44,7 +44,7 @@ I’m working on fixing these!
 - Rewrite absolute links!
   - These are resolved against your project root.
   - Note that if your squarkup config is not in your project root, this means you may run into issues.
-- `squarkdown --suppress` to hide warnings.
+- `squarkdown --no-warn` to hide warnings.
 - Repair HTML `<table>` missing a `<tbody>` element when rendering.
 
 ### Fixes
