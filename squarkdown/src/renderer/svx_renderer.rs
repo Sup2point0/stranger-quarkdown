@@ -673,11 +673,21 @@ impl Renderer<'_>
 			}
 		};
 
-		// 1. find where the target file lives, relative to the current file
-		let own_source_folder = self.page.filepath.parent()
-			.expect("active files always have a parent folder");
+		// 1. find where the target file lives
+		let their_source_path =
+		{
+			// absolute link
+			if their_file_path.starts_with('/') {
+				path!(self.config.paths.root / utils::to_rel(&their_file_path))
+			}
+			// relative to current folder
+			else {
+				let own_source_folder = self.page.filepath.parent()
+					.expect("active files always have a parent folder");
 
-		let their_source_path = path!(own_source_folder / their_file_path).clean();
+				path!(own_source_folder / their_file_path)
+			}.clean()
+		};
 
 		// if it's a file link, only accept `.md` files
 		if let Some(ext) = their_source_path.extension() && ext != "md" {
