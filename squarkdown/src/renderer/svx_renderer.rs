@@ -203,7 +203,7 @@ impl<'d> Renderer<'d>
 
 		let parser = parser
 			.inspect(|(e, _)| if DEBUG { println!("{G}›{W} {e:?}"); })
-			.filter_map(|(e, range)| self.process_event(e, range))
+			.flat_map(|(e, range)| self.transform_event(e, range))
 		;
 
 		let mut out = str!();
@@ -419,25 +419,9 @@ impl Renderer<'_>
 /// Markdown transforms
 impl Renderer<'_>
 {
-	/// Transform a single `pulldown-cmark` event.
-	fn process_event<'e>(&mut self,
-		mut event: Event<'e>,
-		range: ParserRange,
-	) -> Option<Event<'e>>
+	/// Transform a single `pulldown-cmark` event depending on the current context.
+	fn transform_event<'e>(&mut self, event: Event<'e>, range: ParserRange) -> Option<Event<'e>>
 	{
-		match &event
-		{
-			Start(Tag::CodeBlock(..)) => {
-				self.ctx.push(Ctx::CODE);
-			}
-			End(TagEnd::CodeBlock) => {
-				if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
-					log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
-				}
-			}
-			_ => {}
-		};
-
 		/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
 		if !self.ctx.is_code() && let Event::Html(ref html) | Event::InlineHtml(ref html) = event
 		{
@@ -455,7 +439,6 @@ impl Renderer<'_>
 			// TODO add `code` here too?
 			return Some(event)
 		}
-
 		if self.ctx.has_slash() {
 			return None
 		}
@@ -465,8 +448,25 @@ impl Renderer<'_>
 			return self.config.format.preserve_comments.then_some(event)
 		}
 
+		self.process_event(event, range)
+	}
+
+	/// Process a single `pulldown-cmark` event depending on its type.
+	fn process_event<'e>(&mut self, mut event: Event<'e>, range: ParserRange) -> Option<Event<'e>>
+	{
 		let out = match event
 		{
+			Start(Tag::CodeBlock(..)) => {
+				self.ctx.push(Ctx::CODE);
+				Some(event)
+			}
+			End(TagEnd::CodeBlock) => {
+				if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
+					log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
+				}
+				Some(event)
+			}
+
 			// rewrite link
 			Start(Tag::Link{ ref mut dest_url, .. }) =>
 			{
@@ -662,10 +662,7 @@ impl Renderer<'_>
 	/// If resolution fails, an error is added to `self.errors`, and as a best-effort fallback, we try to strip a `.md` suffix from the link.
 	/// 
 	/// If no rewriting was performed, this returns `None`.
-	fn process_link<'e>(&mut self,
-		dest_url: &mut pd::CowStr,
-		range: ParserRange,
-	) -> Option<Event<'e>>
+	fn process_link<'e>(&mut self, dest_url: &mut pd::CowStr, range: ParserRange) -> Option<Event<'e>>
 	{
 		/* We only rewrite relative links to Markdown files, or folders. We ignore external links and anchor links. */
 		if dest_url.is_empty()
