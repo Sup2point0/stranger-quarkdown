@@ -1,5 +1,5 @@
-use super::macros::slash;
 use crate::prelude::*;
+use crate::utils::macros::*;
 
 use map_or_original::MapOrOriginal;
 
@@ -46,7 +46,11 @@ pub fn display_rel(
 	let slashed = path_slash::PathBufExt::to_slash(&relative)
 		.expect("Squarkdown only supports Unicode paths");
 
-	slashed.into_owned()
+	if slashed.is_empty() {
+		str!(".")
+	} else {
+		slashed.into_owned()
+	}
 }
 
 /// Split `path` into `(folder, filename)` (for separate highlighting in messages).
