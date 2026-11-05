@@ -149,16 +149,10 @@ impl CharmParser<'_>
 		}
 
 		self.eat_whitespace();
-		let mut fields = self.parse_fields()?;
-
-		// enforce only native fields before ---
-		if self.config.errors.strict {
-			PageData::check_no_unknown(fields.keys())
-				.or_else(|e| e.depends(self.config))?;
-		}
+		let mut fields = self.parse_fields(true)?;
 		
 		if self.try_eat("---").is_ok() {
-			let other = self.parse_fields()?;
+			let other = self.parse_fields(false)?;
 			fields.extend(other);
 		}
 
@@ -307,7 +301,7 @@ impl CharmParser<'_>
 	///    arbitrary: ["value"],
 	/// }
 	/// ```
-	pub(super) fn parse_fields(&mut self) -> SquarkResult<HashMap<String, Strings>>
+	pub(super) fn parse_fields(&mut self, only_native: bool) -> SquarkResult<HashMap<String, Strings>>
 	{
 		ctx!(self, ParseCtx::FIELDS =>
 		{
@@ -337,6 +331,42 @@ impl CharmParser<'_>
 						continue;
 					}
 				};
+
+				if only_native
+					&& self.config.errors.strict
+					&& !PageData::NATIVE_FIELDS.contains(&key.as_str())
+				{
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("Invalid field {W}{key}"),
+						hint: fmt!("Only Squarkdown-native fields like {W}desc{G} or {W}update{G} are allowed before {W}---"),
+						debug: vec![],
+					});
+				}
+				
+				if !only_native
+					&& let Some(allowed_fields) = &self.config.charm.fields
+					&& !allowed_fields.contains(&key)
+				{
+					self.errors.push(SquarkError::Recoverable {
+						msg: fmt!("Unknown field {W}{key}"),
+						hint:
+							if allowed_fields.is_empty() {
+								fmt!("Your {Y}charm.fields{G} is {W}[]{G}, so no non-native fields are allowed")
+							} else {
+								fmt!(
+									"The {} you allowed in {Y}charm.fields{G} {} {W}{}",
+									if allowed_fields.len() == 1 {"only field"} else {"fields"},
+									if allowed_fields.len() == 1 {"is"} else {"are"},
+									allowed_fields.iter().join(&fmt!("{G} · {W}"))
+								)
+							},
+						debug: [
+							self.source_printed(self.l, 0, self.i),
+							self.ctx.printed(),
+						].concat(),
+					});
+				}
+
 				data.insert(key, value);
 				self.eat_whitespace();
 			}
@@ -1167,7 +1197,7 @@ mod partial {
 		"};
 
 		let mut parser = CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG);
-		let fields = parser.parse_fields().unwrap();
+		let fields = parser.parse_fields(false).unwrap();
 
 		assert!( fields.contains_key("field") );
 		let field = &mut fields["field"].iter();

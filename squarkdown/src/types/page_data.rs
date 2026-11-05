@@ -64,6 +64,19 @@ pub struct PageData
 
 impl PageData
 {
+	pub const NATIVE_FIELDS: [&str; 16] = [
+		"dest", "destination",
+		"title",
+		"desc", "description",
+		"head", "heading",
+		"capt", "caption",
+		"tags",
+		"date",   "release-date",
+		"update", "last-update",
+		"clean",  "cleanse",
+	];
+
+	/// Turn the givern `flags` and `fields` into a fully initialised [`PageData`] object.
 	pub fn init(
 		filepath: PathBuf,
 		flags: Strings,
@@ -191,36 +204,6 @@ impl PageData
 				other: fields,
 			}
 		)
-	}
-
-	/// Check if `fields` contains any unknown fields (not native to Squarkdown).
-	pub fn check_no_unknown<'a>(fields: impl Iterator<Item = &'a String>) -> SquarkResult
-	{
-		let mut errs = SquarkError::multiple("");
-
-		for field in fields {
-			if [
-				"dest", "destination",
-				"title",
-				"desc", "description",
-				"head", "heading",
-				"capt", "caption",
-				"tags",
-				"date",   "release-date",
-				"update", "last-update",
-				"clean",  "cleanse",
-			].contains(&field.as_ref()) {
-				continue;
-			}
-
-			errs.push(SquarkError::Recoverable {
-				msg: fmt!("Warning: unknown field {W}{field}"),
-				hint: fmt!("Only Squarkdown-native fields like {W}desc{G} or {W}update{G} are allowed before {W}---"),
-				debug: vec![],
-			});
-		}
-
-		errs.or(())
 	}
 
 	#[must_use]
