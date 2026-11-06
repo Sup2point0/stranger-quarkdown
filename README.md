@@ -57,8 +57,9 @@ Squarkdown lets you:
 
 Squarkdown can also:
 
-- Resolve and rewrite links so that they work in production (e.g. stripping the `.md` extension).
+- Resolve and rewrite links so that they work in production (e.g. by stripping the `.md` extension).
 - Check for broken links and mark them as broken *at compile time*.
+- Repair broken HTML.
 - Aggregate metadata of all pages and export it to `site.json`.
 
 
@@ -67,7 +68,7 @@ Squarkdown can also:
 
 ## Quickstart
 
-### Install
+### Install / Update
 Cargo (cross-platform):
 
 ```bash
@@ -88,12 +89,7 @@ NPM (Windows/Linux):
 ### Run
 ```bash
 > squarkdown
-
-# With extras:
 > squarkdown --assets --fonts
-
-# Test run:
-> squarkdown --dry-run
 ```
 
 ### Cleanup
@@ -102,7 +98,7 @@ NPM (Windows/Linux):
 ```
 
 > [!Tip]
-> Use `squarkdown --help` to remind yourself of the above.
+> Use `squarkdown help` for reminders.
 
 For a more detailed introduction, see [Quickstart](docs/walkthrough/quickstart.md).
 
