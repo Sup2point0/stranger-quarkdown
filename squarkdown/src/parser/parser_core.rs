@@ -329,9 +329,11 @@ impl CharmParser<'_>
 {
 	/// Produce the lines of a snapshot of the source text, focused around `from..=to` in `line`.
 	/// 
-	/// If `from` or `to` are out-of-bounds, they are clamped.
+	/// If `from` and `to` are equal, underlining arrows are added to point to them.
 	/// 
 	/// To focus an entire line, set `from = 0` and `to = usize::MAX`.
+	/// 
+	/// If `from` or `to` are out-of-bounds, they are clamped.
 	/// 
 	/// # Panics
 	/// 
@@ -366,7 +368,7 @@ impl CharmParser<'_>
 			to = to.saturating_add(1);
 		}
 
-		to   = to.min(zero!(line.len() - 1));
+		to   = to.min(line.len());
 		from = from.min(zero!(line.len() - 1).min(to));
 		let focus: String = line[from..to].iter().collect();
 
