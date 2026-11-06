@@ -363,7 +363,7 @@ impl CharmParser<'_>
 
 		if from == to {
 			show_pointer = true;
-			to += 1;
+			to = to.saturating_add(1);
 		}
 
 		to   = to.min(zero!(line.len() - 1));

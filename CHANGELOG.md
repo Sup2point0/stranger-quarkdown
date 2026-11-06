@@ -50,6 +50,7 @@ I’m working on fixing these!
 
 ### Fixes
 - Repair `<table>` when next element is `<th>` or `<td>`.
+- Avoid overflow on addition when printing parsing errors.
 
 
 ## v4.8
