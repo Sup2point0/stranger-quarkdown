@@ -78,6 +78,14 @@ use path_macro::path;
 	}
 }
 
+/// Squarkdown warns if a field has no value.
+#[test] fn empty_field()
+{
+	let (status, out) = capture_squarkup_from("errors/empty-field");
+	assert_not!( status.success() );
+	assert_ge!( out.match_indices("Empty field").count(), 2 );
+}
+
 /// Squarkdown errors when a page has unbalanced squark usages.
 #[test] fn unbalanced_contexts()
 {

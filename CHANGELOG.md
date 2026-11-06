@@ -47,6 +47,17 @@ I’m working on fixing these!
 
 ### New
 - Support HTML `<h1> Page Heading </h1>`, not just Markdown `# Page Heading`.
+- Warn if a charm squark field has no value when `errors.strict = true`:
+
+  ```hs
+  ▲ Empty field
+  │  
+  │      4 │  | capt =
+  │      5 │  | tags = /
+  │      6 │  -->
+  │  
+  = hint: Fields cannot be empty when errors.strict is enabled
+  ```
 
 ### Fixes
 - Repair `<table>` when next element is `<th>` or `<td>`.

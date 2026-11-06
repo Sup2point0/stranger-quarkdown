@@ -397,6 +397,17 @@ impl CharmParser<'_>
 					});
 				}
 
+				if self.config.errors.strict && (
+						value.is_empty()
+					|| value.iter().all(|v| v.is_empty())
+				) {
+					self.errors.push(SquarkError::Warning {
+						msg: fmt!("Empty field"),
+						hint: fmt!("Fields cannot be empty when {Y}errors.strict{G} is enabled"),
+						debug: self.source_printed(self.l - 1, 0, usize::MAX),
+					});
+				}
+
 				data.insert(key, value);
 				self.eat_whitespace();
 			}
@@ -534,7 +545,7 @@ impl CharmParser<'_>
 fn parse(source: &str) -> PageData
 {
 	match CharmParser::new(source, TEST_FILE.clone(), &TEST_CONFIG).parse() {
-		Ok(page_data) => return page_data,
+		Ok(page) => return page,
 		Err(e) => { log::error(e); panic!("failed parse") },
 	}
 }
@@ -560,24 +571,93 @@ mod full {
 			assert_ok!( &r );
 			assert_eq!( r.unwrap().heading, str!("Test") );
 		}
+
+		#[test] fn empty_fields() {
+			let page = parse(indoc! {"
+				# Test
+				<!-- #SQUARK live!
+				| dest =
+				| title =
+				| desc =
+				| head =
+				| capt =
+				| tags =
+				-->
+			"});
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes") );
+			assert_eq!( page.title, "" );
+			assert_eq!( page.description, "" );
+			assert_eq!( page.heading, "" );
+			assert_eq!( page.caption, "" );
+			assert_eq!( page.tags, indexset!{} );
+		}
+
+		/// List values with `/` are correctly detected as empty.
+		#[test] fn slash_empty() {
+			test_exact(&[
+				indoc! {"
+					# Test
+					<!-- #SQUARK live!
+					| dest =
+					| tags = /
+					-->
+				"},
+				indoc! {"
+					# Test
+					<!-- #SQUARK live!
+					| dest =
+					| tags = / /
+					-->
+				"},
+				indoc! {"
+					# Test
+					<!-- #SQUARK live!
+					| dest =
+					| tags =
+					    /
+					-->
+				"},
+				indoc! {"
+					# Test
+					<!-- #SQUARK live!
+					| dest =
+					| tags =
+					    /
+						 /
+					-->
+				"},
+				indoc! {"
+					# Test
+					<!-- #SQUARK live!
+					| dest =
+					| tags = /
+					         /
+					-->
+				"},
+			],
+			|parser, _| {
+				let page = parser.parse().expect("TEST FAILED");
+				assert_eq!( page.tags, indexset!{} );
+			});
+		}
 	}
 
 	mod short {
 		use super::*;
 	
 		#[test] fn dest_only() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = test
 				-->
 			"});
-			assert_eq!( page_data.heading, str!("Test") );
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
+			assert_eq!( page.heading, str!("Test") );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/test") );
 		}
 
 		#[test] fn all_fields() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = test
@@ -590,14 +670,14 @@ mod full {
 				| update = 2021 May 31
 				-->
 			"});
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
-			assert_eq!( page_data.title, str!("One") );
-			assert_eq!( page_data.description, str!("Two") );
-			assert_eq!( page_data.heading, str!("Three") );
-			assert_eq!( page_data.caption, str!("Four") );
-			assert_eq!( page_data.tags, indexset![str!("five"), str!("six"), str!("seven")] );
-			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
-			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/test") );
+			assert_eq!( page.title, str!("One") );
+			assert_eq!( page.description, str!("Two") );
+			assert_eq!( page.heading, str!("Three") );
+			assert_eq!( page.caption, str!("Four") );
+			assert_eq!( page.tags, indexset![str!("five"), str!("six"), str!("seven")] );
+			assert_eq!( page.release_date, Some(date!(2020-04-01)) );
+			assert_eq!( page.last_update, Some(date!(2021-05-31)) );
 		}
 	}
 
@@ -605,7 +685,7 @@ mod full {
 		use super::*;
 
 		#[test] fn all_fields() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| destination = test
@@ -618,14 +698,14 @@ mod full {
 				| last-update = 2021 May 31
 				-->
 			"});
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
-			assert_eq!( page_data.title, str!("One") );
-			assert_eq!( page_data.description, str!("Two") );
-			assert_eq!( page_data.heading, str!("Three") );
-			assert_eq!( page_data.caption, str!("Four") );
-			assert_eq!( page_data.tags, indexset![str!("five"), str!("six"), str!("seven")] );
-			assert_eq!( page_data.release_date, Some(date!(2020-04-01)) );
-			assert_eq!( page_data.last_update, Some(date!(2021-05-31)) );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/test") );
+			assert_eq!( page.title, str!("One") );
+			assert_eq!( page.description, str!("Two") );
+			assert_eq!( page.heading, str!("Three") );
+			assert_eq!( page.caption, str!("Four") );
+			assert_eq!( page.tags, indexset![str!("five"), str!("six"), str!("seven")] );
+			assert_eq!( page.release_date, Some(date!(2020-04-01)) );
+			assert_eq!( page.last_update, Some(date!(2021-05-31)) );
 		}
 	}
 
@@ -633,7 +713,7 @@ mod full {
 		use super::*;
 
 		#[test] fn one() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# One
 				<!-- #SQUARK live!
 				| dest = test
@@ -641,13 +721,13 @@ mod full {
 				| testing = true
 				-->
 			"});
-			assert_eq!( page_data.heading, str!("One") );
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
-			assert_eq!( page_data.other["testing"], strings!("true") );
+			assert_eq!( page.heading, str!("One") );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/test") );
+			assert_eq!( page.other["testing"], strings!("true") );
 		}
 
 		#[test] fn many() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Many
 				<!-- #SQUARK live!
 				| dest = test
@@ -656,10 +736,10 @@ mod full {
 				| two = 2
 				-->
 			"});
-			assert_eq!( page_data.heading, str!("Many") );
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
-			assert_eq!( page_data.other["one"], strings!("1") );
-			assert_eq!( page_data.other["two"], strings!("2") );
+			assert_eq!( page.heading, str!("Many") );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/test") );
+			assert_eq!( page.other["one"], strings!("1") );
+			assert_eq!( page.other["two"], strings!("2") );
 		}
 	}
 
@@ -693,7 +773,7 @@ mod full {
 		use super::*;
 
 		#[test] fn full() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -701,12 +781,12 @@ mod full {
 				| update = 2020 February 28
 				-->
 			"});
-			assert_eq!( page_data.release_date, Some(date!(2000-04-01)) );
-			assert_eq!( page_data.last_update, Some(date!(2020-02-28)) );
+			assert_eq!( page.release_date, Some(date!(2000-04-01)) );
+			assert_eq!( page.last_update, Some(date!(2020-02-28)) );
 		}
 
 		#[test] fn seasons() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -714,10 +794,10 @@ mod full {
 				| update = 2021 spring
 				-->
 			"});
-			assert_eq!( page_data.release_date, Some(date!(2020-12-01)) );
-			assert_eq!( page_data.last_update, Some(date!(2021-03-01)) );
+			assert_eq!( page.release_date, Some(date!(2020-12-01)) );
+			assert_eq!( page.last_update, Some(date!(2021-03-01)) );
 			
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -725,8 +805,8 @@ mod full {
 				| update = 2025 fall
 				-->
 			"});
-			assert_eq!( page_data.release_date, Some(date!(2025-06-01)) );
-			assert_eq!( page_data.last_update, Some(date!(2025-09-01)) );
+			assert_eq!( page.release_date, Some(date!(2025-06-01)) );
+			assert_eq!( page.last_update, Some(date!(2025-09-01)) );
 		}
 
 		#[test] fn reject_update_before_date() {
@@ -750,17 +830,17 @@ mod full {
 		use super::*;
 
 		#[test] fn space_in_dest() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = a dangerous path
 				-->
 			"});
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/a-dangerous-path") );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/a-dangerous-path") );
 		}
 
 		#[test] fn slash_in_single() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -770,12 +850,12 @@ mod full {
 				       / list
 				-->
 			"});
-			assert_eq!( page_data.title, str!("not / a / list") );
-			assert_eq!( page_data.caption, str!("not / a / list") );
+			assert_eq!( page.title, str!("not / a / list") );
+			assert_eq!( page.caption, str!("not / a / list") );
 		}
 
 		#[test] fn hyphen_to_underscore() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -783,11 +863,11 @@ mod full {
 				| some-field = js
 				-->
 			"});
-			assert_eq!( page_data.other["some_field"], strings!("js") );
+			assert_eq!( page.other["some_field"], strings!("js") );
 		}
 
 		#[test] fn trailing_slash() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -795,12 +875,12 @@ mod full {
 				| desc = Works
 				-->
 			"});
-			assert_eq!( page_data.tags, indexset![str!("one")] );
-			assert_eq!( page_data.description, str!("Works") );
+			assert_eq!( page.tags, indexset![str!("one")] );
+			assert_eq!( page.description, str!("Works") );
 		}
 
 		#[test] fn empty_arbitrary() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -808,8 +888,8 @@ mod full {
 				---
 				-->
 			"});
-			assert_eq!( page_data.description, str!("Works") );
-			assert_is_empty!( page_data.other );
+			assert_eq!( page.description, str!("Works") );
+			assert_is_empty!( page.other );
 		}
 	}
 
@@ -817,18 +897,18 @@ mod full {
 		use super::*;
 
 		#[test] fn carriage_returns() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test\r
 				<!-- #SQUARK live!\r
 				| dest = test\r
 				-->
 			"});
-			assert_eq!( page_data.heading, str!("Test") );
-			assert_eq!( page_data.destination, path!(*TEST_PROJECT / "src/routes/test") );
+			assert_eq!( page.heading, str!("Test") );
+			assert_eq!( page.destination, path!(*TEST_PROJECT / "src/routes/test") );
 		}
 
 		#[test] fn chinese() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# 无名之辈
 				<!-- #SQUARK live!
 				| dest = .
@@ -837,10 +917,10 @@ mod full {
 				| tags = 一 / 二 / 三 / 四
 				-->
 			"});
-			assert_eq!( page_data.heading, str!("无名之辈") );
-			assert_eq!( page_data.title, str!("从前有座山") );
-			assert_eq!( page_data.caption, str!("你是我的小呀小苹果") );
-			assert_eq!( page_data.tags, indexset![str!("一"), str!("二"), str!("三"), str!("四")] );
+			assert_eq!( page.heading, str!("无名之辈") );
+			assert_eq!( page.title, str!("从前有座山") );
+			assert_eq!( page.caption, str!("你是我的小呀小苹果") );
+			assert_eq!( page.tags, indexset![str!("一"), str!("二"), str!("三"), str!("四")] );
 		}
 	}
 }
@@ -853,39 +933,39 @@ mod recovery {
 		use super::*;
 
 		#[test] fn bad() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live! bad ignore
 				| dest = .
 				| title = Success
 				-->
 			"});
-			assert_eq!( page_data.flags, strings![] );
-			assert_eq!( page_data.title, str!("Success") );
+			assert_eq!( page.flags, strings![] );
+			assert_eq!( page.title, str!("Success") );
 		}
 
 		#[test] fn worse() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live! very!! weird keep!
 				| dest = .
 				| title = Success
 				-->
 			"});
-			assert_eq!( page_data.flags, strings!["very", "keep"] );
-			assert_eq!( page_data.title, str!("Success") );
+			assert_eq!( page.flags, strings!["very", "keep"] );
+			assert_eq!( page.title, str!("Success") );
 		}
 
 		#[test] fn worst() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live! very deformed:: !confusion how! handle?
 				| dest = .
 				| title = Success
 				-->
 			"});
-			assert_eq!( page_data.flags, strings!["how"] );
-			assert_eq!( page_data.title, str!("Success") );
+			assert_eq!( page.flags, strings!["how"] );
+			assert_eq!( page.title, str!("Success") );
 		}
 
 		#[test] fn unallowed() {
@@ -937,7 +1017,7 @@ mod recovery {
 		use super::*;
 
 		#[test] fn one() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -945,12 +1025,12 @@ mod recovery {
 				| desc = Works
 				-->
 			"});
-			assert_eq!( page_data.caption, str!() );
-			assert_eq!( page_data.description, str!("Works") );
+			assert_eq!( page.caption, str!() );
+			assert_eq!( page.description, str!("Works") );
 		}
 
 		#[test] fn many() {
-			let page_data = parse(indoc! {"
+			let page = parse(indoc! {"
 				# Test
 				<!-- #SQUARK live!
 				| dest = .
@@ -960,10 +1040,10 @@ mod recovery {
 				| desc = Works
 				-->
 			"});
-			assert_eq!( page_data.release_date, None );
-			assert_eq!( page_data.caption, str!("Still") );
-			assert_eq!( page_data.last_update, None );
-			assert_eq!( page_data.description, str!("Works") );
+			assert_eq!( page.release_date, None );
+			assert_eq!( page.caption, str!("Still") );
+			assert_eq!( page.last_update, None );
+			assert_eq!( page.description, str!("Works") );
 		}
 	}
 }

@@ -1,0 +1,11 @@
+#:schema ../../../src/config/schema.json
+
+[errors]
+strict = true
+on-error = "warn"
+
+[paths]
+site = "../../test-project/"
+
+[out]
+folder = "src/routes/errors/empty-field"
