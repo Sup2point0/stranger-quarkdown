@@ -10,8 +10,11 @@ pub enum ParseCtx
 	#[display("parsing charm squark")]
 	CHARM_SQUARK,
 
+	#[display("extracting # heading")]
+	HEADING_MARKDOWN,
+
 	#[display("extracting <h1> heading")]
-	HEADING,
+	HEADING_HTML,
 
 	#[display("parsing flags")]
 	FLAGS,

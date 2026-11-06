@@ -33,6 +33,25 @@ I’m working on fixing these!
 <br>
 
 
+## Next Major (v4.9)
+
+### New
+- `clean`
+- Improve error formatting
+
+
+<br>
+
+
+## Next (v4.8.1)
+
+### New
+- Support HTML `<h1> Page Heading </h1>`, not just Markdown `# Page Heading`.
+
+### Fixes
+- Repair `<table>` when next element is `<th>` or `<td>`.
+
+
 ## v4.8
 
 ### Breaking

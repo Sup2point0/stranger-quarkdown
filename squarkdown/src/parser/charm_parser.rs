@@ -82,7 +82,9 @@ impl<'d> CharmParser<'d>
 			let mut heading = None;
 			
 			if self.current()? == '#' {
-				heading = Some(self.parse_heading()?);
+				heading = Some(self.parse_heading_markdown()?);
+			} else if self.lookahead("<h1") {
+				heading = Some(self.parse_heading_html()?);
 			}
 
 			self.eat_whitespace();
@@ -112,10 +114,10 @@ impl<'d> CharmParser<'d>
 /// Parser internals specialised to Squarkdown-Flavoured Markdown.
 impl CharmParser<'_>
 {
-	/// Parse the `# Heading` element, extracting the cleaned heading text.
-	pub(super) fn parse_heading(&mut self) -> SquarkResult<String>
+	/// Parse a `# Heading` element, extracting the cleaned heading text.
+	pub(super) fn parse_heading_markdown(&mut self) -> SquarkResult<String>
 	{
-		ctx!(self, ParseCtx::HEADING =>
+		ctx!(self, ParseCtx::HEADING_MARKDOWN =>
 		{
 			self.eat("#", to!("to start heading"), to!())?;
 
@@ -133,6 +135,34 @@ impl CharmParser<'_>
 
 			self.advance_line()?;
 			Ok(heading)
+		})
+	}
+
+	/// Parse a `<h1> Heading </h1>` element, extracting the cleaned heading text.
+	pub(super) fn parse_heading_html(&mut self) -> SquarkResult<String>
+	{
+		ctx!(self, ParseCtx::HEADING_HTML => {
+			self.eat("<h1", to!("to start HTML heading"), to!())?;
+
+			while self.current()? != '>' {
+				self.advance()?;
+			}
+			self.advance()?;  // consume '>'
+			self.eat_whitespace();
+
+			let mut heading = str!();
+
+			while !self.lookahead("</h1>") {
+				heading.push(self.current()?);
+				self.advance()?;
+				if self.i == 0 {
+					self.eat_whitespace();
+				}
+			}
+			self.eat("</h1>", to!("to end HTML heading"), to!())?;
+
+			self.advance_line()?;
+			Ok(utils::trim_end(heading))
 		})
 	}
 	
@@ -1017,7 +1047,7 @@ mod errors {
 mod partial {
 	use super::*;
 
-	mod parse_heading {
+	mod parse_heading_markdown {
 		use super::*;
 
 		#[test] fn matches_single_line() {
@@ -1027,7 +1057,7 @@ mod partial {
 				("# Suppety Sup", "Suppety Sup"),
 			],
 			|mut parser, expected| {
-				let r = parser.parse_heading();
+				let r = parser.parse_heading_markdown();
 				assert_ok!( &r );
 				assert_eq!( r.unwrap(), str!(*expected) );
 			});
@@ -1040,7 +1070,7 @@ mod partial {
 				("# Suppety Sup\nDECOY", "Suppety Sup"),
 			],
 			|mut parser, expected| {
-				let r = parser.parse_heading();
+				let r = parser.parse_heading_markdown();
 				assert_ok!( &r );
 				assert_eq!( r.unwrap(), str!(*expected) );
 			});
@@ -1053,8 +1083,87 @@ mod partial {
 				"Don't Do It",
 			],
 			|mut parser, _case| {
-				let e = parser.parse_heading().unwrap_err();
+				let e = parser.parse_heading_markdown().unwrap_err();
 				assert_contains!( e, "start heading" );
+			});
+		}
+	}
+
+	mod parse_heading_html {
+		use super::*;
+
+		#[test] fn matches_single_line() {
+			test_expected(&[
+				("<h1></h1>",              ""),
+				("<h1> </h1>",             ""),
+				("<h1>Sup</h1>",           "Sup"),
+				("<h1>Sup </h1>",          "Sup"),
+				("<h1> Sup</h1>",          "Sup"),
+				("<h1> Sup </h1>",         "Sup"),
+				("<h1>Suppety Sup</h1>",   "Suppety Sup"),
+				("<h1>Suppety Sup </h1>",  "Suppety Sup"),
+				("<h1> Suppety Sup</h1>",  "Suppety Sup"),
+				("<h1> Suppety Sup </h1>", "Suppety Sup"),
+			],
+			|mut parser, expected| {
+				let r = parser.parse_heading_html();
+				assert_ok!( &r );
+				assert_eq!( r.unwrap(), str!(*expected) );
+			});
+		}
+
+		#[test] fn matches_with_attributes() {
+			test_expected(&[
+				("<h1 align=\"center\"></h1>",              ""),
+				("<h1 align=\"center\"> </h1>",             ""),
+				("<h1 align=\"center\">Sup</h1>",           "Sup"),
+				("<h1 align=\"center\">Sup </h1>",          "Sup"),
+				("<h1 align=\"center\"> Sup</h1>",          "Sup"),
+				("<h1 align=\"center\"> Sup </h1>",         "Sup"),
+				("<h1 align=\"center\">Suppety Sup</h1>",   "Suppety Sup"),
+				("<h1 align=\"center\">Suppety Sup </h1>",  "Suppety Sup"),
+				("<h1 align=\"center\"> Suppety Sup</h1>",  "Suppety Sup"),
+				("<h1 align=\"center\"> Suppety Sup </h1>", "Suppety Sup"),
+			],
+			|mut parser, expected| {
+				let r = parser.parse_heading_html();
+				assert_ok!( &r );
+				assert_eq!( r.unwrap(), str!(*expected) );
+			});
+		}
+
+		#[test] fn matches_multi_line() {
+			test_expected(&[
+				(
+					indoc! {"
+						<h1>
+							Sup
+						</h1>
+					"},
+					"Sup"
+				),
+				(
+					indoc! {"
+						<h1>
+							Suppety Sup
+						</h1>
+					"},
+					"Suppety Sup"
+				),
+				(
+					indoc! {"
+						<h1>
+							Suppety
+							Sup
+						</h1>
+					"},
+					"Suppety\nSup"
+				),
+			],
+			|mut parser, expected| {
+				let r = parser.parse_heading_html();
+				assert_ok!( &r );
+				assert_eq!( r.unwrap(), str!(*expected) );
 			});
 		}
 	}
