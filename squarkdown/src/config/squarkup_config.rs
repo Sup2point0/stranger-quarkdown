@@ -132,6 +132,12 @@ pub struct FormatConfig {
 	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 	pub externalise_links: bool,
 
+	/// Escape `<>` (that don’t form HTML tags) as `&lt;` `&gt;` for HTML safty?
+	pub escape_angles: bool,
+
+	/// Escape `{}` as `&lbrace;` `&rbrace;` for HTML safety?
+	pub escape_braces: bool,
+
 	/// Repair broken HTML `<table>` elements by inserting missing `<tbody>`?
 	pub repair_tables: bool,
 }

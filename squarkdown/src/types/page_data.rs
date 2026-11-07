@@ -57,14 +57,12 @@ pub struct PageData
 	pub last_update: Option<Date>,
 	pub last_update_raw: String,
 
-	pub cleanse: Vec<CleanseOperation>,
-
 	pub other: HashMap<String, Strings>,
 }
 
 impl PageData
 {
-	pub const NATIVE_FIELDS: [&str; 16] = [
+	pub const NATIVE_FIELDS: [&str; 14] = [
 		"dest", "destination",
 		"title",
 		"desc", "description",
@@ -73,7 +71,6 @@ impl PageData
 		"tags",
 		"date",   "release-date",
 		"update", "last-update",
-		"clean",  "cleanse",
 	];
 
 	/// Turn the givern `flags` and `fields` into a fully initialised [`PageData`] object.
@@ -171,24 +168,6 @@ impl PageData
 			});
 		}
 
-		let mut cleanse = vec![];
-
-		for raw in fields.take("cleanse", "clean").unwrap_or_default() {
-			match raw.parse::<CleanseOperation>()
-			{
-				Ok(value) => cleanse.push(value),
-				Err(_) => {
-					errs.push(SquarkError::Recoverable {
-						msg: fmt!("Invalid value for {W}cleanse{R}: {W}{raw}"),
-						hint: fmt!("Valid values are {W}'angles'{G} · {W}'braces'{G} · {W}'line-breaks'"),
-						debug: vec![
-							slash!("in file: {}", filepath),
-						],
-					});
-				}
-			}
-		}
-
 		errs.or_else(||
 			Self {
 				shard: Self::shard_for(&filepath, config),
@@ -200,7 +179,6 @@ impl PageData
 				tags,
 				release_date, release_date_raw,
 				last_update, last_update_raw,
-				cleanse,
 				other: fields,
 			}
 		)
