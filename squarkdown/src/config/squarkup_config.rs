@@ -132,7 +132,7 @@ pub struct FormatConfig {
 	/// Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 	pub externalise_links: bool,
 
-	/// Repair `<table>`s that are missing `<tbody>`?
+	/// Repair broken HTML `<table>` elements by inserting missing `<tbody>`?
 	pub repair_tables: bool,
 }
 

@@ -235,10 +235,14 @@ Keep `<!-- comments -->` in the rendered output?
 ### `externalise-links`
 Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 
-### `repair-tables`
+### `repair-html`
 > See also: [Repairing HTML](../features/repair.md)
 
-Repair `<table>`s that are missing `<tbody>`?
+Repair potentially broken HTML that would result in SvelteKit rendering errors?
+
+This includes:
+
+- Adding missing `<tbody>` to `<table>` elements
 
 *New in v4.8*.
 

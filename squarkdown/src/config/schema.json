@@ -212,8 +212,15 @@
         "externalise-links": {
           "title":       "Externalise Links",
           "type":        "boolean",
-          "default":     false,
+          "default":     true,
           "description": "Convert links containing `<sup>↗</sup>` to `<a target=\"_blank\">` elements?"
+        },
+
+        "repair-tables": {
+          "title":       "Repair Broken Tables",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Repair broken HTML `<table>` elements by inserting missing `<tbody>`?"
         }
       }
     },

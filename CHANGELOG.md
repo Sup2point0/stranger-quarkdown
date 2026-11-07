@@ -80,7 +80,7 @@ I’m working on fixing these!
 - `assets.base-path` option.
   - This is prepended to asset links, in case your assets are not served from root (like on `github.io` sites).
 - `format.repair-tables` option.
-  - This repairs broken HTML `<table>`s that are missing `<tbody>` when rendering.
+  - This inserts missing `<tbody>` into `<table>` elements when rendering.
 - `squarkdown --no-warn` to hide warnings.
 
 ### Fixes
