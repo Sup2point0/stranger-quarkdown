@@ -19,13 +19,14 @@
 
 **Stranger Quarkdown** (*Squarkdown*) is a build tool for [SvelteKit<sup>↗</sup>](https://svelte.dev/docs/kit/introduction) and [MDsveX<sup>↗</sup>](https://mdsvex.pngwn.at) projects.
 
-Write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to mass-export them into `+page.svx` and `+page.ts` files in your SvelteKit project.
+Write Markdown content anywhere in your project repo, with [special syntax](docs/walkthrough/squarkdown-flavoured-markdown.md 'Squarkdown-Flavoured Markdown') hidden inside comments, then use Squarkdown to compile them into `+page.svx` and `+page.ts` files in your SvelteKit project.
 
 ```md
 # Welcome to Squarkdown!
 <!-- #SQUARK live! feat!
 | destination = walkthrough/welcome
 | description = An introduction to what Squarkdown can do
+| tags = help / info
 | release-date = 2024 July 1
 -->
 
@@ -36,9 +37,7 @@ This content won’t be included in the output.
 <!-- #SQUARK slash. -->
 
 <!-- #SQUARK only?
-
 This content only shows up in the output.
-
      #SQUARK only. -->
 ```
 
@@ -79,6 +78,7 @@ NPM (Windows/Linux):
 
 ```bash
 > npm install stranger-quarkdown
+> npm update stranger-quarkdown
 ```
 
 ### Setup

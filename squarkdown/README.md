@@ -53,6 +53,7 @@ Info:
 <!-- #SQUARK live! feat!
 | destination = walkthrough/welcome
 | description = An introduction to what Squarkdown can do
+| tags = help / info
 | release-date = 2024 July 1
 -->
 
@@ -63,8 +64,6 @@ This content won’t be included in the output.
 <!-- #SQUARK slash. -->
 
 <!-- #SQUARK only?
-
 This content only shows up in the output.
-
      #SQUARK only. -->
 ```
