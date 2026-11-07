@@ -43,7 +43,7 @@ I’m working on fixing these!
 <br>
 
 
-## Next (v4.8.1)
+## v4.8.1
 
 ### New
 - Support HTML `<h1> Page Heading </h1>`, not just Markdown `# Page Heading`.
