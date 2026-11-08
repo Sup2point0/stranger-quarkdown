@@ -1,5 +1,5 @@
 {
-  "squarkdown-version": "4.8",
+  "squarkdown-version": "4.9",
 
   "title":       "Squarkup Configuration Schema",
   "description": "Shared schema for your squarkup.toml or squarkup.json",
@@ -227,7 +227,7 @@
           "title":       "Escape Curly Braces",
           "type":        "boolean",
           "default":     true,
-          "description": "Escape `{}` as `&lbrace;` `&rbrace;` for HTML safety?"
+          "description": "Escape `{}` as `&lbrace;` `&rbrace;` for Svelte safety?"
         },
 
         "repair-tables": {

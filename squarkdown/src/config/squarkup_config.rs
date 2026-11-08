@@ -135,7 +135,7 @@ pub struct FormatConfig {
 	/// Escape `<>` (that don’t form HTML tags) as `&lt;` `&gt;` for HTML safty?
 	pub escape_angles: bool,
 
-	/// Escape `{}` as `&lbrace;` `&rbrace;` for HTML safety?
+	/// Escape `{}` as `&lbrace;` `&rbrace;` for Svelte safety?
 	pub escape_braces: bool,
 
 	/// Repair broken HTML `<table>` elements by inserting missing `<tbody>`?
