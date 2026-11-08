@@ -909,7 +909,14 @@ impl Renderer<'_>
 	/// - HTML entity processing
 	fn process_text<'e>(&self, text: pd::CowStr) -> Event<'e>
 	{
-		let mut text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
+		let mut text = ENTITY_PATTERNS.replace_all(&text, &ENTITY_REPLACEMENTS);
+
+		if self.config.format.escape_angles {
+			text = ANGLE_PATTERNS.replace_all(&text, &ANGLE_REPLACEMENTS);
+		}
+		if self.config.format.escape_braces {
+			text = BRACE_PATTERNS.replace_all(&text, &BRACE_REPLACEMENTS);
+		}
 
 		if self.ctx.is_link() {
 			text = BRACKET_PATTERNS.replace_all(&text, &BRACKET_REPLACEMENTS);
@@ -919,27 +926,28 @@ impl Renderer<'_>
 	}
 }
 
+macro_rules! aho {
+	($($args:tt)+) => { LazyLock::new(|| AhoCorasick::new([$($args)+]).unwrap()) }
+}
+
 /// HTML entities that [`pulldown_cmark`] parses as unicode, to transform back into literal entities mapping into [`HTML_ENTITY_REPLACE_WITH`].
-pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
-	= LazyLock::new(||
-		AhoCorasick::new(["\u{2002}", "\u{2003}"]).unwrap()
-	);
+pub static ENTITY_PATTERNS: LazyLock<AhoCorasick>  = aho!["\u{2002}", "\u{2003}"];
+pub const  ENTITY_REPLACEMENTS: [&str; 2]          = ["&ensp;", "&emsp;"];
 
-/// HTML entities that [`pulldown_cmark`] parses as unicode, mapped from [`HTML_ENTITY_PATTERNS`].
-pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
-	= ["&ensp;", "&emsp;"];
+pub static ANGLE_PATTERNS: LazyLock<AhoCorasick>   = aho!["<", ">"];
+pub const  ANGLE_REPLACEMENTS: [&str; 2]           = ["&lt;", "&gt;"];
 
-pub static BRACKET_PATTERNS: LazyLock<AhoCorasick> = LazyLock::new(||
-	AhoCorasick::new(["[", "]"]).unwrap()
-);
-pub static BRACKET_REPLACEMENTS: [&str; 2]
-	= ["&lbrack;", "&rbrack;"];
+pub static BRACE_PATTERNS: LazyLock<AhoCorasick>   = aho!["{", "}"];
+pub const  BRACE_REPLACEMENTS: [&str; 2]           = ["&lbrace;", "&rbrace;"];
+
+pub static BRACKET_PATTERNS: LazyLock<AhoCorasick> = aho!["[", "]"];
+pub const  BRACKET_REPLACEMENTS: [&str; 2]         = ["&lbrack;", "&rbrack;"];
 
 
 /// Miscellaneous injections
 impl Renderer<'_>
 {
-	/// Write a timestamp to `file`.
+	/// Write the current timestamp to `file`.
 	fn inject_timestamp(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		let now = UtcDateTime::now();
@@ -954,6 +962,7 @@ impl Renderer<'_>
 		Ok(())
 	}
 
+	/// Write the `<head>` metadata of this page to `file`.
 	fn inject_head(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		if self.page.title.is_empty() {
@@ -1175,20 +1184,17 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		t
-
-// 		<table>
-// 			<tr>
-// 				<th> Test </th>
-// 			</tr>
-// 		</table>
+// 		```md
+// 		{test}
+// 		```
+// 		<!-- test -->
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
 // 	config.errors.strict = true;
 // 	config.errors.strict = false;
 // 	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
-// 	config.format.externalise_links = true;
+// 	config.format.preserve_comments = true;
 // 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 // 	let out = renderer.render_from(source.trim()).unwrap();
 // 	log::error(renderer.errors);
@@ -1952,8 +1958,10 @@ mod comments {
 				"not -->",
 				"not --> a comment",
 				"not -->\na comment",
-				"\\-->",
 				"--> a comment",
+			]);
+			test_expected(&[
+				("\\-->", "\\--&gt;"),
 			]);
 		}
 
