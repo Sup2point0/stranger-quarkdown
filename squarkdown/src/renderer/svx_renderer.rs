@@ -416,7 +416,17 @@ impl Renderer<'_>
 	/// Transform a single `pulldown-cmark` event depending on the current context.
 	fn transform_event<'e>(&mut self, event: Event<'e>, range: ParserRange) -> Option<Event<'e>>
 	{
-		/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
+		/* Text is left untouched inside code blocks, so handle them before everything else. */
+		if let Start(Tag::CodeBlock(..)) = event {
+			self.ctx.push(Ctx::CODE);
+		}
+		else if let End(TagEnd::CodeBlock) = event {
+			if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
+				log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
+			}
+		}
+
+		/* We almost always need to process comments (Event::Html), to check for squarks that may _change_ the context. The exception is if we're in a code context. */
 		if let Event::Html(ref html) | Event::InlineHtml(ref html) = event
 			&& !self.ctx.is_code()
 		{
@@ -426,7 +436,6 @@ impl Renderer<'_>
 				ProcessAction::DEFER => {}
 			}
 		}
-
 		/* But for everything else, handling will depend on the current context */
 	
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
@@ -436,6 +445,11 @@ impl Renderer<'_>
 		}
 		if self.ctx.has_slash() {
 			return None
+		}
+
+		/* Code content should never be touched. */
+		if self.ctx.is_code() {
+			return Some(event)
 		}
 
 		/* Keep comments only if `preserve_comments: true` */
@@ -451,17 +465,6 @@ impl Renderer<'_>
 	{
 		let out = match event
 		{
-			Start(Tag::CodeBlock(..)) => {
-				self.ctx.push(Ctx::CODE);
-				Some(event)
-			}
-			End(TagEnd::CodeBlock) => {
-				if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
-					log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
-				}
-				Some(event)
-			}
-
 			// rewrite link
 			Start(Tag::Link{ ref mut dest_url, .. }) =>
 			{
