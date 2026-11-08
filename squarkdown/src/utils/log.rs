@@ -9,7 +9,7 @@
 //! To prevent interleaved console output, logging errors is made atomic via [`LOG_LOCK`].
 
 use crate::prelude::*;
-use crate::cli::{ NO_INFO, NO_WARN };
+use crate::cli::{ COLLAPSE_ERRORS, NO_INFO, NO_WARN };
 use crate::utils::colours::*;
 
 use std::borrow::{ Borrow };
@@ -41,6 +41,7 @@ macro_rules! lock {
 		}
 	}
 }
+use itertools::Itertools;
 pub use lock;
 
 
@@ -146,6 +147,7 @@ pub fn error(err: impl Borrow<SquarkError>)
 
 fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
 {
+	// lmao me when printing a damn error is so complex
 	match err
 	{
 		  SquarkError::Recoverable{ msg, hint, debug }
@@ -161,9 +163,20 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 				bad!(indent => msg);
 			}
 			
-			for each in debug {
-				if !each.is_empty() {
-					debug!(indent => each);
+			if COLLAPSE_ERRORS.get().is_some() {
+				return
+				// log only first nonempty line
+				// for each in debug {
+				// 	if !each.is_empty() && each != " " {
+				// 		debug!(indent => each);
+				// 		break
+				// 	}
+				// }
+			} else {
+				for each in debug {
+					if !each.is_empty() {
+						debug!(indent => each);
+					}
 				}
 			}
 
@@ -191,7 +204,7 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 				if i != 0 {
 					if let SquarkError::Multiple{..} = &err {
 						line();
-					} else {
+					} else if !COLLAPSE_ERRORS.get().is_some() {
 						// Don't print lines between lowest-level aggregated errors
 						println!();
 					}
