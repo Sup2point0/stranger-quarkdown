@@ -46,7 +46,7 @@ I’m working on fixing these!
 ## v4.8.2
 
 ### Fixes
-- Insert missing `<tr>` too when `format.repair-tables = true`.
+- Insert missing `<tr>` too when `format.repair-tables = true`, and fix other edge cases.
 
 
 ## v4.8.1

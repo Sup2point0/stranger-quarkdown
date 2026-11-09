@@ -203,7 +203,7 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 		SquarkError::External{ err, msg, backtrace } => {
 			bad!(indent => msg);
 			println!("\n   {R}{err:?}");
-			println!("\n{backtrace}");
+			println!("\n{F}{backtrace}");
 		}
 
 		SquarkError::ABANDON => {

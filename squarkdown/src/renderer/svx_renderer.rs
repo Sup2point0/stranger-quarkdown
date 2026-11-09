@@ -503,9 +503,9 @@ impl Renderer<'_>
 			}
 			Event::Html(ref text)
 				if self.config.format.repair_tables
+				&& !text.contains("<tbody>")
 				&& (
-						!text.contains("<tbody>")
-					|| text.contains("<tr>")
+						text.contains("<tr>")
 					|| text.contains("<th>")
 					|| text.contains("<td>")
 				)
@@ -529,11 +529,13 @@ impl Renderer<'_>
 					return Some(Event::Html(out.into()))
 				}
 
-				if self.ctx.try_pop_exact(&Ctx::TABLE).is_err() {
+				if self.ctx.try_pop_any(&Ctx::TABLE).is_err()
+				&& self.ctx.try_pop_any(&Ctx::TABLE_NO_REPAIR).is_err()
+				{
 					self.errors.push(SquarkError::Recoverable {
 						msg: fmt!("Unpaired closing tag: {W}{BOLD}{text}{UNBOLD}"),
 						hint: {
-							if self.ctx.contains(&Ctx::TABLE) {
+							if self.ctx.contains(&Ctx::TABLE_NO_REPAIR) || self.ctx.contains(&Ctx::TABLE) {
 								fmt!("Did you forget to close a {} context?", self.ctx.current())
 							} else {
 								fmt!("Did you forget to open a {W}<table>{G} context?")
@@ -542,6 +544,10 @@ impl Renderer<'_>
 						debug: [self.source_printed(range), self.ctx.printed()].concat(),
 					});
 				}
+				return Some(event)
+			}
+			Event::Html(..) if self.ctx.try_pop_any(&Ctx::TABLE).is_ok() => {
+				self.ctx.push(Ctx::TABLE_NO_REPAIR);
 				return Some(event)
 			}
 
@@ -1695,8 +1701,50 @@ mod tables {
 		]);
 	}
 
+	#[test] fn no_repair() {
+		test_preserves(&[
+			indoc! {"
+				.
+
+				<table>
+					<tbody>
+						<td> Test </td>
+					</tbody>
+				</table>
+			"},
+			indoc! {"
+				.
+
+				<table>
+					<thead>
+						<th> Testing </th>
+					</thead>
+					<tbody>
+						<td> Test </td>
+					</tbody>
+				</table>
+			"},
+		]);
+	}
+
 	#[test] fn repair_tbody() {
 		test_expected(&[
+			(
+				indoc! {"
+					.
+
+					<table>
+						<tr><th> Test </th></tr>
+					</table>
+				"},
+				indoc! {"
+					.
+
+					<table>
+					<tbody> 	<tr><th> Test </th></tr>
+					</tbody></table>
+				"}
+			),
 			(
 				indoc! {"
 					.
@@ -1705,20 +1753,14 @@ mod tables {
 						<tr>
 							<th> Test </th>
 						</tr>
-						<tr>
-							<td> Testing </td>
-						</tr>
 					</table>
 				"},
 				indoc! {"
 					.
 
 					<table>
-					<tbody> 	<tr>
+					<tbody> \t<tr>
 							<th> Test </th>
-						</tr>
-						<tr>
-							<td> Testing </td>
 						</tr>
 					</tbody></table>
 				"}
@@ -1740,7 +1782,23 @@ mod tables {
 					.
 
 					<table>
-					<tbody><tr> 	<td> Test </td>
+					<tbody><tr> \t<td> Test </td>
+					</tr></tbody></table>
+				"}
+			),
+			(
+				indoc! {"
+					.
+
+					<table>
+						<th> Testing </th>
+					</table>
+				"},
+				indoc! {"
+					.
+
+					<table>
+					<tbody><tr> \t<th> Testing </th>
 					</tr></tbody></table>
 				"}
 			),

@@ -29,6 +29,9 @@ pub enum RenderCtx
 	#[display("table")]
 	TABLE,
 
+	#[display("table")]
+	TABLE_NO_REPAIR,
+
 	#[display("table (repairing)")]
 	TABLE_REPAIR {
 		/// Are we also inserting a surrounding `<tr>` element?
