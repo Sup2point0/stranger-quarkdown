@@ -504,13 +504,14 @@ impl Renderer<'_>
 			Event::Html(ref text)
 				if self.config.format.repair_tables
 				&& (
-						text.contains("<tr>")
+						!text.contains("<tbody>")
+					|| text.contains("<tr>")
 					|| text.contains("<th>")
 					|| text.contains("<td>")
 				)
 				&& self.ctx.try_pop_exact(&Ctx::TABLE).is_ok() =>
 			{
-				let with_row = text.contains("<th>") || text.contains("<td>");
+				let with_row = !text.contains("<tr>");
 				self.ctx.push(Ctx::TABLE_REPAIR { with_row });
 				return Some(Event::Html(fmt!("<tbody>{} {text}", if with_row {"<tr>"} else {""}).into()))
 			}
