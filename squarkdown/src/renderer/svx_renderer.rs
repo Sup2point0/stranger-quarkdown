@@ -1034,18 +1034,18 @@ impl Renderer<'_>
 		out.push(str!(" "));
 
 		// previous line
-		if let Some(mut r) = prev_line_range {
+		if let Some(r) = prev_line_range {
+			let mut prev_line = &self.source[r];
 			let mut ddd_before = "";
 
-			if r.len() > MAX_PREVIEW * 2 {
-				r.end = r.start + MAX_PREVIEW * 2;
+			if let Some(prev_clipped) = utils::truncated_end(prev_line, MAX_PREVIEW * 2) {
+				prev_line = prev_clipped;
 				ddd_before = "...";
 			}
 
 			out.push(fmt!(
-				"{FF}{:6} {F}│  {W}{}{F}{ddd_before}",
+				"{FF}{:6} {F}│  {W}{prev_line}{F}{ddd_before}",
 				line_number - 1,
-				&self.source[r],
 			));
 		}
 
@@ -1080,18 +1080,18 @@ impl Renderer<'_>
 		));
 
 		// next line
-		if let Some(mut r) = next_line_range {
+		if let Some(r) = next_line_range {
+			let mut next_line = &self.source[r];
 			let mut ddd_after = "";
 
-			if r.len() > MAX_PREVIEW * 2 {
-				r.end = r.start + MAX_PREVIEW * 2;
+			if let Some(next_clipped) = utils::truncated_end(next_line, MAX_PREVIEW * 2) {
+				next_line = next_clipped;
 				ddd_after = "...";
 			}
 
 			out.push(fmt!(
-				"{FF}{:6} {F}│  {W}{}{F}{ddd_after}",
+				"{FF}{:6} {F}│  {W}{next_line}{F}{ddd_after}",
 				line_number + 1,
-				&self.source[r],
 			));
 		}
 
