@@ -41,7 +41,6 @@ macro_rules! lock {
 		}
 	}
 }
-use itertools::Itertools;
 pub use lock;
 
 
@@ -137,12 +136,17 @@ pub fn error(err: impl Borrow<SquarkError>)
 		return;
 	}
 
-	let _lock = LOG_LOCK.lock()
-		.expect("global log lock was poisoned!!");
+	let _lock = LOG_LOCK.lock().expect("global log lock was poisoned!!");
 
-	line();
+	if COLLAPSE_ERRORS.get().is_none() {
+		line();
+	}
+	
 	print_error(err.borrow(), 1, false);
-	line();
+
+	if COLLAPSE_ERRORS.get().is_none() {
+		line();
+	}
 }
 
 fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
@@ -165,18 +169,11 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 			
 			if COLLAPSE_ERRORS.get().is_some() {
 				return
-				// log only first nonempty line
-				// for each in debug {
-				// 	if !each.is_empty() && each != " " {
-				// 		debug!(indent => each);
-				// 		break
-				// 	}
-				// }
-			} else {
-				for each in debug {
-					if !each.is_empty() {
-						debug!(indent => each);
-					}
+			}
+
+			for each in debug {
+				if !each.is_empty() {
+					debug!(indent => each);
 				}
 			}
 
@@ -189,10 +186,15 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 		{
 			if !already_shown_when && !when.is_empty() {
 				already_shown_when = true;
+
 				let count = err.len();
 				let plural = if count == 1 {""} else {"s"};
 				bad!(indent => "{count} error{plural} while {when}");
-				line();
+
+				if COLLAPSE_ERRORS.get().is_none() {
+					line();
+				}
+
 				indent += 2;
 			}
 
@@ -201,10 +203,10 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 					continue;
 				}
 				// 1st error already has preceeding line
-				if i != 0 {
+				if i != 0 && COLLAPSE_ERRORS.get().is_none() {
 					if let SquarkError::Multiple{..} = &err {
 						line();
-					} else if !COLLAPSE_ERRORS.get().is_some() {
+					} else {
 						// Don't print lines between lowest-level aggregated errors
 						println!();
 					}
