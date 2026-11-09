@@ -994,7 +994,7 @@ impl Renderer<'_>
 
 		if !self.page.description.is_empty()
 		{
-			let content = self.page.description.replace('\"', "\\\"");
+			let content = self.page.description.replace('\"', "&quot;");
 			writeln!(file, "\t<meta name=\"description\" content=\"{content}\" />")?;
 		}
 

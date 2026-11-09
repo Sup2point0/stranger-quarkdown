@@ -40,9 +40,10 @@ I’m working on fixing these!
   - This replaces `<>` outside of HTML tags with `&lt;` `&gt;` for HTML safety.
 - `format.escape-braces` option, enabled by default.
   - This replaces `{}` outside of code with `&lbrace;` `&rbrace;` for Svelte safety.
-- Improve error formatting
+- `squarkdown --compact` flag to collapse error messages.
 
 ### Fixes
+- Escape `"` inside `<meta name="description">` as `&quot;` instead of `\"` (which doesn’t escape properly).
 - Truncate previous and next lines of source snapshots in rendering errors.
 
 

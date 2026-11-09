@@ -103,7 +103,7 @@ use path_macro::path;
 	assert_not_contains!( main, "#SQUARK" );
 }
 
-/// Squarkdown injects `<svelte:head>` with `<title>` and `<meta name="description">`.
+/// Squarkdown injects `<svelte:head>` with `<title>` and `<meta name="description">`, escaping quotes properly.
 #[test] fn head()
 {
 	clear_files("render/head").unwrap();
@@ -112,7 +112,7 @@ use path_macro::path;
 	let md = read_file("render/head/+page.svx");
 	assert_contains!( md, "<svelte:head>\n" );
 	assert_contains!( md, "<title> Sup, World! · Squarkdown Tests </title>\n" );
-	assert_contains!( md, "<meta name=\"description\" content=\"The quick brown fox jumps over the lazy dog\" />\n" );
+	assert_contains!( md, "<meta name=\"description\" content=\"The quick brown fox &quot;jumps&quot; over the lazy dog\" />\n" );
 	assert_contains!( md, "</svelte:head>\n" );
 }
 
