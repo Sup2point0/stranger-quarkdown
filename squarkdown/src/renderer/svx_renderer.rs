@@ -555,7 +555,8 @@ impl Renderer<'_>
 			}
 
 			// sanitise text
-			Event::Text(text) => Some(self.process_text(text)),
+			Event::Text(ref mut text) => { self.process_text(text, false); Some(event) }
+			Event::Html(ref mut text) => { self.process_text(text, true);  Some(event) }
 
 			_ => Some(event),
 		};
@@ -909,23 +910,24 @@ impl Renderer<'_>
 	/// 
 	/// This includes:
 	/// 
-	/// - HTML entity processing
-	fn process_text<'e>(&self, text: pd::CowStr) -> Event<'e>
+	/// - HTML entity literalising
+	/// - Escaping angles, braces, brackets
+	fn process_text<'e>(&self, text: &mut pd::CowStr, is_html: bool)
 	{
-		let mut text = ENTITY_PATTERNS.replace_all(&text, &ENTITY_REPLACEMENTS);
+		let mut repl = ENTITY_PATTERNS.replace_all(&text, &ENTITY_REPLACEMENTS);
 
-		if self.config.format.escape_angles {
-			text = ANGLE_PATTERNS.replace_all(&text, &ANGLE_REPLACEMENTS);
+		if self.config.format.escape_angles && !is_html {
+			repl = ANGLE_PATTERNS.replace_all(&repl, &ANGLE_REPLACEMENTS);
 		}
 		if self.config.format.escape_braces {
-			text = BRACE_PATTERNS.replace_all(&text, &BRACE_REPLACEMENTS);
+			repl = BRACE_PATTERNS.replace_all(&repl, &BRACE_REPLACEMENTS);
 		}
 
 		if self.ctx.is_link() {
-			text = BRACKET_PATTERNS.replace_all(&text, &BRACKET_REPLACEMENTS);
+			repl = BRACKET_PATTERNS.replace_all(&repl, &BRACKET_REPLACEMENTS);
 		}
 
-		Event::Text(text.into())
+		*text = repl.into();
 	}
 }
 
