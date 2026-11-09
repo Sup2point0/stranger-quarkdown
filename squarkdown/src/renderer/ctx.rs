@@ -29,7 +29,7 @@ pub enum RenderCtx
 	#[display("table")]
 	TABLE,
 
-	#[display("table")]
+	#[display("table (no repair)")]
 	TABLE_NO_REPAIR,
 
 	#[display("table (repairing)")]

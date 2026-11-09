@@ -38,6 +38,12 @@ impl<Ctx> ContextStack<Ctx>
 	pub fn push(&mut self, ctx: Ctx) {
 		self.stack.push(ctx);
 	}
+
+	/// Replace the current context.
+	pub fn replace(&mut self, ctx: Ctx) {
+		self.stack.pop();
+		self.stack.push(ctx);
+	}
 }
 
 impl<Ctx> ContextStack<Ctx>
