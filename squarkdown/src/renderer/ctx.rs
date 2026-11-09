@@ -30,7 +30,10 @@ pub enum RenderCtx
 	TABLE,
 
 	#[display("table (repairing)")]
-	TABLE_REPAIR,
+	TABLE_REPAIR {
+		/// Are we also inserting a surrounding `<tr>` element?
+		with_row: bool,
+	},
 
 	// TODO stringify with key
 

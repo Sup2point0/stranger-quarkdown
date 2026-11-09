@@ -510,14 +510,22 @@ impl Renderer<'_>
 				)
 				&& self.ctx.try_pop_exact(&Ctx::TABLE).is_ok() =>
 			{
-				self.ctx.push(Ctx::TABLE_REPAIR);
-				return Some(Event::Html(fmt!("<tbody> {text}").into()))
+				let with_row = text.contains("<th>") || text.contains("<td>");
+				self.ctx.push(Ctx::TABLE_REPAIR { with_row });
+				return Some(Event::Html(fmt!("<tbody>{} {text}", if with_row {"<tr>"} else {""}).into()))
 			}
 			Event::Html(ref text) if text.contains("</table>")
 				&& self.config.format.repair_tables =>
 			{
-				if self.ctx.try_pop_exact(&Ctx::TABLE_REPAIR).is_ok() {
-					return Some(Event::Html(pd::CowStr::Borrowed("</tbody></table>")))
+				if let Ok(Ctx::TABLE_REPAIR { with_row })
+					= self.ctx.try_pop_any(&Ctx::TABLE_REPAIR { with_row: false })
+				{
+					let out = if with_row {
+						"</tr></tbody></table>"
+					} else {
+						"</tbody></table>"
+					};
+					return Some(Event::Html(out.into()))
 				}
 
 				if self.ctx.try_pop_exact(&Ctx::TABLE).is_err() {
@@ -1686,7 +1694,7 @@ mod tables {
 		]);
 	}
 
-	#[test] fn repair() {
+	#[test] fn repair_tbody() {
 		test_expected(&[
 			(
 				indoc! {"
@@ -1712,6 +1720,27 @@ mod tables {
 							<td> Testing </td>
 						</tr>
 					</tbody></table>
+				"}
+			),
+		]);
+	}
+
+	#[test] fn repair_tbody_tr() {
+		test_expected(&[
+			(
+				indoc! {"
+					.
+
+					<table>
+						<td> Test </td>
+					</table>
+				"},
+				indoc! {"
+					.
+
+					<table>
+					<tbody><tr> 	<td> Test </td>
+					</tr></tbody></table>
 				"}
 			),
 		]);

@@ -43,6 +43,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.8.2
+
+### Fixes
+- Insert missing `<tr>` too when `format.repair-tables = true`.
+
+
 ## v4.8.1
 
 ### New
