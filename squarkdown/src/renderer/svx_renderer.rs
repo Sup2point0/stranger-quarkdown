@@ -416,7 +416,17 @@ impl Renderer<'_>
 	/// Transform a single `pulldown-cmark` event depending on the current context.
 	fn transform_event<'e>(&mut self, event: Event<'e>, range: ParserRange) -> Option<Event<'e>>
 	{
-		/* We almost always need to process comments, to check for squarks that may _change_ the context. The exception is if we're in a code context. */
+		/* Text is left untouched inside code blocks, so handle them before everything else. */
+		if let Start(Tag::CodeBlock(..)) = event {
+			self.ctx.push(Ctx::CODE);
+		}
+		else if let End(TagEnd::CodeBlock) = event {
+			if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
+				log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
+			}
+		}
+
+		/* We almost always need to process comments (Event::Html), to check for squarks that may _change_ the context. The exception is if we're in a code context. */
 		if let Event::Html(ref html) | Event::InlineHtml(ref html) = event
 			&& !self.ctx.is_code()
 		{
@@ -426,7 +436,6 @@ impl Renderer<'_>
 				ProcessAction::DEFER => {}
 			}
 		}
-
 		/* But for everything else, handling will depend on the current context */
 	
 		/* NOTE: LEAVE has higher priority than SLASH, so doesn't matter if it's [SLASH, LEAVE] or [LEAVE, SLASH], the content should still be left untouched! */
@@ -436,6 +445,11 @@ impl Renderer<'_>
 		}
 		if self.ctx.has_slash() {
 			return None
+		}
+
+		/* Code content should never be touched. */
+		if self.ctx.is_code() {
+			return Some(event)
 		}
 
 		/* Keep comments only if `preserve_comments: true` */
@@ -451,17 +465,6 @@ impl Renderer<'_>
 	{
 		let out = match event
 		{
-			Start(Tag::CodeBlock(..)) => {
-				self.ctx.push(Ctx::CODE);
-				Some(event)
-			}
-			End(TagEnd::CodeBlock) => {
-				if self.ctx.try_pop_exact(&Ctx::CODE).is_err() {
-					log::warns!("internal bug: failed to pop code context, but code contexts should never have further contexts inside them");
-				}
-				Some(event)
-			}
-
 			// rewrite link
 			Start(Tag::Link{ ref mut dest_url, .. }) =>
 			{
@@ -552,7 +555,8 @@ impl Renderer<'_>
 			}
 
 			// sanitise text
-			Event::Text(text) => Some(self.process_text(text)),
+			Event::Text(ref mut text) => { self.process_text(text, false); Some(event) }
+			Event::Html(ref mut text) => { self.process_text(text, true);  Some(event) }
 
 			_ => Some(event),
 		};
@@ -802,7 +806,7 @@ impl Renderer<'_>
 			LinkRewriteAction::MARK_DEAD =>
 			{	
 				self.errors.push(SquarkError::Warning {
-					msg: fmt!("Found a {msg}, marking it as broken"),
+					msg: fmt!("Found a {msg}, marking it as {W}.dead-link"),
 					hint,
 					debug: [
 						self.source_printed(range),
@@ -906,40 +910,56 @@ impl Renderer<'_>
 	/// 
 	/// This includes:
 	/// 
-	/// - HTML entity processing
-	fn process_text<'e>(&self, text: pd::CowStr) -> Event<'e>
+	/// - HTML entity literalising
+	/// - Escaping angles, braces, brackets
+	fn process_text<'e>(&self, text: &mut pd::CowStr, is_html: bool)
 	{
-		let mut text = HTML_ENTITY_PATTERNS.replace_all(&text, &HTML_ENTITY_REPLACE_WITH);
+		let mut repl = ENTITY_PATTERNS.replace_all(&text, &ENTITY_REPLACEMENTS);
 
-		if self.ctx.is_link() {
-			text = BRACKET_PATTERNS.replace_all(&text, &BRACKET_REPLACEMENTS);
+		if is_html {
+			repl = ANGLE_SPACED_PATTERNS.replace_all(&repl, &ANGLE_SPACED_REPLACEMENTS);
+		} else if self.config.format.escape_angles {
+			repl = ANGLE_PATTERNS.replace_all(&repl, &ANGLE_REPLACEMENTS);
 		}
 
-		Event::Text(text.into())
+		if self.config.format.escape_braces {
+			repl = BRACE_PATTERNS.replace_all(&repl, &BRACE_REPLACEMENTS);
+		}
+
+		if self.ctx.is_link() {
+			repl = BRACKET_PATTERNS.replace_all(&repl, &BRACKET_REPLACEMENTS);
+		}
+
+		*text = repl.into();
 	}
 }
 
+macro_rules! aho {
+	($($args:tt)+) => { LazyLock::new(|| AhoCorasick::new([$($args)+]).unwrap()) }
+}
+
 /// HTML entities that [`pulldown_cmark`] parses as unicode, to transform back into literal entities mapping into [`HTML_ENTITY_REPLACE_WITH`].
-pub static HTML_ENTITY_PATTERNS: LazyLock<AhoCorasick>
-	= LazyLock::new(||
-		AhoCorasick::new(["\u{2002}", "\u{2003}"]).unwrap()
-	);
+pub static ENTITY_PATTERNS: LazyLock<AhoCorasick>  = aho!["\u{2002}", "\u{2003}"];
+pub const  ENTITY_REPLACEMENTS: [&str; 2]          = ["&ensp;", "&emsp;"];
 
-/// HTML entities that [`pulldown_cmark`] parses as unicode, mapped from [`HTML_ENTITY_PATTERNS`].
-pub const HTML_ENTITY_REPLACE_WITH: [&str; 2]
-	= ["&ensp;", "&emsp;"];
+pub static ANGLE_PATTERNS: LazyLock<AhoCorasick>   = aho!["<", ">"];
+pub const  ANGLE_REPLACEMENTS: [&str; 2]           = ["&lt;", "&gt;"];
 
-pub static BRACKET_PATTERNS: LazyLock<AhoCorasick> = LazyLock::new(||
-	AhoCorasick::new(["[", "]"]).unwrap()
-);
-pub static BRACKET_REPLACEMENTS: [&str; 2]
-	= ["&lbrack;", "&rbrack;"];
+/* NOTE: Angle bracket replacement inside HTML is extremely nontrivial, and we don’t want _an HTML parser on top of a Markdown parser_, holy mackerel. So we’ll do best-effort sanitisation by looking for tags with spaces, which makes them unlikely to be HTML tags (since who writes `< p >`??) */
+pub static ANGLE_SPACED_PATTERNS: LazyLock<AhoCorasick>   = aho!["< ", " >"];
+pub const  ANGLE_SPACED_REPLACEMENTS: [&str; 2]           = ["&lt; ", " &gt;"];
+
+pub static BRACE_PATTERNS: LazyLock<AhoCorasick>   = aho!["{", "}"];
+pub const  BRACE_REPLACEMENTS: [&str; 2]           = ["&amp;lbrace;", "&amp;rbrace;"];
+
+pub static BRACKET_PATTERNS: LazyLock<AhoCorasick> = aho!["[", "]"];
+pub const  BRACKET_REPLACEMENTS: [&str; 2]         = ["&lbrack;", "&rbrack;"];
 
 
 /// Miscellaneous injections
 impl Renderer<'_>
 {
-	/// Write a timestamp to `file`.
+	/// Write the current timestamp to `file`.
 	fn inject_timestamp(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		let now = UtcDateTime::now();
@@ -954,6 +974,7 @@ impl Renderer<'_>
 		Ok(())
 	}
 
+	/// Write the `<head>` metadata of this page to `file`.
 	fn inject_head(&self, file: &mut impl io::Write) -> SquarkResult
 	{
 		if self.page.title.is_empty() {
@@ -973,7 +994,7 @@ impl Renderer<'_>
 
 		if !self.page.description.is_empty()
 		{
-			let content = self.page.description.replace('\"', "\\\"");
+			let content = self.page.description.replace('\"', "&quot;");
 			writeln!(file, "\t<meta name=\"description\" content=\"{content}\" />")?;
 		}
 
@@ -1021,10 +1042,17 @@ impl Renderer<'_>
 
 		// previous line
 		if let Some(r) = prev_line_range {
+			let mut prev_line = &self.source[r];
+			let mut ddd_before = "";
+
+			if let Some(prev_clipped) = utils::truncated_end(prev_line, MAX_PREVIEW * 2) {
+				prev_line = prev_clipped;
+				ddd_before = "...";
+			}
+
 			out.push(fmt!(
-				"{FF}{:6} {F}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{prev_line}{F}{ddd_before}",
 				line_number - 1,
-				&self.source[r],
 			));
 		}
 
@@ -1036,7 +1064,7 @@ impl Renderer<'_>
 		let mut before = if r_before.is_empty() {""} else {&self.source[r_before]};
 		let mut after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
 		
-		// clip to prevent lines from blowing up terminal output
+		/* Clip to prevent lines from blowing up terminal output */
 		const MAX_PREVIEW: usize = 32;
 		const MIN_PREVIEW: usize = 7;
 		let shrink_chars = zero!(focus.len() - MAX_PREVIEW);
@@ -1060,10 +1088,17 @@ impl Renderer<'_>
 
 		// next line
 		if let Some(r) = next_line_range {
+			let mut next_line = &self.source[r];
+			let mut ddd_after = "";
+
+			if let Some(next_clipped) = utils::truncated_end(next_line, MAX_PREVIEW * 2) {
+				next_line = next_clipped;
+				ddd_after = "...";
+			}
+
 			out.push(fmt!(
-				"{FF}{:6} {F}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{next_line}{F}{ddd_after}",
 				line_number + 1,
-				&self.source[r],
 			));
 		}
 
@@ -1176,19 +1211,14 @@ const DEBUG: bool
 // {
 // 	let source = indoc! {"
 // 		t
-
-// 		<table>
-// 			<tr>
-// 				<th> Test </th>
-// 			</tr>
-// 		</table>
+// 		<p> {...} </p>
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
 // 	config.errors.strict = true;
 // 	config.errors.strict = false;
 // 	config.errors.link_inactive = LinkRewriteAction::MARK_DEAD;
-// 	config.format.externalise_links = true;
+// 	config.format.preserve_comments = true;
 // 	let mut renderer = Renderer::new(&TEST_PAGE, &TEST_SITE_DATA, &config);
 // 	let out = renderer.render_from(source.trim()).unwrap();
 // 	log::error(renderer.errors);
@@ -1952,8 +1982,10 @@ mod comments {
 				"not -->",
 				"not --> a comment",
 				"not -->\na comment",
-				"\\-->",
 				"--> a comment",
+			]);
+			test_expected(&[
+				("\\-->", "\\--&gt;"),
 			]);
 		}
 

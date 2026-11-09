@@ -1,5 +1,5 @@
 {
-  "squarkdown-version": "4.8",
+  "squarkdown-version": "4.9",
 
   "title":       "Squarkup Configuration Schema",
   "description": "Shared schema for your squarkup.toml or squarkup.json",
@@ -214,6 +214,20 @@
           "type":        "boolean",
           "default":     true,
           "description": "Convert links containing `<sup>↗</sup>` to `<a target=\"_blank\">` elements?"
+        },
+
+        "escape-angles": {
+          "title":       "Escape Angle Brackets",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Escape `<>` (that don’t form HTML tags) as `&lt;` `&gt;` for HTML safty?"
+        },
+
+        "escape-braces": {
+          "title":       "Escape Curly Braces",
+          "type":        "boolean",
+          "default":     true,
+          "description": "Escape `{}` as `&lbrace;` `&rbrace;` for Svelte safety?"
         },
 
         "repair-tables": {

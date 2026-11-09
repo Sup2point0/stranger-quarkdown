@@ -9,7 +9,7 @@
 //! To prevent interleaved console output, logging errors is made atomic via [`LOG_LOCK`].
 
 use crate::prelude::*;
-use crate::cli::{ NO_INFO, NO_WARN };
+use crate::cli::{ COLLAPSE_ERRORS, NO_INFO, NO_WARN };
 use crate::utils::colours::*;
 
 use std::borrow::{ Borrow };
@@ -136,16 +136,22 @@ pub fn error(err: impl Borrow<SquarkError>)
 		return;
 	}
 
-	let _lock = LOG_LOCK.lock()
-		.expect("global log lock was poisoned!!");
+	let _lock = LOG_LOCK.lock().expect("global log lock was poisoned!!");
 
-	line();
+	if COLLAPSE_ERRORS.get().is_none() {
+		line();
+	}
+	
 	print_error(err.borrow(), 1, false);
-	line();
+
+	if COLLAPSE_ERRORS.get().is_none() {
+		line();
+	}
 }
 
 fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: bool)
 {
+	// lmao me when printing a damn error is so complex
 	match err
 	{
 		  SquarkError::Recoverable{ msg, hint, debug }
@@ -161,6 +167,10 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 				bad!(indent => msg);
 			}
 			
+			if COLLAPSE_ERRORS.get().is_some() {
+				return
+			}
+
 			for each in debug {
 				if !each.is_empty() {
 					debug!(indent => each);
@@ -176,10 +186,15 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 		{
 			if !already_shown_when && !when.is_empty() {
 				already_shown_when = true;
+
 				let count = err.len();
 				let plural = if count == 1 {""} else {"s"};
 				bad!(indent => "{count} error{plural} while {when}");
-				line();
+
+				if COLLAPSE_ERRORS.get().is_none() {
+					line();
+				}
+
 				indent += 2;
 			}
 
@@ -188,7 +203,7 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 					continue;
 				}
 				// 1st error already has preceeding line
-				if i != 0 {
+				if i != 0 && COLLAPSE_ERRORS.get().is_none() {
 					if let SquarkError::Multiple{..} = &err {
 						line();
 					} else {
@@ -202,7 +217,8 @@ fn print_error(err: &SquarkError, mut indent: usize, mut already_shown_when: boo
 
 		SquarkError::External{ err, msg, backtrace } => {
 			bad!(indent => msg);
-			println!("\n   {R}{err:?}");
+			info!(indent => "");
+			info!(indent => "{R}{err:?}");
 			println!("\n{F}{backtrace}");
 		}
 

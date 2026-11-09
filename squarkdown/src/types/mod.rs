@@ -6,9 +6,6 @@ pub use squark_error::{ SquarkAction, SquarkResult, SquarkError, CollectSquark }
 mod page_data;
 pub use page_data::{ PageData };
 
-mod cleanse;
-pub use cleanse::{ CleanseOperation };
-
 mod site_data;
 pub use site_data::{ SiteData, SiteStats };
 

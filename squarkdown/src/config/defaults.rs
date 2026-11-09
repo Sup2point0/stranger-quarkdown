@@ -45,6 +45,7 @@ impl SquarkupConfig
 			charm: CharmConfig {
 				flags: None,
 				fields: None,
+				// allow_custom: true,
 			},
 			out: OutConfig {
 				folder: path!(site / "src/routes/"),
@@ -58,6 +59,8 @@ impl SquarkupConfig
 				preserve_heading: false,
 				preserve_comments: false,
 				externalise_links: true,
+				escape_angles: true,
+				escape_braces: true,
 				repair_tables: true,
 			},
 			assets: AssetsConfig {

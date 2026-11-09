@@ -219,6 +219,8 @@ For instance, `description` is shortened to `desc`, and `last_update` is shorten
 | [`preserve-heading`](#preserve-heading)   | boolean | `false` |
 | [`preserve-comments`](#preserve-comments) | boolean | `false` |
 | [`externalise-links`](#externalise-links) | boolean | `true` |
+| [`escape-angles`](#escape-angles)         | boolean | `true` |
+| [`escape-braces`](#escape-braces)         | boolean | `true` |
 | [`repair-tables`](#repair-tables)         | boolean | `true` |
 
 ### `inject-head`
@@ -235,7 +237,17 @@ Keep `<!-- comments -->` in the rendered output?
 ### `externalise-links`
 Convert links containing `<sup>↗</sup>` to `<a target="_blank">` elements?
 
-### `repair-html`
+### `escape-angles`
+Escape `<>` (that don’t form HTML tags) as `&lt;` `&gt;` for HTML safty?
+
+*New in v4.9*.
+
+### `escape-braces`
+Escape `{}` as `&lbrace;` `&rbrace;` for Svelte safety?
+
+*New in v4.9*.
+
+### `repair-tables`
 > See also: [Repairing HTML](../features/repair.md)
 
 Repair potentially broken HTML that would result in SvelteKit rendering errors?

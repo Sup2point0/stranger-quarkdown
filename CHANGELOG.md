@@ -36,8 +36,15 @@ I’m working on fixing these!
 ## Next Major (v4.9)
 
 ### New
-- `clean`
-- Improve error formatting
+- `format.escape-angles` option, enabled by default.
+  - This replaces `<>` outside of HTML tags with `&lt;` `&gt;` for HTML safety.
+- `format.escape-braces` option, enabled by default.
+  - This replaces `{}` outside of code with `&lbrace;` `&rbrace;` for Svelte safety.
+- `squarkdown --compact` flag to collapse error messages.
+
+### Fixes
+- Escape `"` inside `<meta name="description">` as `&quot;` instead of `\"` (which doesn’t escape properly).
+- Truncate previous and next lines of source snapshots in rendering errors.
 
 
 <br>

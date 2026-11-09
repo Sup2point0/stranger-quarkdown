@@ -24,6 +24,7 @@ pub fn squarkdown(args: impl Iterator<Item = String>) -> ExitCode
 	for arg in args {
 		if      arg.eq_ignore_ascii_case("--quiet")   { let _ = NO_INFO.set(()); }
 		else if arg.eq_ignore_ascii_case("--no-warn") { let _ = NO_WARN.set(()); }
+		else if arg.eq_ignore_ascii_case("--compact") { let _ = COLLAPSE_ERRORS.set(()); }
 		else if arg.eq_ignore_ascii_case("--dry-run") { dry_run = true; }
 		else if arg.eq_ignore_ascii_case("--assets")  { assets = true; }
 		else if arg.eq_ignore_ascii_case("--fonts")   { fonts = true; }
