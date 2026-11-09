@@ -499,23 +499,31 @@ impl Renderer<'_>
 				return Some(event)
 			}
 
-			// repair table
+			/* Repair Tables
+				- When we find a <table>, push TABLE.
+				- At the first row, check for <tr>, <th>, <td>.
+				  - If found, replace TABLE with TABLE_REPAIR and insert <tbody>. Insert <tr> too if missing.
+				  - Otherwise, replace TABLE with TABLE_NO_REPAIR.
+				- One we reach </table>:
+				  - If TABLE_REPAIR, insert </tbody>.
+				  - Otherwise, no-op.
+			*/
 			Event::Html(ref text) if text.contains("<table>") => {
 				self.ctx.push(Ctx::TABLE);
 				return Some(event)
 			}
 			Event::Html(ref text)
 				if self.config.format.repair_tables
+				&& let Ctx::TABLE = self.ctx.current()
 				&& !text.contains("<tbody>")
 				&& (
 						text.contains("<tr>")
 					|| text.contains("<th>")
 					|| text.contains("<td>")
-				)
-				&& self.ctx.try_pop_exact(&Ctx::TABLE).is_ok() =>
+				) =>
 			{
 				let with_row = !text.contains("<tr>");
-				self.ctx.push(Ctx::TABLE_REPAIR { with_row });
+				self.ctx.replace(Ctx::TABLE_REPAIR { with_row });
 				return Some(Event::Html(fmt!("<tbody>{} {text}", if with_row {"<tr>"} else {""}).into()))
 			}
 			Event::Html(ref text) if text.contains("</table>")
@@ -549,8 +557,11 @@ impl Renderer<'_>
 				}
 				return Some(event)
 			}
-			Event::Html(..) if self.ctx.try_pop_any(&Ctx::TABLE).is_ok() => {
-				self.ctx.push(Ctx::TABLE_NO_REPAIR);
+			Event::Html(ref text)
+				if let Ctx::TABLE{..} = self.ctx.current()
+				&& text.contains("<") =>
+			{
+				self.ctx.replace(Ctx::TABLE_NO_REPAIR);
 				return Some(event)
 			}
 
@@ -563,7 +574,7 @@ impl Renderer<'_>
 
 		if DEBUG {
 			println!(
-				"\n{G}»{B} {B}{:?}{W}",
+				"\n{G}» {B}{:?}{W}",
 				self.ctx.prints_with_prefix("").rev().collect_vec()
 			);
 		}
@@ -1210,8 +1221,13 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		t
-// 		<p> {...} </p>
+// last
+
+// <table>
+//   <tr>
+//     <th colspan=\"2\"> <h3> Darkchoke Curse </h3> </th>
+//   </tr>
+// </table>
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
