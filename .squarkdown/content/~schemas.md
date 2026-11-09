@@ -2,6 +2,7 @@
 <!-- #SQUARK live!
 | dest = schemas
 | desc = JSON Schemas for Configuring Stranger Quarkdown
+| update = 2026 November 9
 -->
 
 <div class="quicklinks" align="center">
@@ -14,7 +15,9 @@ Stranger Quarkdown provides a [JSON Schema<sup>↗</sup>](https://json-schema.or
 
 [^toml]: JSON Schema can validate TOML too!
 
-To use it, link a schema to your config:
+This will enable error-checking, autocomplete, and helpful hover tooltips in IDEs.
+
+To harness it, link a schema to your config:
 
 ```toml
 #:schema https://sup2point0.github.io/stranger-quarkdown/schemas/latest
@@ -24,7 +27,8 @@ name = "Schemafied!"
 # ...
 ```
 
-This will enable error-checking, autocomplete, and helpful hover tooltips in IDEs.
+> [!Tip]
+> The `.json` extension is optional, the Squarkdown site serves the same file both with and without the extension.
 
 
 ## Versions
@@ -37,9 +41,9 @@ If you’d like to pin your schema to your particular version, you can access pa
 
 ### Supported
 <!-- #SQUARK leave? -->
-- [v4.8](schemas/v4.8) (latest)
-- [v4.7](schemas/v4.7)
-- [v4.4](schemas/v4.4)
+- [v4.8](schemas/v4.8.json) (latest)
+- [v4.7](schemas/v4.7.json)
+- [v4.4](schemas/v4.4.json)
 <!-- #SQUARK leave. -->
 
 ### Archived
