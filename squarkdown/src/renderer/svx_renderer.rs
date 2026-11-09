@@ -805,7 +805,7 @@ impl Renderer<'_>
 			LinkRewriteAction::MARK_DEAD =>
 			{	
 				self.errors.push(SquarkError::Warning {
-					msg: fmt!("Found a {msg}, marking it as broken"),
+					msg: fmt!("Found a {msg}, marking it as {W}.dead-link"),
 					hint,
 					debug: [
 						self.source_printed(range),
@@ -1032,9 +1032,16 @@ impl Renderer<'_>
 		out.push(str!(" "));
 
 		// previous line
-		if let Some(r) = prev_line_range {
+		if let Some(mut r) = prev_line_range {
+			let mut ddd_before = "";
+
+			if r.len() > MAX_PREVIEW * 2 {
+				r.end = r.start + MAX_PREVIEW * 2;
+				ddd_before = "...";
+			}
+
 			out.push(fmt!(
-				"{FF}{:6} {F}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{}{F}{ddd_before}",
 				line_number - 1,
 				&self.source[r],
 			));
@@ -1048,7 +1055,7 @@ impl Renderer<'_>
 		let mut before = if r_before.is_empty() {""} else {&self.source[r_before]};
 		let mut after  = if r_after.is_empty()  {""} else {&self.source[r_after]};
 		
-		// clip to prevent lines from blowing up terminal output
+		/* Clip to prevent lines from blowing up terminal output */
 		const MAX_PREVIEW: usize = 32;
 		const MIN_PREVIEW: usize = 7;
 		let shrink_chars = zero!(focus.len() - MAX_PREVIEW);
@@ -1071,9 +1078,16 @@ impl Renderer<'_>
 		));
 
 		// next line
-		if let Some(r) = next_line_range {
+		if let Some(mut r) = next_line_range {
+			let mut ddd_after = "";
+
+			if r.len() > MAX_PREVIEW * 2 {
+				r.end = r.start + MAX_PREVIEW * 2;
+				ddd_after = "...";
+			}
+
 			out.push(fmt!(
-				"{FF}{:6} {F}│  {W}{}",
+				"{FF}{:6} {F}│  {W}{}{F}{ddd_after}",
 				line_number + 1,
 				&self.source[r],
 			));

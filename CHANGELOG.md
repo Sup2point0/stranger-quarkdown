@@ -42,6 +42,9 @@ I’m working on fixing these!
   - This replaces `{}` outside of code with `&lbrace;` `&rbrace;` for Svelte safety.
 - Improve error formatting
 
+### Fixes
+- Truncate previous and next lines of source snapshots in rendering errors.
+
 
 <br>
 
