@@ -916,9 +916,12 @@ impl Renderer<'_>
 	{
 		let mut repl = ENTITY_PATTERNS.replace_all(&text, &ENTITY_REPLACEMENTS);
 
-		if self.config.format.escape_angles && !is_html {
+		if is_html {
+			repl = ANGLE_SPACED_PATTERNS.replace_all(&repl, &ANGLE_SPACED_REPLACEMENTS);
+		} else if self.config.format.escape_angles {
 			repl = ANGLE_PATTERNS.replace_all(&repl, &ANGLE_REPLACEMENTS);
 		}
+
 		if self.config.format.escape_braces {
 			repl = BRACE_PATTERNS.replace_all(&repl, &BRACE_REPLACEMENTS);
 		}
@@ -941,6 +944,10 @@ pub const  ENTITY_REPLACEMENTS: [&str; 2]          = ["&ensp;", "&emsp;"];
 
 pub static ANGLE_PATTERNS: LazyLock<AhoCorasick>   = aho!["<", ">"];
 pub const  ANGLE_REPLACEMENTS: [&str; 2]           = ["&lt;", "&gt;"];
+
+/* NOTE: Angle bracket replacement inside HTML is extremely nontrivial, and we don’t want _an HTML parser on top of a Markdown parser_, holy mackerel. So we’ll do best-effort sanitisation by looking for tags with spaces, which makes them unlikely to be HTML tags (since who writes `< p >`??) */
+pub static ANGLE_SPACED_PATTERNS: LazyLock<AhoCorasick>   = aho!["< ", " >"];
+pub const  ANGLE_SPACED_REPLACEMENTS: [&str; 2]           = ["&lt; ", " &gt;"];
 
 pub static BRACE_PATTERNS: LazyLock<AhoCorasick>   = aho!["{", "}"];
 pub const  BRACE_REPLACEMENTS: [&str; 2]           = ["&amp;lbrace;", "&amp;rbrace;"];
@@ -1203,10 +1210,8 @@ const DEBUG: bool
 // #[test] fn playground()
 // {
 // 	let source = indoc! {"
-// 		```md
-// 		{test}
-// 		```
-// 		<!-- test -->
+// 		t
+// 		<p> {...} </p>
 // 	"};
 
 // 	let mut config = TEST_CONFIG.clone();
