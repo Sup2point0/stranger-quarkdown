@@ -943,7 +943,7 @@ pub static ANGLE_PATTERNS: LazyLock<AhoCorasick>   = aho!["<", ">"];
 pub const  ANGLE_REPLACEMENTS: [&str; 2]           = ["&lt;", "&gt;"];
 
 pub static BRACE_PATTERNS: LazyLock<AhoCorasick>   = aho!["{", "}"];
-pub const  BRACE_REPLACEMENTS: [&str; 2]           = ["&lbrace;", "&rbrace;"];
+pub const  BRACE_REPLACEMENTS: [&str; 2]           = ["&amp;lbrace;", "&amp;rbrace;"];
 
 pub static BRACKET_PATTERNS: LazyLock<AhoCorasick> = aho!["[", "]"];
 pub const  BRACKET_REPLACEMENTS: [&str; 2]         = ["&lbrack;", "&rbrack;"];
