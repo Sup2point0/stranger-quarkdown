@@ -40,6 +40,7 @@ I’m working on fixing these!
   - This replaces `<>` outside of HTML tags with `&lt;` `&gt;` for HTML safety.
 - `format.escape-braces` option, enabled by default.
   - This replaces `{}` outside of code with `&lbrace;` `&rbrace;` for Svelte safety.
+- `squarkdown clean --assets` to delete asset files.
 - `squarkdown --compact` flag to collapse error messages.
 
 ### Fixes

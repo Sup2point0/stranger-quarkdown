@@ -6,6 +6,7 @@ use crate::utils::log;
 use crate::utils::colours::*;
 
 use git2 as git;
+use path_macro::path;
 
 use std::fs;
 use std::path::{ Path, PathBuf };
@@ -20,12 +21,14 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 {
 	let mut dry_run = false;
 	let mut force   = false;
+	let mut assets  = false;
 	let mut unknown_args = vec![];
 
 	for arg in args {
 		if arg.eq_ignore_ascii_case("--dry-run")
-		|| arg.eq_ignore_ascii_case("--dryrun")     { dry_run = true; }
-		else if arg.eq_ignore_ascii_case("--force") { force = true; }
+		|| arg.eq_ignore_ascii_case("--dryrun")      { dry_run = true; }
+		else if arg.eq_ignore_ascii_case("--force")  { force   = true; }
+		else if arg.eq_ignore_ascii_case("--assets") { assets  = true; }
 		else {
 			unknown_args.push(arg);
 		}
@@ -40,7 +43,7 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	log::is!("cleaning Squarkdown output...");
 
 	let t_init = Instant::now();
-	let r = cleanup(dry_run, force);
+	let r = cleanup(dry_run, force, assets);
 	let t = t_init.elapsed();
 	let perf = t.as_secs_f64() * 1000.0;
 
@@ -59,13 +62,13 @@ pub fn clean(args: impl Iterator<Item = String>) -> ExitCode
 	}
 }
 
-fn cleanup(dry_run: bool, force: bool) -> SquarkResult
+fn cleanup(dry_run: bool, force: bool, assets: bool) -> SquarkResult
 {
 	let project_root = resolver::resolve_project_root()?;
 	log::ok!(slash!("found your project: {B}{}", project_root));
 
 	let config = resolver::resolve_config(&project_root)?;
-	log::ok!(slash!("found your output folder: {B}{}", &config.out.folder));
+	log::ok!(slash!("found your site: {B}{}", &config.paths.site));
 
 	log::is!("checking for Git repository...");
 	let mut repo_info: Option<(git::Repository, PathBuf)> = None;
@@ -88,36 +91,48 @@ fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 		}
 	}
 
-	log::info!(slash!(
-		"{simulating}deleting files under: {}",
-		&config.out.folder,
-		simulating = if dry_run {"simulating "} else {""}
-	));
+	log::ok!(slash!("found your output folder: {B}{}", &config.out.folder));
+	log::info!(fmt!("{}deleting files", if dry_run {"simulating "} else {""}));
 
 	let mut errs = SquarkError::multiple("cleaning files");
 
 	/* NOTE: walkdir walker always returns `out.folder` itself, so we don't count that. */
 	let mut checked_paths = -1;
+
 	let mut deleted_paths = 0;
 	let mut skipped_paths = vec![];
 
-	let walker = walkdir::WalkDir::new(&config.out.folder)
+	for entry in walkdir::WalkDir::new(&config.out.folder)
 		.contents_first(true)
 		.into_iter()
-	;
-
-	for entry in walker {
+	{
 		checked_paths += 1;
 
 		catch!(errs => {
 			delete_dir(
-				&entry?.into_path(),
-				&repo_info,
-				&config,
-				dry_run,
-				&mut deleted_paths, &mut skipped_paths
+				&entry?.into_path(), &repo_info, &config, false, dry_run,
+				&mut deleted_paths, &mut skipped_paths,
 			)?;
 		});
+	}
+
+	if assets {
+		/* NOTE: walkdir walker always returns `site / static` itself, so we don't count that. */
+		checked_paths -= 1;
+
+		for entry in walkdir::WalkDir::new(path!(config.paths.site / "static"))
+			.contents_first(true)
+			.into_iter()
+		{
+			checked_paths += 1;
+
+			catch!(errs => {
+				delete_dir(
+					&entry?.into_path(), &repo_info, &config, true, dry_run,
+					&mut deleted_paths, &mut skipped_paths,
+				)?;
+			});
+		}
 	}
 
 	if checked_paths == 0 {
@@ -147,12 +162,13 @@ fn delete_dir(
 	path: &Path,
 	repo_info: &Option<(git::Repository, PathBuf)>,
 	config: &SquarkupConfig,
+	is_deleting_assets: bool,
 	dry_run: bool,
 	deleted_paths: &mut usize,
 	skipped_paths: &mut Vec<String>,
 ) -> SquarkResult
 {
-	if let Some((_, root)) = &repo_info && path.strip_prefix(root).is_err() {
+	if let Some((.., root)) = &repo_info && path.strip_prefix(root).is_err() {
 		return Err(SquarkError::Unrecoverable {
 			msg: fmt!("Critical error: received a path outside your project root"),
 			hint: str!(),
@@ -165,14 +181,12 @@ fn delete_dir(
 	let path_rel = utils::display_rel(&path, &config.paths.root);
 
 	// delete folder
-	if path.is_dir() && utils::is_empty_dir(&path)?
-	{
+	if path.is_dir() {
+		if !utils::is_empty_dir(&path)? { return Ok(())}
+
 		let (parent, folder) = utils::split_path(&path_rel);
 
-		log::info!(
-			"{}: {FF}{parent}/{folder}",
-			if dry_run {"would delete"} else {"deleting"}
-		);
+		log::info!("{}: {FF}{parent}/{folder}", if dry_run {"would delete"} else {"deleting"});
 		if !dry_run {
 			fs::remove_dir(path)?;
 		}
@@ -181,13 +195,17 @@ fn delete_dir(
 	}
 
 	// delete file
-	let Some(filename) = path.file_name() else {
-		return Ok(())
-	};
-	if *filename != *config.out.file_name
-	&& *filename != *"+page.ts"
-	{
-		return Ok(())
+	let Some(filename) = path.file_name() else { return Ok(()) };
+
+	if is_deleting_assets {
+		if !config.assets.has_asset_extension(path) {
+			return Ok(())
+		}
+	} else {
+		if *filename != *config.out.file_name
+		&& *filename != *"+page.ts" {
+			return Ok(())
+		}
 	}
 
 	let (folder, filename) = utils::split_path(&path_rel);

@@ -71,7 +71,6 @@ fn squarkup(
 
 	if dry_run || assets || fonts {
 		let mut enabled = vec![];
-
 		if dry_run { enabled.push("dry-run"); }
 		if assets  { enabled.push("assets"); }
 		if fonts   { enabled.push("fonts"); }
