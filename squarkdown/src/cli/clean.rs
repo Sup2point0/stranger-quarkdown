@@ -109,66 +109,14 @@ fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 	for entry in walker {
 		checked_paths += 1;
 
-		catch!(errs =>
-		{
-			let entry = entry?;
-			let path = entry.into_path();
-
-			if let Some((_, root)) = &repo_info && path.strip_prefix(root).is_err() {
-				return Err(SquarkError::Unrecoverable {
-					msg: fmt!("Critical error: received a path outside your project root"),
-					hint: str!(),
-					debug: vec![
-						slash!("would have tried deleting: {FF}{}", path)
-					],
-				});
-			}
-
-			let path_rel = utils::display_rel(&path, &config.paths.root);
-
-			// delete folder
-			if path.is_dir() && utils::is_empty_dir(&path)?
-			{
-				let (parent, folder) = utils::split_path(&path_rel);
-
-				log::info!(
-					"{}: {FF}{parent}/{folder}",
-					if dry_run {"would delete"} else {"deleting"}
-				);
-				if !dry_run {
-					fs::remove_dir(path)?;
-				}
-				deleted_paths += 1;
-				return Ok(())
-			}
-
-			// delete file
-			let Some(filename) = path.file_name() else {
-				return Ok(())
-			};
-			if *filename != *config.out.file_name && *filename != *"+page.ts" {
-				return Ok(())
-			}
-
-			let (folder, filename) = utils::split_path(&path_rel);
-			let path_display = fmt!("{FF}{folder}{F}/{filename}");
-			
-			// check Git safety
-			if let Some((repo, repo_folder)) = &repo_info
-				&& !is_safe_to_delete(&path, repo, repo_folder)?
-			{
-				skipped_paths.push(fmt!("skipped: {path_display}"));
-				return Ok(())
-			}
-
-			log::info!(
-				"{}: {path_display}",
-				if dry_run {"would delete"} else {"deleting"}
-			);
-			if !dry_run {
-				fs::remove_file(path)?;
-			}
-			deleted_paths += 1;
+		catch!(errs => {
+			delete_dir(
+				&entry?.into_path(),
+				&repo_info,
+				&config,
+				dry_run,
+				&mut deleted_paths, &mut skipped_paths
+			)?;
 		});
 	}
 
@@ -190,6 +138,76 @@ fn cleanup(dry_run: bool, force: bool) -> SquarkResult
 	}
 	
 	errs.or(())
+}
+
+/// Delete `path`, checking safety with `repo-info`.
+/// 
+/// Writes to `deleted-paths` and `skipped-paths` to pass along success/failure info.
+fn delete_dir(
+	path: &Path,
+	repo_info: &Option<(git::Repository, PathBuf)>,
+	config: &SquarkupConfig,
+	dry_run: bool,
+	deleted_paths: &mut usize,
+	skipped_paths: &mut Vec<String>,
+) -> SquarkResult
+{
+	if let Some((_, root)) = &repo_info && path.strip_prefix(root).is_err() {
+		return Err(SquarkError::Unrecoverable {
+			msg: fmt!("Critical error: received a path outside your project root"),
+			hint: str!(),
+			debug: vec![
+				slash!("would have tried deleting: {FF}{}", path)
+			],
+		});
+	}
+
+	let path_rel = utils::display_rel(&path, &config.paths.root);
+
+	// delete folder
+	if path.is_dir() && utils::is_empty_dir(&path)?
+	{
+		let (parent, folder) = utils::split_path(&path_rel);
+
+		log::info!(
+			"{}: {FF}{parent}/{folder}",
+			if dry_run {"would delete"} else {"deleting"}
+		);
+		if !dry_run {
+			fs::remove_dir(path)?;
+		}
+		*deleted_paths += 1;
+		return Ok(())
+	}
+
+	// delete file
+	let Some(filename) = path.file_name() else {
+		return Ok(())
+	};
+	if *filename != *config.out.file_name
+	&& *filename != *"+page.ts"
+	{
+		return Ok(())
+	}
+
+	let (folder, filename) = utils::split_path(&path_rel);
+	let path_display = fmt!("{FF}{folder}{F}/{filename}");
+	
+	// check Git safety
+	if let Some((repo, repo_folder)) = &repo_info
+		&& !is_safe_to_delete(&path, repo, repo_folder)?
+	{
+		skipped_paths.push(fmt!("skipped: {path_display}"));
+		return Ok(())
+	}
+
+	log::info!("{}: {path_display}", if dry_run {"would delete"} else {"deleting"});
+	if !dry_run {
+		fs::remove_file(path)?;
+	}
+	*deleted_paths += 1;
+
+	Ok(())
 }
 
 /// Is `path` a fully uncommitted, untracked, Git-ignored file that is safe to delete?
