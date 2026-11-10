@@ -27,13 +27,12 @@ I’m working on fixing these!
 
 - Markdown inside `#SQUARK only` is not properly parsed, meaning links are not rewritten.
 - `<!-- #SQUARK squark? --> usage <!-- #SQUARK squark. -->` in one line is not parsed and applied correctly.
-- `clean`(`se`) in charm squark has not yet been implemented.
 
 
 <br>
 
 
-## Next Major (v4.9)
+## v4.9
 
 ### New
 - `format.escape-angles` option, enabled by default.
