@@ -7,6 +7,9 @@ on-error = "kill"
 [paths]
 site = "../../test-project/"
 
+[out]
+folder = "src/routes/clean/assets/"
+
 [assets]
 folder = "."
 extensions = ['mdx']

@@ -62,19 +62,22 @@ use path_macro::path;
 /// Squarkdown cleans up output in `static/`.
 #[test] fn assets()
 {
-	assert!( squarkup!("clean/keep-folder", "--assets").success() );
+	assert!( squarkup!("clean/assets", "--assets").success() );
 	assert!( path!(*TEST_ROUTES / "clean/assets/+page.svx").exists() );
 	assert!( path!(*TEST_ROUTES / "clean/assets/+page.ts").exists() );
 	assert!( path!(*TEST_SITE / "static/assets/1.mdx").exists() );
 	assert!( path!(*TEST_SITE / "static/assets/nested/2.mdx").exists() );
 
-	assert!( squarkup!("clean/keep-folder", "clean", "--assets").success() );
+	let (status, out) = capture_squarkup!("clean/assets", "clean", "--assets");
+	assert_not!( status.success() );
+	assert_contains!( out, "Git-ignore" );
+
 	assert_not!( path!(*TEST_ROUTES / "clean/assets/+page.svx").exists() );
 	assert_not!( path!(*TEST_ROUTES / "clean/assets/+page.ts").exists() );
 
 	assert_not!( path!(*TEST_SITE / "static/assets/1.mdx").exists() );
 	assert_not!( path!(*TEST_SITE / "static/assets/nested/2.mdx").exists() );
 	assert_not!( path!(*TEST_SITE / "static/assets/nested").exists() );
-	assert!( path!(*TEST_SITE / "static/keep.mdx").exists() );
-	assert!( path!(*TEST_SITE / "static/keep/keep.mdx").exists() );
+	assert!( path!(*TEST_SITE / "static/clean/keep.mdx").exists() );
+	assert!( path!(*TEST_SITE / "static/clean/keep/keep.mdx").exists() );
 }
