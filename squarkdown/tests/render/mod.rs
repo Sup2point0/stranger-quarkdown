@@ -56,41 +56,70 @@ use path_macro::path;
 	clear_files("render/markdown").unwrap();
 	assert!( squarkup_from("render/markdown").success() );
 
-	let main = read_file("render/markdown/+page.svx");
+	let md = read_file("render/markdown/+page.svx");
 
-	assert_contains!( main, "\n## Level 2\n" );
-	assert_contains!( main, "\n### Level 3\n" );
-	assert_contains!( main, "\n#### Level 4\n" );
+	assert_contains!( md, "\n## Level 2\n" );
+	assert_contains!( md, "\n### Level 3\n" );
+	assert_contains!( md, "\n#### Level 4\n" );
 
-	assert_contains!( main, " *italic* " );
-	assert_contains!( main, " **bold** " );
-	assert_contains!( main, " ~~strikethrough~~ " );
-	assert_contains!( main, " ***italic bold*** " );
-	assert_contains!( main, " *~~italic strikethrough~~* " );
-	assert_contains!( main, " **~~bold strikethrough~~**." );
+	assert_contains!( md, " *italic* " );
+	assert_contains!( md, " **bold** " );
+	assert_contains!( md, " ~~strikethrough~~ " );
+	assert_contains!( md, " ***italic bold*** " );
+	assert_contains!( md, " *~~italic strikethrough~~* " );
+	assert_contains!( md, " **~~bold strikethrough~~**." );
 
-	assert_contains!( main, "\n- item 1\n" );
-	assert_contains!( main, "\n- item 2\n" );
-	assert_contains!( main, "\n- item 3\n" );
+	assert_contains!( md, "\n- item 1\n" );
+	assert_contains!( md, "\n- item 2\n" );
+	assert_contains!( md, "\n- item 3\n" );
 
-	assert_contains!( main, "\n  - item 1.1\n" );
-	assert_contains!( main, "\n  - item 1.2\n" );
-	assert_contains!( main, "\n    - item 1.2.1\n" );
-	assert_contains!( main, "\n    - item 1.2.2\n" );
-	assert_contains!( main, "\n    - item 1.2.3\n" );
-	assert_contains!( main, "\n  - item 1.3\n" );
+	assert_contains!( md, "\n  - item 1.1\n" );
+	assert_contains!( md, "\n  - item 1.2\n" );
+	assert_contains!( md, "\n    - item 1.2.1\n" );
+	assert_contains!( md, "\n    - item 1.2.2\n" );
+	assert_contains!( md, "\n    - item 1.2.3\n" );
+	assert_contains!( md, "\n  - item 1.3\n" );
 
-	assert_contains!( main, "\n1. one\n" );
-	assert_contains!( main, "\n1. two\n" );
-	assert_contains!( main, "\n1. three\n" );
+	assert_contains!( md, "\n1. one\n" );
+	assert_contains!( md, "\n1. two\n" );
+	assert_contains!( md, "\n1. three\n" );
 
-	assert_contains!( main, "\nimplicit  \nbreak\n" );
-	assert_contains!( main, "\nexplicit   \nbreak\n" );
+	assert_contains!( md, "\nimplicit  \nbreak\n" );
+	assert_contains!( md, "\nexplicit   \nbreak\n" );
 
-	assert_contains!( main, "\n---\n" );
+	assert_contains!( md, "\n---\n" );
 
-	assert_contains!( main, "\n > \n > Quote\n" );
-	assert_contains!( main, "\n > \n > Multi\n > Line\n > \n > Quote" );
+	assert_contains!( md, "\n > \n > Quote\n" );
+	assert_contains!( md, "\n > \n > Multi\n > Line\n > \n > Quote" );
+}
+
+/// Squarkdown preserves basic HTML syntax.
+#[test] fn html()
+{
+	clear_files("render/html").unwrap();
+	assert!( squarkup_from("render/html").success() );
+
+	let md = read_file("render/html/+page.svx");
+	assert_contains!( md, "\nProse\n" );
+	assert_contains!( md, "\nAnd <strong>more</strong> prose!" );
+
+	assert_contains!( md, "\n<h2> Level 2 </h2>\n" );
+	assert_contains!( md, "\n<h3> Level 3 </h3>\n" );
+	assert_contains!( md, "\n<h4> Level 4 </h4>\n" );
+
+	assert_contains!( md, " <em>italic</em> " );
+	assert_contains!( md, " <strong>bold</strong> " );
+	assert_contains!( md, " <strong><em>italic bold</em></strong>." );
+
+	assert_contains!( md, "\n<ul>\n" );
+	assert_contains!( md, "\n\t<li> item 1 </li>\n" );
+	assert_contains!( md, "\n\t<li> item 2 </li>\n" );
+	assert_contains!( md, "\n\t<li> item 3 </li>\n" );
+	assert_contains!( md, "\n</ul>\n" );
+
+	assert_contains!( md, "\n<table>\n" );
+	assert_contains!( md, "\n<tbody><tr> \t<td> sup </td>\n" );
+	assert_contains!( md, "\n</tr></tbody></table>\n" );
 }
 
 /// Squarkdown strips the charm squark even when `config.format.preserve-comments` is enabled.

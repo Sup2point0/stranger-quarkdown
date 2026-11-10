@@ -1,7 +1,5 @@
 # Extensive Markdown Test
-<!-- #SQUARK live!
-| dest = .
--->
+<!-- #SQUARK live! -->
 
 ## Level 2
 
