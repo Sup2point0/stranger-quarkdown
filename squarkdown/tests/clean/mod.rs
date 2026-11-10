@@ -42,7 +42,6 @@ use path_macro::path;
 	assert!( path!(*TEST_ROUTES / "clean/committed/main/+page.svx").exists() );
 }
 
-
 /// Squarkdown only deletes `+page.svx` and `+page.ts` files, leaving the folder intact if other files are inside.
 #[test] fn keep_folder()
 {
@@ -58,4 +57,24 @@ use path_macro::path;
 	assert_not!( path!(*TEST_ROUTES / "clean/keep-folder/+page.ts").exists() );
 	assert_not!( path!(*TEST_ROUTES / "clean/keep-folder/+page.svx").exists() );
 	assert!( path!(*TEST_ROUTES / "clean/keep-folder/.gitignore").exists() );
+}
+
+/// Squarkdown cleans up output in `static/`.
+#[test] fn assets()
+{
+	assert!( squarkup!("clean/keep-folder", "--assets").success() );
+	assert!( path!(*TEST_ROUTES / "clean/assets/+page.svx").exists() );
+	assert!( path!(*TEST_ROUTES / "clean/assets/+page.ts").exists() );
+	assert!( path!(*TEST_SITE / "static/assets/1.mdx").exists() );
+	assert!( path!(*TEST_SITE / "static/assets/nested/2.mdx").exists() );
+
+	assert!( squarkup!("clean/keep-folder", "clean", "--assets").success() );
+	assert_not!( path!(*TEST_ROUTES / "clean/assets/+page.svx").exists() );
+	assert_not!( path!(*TEST_ROUTES / "clean/assets/+page.ts").exists() );
+
+	assert_not!( path!(*TEST_SITE / "static/assets/1.mdx").exists() );
+	assert_not!( path!(*TEST_SITE / "static/assets/nested/2.mdx").exists() );
+	assert_not!( path!(*TEST_SITE / "static/assets/nested").exists() );
+	assert!( path!(*TEST_SITE / "static/keep.mdx").exists() );
+	assert!( path!(*TEST_SITE / "static/keep/keep.mdx").exists() );
 }
