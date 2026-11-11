@@ -19,6 +19,12 @@ import { base } from "$app/paths";
   </section>
 
   <section class="right">
+    <a class="nav-link" target="_blank" href="https://crates.io/crates/squarkdown">
+      crates.io
+    </a>
+    <a class="nav-link" target="_blank" href="https://www.npmjs.com/package/stranger-quarkdown">
+      npm
+    </a>
     <a class="nav-link" target="_blank" href="https://github.com/Sup2point0/stranger-quarkdown">
       GitHub
     </a>
