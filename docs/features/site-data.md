@@ -33,7 +33,7 @@ After parsing every active file’s charm squark, Squarkdown has collected *quit
 }
 ```
 
-By default Squarkdown saves this file to `src/site.json` under your SvelteKit site folder. You can configure an alternative destination via [`out.site-data-path`](squarkup-config.md#site-data-path).
+By default Squarkdown saves this file to `src/site.json` under your SvelteKit site folder. You can configure an alternative destination via [`out.site-data-path`](../reference/squarkup-config.md#site-data-path).
 
 
 <br>
@@ -44,7 +44,7 @@ By default Squarkdown saves this file to `src/site.json` under your SvelteKit si
 | Field | Type | Notes |
 | ----- | ---- | ----- |
 | `stats` | stat → value | Site-wide metadata and statistics |
-| `pages` | filepath → `PageData<>` | Centralised access to every individual page’s metadata. Field names follow [`out. shorter-fields`](squarkup-config.md#shorter-fields). |
+| `pages` | filepath → `PageData<>` | Centralised access to every individual page’s metadata. Field names follow [`out. shorter-fields`](../reference/squarkup-config.md#shorter-fields). |
 | `tags`  | tag name → filepaths | All of the tags found, and the pages with those tags. |
 
 
