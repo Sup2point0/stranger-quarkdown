@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/site.yaml'
       - 'site/package-lock.json'
+      - 'site/static/schemas/'
       - 'npm/package.json'
 
 jobs:
