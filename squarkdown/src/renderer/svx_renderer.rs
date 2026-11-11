@@ -1782,7 +1782,7 @@ mod tables {
 
 					<table>
 					<tbody> 	<tr><th> Test </th></tr>
-					</tbody></table>
+					</tbody> </table>
 				"}
 			),
 			(
@@ -1802,7 +1802,7 @@ mod tables {
 					<tbody> \t<tr>
 							<th> Test </th>
 						</tr>
-					</tbody></table>
+					</tbody> </table>
 				"}
 			),
 		]);
@@ -1823,7 +1823,7 @@ mod tables {
 
 					<table>
 					<tbody><tr> \t<td> Test </td>
-					</tr></tbody></table>
+					</tr></tbody> </table>
 				"}
 			),
 			(
@@ -1839,7 +1839,7 @@ mod tables {
 
 					<table>
 					<tbody><tr> \t<th> Testing </th>
-					</tr></tbody></table>
+					</tr></tbody> </table>
 				"}
 			),
 		]);

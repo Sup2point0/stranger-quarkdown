@@ -119,7 +119,7 @@ use path_macro::path;
 
 	assert_contains!( md, "\n<table>\n" );
 	assert_contains!( md, "\n<tbody><tr> \t<td> sup </td>\n" );
-	assert_contains!( md, "\n</tr></tbody></table>\n" );
+	assert_contains!( md, "\n</tr></tbody> </table>\n" );
 }
 
 /// Squarkdown strips the charm squark even when `config.format.preserve-comments` is enabled.
