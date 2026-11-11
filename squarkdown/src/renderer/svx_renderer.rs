@@ -504,7 +504,7 @@ impl Renderer<'_>
 				- At the first row, check for <tr>, <th>, <td>.
 				  - If found, replace TABLE with TABLE_REPAIR and insert <tbody>. Insert <tr> too if missing.
 				  - Otherwise, replace TABLE with TABLE_NO_REPAIR.
-				- One we reach </table>:
+				- Once we reach </table>:
 				  - If TABLE_REPAIR, insert </tbody>.
 				  - Otherwise, no-op.
 			*/
@@ -532,12 +532,7 @@ impl Renderer<'_>
 				if let Ok(Ctx::TABLE_REPAIR { with_row })
 					= self.ctx.try_pop_any(&Ctx::TABLE_REPAIR { with_row: false })
 				{
-					let out = if with_row {
-						"</tr></tbody></table>"
-					} else {
-						"</tbody></table>"
-					};
-					return Some(Event::Html(out.into()))
+					return Some(Event::Html(fmt!("{}</tbody> {text}", if with_row {"</tr>"} else {""}).into()))
 				}
 
 				if self.ctx.try_pop_any(&Ctx::TABLE).is_err()
@@ -1171,7 +1166,6 @@ impl Renderer<'_>
 				debug: vec![],
 			}),
 			FileAction::SKIP => {
-				// TODO aggregate instead of raw (non-thread safe) log
 				log::error(SquarkError::Warning {
 					msg: slash!("warning: not overwriting existing file: {B}{}", filepath),
 					hint: fmt!("Squarkdown will not overwrite files since you set {Y}errors.file-already-exists{G} to {W}'skip'"),

@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.9.1
+
+### Fixes
+- Preserve original text when repairing `</table>`, instead of replacing it with just `</table>`.
+
+
 ## v4.9
 
 ### New
