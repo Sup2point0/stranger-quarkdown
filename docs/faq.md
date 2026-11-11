@@ -34,7 +34,7 @@ Squarkdown spends most of its time doing 3 (or 4) things:
 - Finding `.md` files to squarkup
 - Parsing their [charm squark](glossary.md#charm-squark) for metadata
 - Rendering each page to `+page.svx` and `+page.ts`
-- Saving [site data](reference/site-data.md) (if enabled)
+- Saving [site data](features/site-data.md) (if enabled)
 
 Rendering takes the longest because Squarkdown is reading, parsing, processing and rendering your entire file. So the longer the file, the more work it has to do.
 

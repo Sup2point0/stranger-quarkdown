@@ -17,7 +17,7 @@ Beyond just Markdown, Squarkdown can also help with other preprocessing. It’s 
 
 ## Site Data
 
-> Main article: [Site Data](../reference/site-data.md)
+> Main article: [Site Data](../features/site-data.md)
 
 After parsing every active file’s charm squark, Squarkdown has collected *quite a lot* of data about your site that you may want to keep. Squarkdown exports that data to a JSON file for you to use however you see fit.
 

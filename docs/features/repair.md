@@ -1,6 +1,6 @@
 # Repairing HTML
 <!-- #SQUARK live!
-| dest = docs/features/repair
+| dest = features/repair
 | date = 2026 November 4
 | update = 2026 November 5
 -->

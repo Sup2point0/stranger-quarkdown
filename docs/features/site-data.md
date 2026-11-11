@@ -1,6 +1,6 @@
 # Site Data
 <!-- #SQUARK live!
-| dest = docs/reference/site-data
+| dest = features/site-data
 | date = 2025 November 4
 | update = 2026 October 11
 -->

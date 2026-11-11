@@ -91,7 +91,7 @@ Inactive files are not processed by Squarkdown.
 
 
 ## Site Data
-> Main article: [Site Data](reference/site-data.md)
+> Main article: [Site Data](features/site-data.md)
 
 A JSON file (`site.json` by default) containing the [charm squark](#charm-squark) metadata of every [active](#active) page Squarkdown processed, plus other useful metadata.
 
