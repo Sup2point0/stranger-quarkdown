@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.9.2
+
+### Fixes
+- `format.escape-angles` and `.escape-braces` were not being read from your config!
+
+
 ## v4.9.1
 
 ### Fixes

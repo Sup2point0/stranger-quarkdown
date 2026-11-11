@@ -394,6 +394,12 @@ impl SquarkupConfig
 			if let Some(value) = format.remove("externalise-links") { catch!(errs => {
 				s.externalise_links = Self::try_get_bool(&value, "format.externalise-links")?;
 			}) }
+			if let Some(value) = format.remove("escape-angles") { catch!(errs => {
+				s.escape_angles = Self::try_get_bool(&value, "format.escape-angles")?;
+			}) }
+			if let Some(value) = format.remove("escape-braces") { catch!(errs => {
+				s.escape_braces = Self::try_get_bool(&value, "format.escape-braces")?;
+			}) }
 			if let Some(value) = format.remove("repair-tables") { catch!(errs => {
 				s.repair_tables = Self::try_get_bool(&value, "format.repair-tables")?;
 			}) }
