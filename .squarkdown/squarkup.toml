@@ -28,8 +28,13 @@ render-page-ts = true
 shorter-fields = false
 
 [format]
+inject-head = true
+preserve-heading = false
 preserve-comments = true
 externalise-links = true
+escape-angles = true
+escape-braces = true
+repair-tables = true
 
 [fonts]
 queries = [
