@@ -25,6 +25,7 @@
 - [render/dest-infer/nested](render/dest-infer/nested)
 - [render/dest-infer/nested/side](render/dest-infer/nested/side)
 - [render/markdown](render/markdown)
+- [render/html](render/html)
 - [render/strip-charm](render/strip-charm)
 - [render/no-page-ts](render/no-page-ts)
 
