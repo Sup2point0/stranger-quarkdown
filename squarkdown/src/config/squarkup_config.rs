@@ -79,18 +79,23 @@ pub struct PathsConfig {
 
 #[derive(Clone, Debug)]
 pub struct CharmConfig {
-	/// What flags should be allowed in charm squarks, other than `live!`?
+	/// What non-native flags should be allowed in charm squarks?
 	/// 
-	/// If empty, no additional flags are allowed.
+	/// The native flags are:
 	/// 
-	/// `None` if not provided, in which case any flags are allowed.
+	/// - `live!`
+	/// - `index!`
+	/// 
+	/// If provided and empty, no additional flags are allowed.
+	/// 
+	/// If not provided, defaults to `None`, in which case any flags are allowed.
 	pub flags: Option<HashSet<String>>,
 
-	/// What fields should be allowed in the latter half of charm squarks?
+	/// What non-native fields should be allowed in the latter half of charm squarks?
 	/// 
-	/// If empty, no additional fields are allowed.
+	/// If provided and empty, no additional flags are allowed.
 	/// 
-	/// `None` if not provided, in which case any fields are allowed.
+	/// If not provided, defaults to `None`, in which case any fields are allowed.
 	pub fields: Option<HashSet<String>>,
 }
 
