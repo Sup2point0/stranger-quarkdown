@@ -21,20 +21,6 @@ macro_rules! hints {
 	};
 }
 
-/// Return a [`SquarkError::Recoverable`].
-macro_rules! recoverable {
-	($($args:tt)*) => {
-		return Err(SquarkError::Recoverable { $($args)* })
-	}
-}
-
-/// Return a [`SquarkError::Unrecoverable`].
-macro_rules! unrecoverable {
-	($($args:tt)*) => {
-		return Err(SquarkError::Unrecoverable { $($args)* })
-	}
-}
-
 
 /// Loading from `squarkup.toml`
 impl SquarkupConfig

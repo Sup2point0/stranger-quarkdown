@@ -148,14 +148,14 @@ impl CharmParser<'_>
 			if self.current()? != expected {
 				let (l, i) = self.prev_indices();
 				
-				return Err(SquarkError::Recoverable {
+				recoverable! {
 					msg: fmt!("Expected {W}{BOLD}{target}{UNBOLD} {R}{}", to()),
 					hint: hint(),
 					debug: [
 						self.source_printed(l, init, i),
 						self.ctx.printed(),
 					].concat(),
-				});
+				}
 			}
 			self.advance()?;
 		}
@@ -193,14 +193,14 @@ impl CharmParser<'_>
 			if !self.current()?.eq_ignore_ascii_case(&expected) {
 				let (l, i) = self.prev_indices();
 
-				return Err(SquarkError::Recoverable {
+				recoverable! {
 					msg: fmt!("Expected {target} to {}", to()),
 					hint: str!(),
 					debug: [
 						self.source_printed(l, init, i),
 						self.ctx.printed(),
 					].concat(),
-				});
+				}
 			}
 			self.advance()?;
 		}
@@ -261,25 +261,25 @@ impl CharmParser<'_>
 			let mut out = str!();
 
 			if let Ok('-') = self.current() {
-				return Err(SquarkError::Recoverable {
+				recoverable! {
 					msg: fmt!("Illegal identifier"),
 					hint: fmt!("Identifiers cannot start with {Y}{BOLD}-{UNBOLD} (hyphen)"),
 					debug: [
 						self.source_printed(self.l, self.i, self.i),
 						self.ctx.printed(),
 					].concat(),
-				});
+				}
 			}
 
 			if let Ok(c) = self.current() && !Self::is_ident_char(c) {
-				return Err(SquarkError::Recoverable {
+				recoverable! {
 					msg: fmt!("Expected an identifier, but found {W}{BOLD}{c}{UNBOLD}"),
 					hint: fmt!("Identifiers must start with an alphanumeric character or {Y}{BOLD}_.~{UNBOLD}"),
 					debug: [
 						self.source_printed(self.l, self.i, self.i),
 						self.ctx.printed(),
 					].concat(),
-				});
+				}
 			}
 
 			while let Ok(c) = self.current() && Self::is_ident_char(c) {

@@ -101,6 +101,27 @@ macro_rules! catch
 	};
 } pub use catch;
 
+/// Return a [`SquarkError::Warning`](crate::types::SquarkError::Warning).
+macro_rules! warning {
+	($($args:tt)*) => {
+		return Err($crate::types::SquarkError::Warning { $($args)* })
+	}
+} pub(crate) use warning;
+
+/// Return a [`SquarkError::Recoverable`](crate::types::SquarkError::Recoverable).
+macro_rules! recoverable {
+	($($args:tt)*) => {
+		return Err($crate::types::SquarkError::Recoverable { $($args)* })
+	}
+} pub(crate) use recoverable;
+
+/// Return a [`SquarkError::Unrecoverable`](crate::types::SquarkError::Unrecoverable).
+macro_rules! unrecoverable {
+	($($args:tt)*) => {
+		return Err($crate::types::SquarkError::Unrecoverable { $($args)* })
+	}
+} pub(crate) use unrecoverable;
+
 
 // == ARITHMETIC == //
 

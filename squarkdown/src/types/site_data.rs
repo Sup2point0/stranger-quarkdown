@@ -71,7 +71,7 @@ impl SiteData
 		self.pages.get(shard)
 	}
 
-	/// If `page`is an index page, set it as the index page for all of its tags, if any.
+	/// Set `page` as the index page for its tag(s).
 	/// 
 	/// Errors if a conflict(s) is found where multiple pages want to be the index page for a particular tag.
 	pub fn add_index(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
@@ -90,7 +90,7 @@ impl SiteData
 				let col = if config.errors.strict {R} else {W};
 
 				let msg = fmt!(
-					"Found conflicting index pages: {W}{index}{col} and {W}{}{col} both want to be the index page for the tag {W}{BOLD}{tag}{UNBOLD}",
+					"Found conflicting index pages: {W}{index}{col} and {W}{}{col} both want to be the index page for the {W}{BOLD}{tag}{UNBOLD}{col} tag",
 					page.shard,
 				);
 				let hint = str!("Each tag can only have 1 index page");
@@ -140,7 +140,7 @@ impl SiteData
 
 			if let Some(existing) = seen_dests.insert(dest, page)
 			{
-				return Err(SquarkError::Recoverable {
+				recoverable! {
 					msg: fmt!(
 						"Found conflicting pages: {W}{}{R} and {W}{}{R} both want to export to {W}{}",
 						utils::display_rel(&existing.filepath, &config.paths.root),
@@ -149,7 +149,7 @@ impl SiteData
 					),
 					hint: str!("Pages must have unique export destinations, otherwise one will overwrite the other"),
 					debug: vec![],
-				});
+				}
 			}
 		}
 

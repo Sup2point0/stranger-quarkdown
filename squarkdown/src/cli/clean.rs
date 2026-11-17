@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::resolver;
 use crate::utils::log;
 use crate::utils::colours::*;
+use crate::utils::macros::*;
 
 use git2 as git;
 use path_macro::path;
@@ -169,13 +170,13 @@ fn delete_dir(
 ) -> SquarkResult
 {
 	if let Some((.., root)) = &repo_info && path.strip_prefix(root).is_err() {
-		return Err(SquarkError::Unrecoverable {
+		unrecoverable! {
 			msg: fmt!("Critical error: received a path outside your project root"),
 			hint: str!(),
 			debug: vec![
 				slash!("would have tried deleting: {FF}{}", path)
 			],
-		});
+		}
 	}
 
 	let path_rel = utils::display_rel(&path, &config.paths.root);
