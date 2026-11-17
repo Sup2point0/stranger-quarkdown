@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use crate::types::page_data::SerializablePageData;
+use crate::types::{
+	Shard,
+	page_data::SerializablePageData,
+};
 use crate::utils;
 use crate::utils::colours::*;
 use crate::utils::macros::*;
@@ -22,7 +25,7 @@ pub struct SiteData
 	/// The active pages in the site, keyed by the location (filepath) of their source file.
 	/// 
 	/// Since the filepath of any file must be unique, this reliably identifies files with minimal effort!
-	pages: BTreeMap<String, PageData>,
+	pages: BTreeMap<Shard, PageData>,
 }
 
 #[derive(Clone, Debug, serde::Serialize)]
@@ -55,7 +58,7 @@ impl SiteData
 	}
 
 	#[must_use]
-	pub fn pages_map(&self) -> &BTreeMap<String, PageData> {
+	pub fn pages_map(&self) -> &BTreeMap<Shard, PageData> {
 		&self.pages
 	}
 
@@ -64,23 +67,24 @@ impl SiteData
 	}
 
 	#[must_use]
-	pub fn get_page(&self, key: &str) -> Option<&PageData>
+	pub fn get_page(&self, shard: &str) -> Option<&PageData>
 	{
-		self.pages.get(key)
+		self.pages.get(shard)
 	}
 
 	/// Add a page's metadata to the site.
 	pub fn add_page(&mut self, page_data: PageData)
 	{
-		let key = &page_data.shard;
+		let shard = &page_data.shard;
 
 		for tag in &page_data.tags {
 			self.tags
-				.entry(tag.to_owned()).or_default()
-				.insert(key.clone());
+				.entry(tag.clone()).or_default()
+				.pages
+				.insert(shard.clone());
 		}
 
-		self.pages.insert(key.clone(), page_data);
+		self.pages.insert(shard.clone(), page_data);
 		self.stats.active_pages += 1;
 	}
 
@@ -117,7 +121,7 @@ impl SiteData
 	pub fn serialize_with_config<S>(&self, s: S, config: &SquarkupConfig) -> Result<S::Ok, S::Error>
 		where S: serde::Serializer
 	{
-		let pages: BTreeMap<&String, SerializablePageData>
+		let pages: BTreeMap<&Shard, SerializablePageData>
 			= self.pages.iter()
 				.map(|(shard, page)| (shard, page.to_serializable(config)))
 				.collect();

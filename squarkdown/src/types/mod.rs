@@ -9,6 +9,10 @@ pub use page_data::{ PageData };
 mod site_data;
 pub use site_data::{ SiteData, SiteStats };
 
+
+mod shard;
+pub use shard::{ Shard };
+
 mod context_stack;
 pub use context_stack::{ ContextStack };
 

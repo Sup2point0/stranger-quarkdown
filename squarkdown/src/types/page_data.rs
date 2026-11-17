@@ -28,7 +28,7 @@ use std::path::{ Path, PathBuf };
 pub struct PageData
 {
 	/// The unique stable identifier for the page, normalised from `.filepath`.
-	pub shard: String,
+	pub shard: Shard,
 
 	/// The location of the original `.md` file this page represents.
 	pub filepath: PathBuf,
@@ -185,9 +185,11 @@ impl PageData
 	}
 
 	#[must_use]
-	pub fn shard_for(filepath: &Path, config: &SquarkupConfig) -> String
+	pub fn shard_for(filepath: &Path, config: &SquarkupConfig) -> Shard
 	{
-		utils::display_rel(filepath, &config.paths.root)
+		Shard::from(
+			utils::display_rel(filepath, &config.paths.root)
+		)
 	}
 
 	fn try_parse_date(date: &str, field: &str) -> SquarkResult<Date>
