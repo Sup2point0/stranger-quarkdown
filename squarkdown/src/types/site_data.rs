@@ -20,12 +20,10 @@ pub struct SiteData
 {
 	pub stats: SiteStats,
 
-	/// Maps tags to the pages that included them.
+	/// Maps tags to the pages with that tag.
 	tags: BTreeMap<String, TagData>,
 
-	/// The active pages in the site, keyed by the location (filepath) of their source file.
-	/// 
-	/// Since the filepath of any file must be unique, this reliably identifies files with minimal effort!
+	/// Data of all active pages in the site.
 	pages: BTreeMap<Shard, PageData>,
 }
 
@@ -71,6 +69,46 @@ impl SiteData
 	pub fn get_page(&self, shard: &Shard) -> Option<&PageData>
 	{
 		self.pages.get(shard)
+	}
+
+	/// If `page`is an index page, set it as the index page for all of its tags, if any.
+	/// 
+	/// Errors if a conflict(s) is found where multiple pages want to be the index page for a particular tag.
+	pub fn add_index(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
+	{
+		let mut errs = SquarkError::multiple("");
+
+		for tag in &page.tags
+		{
+			let index = &mut self.tags
+				.entry(tag.clone()).or_default()
+				.index;
+
+			/* Check for conflicts where multiple pages want to be the index page for a tag */
+			if !index.is_empty()
+			{
+				let col = if config.errors.strict {R} else {W};
+
+				let msg = fmt!(
+					"Found conflicting index pages: {W}{index}{col} and {W}{}{col} both want to be the index page for the tag {W}{BOLD}{tag}{UNBOLD}",
+					page.shard,
+				);
+				let hint = str!("Each tag can only have 1 index page");
+				let debug = vec![];
+
+				errs.push(
+					if config.errors.strict {
+						SquarkError::Recoverable { msg, hint, debug }
+					} else {
+						SquarkError::Warning { msg, hint, debug }
+					}
+				);
+			}
+
+			*index = page.shard.clone();
+		}
+
+		errs.or(())
 	}
 
 	/// Add a page's metadata to the site.

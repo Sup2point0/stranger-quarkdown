@@ -118,6 +118,9 @@ fn squarkup(
 			let r = parser::parse(&filepath, &config)?;
 			
 			if let Some(page) = r {
+				if page.is_index() {
+					site_data.add_index(&page, &config)?;
+				}
 				site_data.add_page(page);
 
 				let (folder, file) = utils::split_path_from(filepath, &config.paths.root);

@@ -60,6 +60,15 @@ pub struct PageData
 	pub other: HashMap<String, Strings>,
 }
 
+/// Query methods
+impl PageData
+{
+	pub fn is_index(&self) -> bool
+	{
+		self.flags.iter().any(|flag| flag == "index")
+	}
+}
+
 impl PageData
 {
 	pub const NATIVE_FIELDS: [&str; 14] = [
@@ -184,6 +193,7 @@ impl PageData
 		)
 	}
 
+	/// Produce the shard for this page, normalised from its `.filepath`.
 	#[must_use]
 	pub fn shard_for(filepath: &Path, config: &SquarkupConfig) -> Shard
 	{
