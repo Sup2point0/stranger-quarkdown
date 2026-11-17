@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::types::{
 	Shard,
 	page_data::SerializablePageData,
+	tag_data::TagData,
 };
 use crate::utils;
 use crate::utils::colours::*;
@@ -10,7 +11,7 @@ use crate::utils::macros::*;
 use serde::ser::SerializeMap;
 use time::{ UtcDateTime, macros::* };
 
-use std::collections::{ HashSet, HashMap, BTreeMap };
+use std::collections::{ HashMap, BTreeMap };
 use std::path::{ Path };
 
 
@@ -20,7 +21,7 @@ pub struct SiteData
 	pub stats: SiteStats,
 
 	/// Maps tags to the pages that included them.
-	tags: BTreeMap<String, HashSet<String>>,
+	tags: BTreeMap<String, TagData>,
 
 	/// The active pages in the site, keyed by the location (filepath) of their source file.
 	/// 
@@ -67,7 +68,7 @@ impl SiteData
 	}
 
 	#[must_use]
-	pub fn get_page(&self, shard: &str) -> Option<&PageData>
+	pub fn get_page(&self, shard: &Shard) -> Option<&PageData>
 	{
 		self.pages.get(shard)
 	}
