@@ -112,18 +112,21 @@ impl SiteData
 	}
 
 	/// Add a page's metadata to the site.
-	pub fn add_page(&mut self, page_data: PageData)
+	pub fn add_page(&mut self, page: PageData)
 	{
-		let shard = &page_data.shard;
+		let shard = &page.shard;
 
-		for tag in &page_data.tags {
-			self.tags
-				.entry(tag.clone()).or_default()
-				.pages
-				.insert(shard.clone());
+		/* NOTE: Index pages are not added under other tags */
+		if !page.is_index() {
+			for tag in &page.tags {
+				self.tags
+					.entry(tag.clone()).or_default()
+					.pages
+					.insert(shard.clone());
+			}
 		}
 
-		self.pages.insert(shard.clone(), page_data);
+		self.pages.insert(shard.clone(), page);
 		self.stats.active_pages += 1;
 	}
 
