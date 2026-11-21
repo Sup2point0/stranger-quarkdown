@@ -146,7 +146,7 @@ fn cleanup(dry_run: bool, force: bool, assets: bool) -> SquarkResult
 	}
 
 	if !skipped_paths.is_empty() {
-		errs.push(SquarkError::Recoverable {
+		recoverable!(errs => {
 			msg: fmt!("Skipped {} files that are not Git-ignored", skipped_paths.len()),
 			hint: fmt!("To cleanup without checking Git, pass {Y}{BOLD}--force{UNBOLD}"),
 			debug: skipped_paths,

@@ -97,7 +97,7 @@ impl PageData
 				let dest = path!(config.out.folder / utils::to_rel(&raw.replace(' ', "-"))).clean();
 
 				if config.errors.strict && !dest.starts_with(&config.paths.root) {
-					errs.push(SquarkError::Unrecoverable {
+					unrecoverable!(errs => {
 						msg: slash!("cannot export a file to: {}", dest),
 						hint: fmt!("Output files must remain under your project root when {Y}errors.strict{G} is enabled"),
 						debug: vec![],
@@ -107,7 +107,7 @@ impl PageData
 				dest
 			}
 			else if config.errors.strict {
-				errs.push(SquarkError::Unrecoverable {
+				unrecoverable!(errs => {
 					msg: fmt!("Missing field: {W}dest{R}({W}ination{R})"),
 					hint: fmt!("Active pages must specify where they should be rendered to when {Y}errors.strict{G} is enabled"),
 					debug: vec![
@@ -167,7 +167,7 @@ impl PageData
 		&& let Some(update) = last_update
 		&& update < date
 		{
-			errs.push(SquarkError::Recoverable {
+			recoverable!(errs => {
 				msg: fmt!("You provided a {W}last updated{R} date earlier than the {W}release date"),
 				hint: str!("You can’t update a page before you release it!"),
 				debug: vec![

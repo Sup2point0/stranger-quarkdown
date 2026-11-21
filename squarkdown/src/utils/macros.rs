@@ -85,7 +85,7 @@ macro_rules! strings {
 #[macro_export]
 macro_rules! catch
 {
-	($errs:expr => $body:block) => {
+	(  $errs:expr => $body:block  ) => {
 		if let Err(e) = (|| -> $crate::types::SquarkResult {
 			$body;
 			Ok(())
@@ -102,7 +102,12 @@ macro_rules! catch
 } pub use catch;
 
 /// Return a [`SquarkError::Warning`](crate::types::SquarkError::Warning).
-macro_rules! warning {
+macro_rules! warning
+{
+	(  $errs:ident => { $($args:tt)* }  ) =>
+	{
+		$errs.push($crate::types::SquarkError::Warning { $($args)* })
+	};
 	($($args:tt)*) => {
 		return Err($crate::types::SquarkError::Warning { $($args)* })
 	}
@@ -110,6 +115,10 @@ macro_rules! warning {
 
 /// Return a [`SquarkError::Recoverable`](crate::types::SquarkError::Recoverable).
 macro_rules! recoverable {
+	(  $errs:ident => { $($args:tt)* }  ) =>
+	{
+		$errs.push($crate::types::SquarkError::Recoverable { $($args)* })
+	};
 	($($args:tt)*) => {
 		return Err($crate::types::SquarkError::Recoverable { $($args)* })
 	}
@@ -117,9 +126,13 @@ macro_rules! recoverable {
 
 /// Return a [`SquarkError::Unrecoverable`](crate::types::SquarkError::Unrecoverable).
 macro_rules! unrecoverable {
+	(  $errs:ident => { $($args:tt)* }  ) =>
+	{
+		$errs.push($crate::types::SquarkError::Unrecoverable { $($args)* })
+	};
 	($($args:tt)*) => {
 		return Err($crate::types::SquarkError::Unrecoverable { $($args)* })
-	}
+	};
 } pub(crate) use unrecoverable;
 
 

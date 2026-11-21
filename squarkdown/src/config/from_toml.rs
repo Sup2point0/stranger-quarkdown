@@ -174,7 +174,7 @@ impl SquarkupConfig
 					}
 				}
 				else if !raw.contains('/') {
-					errs.push(SquarkError::Warning {
+					warning!(errs => {
 						msg: fmt!("Your {Y}project.github{R} does not contain a {W}/"),
 						hint: fmt!("Use the format {W}user/project"),
 						debug: vec![
@@ -584,7 +584,7 @@ impl SquarkupConfig
 	fn check_leftover_unknowns(data: toml::Table, errs: &mut SquarkError, is_final_check: bool)
 	{
 		for (key, value) in data {
-			errs.push(SquarkError::Recoverable {
+			recoverable!(errs => {
 				msg: fmt!(
 					"Unknown {}: {W}{BOLD}{key}{UNBOLD}",
 					if is_final_check && value.is_table() {"group"} else {"option"},
