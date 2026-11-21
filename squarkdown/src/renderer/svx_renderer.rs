@@ -170,7 +170,11 @@ impl<'d> Renderer<'d>
 	fn write_page_svx(&self, mut f: impl io::Write, content: &[u8]) -> Result<(), SquarkError>
 	{
 		self.inject_timestamp(&mut f)?;
-		self.inject_head(&mut f)?;
+
+		if self.config.format.inject_head {
+			self.inject_head(&mut f)?;
+		}
+		
 		f.write_all(content)?;
 		f.flush()?;
 		Ok(())

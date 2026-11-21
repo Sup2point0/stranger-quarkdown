@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.9.3
+
+### Fixes
+- `format.inject-head` was not being respected.
+
+
 ## v4.9.2
 
 ### Fixes
