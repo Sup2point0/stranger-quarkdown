@@ -36,6 +36,7 @@ pub struct PageData
 	/// The folder to render this page's `+page.svx` and `+page.ts` to.
 	pub destination: PathBuf,
 	
+	/// Flags from the charm squark, excluding `live!`.
 	pub flags: Strings,
 
 	/// The short title of the page injected into `<title>`.
@@ -50,13 +51,21 @@ pub struct PageData
 	/// A short caption for the page displayed below `.heading`.
 	pub caption: String,
 
+	/// The series (1 or many) that this page belongs to. These series should have their own pages in the site.
+	pub series: IndexSet<String>,
+
+	/// Lightweight tags to attach to the page. Unlike `.series`, these probably don’t have their own page and are only used in search filtering.
 	pub tags: IndexSet<String>,
 
+	/// When was the page first added to the repo?
 	pub release_date: Option<Date>,
 	pub release_date_raw: String,
+
+	/// When was the page last edited?
 	pub last_update: Option<Date>,
 	pub last_update_raw: String,
 
+	/// All the other non-native fields the user provided.
 	pub other: HashMap<String, Strings>,
 }
 
@@ -71,12 +80,14 @@ impl PageData
 
 impl PageData
 {
-	pub const NATIVE_FIELDS: [&str; 14] = [
+	/// The core charm squark fields that Squarkdown treats specially.
+	pub const NATIVE_FIELDS: [&str; 15] = [
 		"dest", "destination",
 		"title",
 		"desc", "description",
 		"head", "heading",
 		"capt", "caption",
+		"series",
 		"tags",
 		"date",   "release-date",
 		"update", "last-update",
@@ -140,7 +151,8 @@ impl PageData
 		let caption     = fields.take_flat("caption", "capt").unwrap_or_default();
 		let description = fields.take_flat("description", "desc").unwrap_or_else(|| caption.clone());
 
-		let tags = IndexSet::from_iter(fields.take("tags", "tags").unwrap_or_default());
+		let series = IndexSet::from_iter(fields.take("series", "series").unwrap_or_default());
+		let tags   = IndexSet::from_iter(fields.take("tags", "tags").unwrap_or_default());
 
 		let mut release_date = None;
 		let mut release_date_raw = str!();
@@ -185,7 +197,7 @@ impl PageData
 				destination,
 				title, description,
 				heading, caption,
-				tags,
+				series, tags,
 				release_date, release_date_raw,
 				last_update, last_update_raw,
 				other: fields,
@@ -193,7 +205,7 @@ impl PageData
 		)
 	}
 
-	/// Produce the shard for this page, normalised from its `.filepath`.
+	/// Produce the shard for a page, normalised from `filepath`.
 	#[must_use]
 	pub fn shard_for(filepath: &Path, config: &SquarkupConfig) -> Shard
 	{

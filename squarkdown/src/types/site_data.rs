@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::types::{
 	Shard,
 	page_data::SerializablePageData,
-	tag_data::TagData,
+	series::Series,
 };
 use crate::utils;
 use crate::utils::colours::*;
@@ -11,20 +11,26 @@ use crate::utils::macros::*;
 use serde::ser::SerializeMap;
 use time::{ UtcDateTime, macros::* };
 
-use std::collections::{ HashMap, BTreeMap };
+use std::collections::{ HashSet, HashMap, BTreeMap };
 use std::path::{ Path };
 
 
+/// Aggregate site data produced during squarkup.
+/// 
+/// This primarily consists of a lot of maps for lookup, for instance when resolving links.
 #[derive(Clone, Debug, Default)]
 pub struct SiteData
 {
 	pub stats: SiteStats,
 
-	/// Maps tags to the pages with that tag.
-	tags: BTreeMap<String, TagData>,
-
 	/// Data of all active pages in the site.
 	pages: BTreeMap<Shard, PageData>,
+
+	/// Series found during squarkup and the pages in each series.
+	series: BTreeMap<String, Series>,
+
+	/// Tags found during squarkup and the pages with each tag.
+	tags: BTreeMap<String, HashSet<Shard>>,
 }
 
 #[derive(Clone, Debug, serde::Serialize)]
@@ -71,18 +77,18 @@ impl SiteData
 		self.pages.get(shard)
 	}
 
-	/// Set `page` as the index page for its tag(s).
+	/// Set `page` as the index page for its series(s).
 	/// 
-	/// Errors if a conflict(s) is found where multiple pages want to be the index page for a particular tag.
+	/// Errors if a conflict(s) is found where multiple pages want to be the index page for a particular series.
 	pub fn add_index(&mut self, page: &PageData, config: &SquarkupConfig) -> SquarkResult
 	{
 		let mut errs = SquarkError::multiple("");
 
-		for tag in &page.tags
+		for series in &page.series
 		{
-			let index = &mut self.tags
-				.entry(tag.clone()).or_default()
-				.index;
+			let index = &mut self.series
+				.entry(series.clone()).or_default()
+				.index_page;
 
 			/* Check for conflicts where multiple pages want to be the index page for a tag */
 			if !index.is_empty()
@@ -90,10 +96,10 @@ impl SiteData
 				let col = if config.errors.strict {R} else {W};
 
 				let msg = fmt!(
-					"Found conflicting index pages: {W}{index}{col} and {W}{}{col} both want to be the index page for the {W}{BOLD}{tag}{UNBOLD}{col} tag",
+					"Found conflicting index pages: {W}{index}{col} and {W}{}{col} both want to be the index page for the {W}{BOLD}{series}{UNBOLD}{col} series",
 					page.shard,
 				);
-				let hint = str!("Each tag can only have 1 index page");
+				let hint = str!("Each series can only have 1 index page");
 				let debug = vec![];
 
 				errs.push(
@@ -116,14 +122,11 @@ impl SiteData
 	{
 		let shard = &page.shard;
 
-		/* NOTE: Index pages are not added under other tags */
-		if !page.is_index() {
-			for tag in &page.tags {
-				self.tags
-					.entry(tag.clone()).or_default()
-					.pages
-					.insert(shard.clone());
-			}
+		for tag in &page.tags {
+			self.tags.entry(tag.clone()).or_default().insert(shard.clone());
+		}
+		for series in &page.series {
+			self.series.entry(series.clone()).or_default().pages.insert(shard.clone());
 		}
 
 		self.pages.insert(shard.clone(), page);

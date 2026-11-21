@@ -6,8 +6,8 @@ pub use squark_error::{ SquarkAction, SquarkResult, SquarkError, CollectSquark }
 mod page_data;
 pub use page_data::{ PageData };
 
-mod tag_data;
-pub use tag_data::{ TagData };
+mod series;
+pub use series::{ Series };
 
 mod site_data;
 pub use site_data::{ SiteData, SiteStats };
