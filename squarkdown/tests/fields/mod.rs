@@ -168,33 +168,8 @@ use std::fs;
 	assert_contains!( data, "last_update\": \"2020-04-01\"," );
 	assert_contains!( data, "last_update_raw\": \"2020 April 1\"" );
 
-	assert_contains!( data, "work?\": {\n" );
-	assert_contains!( data, "does\": {\n" );
-	assert_contains!( data, "this\": {\n" );
-	assert_contains!( data, "all\": {\n" );
-}
-
-/// Squarkdown tracks page tags and index pages for them.
-#[test] fn tags()
-{
-	let path = path!(*TEST_SITE / "src/data/tags.json");
-
-	if path.exists() {
-		fs::remove_file(&path).unwrap();
-	}
-
-	assert!( squarkup_from("fields/tags").success() );
-	assert!( path.is_file() );
-
-	let data = read_file("../data/tags.json");
-
-	assert_contains!( data, "tags\": {\n" );
-	assert_contains!( data, "1\": {\n" );
-	assert_contains!( data, "index\": \"index.md\"" );
-	
-	assert_contains!( data, "2\": {\n" );
-	assert_contains!( data, "3\": {\n" );
-	assert_eq!( data.match_indices("index\": \"index-many.md\"").count(), 2 );
-
-	assert_eq!( data.match_indices("pages\": [\"readme.md\"]").count(), 3 );
+	assert_contains!( data, "work?\": [\n" );
+	assert_contains!( data, "does\": [\n" );
+	assert_contains!( data, "this\": [\n" );
+	assert_contains!( data, "all\": [\n" );
 }

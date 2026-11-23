@@ -41,6 +41,9 @@ mod links;
 /// Page metadata in `+page.ts` and `site.json`
 mod fields;
 
+/// Page series and indexing
+mod series;
+
 
 // == EXTRAS == //
 

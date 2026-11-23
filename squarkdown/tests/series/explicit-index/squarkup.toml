@@ -8,5 +8,5 @@ on-error = "kill"
 site = "../../test-project/"
 
 [out]
-folder = "src/routes/fields/tags/"
-site-data-path = "src/data/tags.json"
+folder = "src/routes/series/explicit-index/"
+site-data-path = "src/data/series/explicit-index.json"

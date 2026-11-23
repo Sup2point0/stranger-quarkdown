@@ -1,3 +1,5 @@
+//! This module implements shared utilities for integration tests.
+
 use squarkdown::utils::macros::*;
 
 use assertables::*;
