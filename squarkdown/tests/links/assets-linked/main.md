@@ -3,12 +3,12 @@
 | dest = main
 -->
 
-These image links should be rewritten to `/link.jpg`, and these page links should be rewritten to `side`.
+These image links should be rewritten to `/linked.jpg`, and these page links should be rewritten to `side`.
 
-[![one](.assets/link.jpg)](side.md)
+[![one](.assets/linked.jpg)](side.md)
 
-[![two](./.assets/link.jpg)](side.md)
+[![two](./.assets/linked.jpg)](side.md)
 
-[![three](.assets/link.jpg)](./side.md)
+[![three](.assets/linked.jpg)](./side.md)
 
-[![four](./.assets/link.jpg)](./side.md)
+[![four](./.assets/linked.jpg)](./side.md)

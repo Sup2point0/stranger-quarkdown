@@ -232,10 +232,10 @@ use assertables::*;
 	assert!( squarkup!("links/assets-linked", "--assets").success() );
 	
 	let main = read_file("links/assets-linked/main/+page.svx");
-	assert_contains!( main, "[![one](/link.jpg)](side)" );
-	assert_contains!( main, "[![two](/link.jpg)](side)" );
-	assert_contains!( main, "[![three](/link.jpg)](side)" );
-	assert_contains!( main, "[![four](/link.jpg)](side)" );
+	assert_contains!( main, "[![one](/linked.jpg)](side)" );
+	assert_contains!( main, "[![two](/linked.jpg)](side)" );
+	assert_contains!( main, "[![three](/linked.jpg)](side)" );
+	assert_contains!( main, "[![four](/linked.jpg)](side)" );
 	assert_not_contains!( main, ".assets" );
 	assert_not_contains!( main, ".md" );
 }
@@ -247,6 +247,6 @@ use assertables::*;
 	assert!( squarkup!("links/assets-base-path", "--assets").success() );
 	
 	let main = read_file("links/assets-base-path/+page.svx");
-	assert_contains!( main, "![one](/base-path/link.jpg)" );
-	assert_contains!( main, "![two](/base-path/link.jpg)" );
+	assert_contains!( main, "![one](/base-path/base-path.jpg)" );
+	assert_contains!( main, "![two](/base-path/base-path.jpg)" );
 }
