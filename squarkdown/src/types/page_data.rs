@@ -242,7 +242,6 @@ impl PageData
 trait PageDataFieldsExt
 {
 	fn take(&mut self, long: &str, short: &str) -> Option<Vec<String>>;
-
 	fn take_flat(&mut self, long: &str, short: &str) -> Option<String>;
 }
 
@@ -300,6 +299,7 @@ impl PageData
 		if !self.heading.is_empty()     { ser!(head => &self.heading)? }
 		if !self.caption.is_empty()     { ser!(capt => &self.caption)? }
 
+		ser!(series => &self.series)?;
 		ser!(tags => &self.tags)?;
 		
 		if let Some(v) =  self.release_date  { ser!(date => &format_date(v))? }
@@ -344,6 +344,7 @@ impl PageData
 	impl_field_repr!(desc       => "desc",       "description"     );
 	impl_field_repr!(head       => "head",       "heading"         );
 	impl_field_repr!(capt       => "capt",       "caption"         );
+	impl_field_repr!(series     => "series"                        );
 	impl_field_repr!(tags       => "tags"                          );
 	impl_field_repr!(date       => "date",       "release_date"    );
 	impl_field_repr!(date_raw   => "date_raw",   "release_date_raw");

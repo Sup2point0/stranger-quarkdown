@@ -174,6 +174,7 @@ impl SiteData
 		let mut out = s.serialize_map(None)?;
 		out.serialize_entry("stats", &self.stats)?;
 		out.serialize_entry("pages", &pages)?;
+		out.serialize_entry("series", &self.series)?;
 		out.serialize_entry("tags", &self.tags)?;
 		out.end()
 	}
