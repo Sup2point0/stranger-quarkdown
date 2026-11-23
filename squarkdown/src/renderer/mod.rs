@@ -14,7 +14,6 @@ mod test_utils;
 // == PUBLIC == //
 
 use crate::prelude::*;
-use crate::types::Never;
 
 use std::sync::atomic::{ AtomicUsize, Ordering };
 use std::fs;
@@ -33,7 +32,7 @@ pub fn render(
 	config: &SquarkupConfig,
 	dry_run: bool,
 	successful_writes: &AtomicUsize,
-) -> SquarkResult<Never>
+) -> SquarkResult<!>
 {
 	let renderer = Renderer::new(page, site, config);
 
