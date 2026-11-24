@@ -84,7 +84,7 @@ impl SiteData
 	{
 		let mut errs = SquarkError::multiple("");
 
-		for series in &page.series
+		for series in if !page.index.is_empty() {&page.index} else {&page.series}
 		{
 			let index = &mut self.series
 				.entry(series.clone()).or_default()

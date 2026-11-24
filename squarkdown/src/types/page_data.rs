@@ -51,7 +51,10 @@ pub struct PageData
 	/// A short caption for the page displayed below `.heading`.
 	pub caption: String,
 
-	/// The series (1 or many) that this page belongs to. These series should have their own pages in the site.
+	/// The series(s) for which this page serves as the index page.
+	pub index: IndexSet<String>,
+
+	/// The series(s) that this page belongs to. These series should have their own pages in the site.
 	pub series: IndexSet<String>,
 
 	/// Lightweight tags to attach to the page. Unlike `.series`, these probably don’t have their own page and are only used in search filtering.
@@ -81,12 +84,13 @@ impl PageData
 impl PageData
 {
 	/// The core charm squark fields that Squarkdown treats specially.
-	pub const NATIVE_FIELDS: [&str; 15] = [
+	pub const NATIVE_FIELDS: [&str; 16] = [
 		"dest", "destination",
 		"title",
 		"desc", "description",
 		"head", "heading",
 		"capt", "caption",
+		"index",
 		"series",
 		"tags",
 		"date",   "release-date",
@@ -151,6 +155,7 @@ impl PageData
 		let caption     = fields.take_flat("caption", "capt").unwrap_or_default();
 		let description = fields.take_flat("description", "desc").unwrap_or_else(|| caption.clone());
 
+		let index  = IndexSet::from_iter(fields.take("index", "index").unwrap_or_default());
 		let series = IndexSet::from_iter(fields.take("series", "series").unwrap_or_default());
 		let tags   = IndexSet::from_iter(fields.take("tags", "tags").unwrap_or_default());
 
@@ -197,7 +202,7 @@ impl PageData
 				destination,
 				title, description,
 				heading, caption,
-				series, tags,
+				index, series, tags,
 				release_date, release_date_raw,
 				last_update, last_update_raw,
 				other: fields,
@@ -299,8 +304,9 @@ impl PageData
 		if !self.heading.is_empty()     { ser!(head => &self.heading)? }
 		if !self.caption.is_empty()     { ser!(capt => &self.caption)? }
 
+		ser!(index  => &self.index)?;
 		ser!(series => &self.series)?;
-		ser!(tags => &self.tags)?;
+		ser!(tags   => &self.tags)?;
 		
 		if let Some(v) =  self.release_date  { ser!(date => &format_date(v))? }
 		if !self.release_date_raw.is_empty() { ser!(date_raw => &self.release_date_raw)? }
@@ -344,6 +350,7 @@ impl PageData
 	impl_field_repr!(desc       => "desc",       "description"     );
 	impl_field_repr!(head       => "head",       "heading"         );
 	impl_field_repr!(capt       => "capt",       "caption"         );
+	impl_field_repr!(index      => "index"                         );
 	impl_field_repr!(series     => "series"                        );
 	impl_field_repr!(tags       => "tags"                          );
 	impl_field_repr!(date       => "date",       "release_date"    );
