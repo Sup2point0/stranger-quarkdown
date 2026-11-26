@@ -66,7 +66,7 @@ pub fn render(
 	if (wrote_ts && wrote_svx) {
 		successful_writes.fetch_add(1, Ordering::Relaxed);
 	}
-	site.stats.links.fetch_add(links_checked, Ordering::Relaxed);
+	site.stats.checked_links.fetch_add(links_checked, Ordering::Relaxed);
 	site.stats.dead_links.fetch_add(links_dead, Ordering::Relaxed);
 
 	Err(errs)

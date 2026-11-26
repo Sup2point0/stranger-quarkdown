@@ -43,7 +43,7 @@ pub struct SiteStats
 	pub checked_files: usize,
 	pub active_pages: usize,
 	pub assets: usize,
-	pub links: AtomicUsize,
+	pub checked_links: AtomicUsize,
 	pub dead_links: AtomicUsize,
 }
 
@@ -55,7 +55,7 @@ impl Default for SiteStats
 			checked_files: 0,
 			active_pages: 0,
 			assets: 0,
-			links: AtomicUsize::new(0),
+			checked_links: AtomicUsize::new(0),
 			dead_links: AtomicUsize::new(0),
 		}
 	}
