@@ -62,8 +62,6 @@
 
 ### Series
 - [series/explicit-index](series/explicit-index)
-- [series/explicit-index/1](series/explicit-index/1)
-- [series/explicit-index/2](series/explicit-index/2)
 - [series/explicit-index/index](series/explicit-index/index)
-- [series/implicit-index](series/implicit)
+- [series/implicit-index](series/implicit-index)
 - [series/implicit-index/index](series/implicit-index/index)
