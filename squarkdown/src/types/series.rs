@@ -7,7 +7,6 @@ use std::collections::{ HashSet };
  * A series of related pages, grouped in [`SiteData.series`](crate::types::SiteData).
  */
 #[derive(Clone, Debug, Default, serde::Serialize)]
-#[serde(rename_all = "kebab-case")]
 pub struct Series
 {
 	///The page that acts as an index (‘home’) page for this series.

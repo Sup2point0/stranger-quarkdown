@@ -361,6 +361,7 @@ impl PageData
 }
 
 
+/// A serialiser for [`PageData`].
 pub struct SerializablePageData<'d>
 {
 	page_data: &'d PageData,
