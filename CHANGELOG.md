@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.10.1
+
+### Fixes
+- Export `index` and `series` fields when rendering `+page.ts`.
+
+
 ## v4.10
 
 ### New
