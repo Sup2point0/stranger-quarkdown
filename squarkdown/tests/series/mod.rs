@@ -32,7 +32,7 @@ use std::fs;
 /// Squarkdown tracks series and picks up an index page implicitly declared with `| series =` instead of `| index =`.
 #[test] fn implicit_index()
 {
-	let path = path!(*TEST_SITE / "src/data/series/explicit-index.json");
+	let path = path!(*TEST_SITE / "src/data/series/implicit-index.json");
 
 	if path.exists() {
 		fs::remove_file(&path).unwrap();
