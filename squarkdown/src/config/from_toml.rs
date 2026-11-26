@@ -333,7 +333,7 @@ impl SquarkupConfig
 			if let Some(value) = out.remove("site-data-path") { catch!(errs => {
 				let raw = Self::try_get_str(&value, "out.site-data-path", "(filepath including `.json` extension)")?;
 
-				let path = path!(site / utils::to_rel(raw));
+				let path = path!(site / utils::to_rel(raw)).clean();
 
 				let folder = path.parent().expect("site directory always has a parent folder");
 
