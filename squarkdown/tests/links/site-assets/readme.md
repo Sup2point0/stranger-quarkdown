@@ -10,15 +10,15 @@ These image links should be rewritten to `/link.jpg`.
 ![two](./.assets/link.jpg)
 
 
-These image links should be rewritten to `/linked.jpg` without `.site/` since they're site assets.
+These image links should be rewritten to `/site-1.jpg` without `.site/` since they're site assets.
 
-![three](.assets/.site/linked.jpg)
+![three](.assets/.site/site-1.jpg)
 
-![four](./.assets/.site/linked.jpg)
+![four](./.assets/.site/site-1.jpg)
 
 
-These image links should be rewritten to `/nested/linking.jpg` without `.site/` since they're site assets.
+These image links should be rewritten to `/nested/site-2.jpg` without `.site/` since they're site assets.
 
-![five](.assets/.site/nested/linking.jpg)
+![five](.assets/.site/nested/site-2.jpg)
 
-![six](./.assets/.site/nested/linking.jpg)
+![six](./.assets/.site/nested/site-2.jpg)

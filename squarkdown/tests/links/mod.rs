@@ -219,10 +219,10 @@ use assertables::*;
 	let md = read_file("links/site-assets/+page.svx");
 	assert_contains!( md, "![one](/link.jpg)" );
 	assert_contains!( md, "![two](/link.jpg)" );
-	assert_contains!( md, "![three](/linked.jpg)" );
-	assert_contains!( md, "![four](/linked.jpg)" );
-	assert_contains!( md, "![five](/nested/linking.jpg)" );
-	assert_contains!( md, "![six](/nested/linking.jpg)" );
+	assert_contains!( md, "![three](/site-1.jpg)" );
+	assert_contains!( md, "![four](/site-1.jpg)" );
+	assert_contains!( md, "![five](/nested/site-2.jpg)" );
+	assert_contains!( md, "![six](/nested/site-2.jpg)" );
 }
 
 /// Squarkdown rewrites links to asset files _and_ other files together.
