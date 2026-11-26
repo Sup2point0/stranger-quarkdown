@@ -34,6 +34,8 @@ interface LongFields
 	heading?: string;
 	caption?: string;
 
+	index: string[];
+	series: string[];
 	tags: string[];
 
 	release_date?: Date;
@@ -62,6 +64,8 @@ interface ShortFields
 	head?: string;
 	capt?: string;
 
+	index: string[];
+	series: string[];
 	tags: string[];
 
 	date?: Date;
