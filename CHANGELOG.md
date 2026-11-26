@@ -32,10 +32,22 @@ I’m working on fixing these!
 <br>
 
 
-## v4.9.3
+## v4.10
+
+### New
+- `| series =` field for specifying which series(s) a page should be grouped under.
+  - For instance, use `| series = docs` to categorise a page with other documentation pages.
+  - See [FAQ § Difference between `series` and `tags`](docs/faq.md#whats-the-difference-between-series-and-tags) to understand where you’d want `series` vs `tags`.
+- `index!` flag for marking pages as the index page for its series.
+- `| index =` field for specifying which series a page is the index page for.
+  - If not provided, Squarkdown will fallback to `series`, so the page becomes the index page for the series(s) it is part of.
+- Count `links` and `dead_links` in exported site data.
 
 ### Fixes
 - `format.inject-head` was not being respected.
+
+
+<br>
 
 
 ## v4.9.2
