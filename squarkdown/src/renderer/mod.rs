@@ -21,9 +21,11 @@ use std::fs;
 
 /// Render `page` to its `+page.svx` and/or `+page.ts` files, applying `site` and `config` accordingly.
 /// 
-/// This always returns `Err(SquarkError)` for more uniform error propagation.
+/// This always returns `Err(SquarkError)` (for more uniform error propagation internally).
 /// 
-/// If both `+page.svx` and `+page.ts` (if wanted) were successfully written, `successful_writes` is incremented.
+/// If both `+page.svx` and (if wanted) `+page.ts` were successfully written, `successful_writes` is incremented.
+/// 
+/// `links` and `dead_links` are incremented for site stats.
 /// 
 /// If `dry-run`, do not write to any actual files.
 pub fn render(
@@ -54,11 +56,18 @@ pub fn render(
 	}
 	
 	let mut wrote_svx = false;
-	let ((), errs) = renderer.render_page_svx(&mut wrote_svx, dry_run)?;
+	let mut links_checked = 0;
+	let mut links_dead = 0;
+	
+	let ((), errs) = renderer.render_page_svx(
+		&mut wrote_svx, &mut links_checked, &mut links_dead, dry_run
+	)?;
 
 	if (wrote_ts && wrote_svx) {
 		successful_writes.fetch_add(1, Ordering::Relaxed);
 	}
+	site.stats.links.fetch_add(links_checked, Ordering::Relaxed);
+	site.stats.dead_links.fetch_add(links_dead, Ordering::Relaxed);
 
 	Err(errs)
 }

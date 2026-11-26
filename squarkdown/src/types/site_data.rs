@@ -13,12 +13,13 @@ use time::{ UtcDateTime, macros::* };
 
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use std::path::{ Path };
+use std::sync::atomic::{ AtomicUsize };
 
 
 /// Aggregate site data produced during squarkup.
 /// 
 /// This primarily consists of a lot of maps for lookup, for instance when resolving links.
-#[derive(Clone, Debug, Default)]
+#[derive(Debug, Default)]
 pub struct SiteData
 {
 	pub stats: SiteStats,
@@ -33,7 +34,7 @@ pub struct SiteData
 	tags: BTreeMap<String, HashSet<Shard>>,
 }
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize)]
 pub struct SiteStats
 {
 	#[serde(serialize_with = "serialise_datetime")]
@@ -42,6 +43,8 @@ pub struct SiteStats
 	pub checked_files: usize,
 	pub active_pages: usize,
 	pub assets: usize,
+	pub links: AtomicUsize,
+	pub dead_links: AtomicUsize,
 }
 
 impl Default for SiteStats
@@ -52,6 +55,8 @@ impl Default for SiteStats
 			checked_files: 0,
 			active_pages: 0,
 			assets: 0,
+			links: AtomicUsize::new(0),
+			dead_links: AtomicUsize::new(0),
 		}
 	}
 }

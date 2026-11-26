@@ -93,6 +93,12 @@ pub(super) struct Renderer<'d>
 
 	/// Errors accumulated during rendering.
 	pub(super) errors: SquarkError,
+
+	/// How many links did we attempt to resolve while rendering?
+	pub(super) links_checked: usize,
+
+	/// How many attempted link resolutions failed?
+	pub(super) links_dead: usize,
 }
 
 /// Core interface.
@@ -113,18 +119,22 @@ impl<'d> Renderer<'d>
 			page,
 			site,
 			config,
-			source: str!(),
-			line_boundaries: vec![],
-			errors,
 			dest_file: path!(page.destination / config.out.file_name),
 			dest_folder: page.destination.clone(),
+			source: str!(),
+			line_boundaries: vec![],
 			ctx: ContextStack::new(),
+			errors,
+			links_checked: 0,
+			links_dead: 0,
 		}
 	}
 
 	/// Run the renderer to completion, writing the whole `+page.svx` file with all injections.
 	pub(super) fn render_page_svx(mut self,
 		wrote: &mut bool,
+		links_checked: &mut usize,
+		links_dead: &mut usize,
 		dry_run: bool,
 	) -> SquarkAction
 	{
@@ -162,7 +172,10 @@ impl<'d> Renderer<'d>
 		} else {
 			self.write_page_svx(File::create(&self.dest_file)?, output.as_bytes())?;
 		}
+
 		*wrote = true;
+		*links_checked = self.links_checked;
+		*links_dead = self.links_dead;
 
 		self.errors.into()
 	}
@@ -754,6 +767,8 @@ impl Renderer<'_>
 			}
 		}
 
+		self.links_checked += 1;
+
 		if let Some(dest_page) = lookup
 		{
 			let own_dest_folder = self.page.destination.parent()
@@ -811,6 +826,8 @@ impl Renderer<'_>
 		resolved_to: String,
 	) -> Option<Event<'e>>
 	{
+		self.links_dead += 1;
+
 		match action
 		{
 			LinkRewriteAction::MARK_DEAD =>
