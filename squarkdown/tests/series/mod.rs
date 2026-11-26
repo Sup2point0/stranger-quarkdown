@@ -23,7 +23,7 @@ use std::fs;
 	assert_contains!( data, "series\": [\"suppety\"]" );
 
 	assert_contains!( data, "suppety\": {\n" );
-	assert_contains!( data, "index-page\": \"index.md\"" );
+	assert_contains!( data, "index_page\": \"index.md\"" );
 	assert_contains!( data, "pages\": [\"readme.md\"]" );
 	
 	assert_contains!( data, "tags\": {}" );
@@ -46,7 +46,7 @@ use std::fs;
 	assert_contains!( data, "series\": [\"soup\"]" );
 
 	assert_contains!( data, "soup\": {\n" );
-	assert_contains!( data, "index-page\": \"index.md\"" );
+	assert_contains!( data, "index_page\": \"index.md\"" );
 	assert_contains!( data, "pages\": [\"readme.md\"]" );
 	
 	assert_contains!( data, "tags\": {}" );
