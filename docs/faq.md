@@ -1,7 +1,7 @@
 # Frequently Asked Questions
 <!-- #SQUARK live!
 | dest = info/faq
-| update = 2026 October 31
+| update = 2026 November 26
 -->
 
 ### What is Squarkdown?
@@ -41,6 +41,13 @@ Rendering takes the longest because Squarkdown is reading, parsing, processing a
 Saving site data can also take a hot sec if you have a *lot* of metadata, since Squarkdown needs to write a huge JSON file to disk.
 
 The first two parts are pretty fast, and Squarkdown avoids unnecessary work by skipping ignored directories and only reading files up to the end of their charm squark.
+
+### What’s the difference between `series` and `tags`?
+“Series” are a cohesive collection of pages, used for browsing. A series should also have an “index page” (using `index!`) which serves as a sort of ‘home page’ for that collection.
+
+Tags are messier and disorganised. They’re more used for searching pages with a particular theme.
+
+For instance, `docs`, `setup`, `updates` might be series, while `mobile-only`, `shorts`, `opinion` might be tags.
 
 ### Where does the name *Squarkdown* come from?
 *Squarkdown* is an abbreviation of the full name *Stranger Quarkdown*. It’s the successor to my original tool [*Quarkdown*](https://github.com/Sup2point0/quarkdown) (now deprecated). You can find out more in [Synopsis](../synopsis.md)!
