@@ -181,18 +181,28 @@ impl PageData
 		}
 
 		if config.errors.strict
-		&& let Some(date) = release_date
-		&& let Some(update) = last_update
-		&& update < date
 		{
-			recoverable!(errs => {
-				msg: fmt!("You provided a {W}last updated{R} date earlier than the {W}release date"),
-				hint: str!("You can’t update a page before you release it!"),
-				debug: vec![
-					fmt!("last updated = {}", &last_update_raw),
-					fmt!("release date = {}", &release_date_raw),
-				],
-			});
+			if !index.is_empty() && !flags.contains("index") {
+				recoverable!(errs => {
+					msg: fmt!("You provided {W}index{R} for a non-index page"),
+					hint: fmt!("{W}index{G} is only relevant for index pages with the {W}index!{G} flag"),
+					debug: vec![],
+				});
+			}
+
+			if let Some(date) = release_date
+			&& let Some(update) = last_update
+			&& update < date
+			{
+				recoverable!(errs => {
+					msg: fmt!("You provided a {W}last updated{R} date earlier than the {W}release date"),
+					hint: str!("You can’t update a page before you release it!"),
+					debug: vec![
+						fmt!("last updated = {}", &last_update_raw),
+						fmt!("release date = {}", &release_date_raw),
+					],
+				});
+			}
 		}
 
 		errs.or_else(||
