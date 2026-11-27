@@ -75,9 +75,10 @@ pub struct PageData
 /// Query methods
 impl PageData
 {
+	/// Is this an index page for a series?
 	pub fn is_index(&self) -> bool
 	{
-		self.flags.iter().any(|flag| flag == "index")
+		self.flags.contains("index")
 	}
 }
 

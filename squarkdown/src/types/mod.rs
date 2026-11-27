@@ -17,10 +17,7 @@ mod shard;
 pub use shard::{ Shard };
 
 mod context_stack;
-pub use context_stack::{ ContextStack };
+pub(crate) use context_stack::{ ContextStack };
 
-
-use tinyvec::TinyVec;
-
-/// A single string on the stack, or many strings on the heap.
-pub(crate) type Strings = TinyVec<[String; 1]>;
+mod strings;
+pub(crate) use strings::{ Strings, StringsContains };

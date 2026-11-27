@@ -173,7 +173,7 @@ impl CharmParser<'_>
 		self.eat_spaces();
 		let flags = self.parse_flags()?;
 
-		if flags.iter().any(|flag| flag == "dead") {
+		if flags.contains("dead") {
 			self.is_live = false;
 			return Err(SquarkError::ABANDON)
 		}
