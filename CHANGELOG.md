@@ -34,6 +34,10 @@ I’m working on fixing these!
 
 ## v4.10.2
 
+### New
+- `squarkdown --assets` ignores `.git/` and `node_modules/` when searching for assets.
+- Error if `| index =` is set for a page without an `index!` flag.
+
 ### Fixes
 - Fix long-standing unnoticed bug where if `link-broken` or `link-inactive` are set to `link-to-github`, the rewritten link is to the current file, not the actual linked file. Oops!
 

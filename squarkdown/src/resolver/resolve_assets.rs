@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 use path_macro::path;
 
-use std::path::{ PathBuf };
+use std::path::{ Path, PathBuf };
 
 
 /// Find all assets to copy to SvelteKit's `static/` directory, as specified by the user's `config.assets.folder`, `.site-assets-folder` and `.extensions`.
@@ -10,18 +10,17 @@ use std::path::{ PathBuf };
 /// Returns an iterator of `(source, dest)` pairs.
 pub fn resolve_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkResult<(PathBuf, PathBuf)>>
 {
+	let static_dir = path!(config.paths.site / "static");
+
 	walkdir::WalkDir::new(&config.assets.folder)
 		.into_iter()
-
-		.filter_entry(|entry| entry.path() != path!(config.paths.site / "static"))
-
+		.filter_entry(move |entry| not_ignored(entry.path(), &static_dir))
 		.filter(|entry| match entry {
 			Err(..) => true,
 			Ok(e) =>
 				e.file_type().is_file()
 				&& config.assets.has_asset_extension(e.path())
 		})
-
 		.map(move |entry| match entry {
 			Ok(e) => {
 				let path = e.into_path();
@@ -35,4 +34,13 @@ pub fn resolve_assets(config: &SquarkupConfig) -> impl Iterator<Item = SquarkRes
 			},
 			Err(e) => Err(SquarkError::external(e)),
 		})
+}
+
+pub fn not_ignored(path: &Path, static_dir: &Path) -> bool
+{
+	let Some(dirname) = path.file_name() else { return false };
+
+		dirname != ".git"
+	&& dirname != "node_modules"
+	&& path != static_dir
 }
