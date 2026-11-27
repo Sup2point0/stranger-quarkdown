@@ -36,6 +36,7 @@ I’m working on fixing these!
 
 ### New
 - `squarkdown --assets` ignores `.git/` and `node_modules/` when searching for assets.
+  - These shouldn’t be in your assets directory anyway, but this’ll help avoid your files blowing up if you run `--assets` with `assets.folder` missing or misconfigured =)
 - Error if `| index =` is set for a page without an `index!` flag.
 
 ### Fixes
