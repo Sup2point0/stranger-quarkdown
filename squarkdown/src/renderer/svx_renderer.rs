@@ -799,7 +799,8 @@ impl Renderer<'_>
 		if !their_source_path.exists() {
 			self.process_broken_link(
 				self.config.errors.link_broken,
-				dest_url, range, link_rewritten,
+				dest_url, range,
+				&their_source_path, link_rewritten,
 				fmt!("broken link to a nonexistent {}", if is_folder_link {"folder"} else {"file"}),
 				str!(),
 				slash!("resolved to: {}", their_source_path)
@@ -807,7 +808,8 @@ impl Renderer<'_>
 		} else {
 			self.process_broken_link(
 				self.config.errors.link_inactive,
-				dest_url, range, link_rewritten,
+				dest_url, range,
+				&their_source_path, link_rewritten,
 				str!("link to an inactive page"),
 				fmt!("does the linked page have a {Y}<!-- #SQUARK live! -->{G}?"),
 				fmt!("resolved to: {shard}")
@@ -820,6 +822,7 @@ impl Renderer<'_>
 		action: LinkRewriteAction,
 		dest_url: &mut pd::CowStr,
 		range: ParserRange,
+		their_source_path: &Path,
 		link_rewritten: String,
 		msg: String,
 		hint: String,
@@ -863,7 +866,7 @@ impl Renderer<'_>
 				let href = fmt!(
 					"https://github.com/{}/blob/main/{}",
 					self.config.project.github,
-					utils::display_rel(&self.page.filepath, &self.config.paths.root),
+					utils::display_rel(&their_source_path, &self.config.paths.root),
 				);
 				log::info!("found a {msg}, rewriting it: {FF}{dest_url}{F} ⟶ {FF}{href}");
 

@@ -190,7 +190,7 @@ use assertables::*;
 	assert!( squarkup_from("links/link-github").success() );
 
 	let md = read_file("links/link-github/+page.svx");
-	assert_contains!( md, "[github](https://github.com/Sup2point0/stranger-quarkdown/blob/main/readme.md)" );
+	assert_contains!( md, "[github](https://github.com/Sup2point0/stranger-quarkdown/blob/main/github.md)" );
 }
 
 

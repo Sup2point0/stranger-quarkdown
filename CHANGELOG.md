@@ -32,6 +32,12 @@ I’m working on fixing these!
 <br>
 
 
+## v4.10.2
+
+### Fixes
+- Fix long-standing unnoticed bug where if `link-broken` or `link-inactive` are set to `link-to-github`, the rewritten link is to the current file, not the actual linked file. Oops!
+
+
 ## v4.10.1
 
 ### Fixes
